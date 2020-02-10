@@ -13,7 +13,7 @@ public class Structure extends Entity {
 
     private String name;
 
-    @Relationship(type = "BELONGS_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
     private Set<StructureItem> items;
 
     @Relationship(type = "OBEYS", direction = Relationship.INCOMING)

@@ -14,22 +14,22 @@ public class PlanItem extends Entity {
 
     private String description;
 
-    @Relationship(type = "BELONGS_TO")
+    @Relationship(type = "COMPOSES")
     private Plan plan;
 
-    @Relationship(type = "BELONGS_TO")
+    @Relationship(type = "OBEYS")
     private StructureItem structureItem;
 
-    @Relationship(type = "BELONGS_TO")
+    @Relationship(type = "FEATURES")
     private File file;
 
     @Relationship(type = "APPLIES_TO", direction = Relationship.INCOMING)
     private Set<Locality> localities;
 
-    @Relationship(type = "BELONGS_TO")
+    @Relationship(type = "COMPOSES")
     private PlanItem parent;
 
-    @Relationship(type = "BELONGS_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
     private Set<PlanItem> children;
 
     private transient Set<Long> localitiesIds;

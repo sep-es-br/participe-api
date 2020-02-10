@@ -13,16 +13,16 @@ public class Locality extends Entity {
 
     private String name;
 
-    @Relationship(type = "BELONGS_TO")
+    @Relationship(type = "IS_LOCATED_IN")
     private Set<Domain> domains;
 
     @Relationship(type = "OF_TYPE")
     private LocalityType type;
 
-    @Relationship(type = "BELONGS_TO")
+    @Relationship(type = "IS_LOCATED_IN")
     private Set<Locality> parents;
 
-    @Relationship(type = "BELONGS_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "IS_LOCATED_IN", direction = Relationship.INCOMING)
     private Set<Locality> children;
 
     public Locality() {

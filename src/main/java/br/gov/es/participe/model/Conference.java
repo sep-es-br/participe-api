@@ -15,7 +15,7 @@ public class Conference extends Entity {
 
     private String description;
 
-    @Relationship(type = "APPLIES_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "TARGETS")
     private Plan plan;
 
     @DateString

@@ -13,7 +13,7 @@ public class Domain extends Entity {
 
     private String name;
 
-    @Relationship(type = "BELONGS_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "IS_LOCATED_IN", direction = Relationship.INCOMING)
     private Set<Locality> localities;
 
     @Relationship(type = "APPLIES_TO", direction = Relationship.INCOMING)

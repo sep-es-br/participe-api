@@ -8,10 +8,10 @@ import java.util.Collection;
 
 public interface DomainRepository extends Neo4jRepository<Domain, Long> {
 
-    @Query("MATCH (d:Domain) OPTIONAL MATCH (d)<-[bt:BELONGS_TO]-(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) RETURN d, bt, l, ot, lt, [ " +
-            "[ (l)<-[btl:BELONGS_TO]-(lc:Locality) | [btl, lc] ], " +
-            "    [ (l)-[btl:BELONGS_TO]->(lc:Locality) | [btl, lc] ] " +
-            "] ORDER BY d.name")
+    @Query("MATCH (d:Domain) OPTIONAL MATCH (d)<-[bt:IS_LOCATED_IN]-(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) RETURN d, bt, l, ot, lt, [ " +
+            " [ (l)<-[btl:IS_LOCATED_IN]-(lc:Locality) | [btl, lc] ], " +
+            " [ (l)-[btl:IS_LOCATED_IN]->(lc:Locality) | [btl, lc] ] " +
+            " ] ORDER BY d.name")
     Collection<Domain> findAll();
 
     Collection<Domain> findByNameContainingIgnoreCase(String name);

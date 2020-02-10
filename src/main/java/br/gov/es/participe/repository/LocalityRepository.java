@@ -13,9 +13,9 @@ public interface LocalityRepository extends Neo4jRepository<Locality, Long> {
 
     Locality findByNameIgnoreCase(String name);
 
-    @Query("MATCH (domain:Domain)<-[:BELONGS_TO]-(child:Locality)-[:BELONGS_TO]->(parent:Locality) WHERE id(domain) = {0} AND ID(parent) = {1} RETURN child")
+    @Query("MATCH (domain:Domain)<-[:BELONGS_TO]-(child:Locality)-[:IS_LOCATED_IN]->(parent:Locality) WHERE id(domain) = {0} AND ID(parent) = {1} RETURN child")
     List<Locality> findChildren(Long idDomain, Long idParent);
 
-    @Query("MATCH (d:Domain)<-[:BELONGS_TO]-(l:Locality)<-[bt:BELONGS_TO]-(lo:Locality)-[:BELONGS_TO]->(do:Domain) WHERE id(d) = {0} AND id(do) = {0} RETURN l, bt, lo")
+    @Query("MATCH (d:Domain)<-[:IS_LOCATED_IN]-(l:Locality)<-[bt:IS_LOCATED_IN]-(lo:Locality)-[:IS_LOCATED_IN]->(do:Domain) WHERE id(d) = {0} AND id(do) = {0} RETURN l, bt, lo")
     List<Locality> findByDomain(Long idDomain);
 }
