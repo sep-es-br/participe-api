@@ -8,15 +8,15 @@ import java.util.Collection;
 
 public interface StructureRepository extends Neo4jRepository<Structure, Long> {
 
-    @Query(" MATCH (s:Structure) OPTIONAL MATCH (s)<-[bt:BELONGS_TO]-(si:StructureItem) RETURN s, bt, si, [ " +
+    @Query(" MATCH (s:Structure) OPTIONAL MATCH (s)<-[bt:COMPOSES]-(si:StructureItem) RETURN s, bt, si, [ " +
             " [ (s)<-[p_o1:OBEYS]-(p:Plan) | [ p_o1, p ] ]," +
-            " [ (si)<-[btl:BELONGS_TO*]-(sim:StructureItem) | [btl, sim] ]  " +
+            " [ (si)<-[btl:COMPOSES*]-(sim:StructureItem) | [btl, sim] ]  " +
             "] ORDER BY s.name")
     Collection<Structure> findAll();
 
-    @Query(" MATCH (s:Structure) WHERE LOWER(s.name) CONTAINS LOWER($name)  OPTIONAL MATCH (s)<-[bt:BELONGS_TO]-(si:StructureItem) RETURN s, bt, si, [ " +
+    @Query(" MATCH (s:Structure) WHERE LOWER(s.name) CONTAINS LOWER($name)  OPTIONAL MATCH (s)<-[bt:COMPOSES]-(si:StructureItem) RETURN s, bt, si, [ " +
                " [ (s)<-[p_o1:OBEYS]-(p:Plan) | [ p_o1, p ] ]," +
-               " [ (si)<-[btl:BELONGS_TO*]-(sim:StructureItem) | [btl, sim] ]  " +
+               " [ (si)<-[btl:COMPOSES*]-(sim:StructureItem) | [btl, sim] ]  " +
             "] ORDER BY s.name")
     Collection<Structure> findByName(String name);
 }

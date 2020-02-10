@@ -19,7 +19,7 @@ public class Plan extends Entity {
     @Relationship(type = "APPLIES_TO")
     private Domain domain;
 
-    @Relationship(type = "BELONGS_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
     private Set<PlanItem> items;
 
     public Plan() {

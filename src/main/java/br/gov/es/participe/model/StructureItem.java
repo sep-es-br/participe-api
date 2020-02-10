@@ -21,16 +21,16 @@ public class StructureItem extends Entity {
 
     private Boolean comments;
 
-    @Relationship(type = "BELONGS_TO")
+    @Relationship(type = "COMPOSES")
     private Structure structure;
 
-    @Relationship(type = "BELONGS_TO")
+    @Relationship(type = "COMPOSES")
     private StructureItem parent;
 
-    @Relationship(type = "BELONGS_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
     private Set<StructureItem> children;
 
-    @Relationship(type = "BELONGS_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "OBEYS", direction = Relationship.INCOMING)
     private Set<PlanItem> planItems;
 
     public StructureItem(StructureItemDto structureItemDto) {
