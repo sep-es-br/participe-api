@@ -2,8 +2,8 @@ package br.gov.es.participe.service;
 
 import br.gov.es.participe.model.Domain;
 import br.gov.es.participe.model.Locality;
+import br.gov.es.participe.model.LocalityType;
 import br.gov.es.participe.repository.LocalityRepository;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class LocalityService {
@@ -36,11 +37,11 @@ public class LocalityService {
         return localities;
     }
 
-    public List<Locality> search(String query) {
+    public List<Locality> search(String query, Long type) {
         List<Locality> localities = new ArrayList<>();
 
         localityRepository
-                .search(query)
+                .search(query, type)
                 .iterator()
                 .forEachRemaining(locality -> localities.add(locality));
 
@@ -49,14 +50,25 @@ public class LocalityService {
 
     @Transactional
     public Locality create(Locality locality) {
-        Locality existentLocality = find(locality.getName());
+        if (isInvalidTypeLevel(locality)) {
+            throw new IllegalArgumentException("domain.error.locality.invalid-type-level");
+        }
 
-        if (existentLocality != null) {
+        Locality existentLocality = find(locality.getName(), locality.getType().getId());
+
+        if (existentLocality != null && locality.getType() != null && locality.getType().getId() != null
+            && locality.getType().getId().equals(existentLocality.getType().getId())) {
             Set<Domain> domains = new HashSet<>();
             for (Domain localityDomain : locality.getDomains()) {
                 domains.add(domainService.find(localityDomain.getId()));
             }
             existentLocality.addDomains(domains);
+
+            if(!locality.getParents().isEmpty()) {
+                for (Locality l : locality.getParents()) {
+                    existentLocality.addParent(l);
+                }
+            }
             locality = existentLocality;
         } else {
             loadAttributes(locality);
@@ -93,11 +105,109 @@ public class LocalityService {
         return localities;
     }
 
-    public Locality find(String name) {
-        Locality locality = localityRepository
-                .findByNameIgnoreCase(name);
+    private boolean isInvalidTypeLevel(Locality locality) {
+        Domain domain = locality
+                .getDomains()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Domain not found for this locality."));
 
-        return locality;
+        domain = domainService.findWithLocalities(domain.getId());
+        if (domain.getLocalities().isEmpty()) {
+            return false;
+        }
+
+        Locality root = domain.getLocalities().stream().filter(l -> l.getParents().isEmpty()).findFirst().orElse(null);
+        if (root == null) {
+            return false;
+        }
+
+        int typeLevel = getTypeLevel(domain, root, locality.getType(), 0);
+        if (typeLevel == -1) {
+            return false;
+        }
+
+        int localityLevel = getLocalityLevel(domain, locality, 0);
+
+        return typeLevel != localityLevel;
+    }
+
+    private int getTypeLevel(Domain domain, Locality node, LocalityType type, int level) {
+        if (node.getType().getId().equals(type.getId())) {
+            return level;
+        }
+
+        if (node.getChildren().isEmpty()) {
+            return -1;
+        }
+
+        Locality firstChild = node
+                .getChildren()
+                .stream()
+                .filter(l -> l.getDomains().contains(domain))
+                .findFirst()
+                .orElse(null);
+
+        if (firstChild == null) {
+            return -1;
+        }
+
+        return getTypeLevel(domain, firstChild, type, ++level);
+    }
+
+    private int getLocalityLevel(Domain domain, Locality node, int level) {
+        if (node.getParents().isEmpty()) {
+            return level;
+        }
+
+        Locality parent = getParent(domain, node);
+        return getLocalityLevel(domain, parent, ++level);
+    }
+
+    private Locality getParent(Domain domain, Locality locality) {
+        if (locality.getParents().isEmpty()) {
+            return null;
+        }
+
+        List<Locality> domainLocalities = domain
+                .getLocalities()
+                .stream()
+                .filter(l -> l.getDomains().contains(domain)).collect(Collectors.toList());
+
+        if (locality.getId() == null) {
+            Long parentId = locality
+                    .getParents()
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"))
+                    .getId();
+
+            return findParentById(domainLocalities, parentId);
+        }
+
+        return locality
+                .getParents()
+                .stream()
+                .filter(l -> l.getDomains().contains(domain))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"));
+    }
+
+    private Locality findParentById(List<Locality> localities, Long id) {
+        return localities
+                .stream()
+                .filter(l -> l.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Locality find(String name, Long typeId) {
+        List<Locality> localities = localityRepository
+                .findByNameAndType(name, typeId);
+        if(localities != null && !localities.isEmpty()){
+            return localities.get(0);
+        }
+        return null;
     }
 
     @Transactional

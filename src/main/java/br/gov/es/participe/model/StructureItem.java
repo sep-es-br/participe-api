@@ -1,12 +1,14 @@
 package br.gov.es.participe.model;
 
-import br.gov.es.participe.controller.dto.StructureItemDto;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
+
+import br.gov.es.participe.controller.dto.StructureItemDto;
+import br.gov.es.participe.controller.dto.StructureItemParamDto;
 
 @NodeEntity
 public class StructureItem extends Entity {
@@ -33,8 +35,12 @@ public class StructureItem extends Entity {
     @Relationship(type = "OBEYS", direction = Relationship.INCOMING)
     private Set<PlanItem> planItems;
 
+    public StructureItem() {
+    }
+
     public StructureItem(StructureItemDto structureItemDto) {
-        if (structureItemDto == null) return;
+        if (structureItemDto == null)
+            return;
 
         setId(structureItemDto.getId());
         this.name = structureItemDto.getName();
@@ -56,6 +62,23 @@ public class StructureItem extends Entity {
         if (structureItemDto.getPlanItems() != null && !structureItemDto.getPlanItems().isEmpty()) {
             this.planItems = new HashSet<>();
             structureItemDto.getPlanItems().forEach(planItem -> planItems.add(new PlanItem(planItem)));
+        }
+    }
+
+    public StructureItem(StructureItemParamDto structureItemDto) {
+        if (structureItemDto == null)
+            return;
+
+        setId(structureItemDto.getId());
+        this.name = structureItemDto.getName();
+        this.logo = structureItemDto.getLogo();
+        this.locality = structureItemDto.getLocality();
+        this.votes = structureItemDto.getVotes();
+        this.comments = structureItemDto.getComments();
+        this.structure = new Structure(structureItemDto.getStructure());
+
+        if (structureItemDto.getParent() != null) {
+            this.parent = new StructureItem(structureItemDto.getParent());
         }
     }
 
@@ -116,22 +139,26 @@ public class StructureItem extends Entity {
     }
 
     public Set<StructureItem> getChildren() {
-        if (children == null) return Collections.emptySet();
+        if (children == null)
+            return Collections.emptySet();
         return Collections.unmodifiableSet(children);
     }
 
     public void addItem(StructureItem item) {
-        if (children == null) new HashSet<>();
+        if (children == null)
+            new HashSet<>();
         this.children.add(item);
     }
 
     public Set<PlanItem> getPlanItems() {
-        if (planItems == null) return Collections.emptySet();
+        if (planItems == null)
+            return Collections.emptySet();
         return Collections.unmodifiableSet(planItems);
     }
 
     public void addPlanItem(PlanItem planItem) {
-        if (planItems == null) planItems = new HashSet<>();
+        if (planItems == null)
+            planItems = new HashSet<>();
         planItems.add(planItem);
     }
 

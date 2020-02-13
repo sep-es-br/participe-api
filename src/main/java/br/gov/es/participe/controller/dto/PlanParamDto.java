@@ -1,16 +1,13 @@
 package br.gov.es.participe.controller.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-public class LocalityParamDto {
+public class PlanParamDto {
 
     private Long id;
     private String name;
-    private LocalityTypeDto type;
+    private StructureParamDto structure;
     private DomainParamDto domain;
-    private LocalityParamDto parent;
 
-    public LocalityParamDto() {
+    public PlanParamDto() {
     }
 
     public Long getId() {
@@ -29,12 +26,12 @@ public class LocalityParamDto {
         this.name = name;
     }
 
-    public LocalityTypeDto getType() {
-        return type;
+    public StructureParamDto getStructure() {
+        return structure;
     }
 
-    public void setType(LocalityTypeDto type) {
-        this.type = type;
+    public void setStructure(StructureParamDto structure) {
+        this.structure = structure;
     }
 
     public DomainParamDto getDomain() {
@@ -43,13 +40,5 @@ public class LocalityParamDto {
 
     public void setDomain(DomainParamDto domain) {
         this.domain = domain;
-    }
-
-    public LocalityParamDto getParent() {
-        return parent;
-    }
-
-    public void setParent(LocalityParamDto parent) {
-        this.parent = parent;
     }
 }

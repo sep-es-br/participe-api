@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.gov.es.participe.controller.dto.ConferenceDto;
+import br.gov.es.participe.controller.dto.ConferenceParamDto;
 import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.service.ConferenceService;
 
@@ -48,8 +49,8 @@ public class ConferenceController {
     }
 
     @PostMapping
-    public ResponseEntity store(@RequestBody ConferenceDto conferenceDto) {
-        Conference conference = new Conference(conferenceDto);
+    public ResponseEntity store(@RequestBody ConferenceParamDto conferenceParamDto) {
+        Conference conference = new Conference(conferenceParamDto);
         ConferenceDto response = new ConferenceDto(conferenceService.save(conference));
         return ResponseEntity.status(200).body(response);
     }

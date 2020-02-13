@@ -1,12 +1,14 @@
 package br.gov.es.participe.model;
 
-import br.gov.es.participe.controller.dto.DomainDto;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
+
+import br.gov.es.participe.controller.dto.DomainDto;
+import br.gov.es.participe.controller.dto.DomainParamDto;
 
 @NodeEntity
 public class Domain extends Entity {
@@ -27,6 +29,12 @@ public class Domain extends Entity {
 
         setId(domainDto.getId());
         name = domainDto.getName();
+    }
+
+    public Domain(DomainParamDto domainParamDto) {
+        if (domainParamDto == null) return;
+        setId(domainParamDto.getId());
+        name = domainParamDto.getName();
     }
 
     public Domain(String name) {

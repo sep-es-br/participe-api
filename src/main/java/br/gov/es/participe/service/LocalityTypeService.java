@@ -28,7 +28,7 @@ public class LocalityTypeService {
     public LocalityType find(Long id) {
         LocalityType localityType = localityTypeRepository
                 .findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Locality Type not found: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("domain.error.locality-type.not-found"));
 
         return localityType;
     }

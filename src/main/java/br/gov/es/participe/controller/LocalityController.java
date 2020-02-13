@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.gov.es.participe.controller.dto.LocalityDto;
+import br.gov.es.participe.controller.dto.LocalityParamDto;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.service.LocalityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,11 @@ public class LocalityController {
     private LocalityService localityService;
 
     @GetMapping
-    public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
+    public ResponseEntity index(@RequestParam(value = "query", required = false) String query,
+                                @RequestParam(value = "type", required = false) Long type) {
         List<Locality> localities;
-        if (query != null && !query.isEmpty()) {
-            localities = localityService.search(query);
+        if (query != null && !query.isEmpty() && type != null) {
+            localities = localityService.search(query, type);
         } else {
             localities = localityService.findAll();
         }
@@ -44,8 +46,8 @@ public class LocalityController {
     }
 
     @PostMapping
-    public ResponseEntity store(@RequestBody LocalityDto localityDto) {
-        Locality locality = new Locality(localityDto);
+    public ResponseEntity store(@RequestBody LocalityParamDto localityParamDto) {
+        Locality locality = new Locality(localityParamDto);
         LocalityDto response = new LocalityDto(localityService.create(locality), null, true);
         return ResponseEntity.status(200).body(response);
     }
@@ -57,8 +59,8 @@ public class LocalityController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody LocalityDto localityDto) {
-        LocalityDto response = new LocalityDto(localityService.update(id, localityDto.getName()), null, true);
+    public ResponseEntity update(@PathVariable Long id, @RequestBody LocalityParamDto localityParamDto) {
+        LocalityDto response = new LocalityDto(localityService.update(id, localityParamDto.getName()), null, true);
         return ResponseEntity.status(200).body(response);
     }
 

@@ -1,12 +1,14 @@
 package br.gov.es.participe.model;
 
-import br.gov.es.participe.controller.dto.LocalityDto;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
+
+import br.gov.es.participe.controller.dto.LocalityDto;
+import br.gov.es.participe.controller.dto.LocalityParamDto;
 
 @NodeEntity
 public class Locality extends Entity {
@@ -48,6 +50,24 @@ public class Locality extends Entity {
         if (localityDto.getChildren() != null && !localityDto.getChildren().isEmpty()) {
             children = new HashSet<>();
             localityDto.getChildren().forEach(child -> children.add(new Locality(child)));
+        }
+    }
+
+    public Locality(LocalityParamDto localityParamDto) {
+        if (localityParamDto == null) return;
+
+        setId(localityParamDto.getId());
+        name = localityParamDto.getName();
+        type = new LocalityType(localityParamDto.getType());
+
+        if (localityParamDto.getParent() != null && localityParamDto.getParent().getId() != null) {
+            parents = new HashSet<>();
+            parents.add(new Locality(localityParamDto.getParent()));
+        }
+
+        if (localityParamDto.getDomain() != null && localityParamDto.getDomain().getId() != null) {
+            domains = new HashSet<>();
+            domains.add(new Domain(localityParamDto.getDomain()));
         }
     }
 

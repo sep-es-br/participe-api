@@ -1,6 +1,7 @@
 package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.PlanItemDto;
+import br.gov.es.participe.controller.dto.PlanItemParamDto;
 import br.gov.es.participe.controller.dto.StructureItemDto;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.service.PlanItemService;
@@ -36,8 +37,8 @@ public class PlanItemController {
     }
 
     @PostMapping
-    public ResponseEntity store(@RequestBody PlanItemDto planItemDto) {
-        PlanItem planItem = new PlanItem(planItemDto);
+    public ResponseEntity store(@RequestBody PlanItemParamDto planItemParamDto) {
+        PlanItem planItem = new PlanItem(planItemParamDto);
         planItem = planItemService.save(planItem);
         PlanItemDto response = new PlanItemDto(planItem, null, false);
         return ResponseEntity.status(200).body(response);
@@ -50,8 +51,8 @@ public class PlanItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody PlanItemDto planItemDto) {
-        PlanItem planItem = new PlanItem(planItemDto);
+    public ResponseEntity update(@PathVariable Long id, @RequestBody PlanItemParamDto planItemParamDto) {
+        PlanItem planItem = new PlanItem(planItemParamDto);
         PlanItemDto response = new PlanItemDto(planItemService.save(planItem), null, true);
         return ResponseEntity.status(200).body(response);
     }
