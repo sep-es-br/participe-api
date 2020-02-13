@@ -1,6 +1,7 @@
 package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.PlanDto;
+import br.gov.es.participe.controller.dto.PlanParamDto;
 import br.gov.es.participe.model.Plan;
 import br.gov.es.participe.service.PlanService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,8 @@ public class PlanController {
     }
 
     @PostMapping
-    public ResponseEntity store(@RequestBody PlanDto planDto) {
-        Plan plan = new Plan(planDto);
+    public ResponseEntity store(@RequestBody PlanParamDto planParamDto) {
+        Plan plan = new Plan(planParamDto);
         PlanDto response = new PlanDto(planService.save(plan), true);
         return ResponseEntity.status(200).body(response);
     }
@@ -43,9 +44,9 @@ public class PlanController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody PlanDto planDto) {
-        planDto.setId(id);
-        Plan plan = new Plan(planDto);
+    public ResponseEntity update(@PathVariable Long id, @RequestBody PlanParamDto planParamDto) {
+        planParamDto.setId(id);
+        Plan plan = new Plan(planParamDto);
         PlanDto response = new PlanDto(planService.save(plan), true);
         return ResponseEntity.status(200).body(response);
     }

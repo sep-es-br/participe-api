@@ -1,6 +1,8 @@
 package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.PlanItemDto;
+import br.gov.es.participe.controller.dto.PlanItemParamDto;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
@@ -67,6 +69,30 @@ public class PlanItem extends Entity {
         if (planItemDto.getChildren() != null && !planItemDto.getChildren().isEmpty()) {
             this.children = new HashSet<>();
             planItemDto.getChildren().forEach(child -> this.children.add(new PlanItem(child)));
+        }
+    }
+
+    public PlanItem(PlanItemParamDto planItemParamDto) {
+        if (planItemParamDto == null) return;
+
+        setId(planItemParamDto.getId());
+        this.name = planItemParamDto.getName();
+        this.description = planItemParamDto.getDescription();
+        this.localitiesIds = planItemParamDto.getLocalitiesIds();
+
+        if (planItemParamDto.getStructureItem() != null) {
+            this.structureItem = new StructureItem(planItemParamDto.getStructureItem());
+        }
+        if(planItemParamDto.getPlan() != null) {
+            this.plan = new Plan(planItemParamDto.getPlan());
+        }
+        if (planItemParamDto.getFile() != null) {
+            this.file = new File(planItemParamDto.getFile());
+        }
+
+
+        if (planItemParamDto.getParent() != null) {
+            this.parent = new PlanItem(planItemParamDto.getParent());
         }
     }
 

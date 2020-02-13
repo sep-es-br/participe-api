@@ -25,7 +25,6 @@ CREATE (:LocalityType{name:'País'}),
   	(:LocalityType{name:'Microrregião'}),
   	(:LocalityType{name:'Município'}),
     (:LocalityType{name:'Bairro'});
-
 ````
 
 

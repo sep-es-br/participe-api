@@ -1,15 +1,17 @@
 package br.gov.es.participe.service;
 
-import br.gov.es.participe.model.Domain;
-import br.gov.es.participe.model.Locality;
-import br.gov.es.participe.repository.DomainRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import br.gov.es.participe.model.Domain;
+import br.gov.es.participe.model.Locality;
+import br.gov.es.participe.repository.DomainRepository;
 
 @Service
 public class DomainService {
@@ -40,13 +42,24 @@ public class DomainService {
 
     @Transactional
     public Domain save(Domain domain) {
+        if(domain.getName() == null) {
+            throw new IllegalArgumentException("Domain name is required");
+        }
         return domainRepository.save(domain);
     }
 
     public Domain find(Long id) {
         Domain domain = domainRepository
                 .findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Domain not found: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"));
+
+        return domain;
+    }
+
+    public Domain findWithLocalities(Long id) {
+        Domain domain = Optional.ofNullable(domainRepository
+                .findByIdWithLocalities(id))
+                .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"));
 
         return domain;
     }

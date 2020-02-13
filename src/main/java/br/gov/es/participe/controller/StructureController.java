@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.gov.es.participe.controller.dto.StructureDto;
+import br.gov.es.participe.controller.dto.StructureParamDto;
 import br.gov.es.participe.model.Structure;
 import br.gov.es.participe.service.StructureService;
 
@@ -39,8 +40,8 @@ public class StructureController {
     }
 
     @PostMapping
-    public ResponseEntity store(@RequestBody StructureDto structureDto) {
-        Structure structure = new Structure(structureDto);
+    public ResponseEntity store(@RequestBody StructureParamDto structureParamDto) {
+        Structure structure = new Structure(structureParamDto);
         StructureDto response = new StructureDto(structureService.save(structure), true);
         return ResponseEntity.status(200).body(response);
     }
@@ -52,9 +53,9 @@ public class StructureController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody StructureDto structureDto) {
-        structureDto.setId(id);
-        Structure structure = new Structure(structureDto);
+    public ResponseEntity update(@PathVariable Long id, @RequestBody StructureParamDto structureParamDto) {
+        structureParamDto.setId(id);
+        Structure structure = new Structure(structureParamDto);
         StructureDto response = new StructureDto(structureService.save(structure), true);
         return ResponseEntity.status(200).body(response);
     }

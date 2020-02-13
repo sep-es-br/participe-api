@@ -1,6 +1,8 @@
 package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.PlanDto;
+import br.gov.es.participe.controller.dto.PlanParamDto;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
@@ -32,6 +34,15 @@ public class Plan extends Entity {
         this.name = planDto.getName();
         this.structure = new Structure(planDto.getStructure());
         this.domain = new Domain(planDto.getDomain());
+    }
+
+    public Plan(PlanParamDto planParamDto) {
+        if (planParamDto == null) return;
+
+        setId(planParamDto.getId());
+        this.name = planParamDto.getName();
+        this.structure = new Structure(planParamDto.getStructure());
+        this.domain = new Domain(planParamDto.getDomain());
     }
 
     public String getName() {

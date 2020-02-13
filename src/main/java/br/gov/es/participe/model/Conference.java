@@ -7,6 +7,7 @@ import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 import br.gov.es.participe.controller.dto.ConferenceDto;
+import br.gov.es.participe.controller.dto.ConferenceParamDto;
 
 @NodeEntity
 public class Conference extends Entity {
@@ -38,6 +39,19 @@ public class Conference extends Entity {
         }
         this.beginDate = conferenceDto.getBeginDate();
         this.endDate = conferenceDto.getEndDate();
+    }
+
+    public Conference(ConferenceParamDto conferenceParamDto) {
+        if (conferenceParamDto == null) return;
+
+        setId(conferenceParamDto.getId());
+        this.name = conferenceParamDto.getName();
+        this.description = conferenceParamDto.getDescription();
+        if(conferenceParamDto.getPlan() != null && conferenceParamDto.getPlan().getId() != null){
+            this.plan = new Plan(conferenceParamDto.getPlan());
+        }
+        this.beginDate = conferenceParamDto.getBeginDate();
+        this.endDate = conferenceParamDto.getEndDate();
     }
 
     public String getName() {

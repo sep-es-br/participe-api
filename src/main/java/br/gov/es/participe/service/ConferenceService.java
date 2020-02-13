@@ -42,6 +42,9 @@ public class ConferenceService {
 
     @Transactional
     public Conference save(Conference conference) {
+        if (conference.getPlan() == null || conference.getPlan().getId() == null) {
+            throw new IllegalArgumentException("Plan is required");
+        }
         Conference c = conferenceRepository.findByNameIgnoreCase(conference.getName());
         if (c != null) {
             if (conference.getId() != null) {
@@ -52,17 +55,13 @@ public class ConferenceService {
                 throw new IllegalArgumentException("This name already exists");
             }
         }
-        if (conference.getPlan() != null) {
-            if (conference.getPlan().getId() != null) {
-                if (conference.getId() != null) {
-                    Conference conference1 = find(conference.getId());
-                    conference1.setPlan(null);
-                    conferenceRepository.save(conference1);
-                }
-                conference.setPlan(planService.find(conference.getPlan().getId()));
-            } else {
-                conference.setPlan(null);
+        if (conference.getPlan().getId() != null) {
+            if (conference.getId() != null) {
+                Conference conference1 = find(conference.getId());
+                conference1.setPlan(null);
+                conferenceRepository.save(conference1);
             }
+            conference.setPlan(planService.find(conference.getPlan().getId()));
         }
         return conferenceRepository.save(conference);
     }
