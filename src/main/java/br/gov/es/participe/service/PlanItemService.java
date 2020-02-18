@@ -80,6 +80,7 @@ public class PlanItemService {
     private void loadAttributes(PlanItem planItem) {
         loadPlan(planItem);
         loadParent(planItem);
+        loadChildren(planItem);
         loadLocalities(planItem);
         loadFile(planItem);
         loadStructureItem(planItem);
@@ -142,6 +143,14 @@ public class PlanItemService {
             if (structureItem != null) {
                 planItem.setStructureItem(structureItem);
             }
+        }
+    }
+
+    private void loadChildren(PlanItem planItem) {
+        if (planItem.getId() != null) {
+            PlanItem tmpPlanItem = find(planItem.getId());
+
+            planItem.setChildren(tmpPlanItem.getChildren());
         }
     }
 }
