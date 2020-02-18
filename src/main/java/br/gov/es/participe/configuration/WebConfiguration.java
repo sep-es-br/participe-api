@@ -1,7 +1,9 @@
 package br.gov.es.participe.configuration;
 
-import java.text.SimpleDateFormat;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,10 +16,8 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
@@ -35,6 +35,7 @@ public class WebConfiguration implements WebMvcConfigurer {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setDateFormat(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"));
+        mapper.setTimeZone(TimeZone.getDefault());
         return new MappingJackson2HttpMessageConverter(mapper);
     }
 
