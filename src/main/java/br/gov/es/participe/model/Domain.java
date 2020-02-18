@@ -1,14 +1,13 @@
 package br.gov.es.participe.model;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
+import br.gov.es.participe.controller.dto.DomainDto;
+import br.gov.es.participe.controller.dto.DomainParamDto;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import br.gov.es.participe.controller.dto.DomainDto;
-import br.gov.es.participe.controller.dto.DomainParamDto;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @NodeEntity
 public class Domain extends Entity {
@@ -95,5 +94,16 @@ public class Domain extends Entity {
         if (planToRemove != null) {
             plans.remove(planToRemove);
         }
+    }
+
+    public Locality getRootLocality() {
+        if (this.getLocalities().isEmpty()) {
+            return null;
+        }
+
+        return this.getLocalities()
+                .stream()
+                .filter(l -> l.getParents().isEmpty()).findFirst()
+                .orElse(null);
     }
 }
