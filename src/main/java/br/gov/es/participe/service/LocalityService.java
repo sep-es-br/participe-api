@@ -106,30 +106,67 @@ public class LocalityService {
     }
 
     private boolean isInvalidTypeLevel(Locality locality) {
-        Domain domain = locality
-                .getDomains()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Domain not found for this locality."));
+        Domain domain = getDomainFromLocality(locality);
 
-        domain = domainService.findWithLocalities(domain.getId());
         if (domain.getLocalities().isEmpty()) {
             return false;
         }
 
-        Locality root = domain.getLocalities().stream().filter(l -> l.getParents().isEmpty()).findFirst().orElse(null);
-        if (root == null) {
-            return false;
+        if (isTypeUsedInAnotherLevel(domain, locality)) {
+            return true;
         }
 
-        int typeLevel = getTypeLevel(domain, root, locality.getType(), 0);
-        if (typeLevel == -1) {
-            return false;
-        }
+        return isLevelTypeAlreadyBinded(domain, locality);
+    }
 
+    private Domain getDomainFromLocality(Locality locality) {
+        Domain domain = locality
+                .getDomains()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"));
+
+        return domainService.findWithLocalities(domain.getId());
+    }
+
+    private boolean isTypeUsedInAnotherLevel(Domain domain, Locality locality) {
+        int typeLevel = getTypeLevel(domain, domain.getRootLocality(), locality.getType(), 0);
         int localityLevel = getLocalityLevel(domain, locality, 0);
 
-        return typeLevel != localityLevel;
+        if (typeLevel != -1 && localityLevel != -1) {
+            return typeLevel != localityLevel;
+        }
+
+        return false;
+    }
+
+    private boolean isLevelTypeAlreadyBinded(Domain domain, Locality locality) {
+        LocalityType levelType = getLevelType(domain, locality);
+
+        if (levelType != null) {
+            return !levelType.getId().equals(locality.getType().getId());
+        }
+
+        return false;
+    }
+
+    private LocalityType getLevelType(Domain domain, Locality locality) {
+        int localityLevel = getLocalityLevel(domain, locality, 0);
+
+        if (!domain.getLocalities().isEmpty()) {
+            Locality sameLevelLocality = domain
+                    .getLocalities()
+                    .stream()
+                    .filter(l -> !l.getId().equals(locality.getId()))
+                    .filter(l -> getLocalityLevel(domain, l, 0) == localityLevel)
+                    .findFirst()
+                    .orElse(null);
+            if (sameLevelLocality != null) {
+                return sameLevelLocality.getType();
+            }
+        }
+
+        return null;
     }
 
     private int getTypeLevel(Domain domain, Locality node, LocalityType type, int level) {
