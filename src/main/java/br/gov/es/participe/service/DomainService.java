@@ -1,17 +1,16 @@
 package br.gov.es.participe.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import br.gov.es.participe.model.Domain;
+import br.gov.es.participe.model.Locality;
+import br.gov.es.participe.repository.DomainRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.gov.es.participe.model.Domain;
-import br.gov.es.participe.model.Locality;
-import br.gov.es.participe.repository.DomainRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DomainService {
@@ -27,7 +26,7 @@ public class DomainService {
 
         if (query != null && !query.trim().isEmpty()) {
             domainRepository
-                    .findByNameContainingIgnoreCase(query.trim())
+                    .findByName(query.trim())
                     .iterator()
                     .forEachRemaining(domain -> domains.add(domain));
         } else {
