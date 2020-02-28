@@ -5,6 +5,7 @@ import br.gov.es.participe.controller.dto.PlanItemParamDto;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
+import org.neo4j.ogm.annotation.Transient;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -34,7 +35,8 @@ public class PlanItem extends Entity {
     @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
     private Set<PlanItem> children;
 
-    private transient Set<Long> localitiesIds;
+    @Transient
+    private Set<Long> localitiesIds;
 
     public PlanItem() {
     }

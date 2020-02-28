@@ -60,20 +60,11 @@ public class Structure extends Entity {
         items.add(item);
     }
 
-    public Set<Plan> getPlans() {
-        if (plans == null)
-            return Collections.emptySet();
-        return Collections.unmodifiableSet(plans);
-    }
-
-    public void addPlan(Plan plan) {
-        if (plans == null)
-            plans = new HashSet<>();
-        plans.add(plan);
-    }
-
     public void removePlan(Long id) {
         Plan planToRemove = null;
+        if (plans == null) {
+            return;
+        }
         for (Plan plan : plans) {
             if (plan.getId().equals(id)) {
                 planToRemove = plan;
@@ -84,5 +75,11 @@ public class Structure extends Entity {
         if (planToRemove != null) {
             plans.remove(planToRemove);
         }
+    }
+
+    public Set<Plan> getPlans() {
+        if (plans == null)
+            return Collections.emptySet();
+        return Collections.unmodifiableSet(plans);
     }
 }

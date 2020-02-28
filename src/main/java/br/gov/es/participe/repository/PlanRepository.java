@@ -36,4 +36,7 @@ public interface PlanRepository extends Neo4jRepository<Plan, Long> {
             + " ] "
     )
     List<Plan> findByName(String name);
+
+    @Query("MATCH (p:Plan) DETACH DELETE p")
+    void deleteAll();
 }

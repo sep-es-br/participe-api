@@ -1,8 +1,8 @@
 package br.gov.es.participe.model;
 
-import br.gov.es.participe.controller.dto.FileDto;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.typeconversion.EnumString;
+
+import br.gov.es.participe.controller.dto.FileDto;
 
 @NodeEntity
 public class File extends Entity {

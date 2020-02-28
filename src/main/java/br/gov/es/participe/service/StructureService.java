@@ -27,12 +27,12 @@ public class StructureService {
             structureRepository
                     .findByName(query.trim())
                     .iterator()
-                    .forEachRemaining(domain -> structures.add(domain));
+                    .forEachRemaining(structures::add);
         } else {
             structureRepository
                     .findAll()
                     .iterator()
-                    .forEachRemaining(domain -> structures.add(domain));
+                    .forEachRemaining(structures::add);
         }
 
         return structures;
@@ -44,11 +44,10 @@ public class StructureService {
     }
 
     public Structure find(Long id) {
-        Structure structure = structureRepository
+
+        return structureRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Structure not found: " + id));
-
-        return structure;
     }
 
     @Transactional

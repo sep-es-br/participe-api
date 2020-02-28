@@ -12,11 +12,11 @@ import java.util.Set;
 public class PlanItemDto {
 
     private Long id;
-    private String name;
     private String description;
-    private PlanDto plan;
+    private String name;
     private StructureItemDto structureItem;
     private FileDto file;
+    private PlanDto plan;
     private List<LocalityDto> localities;
     private PlanItemDto parent;
     private List<PlanItemDto> children;
@@ -31,10 +31,10 @@ public class PlanItemDto {
         Structure structure = parentPlan != null ? parentPlan.getStructure() : null;
 
         this.id = planItem.getId();
-        this.name = planItem.getName();
         this.description = planItem.getDescription();
-        this.plan = parentPlan != null ? new PlanDto(parentPlan, false) : null;
+        this.name = planItem.getName();
         this.structureItem = new StructureItemDto(planItem.getStructureItem(), structure, false, false);
+        this.plan = parentPlan != null ? new PlanDto(parentPlan, false) : null;
 
         if (planItem.getFile() != null) {
             this.file = new FileDto(planItem.getFile());
@@ -63,14 +63,6 @@ public class PlanItemDto {
         }
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
@@ -79,12 +71,12 @@ public class PlanItemDto {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
+    public Long getId() {
+        return id;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public PlanDto getPlan() {
@@ -93,6 +85,14 @@ public class PlanItemDto {
 
     public void setPlan(PlanDto plan) {
         this.plan = plan;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public StructureItemDto getStructureItem() {

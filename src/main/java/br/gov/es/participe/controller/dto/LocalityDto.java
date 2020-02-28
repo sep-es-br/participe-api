@@ -19,8 +19,7 @@ public class LocalityDto {
     }
 
     public LocalityDto(Locality locality, Domain parentDomain, boolean loadChildren) {
-        if (locality == null) return;
-        if (parentDomain != null && !locality.getDomains().contains(parentDomain)) return;
+        if (locality == null ||(parentDomain != null && !locality.getDomains().contains(parentDomain))) return;
 
         id = locality.getId();
         name = locality.getName();

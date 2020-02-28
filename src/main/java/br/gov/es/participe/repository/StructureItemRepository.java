@@ -12,4 +12,7 @@ public interface StructureItemRepository extends Neo4jRepository<StructureItem, 
     List<StructureItem> search(String query);
 
     StructureItem findByNameIgnoreCase(String name);
+
+    @Query("MATCH (s:StructureItem) DETACH DELETE s")
+    void deleteAll();
 }

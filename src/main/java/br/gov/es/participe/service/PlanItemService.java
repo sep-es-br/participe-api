@@ -35,20 +35,20 @@ public class PlanItemService {
         planItemRepository
                 .findAll()
                 .iterator()
-                .forEachRemaining(planItem -> planItems.add(planItem));
+                .forEachRemaining(planItems::add);
 
         return planItems;
     }
 
     public List<PlanItem> search(String query) {
-        List<PlanItem> PlanItem = new ArrayList<>();
+        List<PlanItem> planItems = new ArrayList<>();
 
         planItemRepository
                 .search(query)
                 .iterator()
-                .forEachRemaining(locality -> PlanItem.add(locality));
+                .forEachRemaining(planItems::add);
 
-        return PlanItem;
+        return planItems;
     }
 
     @Transactional
@@ -59,11 +59,10 @@ public class PlanItemService {
     }
 
     public PlanItem find(Long id) {
-        PlanItem planItem = planItemRepository
+
+        return planItemRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Plan item not found: " + id));
-
-        return planItem;
     }
 
     @Transactional

@@ -5,9 +5,6 @@ public class StructureParamDto {
     private Long id;
     private String name;
 
-    public StructureParamDto() {
-    }
-
     public Long getId() {
         return id;
     }

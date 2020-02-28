@@ -1,14 +1,13 @@
 package br.gov.es.participe.model;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
+import br.gov.es.participe.controller.dto.StructureItemDto;
+import br.gov.es.participe.controller.dto.StructureItemParamDto;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import br.gov.es.participe.controller.dto.StructureItemDto;
-import br.gov.es.participe.controller.dto.StructureItemParamDto;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @NodeEntity
 public class StructureItem extends Entity {
@@ -43,20 +42,20 @@ public class StructureItem extends Entity {
             return;
 
         setId(structureItemDto.getId());
-        this.name = structureItemDto.getName();
-        this.logo = structureItemDto.getLogo();
         this.locality = structureItemDto.getLocality();
+        this.logo = structureItemDto.getLogo();
         this.votes = structureItemDto.getVotes();
-        this.comments = structureItemDto.getComments();
+        this.name = structureItemDto.getName();
         this.structure = new Structure(structureItemDto.getStructure());
-
-        if (structureItemDto.getParent() != null) {
-            this.parent = new StructureItem(structureItemDto.getParent());
-        }
+        this.comments = structureItemDto.getComments();
 
         if (structureItemDto.getChildren() != null && !structureItemDto.getChildren().isEmpty()) {
             this.children = new HashSet<>();
             structureItemDto.getChildren().forEach(child -> children.add(new StructureItem(child)));
+        }
+
+        if (structureItemDto.getParent() != null) {
+            this.parent = new StructureItem(structureItemDto.getParent());
         }
 
         if (structureItemDto.getPlanItems() != null && !structureItemDto.getPlanItems().isEmpty()) {
@@ -139,26 +138,34 @@ public class StructureItem extends Entity {
     }
 
     public Set<StructureItem> getChildren() {
-        if (children == null)
+        if (children == null) {
             return Collections.emptySet();
+        }
+
         return Collections.unmodifiableSet(children);
     }
 
     public void addItem(StructureItem item) {
-        if (children == null)
-            new HashSet<>();
+        if (children == null) {
+            children = new HashSet<>();
+        }
+
         this.children.add(item);
     }
 
     public Set<PlanItem> getPlanItems() {
-        if (planItems == null)
+        if (planItems == null) {
             return Collections.emptySet();
+        }
+
         return Collections.unmodifiableSet(planItems);
     }
 
     public void addPlanItem(PlanItem planItem) {
-        if (planItems == null)
+        if (planItems == null) {
             planItems = new HashSet<>();
+        }
+
         planItems.add(planItem);
     }
 

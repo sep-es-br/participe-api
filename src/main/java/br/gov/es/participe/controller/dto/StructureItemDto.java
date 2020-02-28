@@ -9,13 +9,13 @@ import java.util.List;
 public class StructureItemDto {
 
     private Long id;
-    private String name;
     private Boolean logo;
     private Boolean locality;
+    private String name;
     private Boolean votes;
-    private Boolean comments;
     private StructureDto structure;
     private StructureItemDto parent;
+    private Boolean comments;
     private List<StructureItemDto> children;
     private List<PlanItemDto> planItems;
 
@@ -25,14 +25,14 @@ public class StructureItemDto {
     public StructureItemDto(StructureItem structureItem, Structure parentStructure, boolean loadChildren, boolean loadPlanItems) {
         if (structureItem == null) return;
 
+        this.logo = structureItem.getLogo();
         this.id = structureItem.getId();
         this.name = structureItem.getName();
-        this.logo = structureItem.getLogo();
-        this.locality = structureItem.getLocality();
-        this.votes = structureItem.getVotes();
         this.comments = structureItem.getComments();
         this.structure = new StructureDto(parentStructure, false);
         this.parent = new StructureItemDto(structureItem.getParent(), parentStructure, false, loadPlanItems);
+        this.locality = structureItem.getLocality();
+        this.votes = structureItem.getVotes();
 
 
         if (loadChildren && structureItem.getChildren() != null && !structureItem.getChildren().isEmpty()) {
@@ -56,14 +56,6 @@ public class StructureItemDto {
         }
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
@@ -76,16 +68,16 @@ public class StructureItemDto {
         return logo;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setLogo(Boolean logo) {
         this.logo = logo;
-    }
-
-    public Boolean getLocality() {
-        return locality;
-    }
-
-    public void setLocality(Boolean locality) {
-        this.locality = locality;
     }
 
     public Boolean getVotes() {
@@ -94,6 +86,14 @@ public class StructureItemDto {
 
     public void setVotes(Boolean votes) {
         this.votes = votes;
+    }
+
+    public Boolean getLocality() {
+        return locality;
+    }
+
+    public void setLocality(Boolean locality) {
+        this.locality = locality;
     }
 
     public Boolean getComments() {

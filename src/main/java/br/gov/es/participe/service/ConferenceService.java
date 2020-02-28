@@ -29,13 +29,10 @@ public class ConferenceService {
 
     public List<Conference> findAll(String name, Long plan, Integer month, Integer year) {
         List<Conference> conferences = new ArrayList<>();
-        if (year != null) {
-
-        }
         conferenceRepository
             .findAllByQuery(name, plan, month, year)
             .iterator()
-            .forEachRemaining(conference -> conferences.add(conference));
+            .forEachRemaining(conferences::add);
 
         return conferences;
     }
@@ -67,11 +64,10 @@ public class ConferenceService {
     }
 
     public Conference find(Long id) {
-        Conference conference = conferenceRepository
+
+        return conferenceRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Conference not found: " + id));
-
-        return conference;
     }
 
     @Transactional

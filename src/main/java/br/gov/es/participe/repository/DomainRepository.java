@@ -32,4 +32,7 @@ public interface DomainRepository extends Neo4jRepository<Domain, Long> {
             + " ] "
     )
     Collection<Domain> findByName(String name);
+
+    @Query("MATCH (d:Domain) DETACH DELETE d")
+    void deleteAll();
 }
