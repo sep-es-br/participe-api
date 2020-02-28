@@ -5,17 +5,13 @@ import java.util.Set;
 public class PlanItemParamDto {
 
     private Long id;
-    private String name;
     private String description;
-    private PlanParamDto plan;
+    private String name;
     private StructureItemParamDto structureItem;
-    private FileDto file;
+    private PlanParamDto plan;
     private PlanItemParamDto parent;
+    private FileDto file;
     private Set<Long> localitiesIds;
-
-    public PlanItemParamDto() {
-
-    }
 
     public Long getId() {
         return id;
@@ -23,22 +19,6 @@ public class PlanItemParamDto {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public PlanParamDto getPlan() {
@@ -49,12 +29,20 @@ public class PlanItemParamDto {
         this.plan = plan;
     }
 
-    public StructureItemParamDto getStructureItem() {
-        return structureItem;
+    public String getDescription() {
+        return description;
     }
 
-    public void setStructureItem(StructureItemParamDto structureItem) {
-        this.structureItem = structureItem;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public FileDto getFile() {
@@ -63,6 +51,14 @@ public class PlanItemParamDto {
 
     public void setFile(FileDto file) {
         this.file = file;
+    }
+
+    public StructureItemParamDto getStructureItem() {
+        return structureItem;
+    }
+
+    public void setStructureItem(StructureItemParamDto structureItem) {
+        this.structureItem = structureItem;
     }
 
     public PlanItemParamDto getParent() {

@@ -26,7 +26,7 @@ public class StructureItemService {
         structureItemRepository
                 .findAll()
                 .iterator()
-                .forEachRemaining(structureItem -> structureItems.add(structureItem));
+                .forEachRemaining(structureItems::add);
 
         return structureItems;
     }
@@ -37,7 +37,7 @@ public class StructureItemService {
         structureItemRepository
                 .search(query)
                 .iterator()
-                .forEachRemaining(locality -> structureItems.add(locality));
+                .forEachRemaining(structureItems::add);
 
         return structureItems;
     }
@@ -63,18 +63,16 @@ public class StructureItemService {
     }
 
     public StructureItem find(Long id) {
-        StructureItem structureItem = structureItemRepository
+
+        return structureItemRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Structure item not found: " + id));
-
-        return structureItem;
     }
 
     public StructureItem find(String name) {
-        StructureItem structureItem = structureItemRepository
-                .findByNameIgnoreCase(name);
 
-        return structureItem;
+        return structureItemRepository
+                .findByNameIgnoreCase(name);
     }
 
     @Transactional

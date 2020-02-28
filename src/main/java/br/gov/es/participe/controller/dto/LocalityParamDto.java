@@ -1,7 +1,5 @@
 package br.gov.es.participe.controller.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class LocalityParamDto {
 
     private Long id;
@@ -10,27 +8,24 @@ public class LocalityParamDto {
     private DomainParamDto domain;
     private LocalityParamDto parent;
 
-    public LocalityParamDto() {
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public LocalityTypeDto getType() {
         return type;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setType(LocalityTypeDto type) {

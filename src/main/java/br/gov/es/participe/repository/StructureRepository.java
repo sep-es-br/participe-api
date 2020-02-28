@@ -27,4 +27,8 @@ public interface StructureRepository extends Neo4jRepository<Structure, Long> {
             + " ] "
     )
     Collection<Structure> findByName(String name);
+
+    @Query("MATCH (s:Structure) DETACH DELETE s")
+    void deleteAll();
+
 }

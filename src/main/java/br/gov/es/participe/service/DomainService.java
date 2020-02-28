@@ -21,6 +21,8 @@ public class DomainService {
     @Autowired
     private LocalityService localityService;
 
+    private static final String DOMAIN_ERROR_NOT_FOUND = "domain.error.not-found";
+
     public List<Domain> findAll(String query) {
         List<Domain> domains = new ArrayList<>();
 
@@ -28,12 +30,12 @@ public class DomainService {
             domainRepository
                     .findByName(query.trim())
                     .iterator()
-                    .forEachRemaining(domain -> domains.add(domain));
+                    .forEachRemaining(domains::add);
         } else {
             domainRepository
                     .findAll()
                     .iterator()
-                    .forEachRemaining(domain -> domains.add(domain));
+                    .forEachRemaining(domains::add);
         }
 
         return domains;
@@ -48,19 +50,17 @@ public class DomainService {
     }
 
     public Domain find(Long id) {
-        Domain domain = domainRepository
-                .findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"));
 
-        return domain;
+        return domainRepository
+                .findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(DOMAIN_ERROR_NOT_FOUND));
     }
 
     public Domain findWithLocalities(Long id) {
-        Domain domain = Optional.ofNullable(domainRepository
-                .findByIdWithLocalities(id))
-                .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"));
 
-        return domain;
+        return Optional.ofNullable(domainRepository
+                .findByIdWithLocalities(id))
+                       .orElseThrow(() -> new IllegalArgumentException(DOMAIN_ERROR_NOT_FOUND));
     }
 
     @Transactional
@@ -81,5 +81,10 @@ public class DomainService {
         }
 
         domainRepository.delete(domain);
+    }
+
+    @Transactional
+    public void deleteAll() {
+        domainRepository.deleteAll();
     }
 }

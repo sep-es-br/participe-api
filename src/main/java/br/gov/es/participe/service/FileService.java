@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -27,13 +28,15 @@ public class FileService {
     @Autowired
     private ApplicationProperties applicationProperties;
 
+    @Autowired
+    private Logger log;
+
     @Transactional(readOnly = true)
     public FileDto findById(Long id) {
         br.gov.es.participe.model.File file = fileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Imagem não encontrada."));
         return new FileDto(file);
     }
 
-    @Transactional(readOnly = true)
     public br.gov.es.participe.model.File find(Long id) {
         return fileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Imagem não encontrada."));
     }
@@ -49,7 +52,7 @@ public class FileService {
     public FileDto save(MultipartFile multipartFile) throws IOException {
         br.gov.es.participe.model.File file = new br.gov.es.participe.model.File();
         file.setName(multipartFile.getOriginalFilename());
-        String extensao = file.getName().substring(file.getName().lastIndexOf("."));
+        String extensao = file.getName().substring(file.getName().lastIndexOf('.'));
         file.setUrl(UUID.randomUUID().toString() + extensao);
         saveOnDisc(multipartFile.getBytes(), file.getUrl());
         file.setMimeType(multipartFile.getContentType());
@@ -60,19 +63,22 @@ public class FileService {
     private void saveOnDisc(byte [] dados, String nomeArquivo) throws IOException {
         String caminhoArquivo = applicationProperties.getPathImagens().concat(nomeArquivo);
         File file = Files.createFile(Paths.get(caminhoArquivo)).toFile();
-        FileOutputStream out = new FileOutputStream(file);
-        out.write(dados);
-        out.flush();
-        out.close();
+
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            out.write(dados);
+            out.flush();
+        }
     }
 
     public void delete(Long id) {
         br.gov.es.participe.model.File file1 = fileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Imagem id: " + id +" não encontrada."));
         String caminhoArquivo = applicationProperties.getPathImagens().concat(file1.getUrl());
-        File file = Paths.get(caminhoArquivo).toFile();
-        if (file.exists()) {
-            file.delete();
+        try {
+            Files.delete(Paths.get(caminhoArquivo));
+        } catch (IOException e) {
+            log.error("File not removed", e);
         }
+
         fileRepository.delete(file1);
     }
 

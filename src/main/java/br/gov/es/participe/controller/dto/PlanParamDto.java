@@ -7,9 +7,6 @@ public class PlanParamDto {
     private StructureParamDto structure;
     private DomainParamDto domain;
 
-    public PlanParamDto() {
-    }
-
     public Long getId() {
         return id;
     }

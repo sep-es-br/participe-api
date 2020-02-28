@@ -26,13 +26,15 @@ public class LocalityService {
     @Autowired
     private DomainService domainService;
 
+    private static final String DOMAIN_ERROR_NOT_FOUND = "domain.error.not-found";
+
     public List<Locality> findAll() {
         List<Locality> localities = new ArrayList<>();
 
         localityRepository
                 .findAll()
                 .iterator()
-                .forEachRemaining(locality -> localities.add(locality));
+                .forEachRemaining(localities::add);
 
         return localities;
     }
@@ -43,7 +45,7 @@ public class LocalityService {
         localityRepository
                 .search(query, type)
                 .iterator()
-                .forEachRemaining(locality -> localities.add(locality));
+                .forEachRemaining(localities::add);
 
         return localities;
     }
@@ -87,11 +89,10 @@ public class LocalityService {
     }
 
     public Locality find(Long id) {
-        Locality locality = localityRepository
+
+        return localityRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Locality not found: " + id));
-
-        return locality;
     }
 
     public List<Locality> findByDomain(Long idDomain) {
@@ -100,7 +101,7 @@ public class LocalityService {
         localityRepository
                 .findByDomain(idDomain)
                 .iterator()
-                .forEachRemaining(locality -> localities.add(locality));
+                .forEachRemaining(localities::add);
 
         return localities;
     }
@@ -124,7 +125,7 @@ public class LocalityService {
                 .getDomains()
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"));
+                .orElseThrow(() -> new IllegalArgumentException(DOMAIN_ERROR_NOT_FOUND));
 
         return domainService.findWithLocalities(domain.getId());
     }
@@ -216,7 +217,7 @@ public class LocalityService {
                     .getParents()
                     .stream()
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"))
+                    .orElseThrow(() -> new IllegalArgumentException(DOMAIN_ERROR_NOT_FOUND))
                     .getId();
 
             return findParentById(domainLocalities, parentId);
@@ -227,7 +228,7 @@ public class LocalityService {
                 .stream()
                 .filter(l -> l.getDomains().contains(domain))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("domain.error.not-found"));
+                .orElseThrow(() -> new IllegalArgumentException(DOMAIN_ERROR_NOT_FOUND));
     }
 
     private Locality findParentById(List<Locality> localities, Long id) {
@@ -252,7 +253,7 @@ public class LocalityService {
         Locality locality = find(idLocality);
         Domain domain = domainService.find(idDomain);
 
-        if (locality.getChildren() != null && locality.getChildren().size() > 0) {
+        if (locality.getChildren() != null && !locality.getChildren().isEmpty()) {
             List<Locality> childrenInDomain = localityRepository.findChildren(idDomain, locality.getId());
 
             if (childrenInDomain != null && !childrenInDomain.isEmpty()) {

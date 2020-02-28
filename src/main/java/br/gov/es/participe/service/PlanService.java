@@ -34,12 +34,12 @@ public class PlanService {
             planRepository
                     .findByName(query.trim())
                     .iterator()
-                    .forEachRemaining(plan -> plans.add(plan));
+                    .forEachRemaining(plans::add);
         } else {
             planRepository
                     .findAll()
                     .iterator()
-                    .forEachRemaining(domain -> plans.add(domain));
+                    .forEachRemaining(plans::add);
         }
 
         return plans;
@@ -67,11 +67,10 @@ public class PlanService {
     }
 
     public Plan find(Long id) {
-        Plan plan = planRepository
+
+        return planRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Plan not found: " + id));
-
-        return plan;
     }
 
     @Transactional

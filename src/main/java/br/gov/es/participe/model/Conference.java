@@ -45,21 +45,13 @@ public class Conference extends Entity {
         if (conferenceParamDto == null) return;
 
         setId(conferenceParamDto.getId());
-        this.name = conferenceParamDto.getName();
         this.description = conferenceParamDto.getDescription();
         if(conferenceParamDto.getPlan() != null && conferenceParamDto.getPlan().getId() != null){
             this.plan = new Plan(conferenceParamDto.getPlan());
         }
         this.beginDate = conferenceParamDto.getBeginDate();
+        this.name = conferenceParamDto.getName();
         this.endDate = conferenceParamDto.getEndDate();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getDescription() {
@@ -76,6 +68,14 @@ public class Conference extends Entity {
 
     public void setPlan(Plan plan) {
         this.plan = plan;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Date getBeginDate() {

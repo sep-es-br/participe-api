@@ -26,4 +26,7 @@ public interface LocalityRepository extends Neo4jRepository<Locality, Long> {
     @Query("MATCH (d:Domain)<-[:IS_LOCATED_IN]-(l:Locality) WHERE id(d) = $idDomain RETURN l, "
                + "[ (l)<-[btl:IS_LOCATED_IN]-(lc:Locality)-[:IS_LOCATED_IN]->(d) | [btl, lc] ]")
     List<Locality> findByDomain(Long idDomain);
+
+    @Query("MATCH (l:Locality) DETACH DELETE l")
+    void deleteAll();
 }

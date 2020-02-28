@@ -1,14 +1,13 @@
 package br.gov.es.participe.model;
 
-import br.gov.es.participe.controller.dto.PlanDto;
-import br.gov.es.participe.controller.dto.PlanParamDto;
+import java.util.Collections;
+import java.util.Set;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import br.gov.es.participe.controller.dto.PlanDto;
+import br.gov.es.participe.controller.dto.PlanParamDto;
 
 @NodeEntity
 public class Plan extends Entity {
@@ -74,8 +73,4 @@ public class Plan extends Entity {
         return Collections.unmodifiableSet(items);
     }
 
-    public void addItem(PlanItem planItem) {
-        if (items == null) items = new HashSet<>();
-        items.add(planItem);
-    }
 }

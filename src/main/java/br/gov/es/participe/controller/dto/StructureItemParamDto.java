@@ -3,55 +3,52 @@ package br.gov.es.participe.controller.dto;
 public class StructureItemParamDto {
 
     private Long id;
-    private String name;
-    private Boolean logo;
-    private Boolean locality;
-    private Boolean votes;
     private Boolean comments;
+    private String name;
+    private Boolean votes;
+    private Boolean locality;
     private StructureParamDto structure;
+    private Boolean logo;
     private StructureItemParamDto parent;
 
-    public StructureItemParamDto() {
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Boolean getLogo() {
+        return logo;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Boolean getLogo() {
-        return logo;
-    }
-
     public void setLogo(Boolean logo) {
         this.logo = logo;
     }
 
-    public Boolean getLocality() {
-        return locality;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setLocality(Boolean locality) {
-        this.locality = locality;
+    public void setVotes(Boolean votes) {
+        this.votes = votes;
     }
 
     public Boolean getVotes() {
         return votes;
     }
 
-    public void setVotes(Boolean votes) {
-        this.votes = votes;
+    public void setLocality(Boolean locality) {
+        this.locality = locality;
+    }
+
+    public Boolean getLocality() {
+        return locality;
     }
 
     public Boolean getComments() {

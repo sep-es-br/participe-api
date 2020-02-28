@@ -72,16 +72,6 @@ public class Domain extends Entity {
         }
     }
 
-    public Set<Plan> getPlans() {
-        if (plans == null) return Collections.emptySet();
-        return Collections.unmodifiableSet(plans);
-    }
-
-    public void addPlan(Plan plan) {
-        if (plans == null) plans = new HashSet<>();
-        plans.add(plan);
-    }
-
     public void removePlan(Long id) {
         Plan planToRemove = null;
         for (Plan plan : plans) {

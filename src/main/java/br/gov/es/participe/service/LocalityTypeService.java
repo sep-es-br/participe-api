@@ -20,16 +20,15 @@ public class LocalityTypeService {
         localityTypeRepository
                 .findAll()
                 .iterator()
-                .forEachRemaining(localityType -> localityTypes.add(localityType));
+                .forEachRemaining(localityTypes::add);
 
         return localityTypes;
     }
 
     public LocalityType find(Long id) {
-        LocalityType localityType = localityTypeRepository
+
+        return localityTypeRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("domain.error.locality-type.not-found"));
-
-        return localityType;
     }
 }

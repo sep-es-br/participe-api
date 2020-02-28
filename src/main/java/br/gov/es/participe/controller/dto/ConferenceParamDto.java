@@ -7,15 +7,20 @@ import java.util.Date;
 public class ConferenceParamDto {
 
     private Long id;
-    private String name;
-    private String description;
-    private PlanParamDto plan;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date beginDate;
+    private String name;
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date endDate;
+    private String description;
+    private PlanParamDto plan;
 
-    public ConferenceParamDto() {
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Long getId() {
@@ -24,22 +29,6 @@ public class ConferenceParamDto {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public PlanParamDto getPlan() {
@@ -56,6 +45,14 @@ public class ConferenceParamDto {
 
     public void setBeginDate(Date beginDate) {
         this.beginDate = beginDate;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Date getEndDate() {

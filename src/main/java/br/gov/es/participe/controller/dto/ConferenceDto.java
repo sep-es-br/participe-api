@@ -25,11 +25,11 @@ public class ConferenceDto {
     public ConferenceDto(Conference conference) {
         if (conference == null) return;
 
+        this.description = conference.getDescription();
         this.id = conference.getId();
         this.name = conference.getName();
-        this.description = conference.getDescription();
-        this.plan = new PlanDto(conference.getPlan(), false);
         this.beginDate = conference.getBeginDate();
+        this.plan = new PlanDto(conference.getPlan(), false);
         this.endDate = conference.getEndDate();
     }
 
