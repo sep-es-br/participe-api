@@ -2,6 +2,7 @@ package br.gov.es.participe.service;
 
 import br.gov.es.participe.model.Domain;
 import br.gov.es.participe.model.Locality;
+import br.gov.es.participe.model.Plan;
 import br.gov.es.participe.repository.DomainRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,9 @@ public class DomainService {
 
     @Autowired
     private LocalityService localityService;
+
+    @Autowired
+    private PlanService planService;
 
     private static final String DOMAIN_ERROR_NOT_FOUND = "domain.error.not-found";
 
@@ -46,6 +50,7 @@ public class DomainService {
         if(domain.getName() == null) {
             throw new IllegalArgumentException("Domain name is required");
         }
+        domain.setName(domain.getName().trim().replaceAll("\\s+"," "));
         return domainRepository.save(domain);
     }
 
@@ -66,6 +71,12 @@ public class DomainService {
     @Transactional
     public void delete(Long id) {
         Domain domain = find(id);
+
+        List<Plan> plans = planService.findByDomain(domain.getId());
+
+        if (plans != null && plans.size() > 0) {
+            throw new IllegalArgumentException("This domain is in use by a plan");
+        }
 
         if (!domain.getLocalities().isEmpty()) {
             List<Locality> localities = localityService.findByDomain(id);

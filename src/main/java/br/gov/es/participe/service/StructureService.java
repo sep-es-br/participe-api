@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +25,11 @@ public class StructureService {
         List<Structure> structures = new ArrayList<>();
 
         if (query != null && !query.trim().isEmpty()) {
+            query = query.replaceAll("[^a-zà-úA-ZÀ-Ú0-9ç]+", " ");
+        	query = query.trim().replaceAll(" +", " ");
+        	String newQuery = Normalizer.normalize(query, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
             structureRepository
-                    .findByName(query.trim())
+                    .findByName(newQuery)
                     .iterator()
                     .forEachRemaining(structures::add);
         } else {
@@ -40,6 +44,8 @@ public class StructureService {
 
     @Transactional
     public Structure save(Structure structure) {
+    	String newName = structure.getName().trim().replaceAll(" +", " ");
+    	structure.setName(newName);
         return structureRepository.save(structure);
     }
 

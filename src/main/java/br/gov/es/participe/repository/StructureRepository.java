@@ -1,10 +1,11 @@
 package br.gov.es.participe.repository;
 
-import br.gov.es.participe.model.Structure;
+import java.util.Collection;
+
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
-import java.util.Collection;
+import br.gov.es.participe.model.Structure;
 
 public interface StructureRepository extends Neo4jRepository<Structure, Long> {
 
@@ -15,8 +16,8 @@ public interface StructureRepository extends Neo4jRepository<Structure, Long> {
     Collection<Structure> findAll();
 
     @Query("MATCH () "
-            + " OPTIONAL MATCH (structure:Structure) WHERE toLower(structure.name) CONTAINS toLower($name) "
-            + " OPTIONAL MATCH (structureItem:StructureItem)-[c:COMPOSES*]->(parentStructure:Structure) WHERE toLower(structureItem.name) CONTAINS toLower($name) "
+            + " OPTIONAL MATCH (structure:Structure) WHERE ext.translate(structure.name) CONTAINS ext.translate({0}) "
+            + " OPTIONAL MATCH (structureItem:StructureItem)-[c:COMPOSES*]->(parentStructure:Structure) WHERE ext.translate(structureItem.name) CONTAINS ext.translate({0}) "
             + " OPTIONAL MATCH (structureItem)-[c2:COMPOSES]->(parentStructure:Structure) "
             + " OPTIONAL MATCH (structureItem)<-[c3:COMPOSES*]-(child:StructureItem) "
             + " RETURN structure, structureItem, c, parentStructure, c2, c3, child "

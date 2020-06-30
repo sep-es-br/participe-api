@@ -12,6 +12,19 @@ public interface StructureItemRepository extends Neo4jRepository<StructureItem, 
     List<StructureItem> search(String query);
 
     StructureItem findByNameIgnoreCase(String name);
+    
+    @Query(" MATCH (pi:PlanItem)-[o:OBEYS]-(s:StructureItem) "
+    		+" WHERE id(pi)={0}"
+    		+" RETURN s "
+    		+" ,[ "
+    		+" 		[(s)-[c:COMPOSES]-(si:StructureItem) | [c,si]] "
+    		+" ]")
+    StructureItem findByIdPlanItem(Long idPlanItem);
+    
+    @Query(" MATCH (s:StructureItem)<-[c:COMPOSES]-(si:StructureItem) "
+    		+" WHERE id(s)={0} "
+    		+" RETURN si LIMIT 1")
+    StructureItem findChild(Long idParent);
 
     @Query("MATCH (s:StructureItem) DETACH DELETE s")
     void deleteAll();

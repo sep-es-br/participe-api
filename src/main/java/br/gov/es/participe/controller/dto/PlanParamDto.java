@@ -6,6 +6,7 @@ public class PlanParamDto {
     private String name;
     private StructureParamDto structure;
     private DomainParamDto domain;
+    private LocalityTypeDto localitytype;
 
     public Long getId() {
         return id;
@@ -38,4 +39,12 @@ public class PlanParamDto {
     public void setDomain(DomainParamDto domain) {
         this.domain = domain;
     }
+
+	public LocalityTypeDto getlocalitytype() {
+		return localitytype;
+	}
+
+	public void setlocalitytype(LocalityTypeDto type) {
+		this.localitytype = type;
+	}
 }

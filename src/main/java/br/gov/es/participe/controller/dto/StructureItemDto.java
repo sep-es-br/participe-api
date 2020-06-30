@@ -11,11 +11,18 @@ public class StructureItemDto {
     private Long id;
     private Boolean logo;
     private Boolean locality;
-    private String name;
     private Boolean votes;
+    private Boolean comments;
+    private Boolean hasNext;
+    
+    private String name;
+    private String title;
+    private String subtitle;
+    private String link;
+    private LinkParentDto parentLink;
+    
     private StructureDto structure;
     private StructureItemDto parent;
-    private Boolean comments;
     private List<StructureItemDto> children;
     private List<PlanItemDto> planItems;
 
@@ -33,6 +40,21 @@ public class StructureItemDto {
         this.parent = new StructureItemDto(structureItem.getParent(), parentStructure, false, loadPlanItems);
         this.locality = structureItem.getLocality();
         this.votes = structureItem.getVotes();
+        
+        if(structureItem.getTitle() != null) 
+        	this.title = structureItem.getTitle();
+        
+        if(structureItem.getSubtitle() != null) 
+        	this.subtitle = structureItem.getSubtitle();
+        
+        if(structureItem.getLink() != null) 
+        	this.link = structureItem.getLink();
+        
+        
+        if(structureItem.getChildren() != null && !structureItem.getChildren().isEmpty())
+        	this.hasNext = true;
+        else
+        	this.hasNext = false;
 
 
         if (loadChildren && structureItem.getChildren() != null && !structureItem.getChildren().isEmpty()) {
@@ -54,6 +76,11 @@ public class StructureItemDto {
                 }
             });
         }
+    }
+
+    public StructureItemDto(StructureItem structureItem) {
+        this.id = structureItem.getId();
+        this.name = structureItem.getName();
     }
 
     public String getName() {
@@ -104,7 +131,39 @@ public class StructureItemDto {
         this.comments = comments;
     }
 
-    public StructureDto getStructure() {
+	public Boolean getHasNext() {
+		return hasNext;
+	}
+
+	public void setHasNext(Boolean hasNext) {
+		this.hasNext = hasNext;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getSubtitle() {
+		return subtitle;
+	}
+
+	public void setSubtitle(String subtitle) {
+		this.subtitle = subtitle;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public StructureDto getStructure() {
         return structure;
     }
 
@@ -112,7 +171,15 @@ public class StructureItemDto {
         this.structure = structure;
     }
 
-    public StructureItemDto getParent() {
+    public LinkParentDto getParentLink() {
+		return parentLink;
+	}
+
+	public void setParentLink(LinkParentDto parentLink) {
+		this.parentLink = parentLink;
+	}
+
+	public StructureItemDto getParent() {
         return parent;
     }
 

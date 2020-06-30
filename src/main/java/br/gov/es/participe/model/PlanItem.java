@@ -34,7 +34,10 @@ public class PlanItem extends Entity {
 
     @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
     private Set<PlanItem> children;
-
+    
+    @Relationship(type = "ABOUT", direction = Relationship.INCOMING)
+    private Set<Attend> attends;
+    
     @Transient
     private Set<Long> localitiesIds;
 
@@ -169,4 +172,12 @@ public class PlanItem extends Entity {
     public void setLocalitiesIds(Set<Long> localitiesIds) {
         this.localitiesIds = localitiesIds;
     }
+
+	public Set<Attend> getAttends() {
+		return attends;
+	}
+
+	public void setAttends(Set<Attend> attends) {
+		this.attends = attends;
+	}
 }

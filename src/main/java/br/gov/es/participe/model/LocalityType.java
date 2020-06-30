@@ -12,6 +12,9 @@ public class LocalityType extends Entity {
 
     @Relationship(type = "OF_TYPE", direction = Relationship.INCOMING)
     private Set<Locality> localities;
+    
+    @Relationship(type = "REGIONALIZABLE", direction = Relationship.INCOMING)
+    private Set<Plan> plans;
 
     public LocalityType(){
     }

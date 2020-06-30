@@ -1,5 +1,7 @@
 package br.gov.es.participe.controller.dto;
 
+import java.util.List;
+
 public class LocalityParamDto {
 
     private Long id;
@@ -7,6 +9,8 @@ public class LocalityParamDto {
     private LocalityTypeDto type;
     private DomainParamDto domain;
     private LocalityParamDto parent;
+    private List<MeetingDto> meetingPlace;
+    private List<MeetingDto> meetingCovers;
 
     public Long getId() {
         return id;
@@ -47,4 +51,20 @@ public class LocalityParamDto {
     public void setParent(LocalityParamDto parent) {
         this.parent = parent;
     }
+
+	public List<MeetingDto> getMeetingPlace() {
+		return meetingPlace;
+	}
+
+	public void setMeetingPlace(List<MeetingDto> meetingPlace) {
+		this.meetingPlace = meetingPlace;
+	}
+
+	public List<MeetingDto> getMeetingCovers() {
+		return meetingCovers;
+	}
+
+	public void setMeetingCovers(List<MeetingDto> meetingCovers) {
+		this.meetingCovers = meetingCovers;
+	}
 }

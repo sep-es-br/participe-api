@@ -13,14 +13,14 @@ import java.util.Set;
 public class StructureItem extends Entity {
 
     private String name;
-
     private Boolean logo;
-
     private Boolean locality;
-
     private Boolean votes;
-
     private Boolean comments;
+
+    private String title;
+    private String subtitle;
+    private String link;
 
     @Relationship(type = "COMPOSES")
     private Structure structure;
@@ -48,6 +48,17 @@ public class StructureItem extends Entity {
         this.name = structureItemDto.getName();
         this.structure = new Structure(structureItemDto.getStructure());
         this.comments = structureItemDto.getComments();
+        
+        if(structureItemDto.getTitle() != null) {
+        	this.title = structureItemDto.getTitle();
+
+        }
+        if(structureItemDto.getSubtitle() != null) {
+        	this.subtitle = structureItemDto.getSubtitle();
+        }
+        if(structureItemDto.getLink() != null) {
+        	this.link = structureItemDto.getLink();
+        }
 
         if (structureItemDto.getChildren() != null && !structureItemDto.getChildren().isEmpty()) {
             this.children = new HashSet<>();
@@ -75,6 +86,17 @@ public class StructureItem extends Entity {
         this.votes = structureItemDto.getVotes();
         this.comments = structureItemDto.getComments();
         this.structure = new Structure(structureItemDto.getStructure());
+        
+        if(structureItemDto.getTitle() != null) {
+        	this.title = structureItemDto.getTitle();
+
+        }
+        if(structureItemDto.getSubtitle() != null) {
+        	this.subtitle = structureItemDto.getSubtitle();
+        }
+        if(structureItemDto.getLink() != null) {
+        	this.link = structureItemDto.getLink();
+        }
 
         if (structureItemDto.getParent() != null) {
             this.parent = new StructureItem(structureItemDto.getParent());
@@ -121,7 +143,40 @@ public class StructureItem extends Entity {
         this.comments = comments;
     }
 
-    public Structure getStructure() {
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getSubtitle() {
+		return subtitle;
+	}
+
+	public void setSubtitle(String subtitle) {
+		this.subtitle = subtitle;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public void setChildren(Set<StructureItem> children) {
+		this.children = children;
+	}
+
+	public void setPlanItems(Set<PlanItem> planItems) {
+		this.planItems = planItems;
+	}
+
+	public Structure getStructure() {
         return structure;
     }
 
