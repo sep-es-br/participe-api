@@ -27,7 +27,7 @@ public class DomainDto {
                     .stream()
                     .filter(locality -> locality.getParents().isEmpty())
                     .collect(Collectors.toList())
-                    .forEach(locality -> localities.add(new LocalityDto(locality, domain, true)));
+                    .forEach(locality -> localities.add(new LocalityDto(locality, domain, true, true)));
         }
     }
 

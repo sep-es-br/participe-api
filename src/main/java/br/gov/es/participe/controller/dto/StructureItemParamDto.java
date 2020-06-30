@@ -10,6 +10,9 @@ public class StructureItemParamDto {
     private StructureParamDto structure;
     private Boolean logo;
     private StructureItemParamDto parent;
+    private String title;
+    private String subtitle;
+    private String link;
 
     public void setId(Long id) {
         this.id = id;
@@ -74,5 +77,29 @@ public class StructureItemParamDto {
     public void setParent(StructureItemParamDto parent) {
         this.parent = parent;
     }
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getSubtitle() {
+		return subtitle;
+	}
+
+	public void setSubtitle(String subtitle) {
+		this.subtitle = subtitle;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
 
 }

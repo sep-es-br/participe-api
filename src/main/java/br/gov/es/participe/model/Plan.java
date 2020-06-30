@@ -22,6 +22,9 @@ public class Plan extends Entity {
 
     @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
     private Set<PlanItem> items;
+    
+    @Relationship(type = "REGIONALIZABLE")
+    private LocalityType localitytype;
 
     public Plan() {
     }
@@ -33,6 +36,8 @@ public class Plan extends Entity {
         this.name = planDto.getName();
         this.structure = new Structure(planDto.getStructure());
         this.domain = new Domain(planDto.getDomain());
+        if(planDto.getlocalitytype() != null && planDto.getlocalitytype().getId() != null)
+        	this.localitytype = new LocalityType(planDto.getlocalitytype());
     }
 
     public Plan(PlanParamDto planParamDto) {
@@ -42,6 +47,8 @@ public class Plan extends Entity {
         this.name = planParamDto.getName();
         this.structure = new Structure(planParamDto.getStructure());
         this.domain = new Domain(planParamDto.getDomain());
+        if(planParamDto.getlocalitytype() != null && planParamDto.getlocalitytype().getId() != null)
+        	this.localitytype = new LocalityType(planParamDto.getlocalitytype());
     }
 
     public String getName() {
@@ -71,6 +78,14 @@ public class Plan extends Entity {
     public Set<PlanItem> getItems() {
         if (items == null) return Collections.emptySet();
         return Collections.unmodifiableSet(items);
+    }
+    
+    public LocalityType getlocalitytype() {
+    	return localitytype;
+    }
+    
+    public void setlocalitytype(LocalityType type) {
+    	this.localitytype = type;
     }
 
 }

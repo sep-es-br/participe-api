@@ -5,15 +5,22 @@ import br.gov.es.participe.model.Plan;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.model.Structure;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class PlanItemDto {
+public class PlanItemDto implements  Comparable<PlanItemDto> {
 
     private Long id;
+    private String name;    
     private String description;
-    private String name;
+    private String image;
+    private String StructureItemName;
+    private Boolean votes;
+    private Integer commentsMade;
+    private List<CommentDto> comments;
+    
     private StructureItemDto structureItem;
     private FileDto file;
     private PlanDto plan;
@@ -23,6 +30,22 @@ public class PlanItemDto {
     private Set<Long> localitiesIds;
 
     public PlanItemDto() {
+    }
+    
+    public PlanItemDto(PlanItem planItem, boolean proposal) {
+    	this.id = planItem.getId();
+        this.name = planItem.getName();
+        
+        if(!proposal)
+        	this.description = planItem.getDescription();
+        else {			
+        	this.StructureItemName = planItem.getStructureItem().getName();
+        }
+    }
+
+    public PlanItemDto(PlanItem planItem) {
+        this.id = planItem.getId();
+        this.name = planItem.getName();
     }
 
     public PlanItemDto(PlanItem planItem, Plan parentPlan, boolean loadChildren) {
@@ -45,7 +68,7 @@ public class PlanItemDto {
             this.localities = new ArrayList<>();
             planItem.getLocalities()
                     .stream()
-                    .forEach(locality -> this.localities.add(new LocalityDto(locality, domain, false)));
+                    .forEach(locality -> this.localities.add(new LocalityDto(locality, domain, false, true)));
         }
 
         if (planItem.getParent() != null) {
@@ -142,4 +165,54 @@ public class PlanItemDto {
     public void setLocalitiesIds(Set<Long> localitiesIds) {
         this.localitiesIds = localitiesIds;
     }
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public String getStructureItemName() {
+		return StructureItemName;
+	}
+
+	public void setStructureItemName(String structureItemName) {
+		StructureItemName = structureItemName;
+	}
+
+	public Boolean getVotes() {
+		return votes;
+	}
+
+	public void setVotes(Boolean votes) {
+		this.votes = votes;
+	}
+
+	public Integer getCommentsMade() {
+		return commentsMade;
+	}
+
+	public void setCommentsMade(Integer commentsMade) {
+		this.commentsMade = commentsMade;
+	}
+
+	public List<CommentDto> getComments() {
+		return comments;
+	}
+
+	public void setComments(List<CommentDto> comments) {
+		this.comments = comments;
+	}
+
+	@Override
+	public int compareTo(PlanItemDto plan) {
+		return this.name.compareTo(plan.getName());
+	} 
+	
+	@Override
+	public String toString() {
+		return " Name: "+this.name+" ID: "+this.id;
+	}
 }

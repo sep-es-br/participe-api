@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "spring.social.facebook.scope",
+      "type": "java.lang.String",
+      "description": "Description for spring.social.facebook.scope."
+  }
+] }

@@ -13,6 +13,8 @@ public class FileDto {
     public FileDto() {}
 
     public FileDto(File file) {
+    	if(file == null) return;
+    	
         this.id = file.getId();
         this.name = file.getName();
         this.url = file.getUrl();

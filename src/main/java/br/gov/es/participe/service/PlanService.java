@@ -1,14 +1,12 @@
 package br.gov.es.participe.service;
 
-import br.gov.es.participe.model.Domain;
-import br.gov.es.participe.model.Plan;
-import br.gov.es.participe.model.PlanItem;
-import br.gov.es.participe.model.Structure;
+import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.PlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +17,9 @@ public class PlanService {
     private PlanRepository planRepository;
 
     @Autowired
+    private LocalityTypeService localityTypeService;
+    
+    @Autowired
     private StructureService structureService;
 
     @Autowired
@@ -27,12 +28,19 @@ public class PlanService {
     @Autowired
     private PlanItemService planItemService;
 
+    @Autowired
+    private ConferenceService conferenceService;
+
     public List<Plan> findAll(String query) {
         List<Plan> plans = new ArrayList<>();
 
         if (query != null && !query.trim().isEmpty()) {
+            query = query.replaceAll("[^a-zà-úA-ZÀ-Ú0-9ç]+", " ");
+        	query = query.trim().replaceAll(" +", " ");
+        	String newQuery = Normalizer.normalize(query, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""); 
+            
             planRepository
-                    .findByName(query.trim())
+                    .findByName(newQuery.trim())
                     .iterator()
                     .forEachRemaining(plans::add);
         } else {
@@ -45,6 +53,18 @@ public class PlanService {
         return plans;
     }
 
+    public Plan findByConference(Long id) {
+    	return planRepository.findByConference(id);
+    }
+    
+    public Plan findByPlanItem(Long id) {
+    	return planRepository.findByPlanItem(id);
+    }
+
+    public List<Plan> findByDomain(Long id) {
+        return planRepository.findByDomain(id);
+    }
+    
     @Transactional
     public Plan save(Plan plan) {
         if (plan.getId() != null) {
@@ -72,10 +92,20 @@ public class PlanService {
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Plan not found: " + id));
     }
+    
+    public Plan findFilesById(Long id) {
+    	return planRepository.findFilesById(id);
+    }
 
     @Transactional
     public void delete(Long id) {
         Plan plan = find(id);
+
+        List<Conference> conferences = conferenceService.findByPlan(plan.getId());
+
+        if (conferences != null && conferences.size() > 0) {
+            throw new IllegalArgumentException("This plan is in use by a conference");
+        }
 
         if (!plan.getItems().isEmpty()) {
             for (PlanItem planItem : plan.getItems()) {
@@ -89,7 +119,9 @@ public class PlanService {
     private void loadAttributes(Plan plan) {
         loadStructure(plan);
         loadDomain(plan);
+        loadLocalityType(plan);
     }
+    
 
     private void loadStructure(Plan plan) {
         if (plan.getStructure() != null) {
@@ -99,6 +131,16 @@ public class PlanService {
             }
         }
     }
+    
+    private void loadLocalityType(Plan plan) {
+        if (plan.getlocalitytype() != null && plan.getlocalitytype().getId() !=null) {
+        	LocalityType type = localityTypeService.find(plan.getlocalitytype().getId());
+            if (type != null) {
+                plan.setlocalitytype(type);
+            }
+        }
+    }
+    
 
     private void loadDomain(Plan plan) {
         if (plan.getDomain() != null) {

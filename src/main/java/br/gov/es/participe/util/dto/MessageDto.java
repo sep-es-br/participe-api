@@ -1,5 +1,8 @@
 package br.gov.es.participe.util.dto;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 public class MessageDto {
     private Integer code;
     private String message;
@@ -26,5 +29,9 @@ public class MessageDto {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getJSON() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
     }
 }

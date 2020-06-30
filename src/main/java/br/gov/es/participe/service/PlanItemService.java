@@ -1,5 +1,6 @@
 package br.gov.es.participe.service;
 
+import br.gov.es.participe.controller.dto.LeanPlanItemResultDto;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.PlanItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,10 @@ public class PlanItemService {
         return planItems;
     }
 
+    public LeanPlanItemResultDto findPlanItemsByConference(Long id) {
+        return planItemRepository.findByConferenceId(id);
+    }
+
     public List<PlanItem> search(String query) {
         List<PlanItem> planItems = new ArrayList<>();
 
@@ -59,12 +64,35 @@ public class PlanItemService {
     }
 
     public PlanItem find(Long id) {
-
         return planItemRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Plan item not found: " + id));
     }
+    
+    public PlanItem findByIdWithLocalities(Long id) {
+        return planItemRepository
+                .findByIdWithLocalities(id)
+                .orElseThrow(() -> new IllegalArgumentException("Plan item not found: " + id));
+    }
+    
+    public List<PlanItem> findChildren(Long idPlanItem){
+    	return planItemRepository.findChildren(idPlanItem);
+    }
 
+    public PlanItem findFatherPlanItem(Long id) {
+        return planItemRepository
+                .findFatherPlanItem(id)
+                .orElseThrow(() -> new IllegalArgumentException("Plan item not found: " + id));
+    }
+
+    public List<PlanItem> findAllByIdPlan(Long idPlan){
+    	return planItemRepository.findAllByIdPlan(idPlan);
+    }
+    
+    public PlanItem findParentsByCommentId(Long idComment) {
+    	return planItemRepository.findParentsByCommentId(idComment);
+    }
+    
     @Transactional
     public void delete(Long id) {
         PlanItem planItem = find(id);
@@ -83,6 +111,7 @@ public class PlanItemService {
         loadLocalities(planItem);
         loadFile(planItem);
         loadStructureItem(planItem);
+        loadAttend(planItem);
     }
 
     private void loadLocalities(PlanItem planItem) {
@@ -151,5 +180,13 @@ public class PlanItemService {
 
             planItem.setChildren(tmpPlanItem.getChildren());
         }
+    }
+    
+    private void loadAttend(PlanItem planItem) {
+    	 if (planItem.getId() != null) {
+             PlanItem tmpPlanItem = find(planItem.getId());
+
+             planItem.setAttends(tmpPlanItem.getAttends());
+         }
     }
 }

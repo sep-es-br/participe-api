@@ -14,15 +14,15 @@ public interface DomainRepository extends Neo4jRepository<Domain, Long> {
             " ] ORDER BY d.name")
     Collection<Domain> findAll();
 
-    @Query("MATCH (d:Domain) WHERE ID(d) = $id OPTIONAL MATCH (d)<-[bt:IS_LOCATED_IN]-(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) RETURN d, bt, l, ot, lt, [ " +
+    @Query("MATCH (d:Domain) WHERE ID(d) = {0} OPTIONAL MATCH (d)<-[bt:IS_LOCATED_IN]-(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) RETURN d, bt, l, ot, lt, [ " +
             " [ (l)<-[btl:IS_LOCATED_IN]-(lc:Locality) | [btl, lc] ], " +
             " [ (l)-[btl:IS_LOCATED_IN]->(lc:Locality) | [btl, lc] ] " +
             " ] ORDER BY d.name")
     Domain findByIdWithLocalities(Long id);
 
     @Query("MATCH () "
-            + " OPTIONAL MATCH (domain:Domain) WHERE toLower(domain.name) CONTAINS toLower($name)"
-            + " OPTIONAL MATCH (locality:Locality) WHERE toLower(locality.name) CONTAINS toLower($name)  "
+            + " OPTIONAL MATCH (domain:Domain) WHERE  ext.translate(domain.name) CONTAINS ext.translate({0}) "
+            + " OPTIONAL MATCH (locality:Locality) WHERE ext.translate(locality.name) CONTAINS ext.translate({0})  "
             + " OPTIONAL MATCH (locality)-[ili:IS_LOCATED_IN]->(parentDomain:Domain) "
             + " OPTIONAL MATCH (locality)<-[i0:IS_LOCATED_IN*]-(child:Locality)-[i2:IS_LOCATED_IN*]->(parentDomain) "
             + " RETURN domain, locality, ili, parentDomain, i0, child, i2, [ "

@@ -58,7 +58,10 @@ public class StructureItemService {
         structureItem.setLocality(structureItemDto.getLocality());
         structureItem.setVotes(structureItemDto.getVotes());
         structureItem.setComments(structureItemDto.getComments());
-
+        structureItem.setTitle(structureItemDto.getTitle());
+        structureItem.setSubtitle(structureItemDto.getSubtitle());
+        structureItem.setLink(structureItemDto.getLink());
+        
         return structureItemRepository.save(structureItem);
     }
 
@@ -73,6 +76,14 @@ public class StructureItemService {
 
         return structureItemRepository
                 .findByNameIgnoreCase(name);
+    }
+    
+    public StructureItem findByIdPlanItem(Long idPlanItem) {
+    	return structureItemRepository.findByIdPlanItem(idPlanItem);
+    }
+    
+    public StructureItem findChild(Long idParent) {
+    	return structureItemRepository.findChild(idParent);
     }
 
     @Transactional

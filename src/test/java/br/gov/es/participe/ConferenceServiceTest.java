@@ -1,5 +1,7 @@
 package br.gov.es.participe;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 import org.junit.Assert;
@@ -11,16 +13,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import br.gov.es.participe.controller.ConferenceController;
 import br.gov.es.participe.controller.dto.ConferenceDto;
 import br.gov.es.participe.controller.dto.ConferenceParamDto;
+import br.gov.es.participe.controller.dto.FileDto;
 import br.gov.es.participe.controller.dto.PlanParamDto;
 import br.gov.es.participe.model.Plan;
 import br.gov.es.participe.repository.ConferenceRepository;
 import br.gov.es.participe.repository.PlanRepository;
+import br.gov.es.participe.service.FileService;
 
 @Testcontainers
 @SpringBootTest
@@ -34,6 +41,9 @@ class ConferenceServiceTest extends BaseTest {
 
     @Autowired
     private PlanRepository planRepository;
+    
+    @Autowired
+    private FileService fileService;
 
     @TestConfiguration
     static class Config {
@@ -56,7 +66,7 @@ class ConferenceServiceTest extends BaseTest {
     }
 
     @Test
-    public void shouldCreateConference() {
+    public void shouldCreateConference() throws IOException {
         ConferenceParamDto conferenceParamDto = createConferenceParamDto("Test");
 
         ResponseEntity response = conferenceController.store(conferenceParamDto);
@@ -66,7 +76,7 @@ class ConferenceServiceTest extends BaseTest {
 
 
     @Test
-    public void shouldUpdateConference() {
+    public void shouldUpdateConference() throws IOException {
         ConferenceParamDto conferenceParamDto = createConferenceParamDto("Test");
         ConferenceDto conferenceDto = (ConferenceDto) conferenceController.store(conferenceParamDto).getBody();
         conferenceDto.setName("Test 2");
@@ -76,7 +86,7 @@ class ConferenceServiceTest extends BaseTest {
     }
 
     @Test
-    public void shouldFindConference() {
+    public void shouldFindConference() throws IOException {
         ConferenceParamDto conferenceParamDto = createConferenceParamDto("Test");
         ConferenceDto conferenceDto = (ConferenceDto) conferenceController.store(conferenceParamDto).getBody();
 
@@ -96,7 +106,7 @@ class ConferenceServiceTest extends BaseTest {
     }
 
     @Test
-    public void shouldDeleteConference() {
+    public void shouldDeleteConference() throws IOException {
         ConferenceParamDto conferenceParamDto = createConferenceParamDto("Test");
         ConferenceDto conferenceDto = (ConferenceDto) conferenceController.store(conferenceParamDto).getBody();
 
@@ -105,15 +115,24 @@ class ConferenceServiceTest extends BaseTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> conferenceController.show(conferenceDto.getId()));
     }
 
-    private ConferenceParamDto createConferenceParamDto(String name) {
+    private ConferenceParamDto createConferenceParamDto(String name) throws IOException {
         ConferenceParamDto conferenceParamDto = new ConferenceParamDto();
         conferenceParamDto.setDescription("Description test");
         conferenceParamDto.setBeginDate(new Date());
         conferenceParamDto.setEndDate(new Date());
         conferenceParamDto.setName(name);
+        conferenceParamDto.setFileAuthentication(getFileDto("business.png"));
+        conferenceParamDto.setFileParticipation(getFileDto("person.png"));
         Plan plan = planRepository.save(new Plan());
         conferenceParamDto.setPlan(new PlanParamDto());
         conferenceParamDto.getPlan().setId(plan.getId());
         return conferenceParamDto;
     }
+    
+    private FileDto getFileDto(String fileName) throws IOException {
+    	InputStream is = getClass().getResourceAsStream(fileName);
+    	MultipartFile file = new MockMultipartFile(fileName, fileName, MediaType.APPLICATION_PDF_VALUE, is);
+        return fileService.save(file);
+    }
+    
 }

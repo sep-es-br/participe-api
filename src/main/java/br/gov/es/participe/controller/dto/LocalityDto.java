@@ -1,10 +1,10 @@
 package br.gov.es.participe.controller.dto;
 
-import br.gov.es.participe.model.Domain;
-import br.gov.es.participe.model.Locality;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import br.gov.es.participe.model.Domain;
+import br.gov.es.participe.model.Locality;
 
 public class LocalityDto {
 
@@ -14,34 +14,62 @@ public class LocalityDto {
     private List<DomainDto> domains;
     private List<LocalityDto> parents;
     private List<LocalityDto> children;
+    private List<MeetingDto> meetingPlace;
+    private List<MeetingDto> meetingCovers;
+    private List<SelfDeclarationDto> selfDeclarations;
+    private List<String> mapSplit;
 
     public LocalityDto() {
     }
 
-    public LocalityDto(Locality locality, Domain parentDomain, boolean loadChildren) {
+    public LocalityDto(Locality locality) {
+    	if (locality == null)
+    		return;
+    	id = locality.getId();
+        name = locality.getName();
+        if(locality.getType() != null)
+        	type = new LocalityTypeDto(locality.getType());
+    }
+    public LocalityDto(Locality locality, Domain parentDomain, boolean loadChildren, boolean loadParent) {
         if (locality == null ||(parentDomain != null && !locality.getDomains().contains(parentDomain))) return;
 
         id = locality.getId();
         name = locality.getName();
-        type = new LocalityTypeDto(locality.getType());
+        if(locality.getType() != null)
+        	type = new LocalityTypeDto(locality.getType());
+        
         if (!locality.getDomains().isEmpty()) {
             domains = new ArrayList<>();
             locality.getDomains().forEach(domain -> domains.add(new DomainDto(domain, false)));
         }
 
-        if (!locality.getParents().isEmpty()) {
+        if (loadParent && !locality.getParents().isEmpty()) {
             parents = new ArrayList<>();
-            locality.getParents().forEach(parent -> parents.add(new LocalityDto(parent, parentDomain, false)));
+            locality.getParents().forEach(parent -> parents.add(new LocalityDto(parent, parentDomain, false, loadParent)));
         }
 
         if (loadChildren && !locality.getChildren().isEmpty()) {
             children = new ArrayList<>();
             locality.getChildren().forEach(child -> {
-                LocalityDto childLocalityDto = new LocalityDto(child, parentDomain, true);
+                LocalityDto childLocalityDto = new LocalityDto(child, parentDomain, true, loadParent);
                 if (childLocalityDto.getId() != null) {
                     children.add(childLocalityDto);
                 }
             });
+        }
+        if(locality.getMeetingPlace() != null && !locality.getMeetingPlace().isEmpty()) {
+        	meetingPlace = new ArrayList<>();
+        	locality.getMeetingPlace().forEach(meet -> meetingPlace.add(new MeetingDto(meet)));
+        }
+        
+        if(locality.getMeetingCovers() != null && !locality.getMeetingCovers().isEmpty()) {
+        	meetingCovers = new ArrayList<>();
+        	locality.getMeetingCovers().forEach(meet -> meetingCovers.add(new MeetingDto(meet)));
+        }
+        
+        if(locality.getSelfDeclaration() != null && !locality.getSelfDeclaration().isEmpty()) {
+        	selfDeclarations = new ArrayList<>();
+        	locality.getSelfDeclaration().forEach(self -> selfDeclarations.add(new SelfDeclarationDto(self, true)));
         }
     }
 
@@ -92,4 +120,36 @@ public class LocalityDto {
     public void setChildren(List<LocalityDto> children) {
         this.children = children;
     }
+
+	public List<MeetingDto> getMeetingPlace() {
+		return meetingPlace;
+	}
+
+	public void setMeetingPlace(List<MeetingDto> meetingPlace) {
+		this.meetingPlace = meetingPlace;
+	}
+
+	public List<MeetingDto> getMeetingCovers() {
+		return meetingCovers;
+	}
+
+	public void setMeetingCovers(List<MeetingDto> meetingCovers) {
+		this.meetingCovers = meetingCovers;
+	}
+
+	public List<String> getMapSplit() {
+		return mapSplit;
+	}
+
+	public void setMapSplit(List<String> mapSplit) {
+		this.mapSplit = mapSplit;
+	}
+
+	public List<SelfDeclarationDto> getSelfDeclarations() {
+		return selfDeclarations;
+	}
+
+	public void setSelfDeclarations(List<SelfDeclarationDto> selfDeclarations) {
+		this.selfDeclarations = selfDeclarations;
+	}
 }

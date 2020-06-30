@@ -5,7 +5,7 @@
 Execute o comando abaixo, substituindo o valor de `profile` pelo correspondente ao ambiente.
 
 ```sh
-java -Dspring.profiles.active={profile} -jar participe-api.jar
+java -Dspring.profiles.active={profile} -jar simp-integracao.jar
 ```
 
 Os valores aceitos nesta propriedade são:

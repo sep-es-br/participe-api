@@ -26,6 +26,18 @@ public class Locality extends Entity {
 
     @Relationship(type = "IS_LOCATED_IN", direction = Relationship.INCOMING)
     private Set<Locality> children;
+    
+    @Relationship(type = "TAKES_PLACE-AT", direction = Relationship.INCOMING)
+    private Set<Meeting> meetingPlace;
+    
+    @Relationship(type = "COVERS", direction = Relationship.INCOMING)
+    private Set<Meeting> meetingCovers;
+    
+    @Relationship(type = "AS_BEGIN_FROM", direction = Relationship.INCOMING)
+    private Set<SelfDeclaration> selfDeclaration;
+    
+    @Relationship(type = "ABOUT", direction = Relationship.INCOMING)
+    private Set<Attend> attends;
 
     public Locality() {
     }
@@ -35,7 +47,10 @@ public class Locality extends Entity {
 
         setId(localityDto.getId());
         name = localityDto.getName();
-        type = new LocalityType(localityDto.getType());
+
+        
+        if(localityDto.getType() != null && localityDto.getType().getId() != null)
+        	type = new LocalityType(localityDto.getType());
 
         if (localityDto.getParents() != null && !localityDto.getParents().isEmpty()) {
             parents = new HashSet<>();
@@ -50,6 +65,16 @@ public class Locality extends Entity {
         if (localityDto.getChildren() != null && !localityDto.getChildren().isEmpty()) {
             children = new HashSet<>();
             localityDto.getChildren().forEach(child -> children.add(new Locality(child)));
+        }
+        
+        if(localityDto.getMeetingPlace() != null && !localityDto.getMeetingPlace().isEmpty()) {
+        	meetingPlace = new HashSet<>();
+        	localityDto.getMeetingPlace().forEach(meet -> meetingPlace.add(new Meeting(meet)));
+        }
+        
+        if(localityDto.getMeetingCovers() != null && !localityDto.getMeetingCovers().isEmpty()) {
+        	meetingCovers = new HashSet<>();
+        	localityDto.getMeetingCovers().forEach(meet -> meetingCovers.add(new Meeting(meet)));
         }
     }
 
@@ -68,6 +93,16 @@ public class Locality extends Entity {
         if (localityParamDto.getDomain() != null && localityParamDto.getDomain().getId() != null) {
             domains = new HashSet<>();
             domains.add(new Domain(localityParamDto.getDomain()));
+        }
+        
+        if(localityParamDto.getMeetingPlace() != null && !localityParamDto.getMeetingPlace().isEmpty()) {
+        	meetingPlace = new HashSet<>();
+        	localityParamDto.getMeetingPlace().forEach(meet -> meetingPlace.add(new Meeting(meet)));
+        }
+        
+        if(localityParamDto.getMeetingCovers() != null && !localityParamDto.getMeetingCovers().isEmpty()) {
+        	meetingCovers = new HashSet<>();
+        	localityParamDto.getMeetingCovers().forEach(meet -> meetingCovers.add(new Meeting(meet)));
         }
     }
 
@@ -153,4 +188,36 @@ public class Locality extends Entity {
 
         return false;
     }
+
+	public Set<Meeting> getMeetingPlace() {
+		return meetingPlace;
+	}
+
+	public void setMeetingPlace(Set<Meeting> meetingPlace) {
+		this.meetingPlace = meetingPlace;
+	}
+
+	public Set<Meeting> getMeetingCovers() {
+		return meetingCovers;
+	}
+
+	public void setMeetingCovers(Set<Meeting> meetingCovers) {
+		this.meetingCovers = meetingCovers;
+	}
+
+	public Set<SelfDeclaration> getSelfDeclaration() {
+		return selfDeclaration;
+	}
+
+	public void setSelfDeclaration(Set<SelfDeclaration> sefDeclaration) {
+		this.selfDeclaration = sefDeclaration;
+	}
+
+	public Set<Attend> getAttends() {
+		return attends;
+	}
+
+	public void setAttends(Set<Attend> attends) {
+		this.attends = attends;
+	}
 }

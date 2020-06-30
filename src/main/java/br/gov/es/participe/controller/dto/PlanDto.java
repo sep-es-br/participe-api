@@ -11,6 +11,7 @@ public class PlanDto {
     private String name;
     private StructureDto structure;
     private DomainDto domain;
+    private LocalityTypeDto localitytype;
     private List<PlanItemDto> items;
 
     public PlanDto() {
@@ -23,6 +24,7 @@ public class PlanDto {
         this.name = plan.getName();
         this.structure = new StructureDto(plan.getStructure(), true);
         this.domain = new DomainDto(plan.getDomain(), true);
+        this.localitytype = new LocalityTypeDto(plan.getlocalitytype());
 
         if (loadItems && plan.getItems() != null && !plan.getItems().isEmpty()) {
             items = new ArrayList<>();
@@ -63,6 +65,14 @@ public class PlanDto {
     public void setDomain(DomainDto domain) {
         this.domain = domain;
     }
+    
+    public LocalityTypeDto getlocalitytype() {
+		return localitytype;
+	}
+
+	public void setlocalitytype(LocalityTypeDto type) {
+		this.localitytype = type;
+	}
 
     public List<PlanItemDto> getItems() {
         return items;
