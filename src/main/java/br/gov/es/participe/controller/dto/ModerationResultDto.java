@@ -24,6 +24,8 @@ public class ModerationResultDto {
 	private String localityType;
 	private Boolean disableModerate;
 	private List<ModerationStructure> commentStructure;
+	private Long structureItemId;
+	private String structureItemName;
 
 	public ModerationResultDto() {
 	}
@@ -31,7 +33,7 @@ public class ModerationResultDto {
 	public ModerationResultDto(Long commentId, String status, String text, String time, String type, Long localityId,
 			String localityName, Long planItemId, String planItemName, String citizenName, String moderatorName,
 			Boolean moderated, String moderateTime, Long moderatorId, String classification, String localityType, 
-			List<ModerationStructure> commentStructure) {
+			List<ModerationStructure> commentStructure, Long structureItemId, String structureItemName) {
 		this.commentId = commentId;
 		this.status = status;
 		if (status == null) {
@@ -51,6 +53,8 @@ public class ModerationResultDto {
 		this.moderatorId = moderatorId;
 		this.classification = classification;
 		this.localityType = localityType;
+		this.structureItemId = structureItemId;
+		this.structureItemName = structureItemName;
 	}
 
 	public Long getCommentId() {
@@ -195,5 +199,21 @@ public class ModerationResultDto {
 
 	public void setDisableModerate(Boolean disableModerate) {
 		this.disableModerate = disableModerate;
+	}
+
+	public Long getStructureItemId() {
+		return structureItemId;
+	}
+
+	public void setStructureItemId(Long structureItemId) {
+		this.structureItemId = structureItemId;
+	}
+
+	public String getStructureItemName() {
+		return structureItemName;
+	}
+
+	public void setStructureItemName(String structureItemName) {
+		this.structureItemName = structureItemName;
 	}
 }
