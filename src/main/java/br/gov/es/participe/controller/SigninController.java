@@ -93,7 +93,7 @@ public class SigninController {
     public RedirectView indexGoogle(
             @RequestParam("code") String authorizationCode,
             HttpServletRequest request
-    ) {
+    ) throws Exception {
         String accessToken = googleService.googleAcessToken(authorizationCode, request);
         RedirectView redirectView = new RedirectView("google-response?access_token=" + accessToken);
         return redirectView;
