@@ -28,24 +28,24 @@ public class SecurityFilter extends OncePerRequestFilter {
         try {
             String url = request.getRequestURI();
 
-            boolean isPublicUrl = url.equals("/participe/signin/refresh")
-                    || url.equals("/participe/signin/acesso-cidadao")
-                    || url.startsWith("/participe/files/")
+            boolean isPublicUrl = url.endsWith("/signin/refresh")
+                    || url.endsWith("/signin/acesso-cidadao")
+                    || url.contains("/files/")
                     || url.equals("/participe/login")
-                    || url.startsWith("/participe/conferences/AuthenticationScreen")
-                    || url.equals("/participe/signin/acesso-cidadao-response")
-                    || url.equals("/participe/acesso-cidadao-response.html")
-                    || url.equals("/participe/signin/facebook")
-                    || url.equals("/participe/signin/facebook-response")
-                    || url.equals("/participe/signin/google")
-                    || url.equals("/participe/signin/google-response")
-                    || url.equals("/participe/signin/twitter")
-                    || url.equals("/participe/signin/twitter-response")
-                    || url.equals("/participe/swagger-ui.html")
-                    || url.equals("/participe/v2/api-docs")
-                    || url.startsWith("/participe/swagger-resources")
-                    || url.equals("/participe/acesso-cidadao-response.html")
-                    || url.startsWith("/participe/webjars/");
+                    || url.contains("/conferences/AuthenticationScreen")
+                    || url.endsWith("/signin/acesso-cidadao-response")
+                    || url.endsWith("/acesso-cidadao-response.html")
+                    || url.endsWith("/signin/facebook")
+                    || url.endsWith("/signin/facebook-response")
+                    || url.endsWith("/signin/google")
+                    || url.endsWith("/signin/google-response")
+                    || url.endsWith("/signin/twitter")
+                    || url.endsWith("/signin/twitter-response")
+                    || url.endsWith("/swagger-ui.html")
+                    || url.endsWith("/v2/api-docs")
+                    || url.contains("/swagger-resources")
+                    || url.endsWith("/acesso-cidadao-response.html")
+                    || url.contains("/webjars/");
 
             if (!isPublicUrl) {
                 String token = getToken(request);
