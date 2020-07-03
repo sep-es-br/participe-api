@@ -184,7 +184,7 @@ public class ModerationController {
     }
 	
 	 @GetMapping("plan-items/conference/{id}")
-	    public ResponseEntity<LeanPlanItemResultDto> findPlanItemsByConference(@PathVariable Long id) {
+	 public ResponseEntity<LeanPlanItemResultDto> findPlanItemsByConference(@PathVariable Long id) {
         LeanPlanItemResultDto response = planItemService.findPlanItemsByConference(id);
         return ResponseEntity.status(200).body(response);
     }

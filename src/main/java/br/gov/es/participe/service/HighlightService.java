@@ -66,6 +66,15 @@ public class HighlightService {
 		
 			return highlightRepository.save(highlight);
 		}
+		List<Comment> comment = commentService.find(highlightBD.getPersonMadeBy().getId(),
+													highlightBD.getPlanItem().getId(), 
+													highlight.getConference().getId(), 
+													highlight.getLocality().getId());
+		
+		if(comment == null || comment.isEmpty()) {
+			highlightRepository.delete(highlightBD);
+			return null;
+		}
 		return highlightBD;
 	}
 	

@@ -16,7 +16,8 @@ import br.gov.es.participe.model.StructureItem;
 public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 	
 	@Query("MATCH  (p:Person)<-[a:MADE_BY]-(c:Comment)"
-			+" WHERE id(p)={0} AND (id(c) = {2} OR {2} IS NULL )"
+			+" OPTIONAL MATCH (conf:Conference)-[ab:ABOUT]-(c)"
+			+" WHERE id(p)={0} AND (id(conf) = {1} OR {1} IS NULL )"
 			+" Return c")
 	List<Comment> findByIdPerson(Long idPerson, Long idConference);
 
@@ -37,12 +38,10 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 			+" RETURN c")
 	List<Comment> findByIdPersonAndIdPlanItemAndIdConferenceAndIdLoclity(Long idPerson, Long idPlanItem, Long idConference, Long idLocality);
 	
-	@Query(value="MATCH (c:Conference)-[t:TARGETS]-(p:Plan)<-[comP:COMPOSES]-(parent:PlanItem)-[comC:COMPOSES*]-(child:PlanItem)"
-			+" MATCH (:Person)<-[:MADE_BY]-(comment:Comment)-[a:ABOUT]->(loc:Locality) "
+	@Query(value="MATCH (loc:Locality)<-[a:ABOUT]-(comment:Comment)-[:ABOUT]->(c:Conference)-[t:TARGETS]-(p:Plan)<-[comP:COMPOSES]-(parent:PlanItem)-[comC:COMPOSES*]-(child:PlanItem) "
 			+" WHERE id(c)={0} AND comment.status CONTAINS {1} AND ext.translate(comment.text) CONTAINS ext.translate({2}) AND (id(parent) IN {4} OR NOT {4}) AND (id(loc) IN {3} OR NOT {3}) AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment)))"
 			+" RETURN DISTINCT comment ,a ,loc",
-			countQuery = "MATCH (c:Conference)-[t:TARGETS]-(p:Plan)<-[comP:COMPOSES]-(parent:PlanItem)-[comC:COMPOSES*]-(child:PlanItem)"
-					+" MATCH (:Person)<-[:MADE_BY]-(comment:Comment)-[a:ABOUT]->(loc:Locality) "
+			countQuery = "MATCH (loc:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(c:Conference)-[t:TARGETS]-(p:Plan)<-[comP:COMPOSES]-(parent:PlanItem)-[comC:COMPOSES*]-(child:PlanItem) "
 					+" WHERE id(c)={0} AND comment.status CONTAINS {1} AND ext.translate(comment.text) CONTAINS ext.translate({2}) AND (id(parent) IN {4} OR NOT {4}) AND (id(loc) IN {3} OR NOT {3}) AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment)))"
 					+" RETURN COUNT(DISTINCT comment)")
 	Page<Comment> findAllCommentsByConference(Long idConference, String status, String text, Long[] localityIds, Long[] planItemIds, Pageable pageable);
@@ -71,7 +70,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 			"RETURN Id(c) AS commentId, c.status AS status, c.text AS text, c.time AS time, " +
 			"c.type AS type, p.name AS citizenName, m.name AS moderatorName, mb.time as moderateTime, mb.finish as moderated, " +
 			"id(m) as moderatorId, id(loc) as localityId, loc.name as localityName, c.classification AS classification, " +
-			"Id(pl) as planItemId, pl.name as planItemName"
+			"Id(pl) as planItemId, pl.name as planItemName, id(si) AS structureItemId, si.name AS structureItemName"
 		)
 		List<ModerationResultDto> findAllByStatus(String[] status, String type, Long[] localityIds, Long[] planItemIds,
 												  Long conferenceId, Long[] structureItemIds);

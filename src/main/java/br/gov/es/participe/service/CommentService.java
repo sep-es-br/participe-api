@@ -147,6 +147,7 @@ public class CommentService {
 		}
 		else
 			person = personService.find(idPerson);
+		
 		Locality locality = localityService.find(comment.getLocality().getId());
 		PlanItem planItem;
 		if(usePlanItem) {
@@ -165,7 +166,7 @@ public class CommentService {
 		comment.setMeeting(meeting);
 		comment.setPlanItem(planItem);
 		comment.setLocality(locality);
-		comment.setPersonMadeBy(person);
+		
 		if(comment.getClassification() == null || comment.getClassification().isEmpty()) {
 			comment.setClassification("proposal");
 		}
@@ -216,7 +217,7 @@ public class CommentService {
 	}
 	
 	public Page<Comment> findAllCommentsByConference(Long idConference, Integer pageNumber, String text, String status, Long[] localityIds, Long[] planItemIds){
-		Pageable page = PageRequest.of(pageNumber, 6);
+		Pageable page = PageRequest.of(pageNumber, 30);
 		return commentRepository.findAllCommentsByConference(idConference, status, text, localityIds, planItemIds, page);
 	}
 
