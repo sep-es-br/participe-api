@@ -48,19 +48,12 @@ public class GoogleService {
     @Autowired
     private TokenService tokenService;
 
-    public String googleAcessToken(String authorizationCode, HttpServletRequest request) throws Exception {
-        System.out.println("###########################################");
-        System.out.println("###########################################");
-        System.out.println("Access Token: ".concat(authorizationCode));
-        System.out.println("Base Url: ".concat(participeUtils.getServerBaseUrl(request)));
-        System.out.println("###########################################");
-        System.out.println("###########################################");
-        throw new Exception(participeUtils.getServerBaseUrl(request));
-        /*return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
+    public String googleAcessToken(String authorizationCode, HttpServletRequest request) {
+        return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
                 authorizationCode,
                 participeUtils.getServerBaseUrl(request).concat("/signin/google"),
                 null
-        ).getAccessToken();*/
+        ).getAccessToken();
     }
 
     public SigninDto authenticate(String accessToken, Long conferenceId) {

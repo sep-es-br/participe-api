@@ -23,8 +23,11 @@ import java.util.List;
 public class ParticipeUtils {
 
     public String getServerBaseUrl(HttpServletRequest request) {
-        String baseUrl = String.format("%s://%s:%d/participe", request.getScheme(), request.getServerName(), request.getServerPort());
-        return baseUrl;
+        if (request.getServerPort() > 0 && request.getServerPort() != 443) {
+            return String.format("%s://%s:%d/participe", request.getScheme(), request.getServerName(), request.getServerPort());
+        } else {
+            return String.format("%s://%s:%d/participe", request.getScheme(), request.getServerName());
+        }
     }
 
     public RestTemplate htmlRestTemplate() {
