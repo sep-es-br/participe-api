@@ -92,8 +92,7 @@ public class LocalityController {
 
     @GetMapping("/complement/{idConference}")
     public ResponseEntity findLocalitiesToComplement(@PathVariable Long idConference) {
-    	List<Locality> localities = localityService.findLocalitiesToComplement(idConference);
-    	
+    	List<Locality> localities = localityService.findLocalitiesToComplement(idConference, true);
     	List<LocalityDto> localitiesDto = new ArrayList<>();
     	localities.forEach(locality -> localitiesDto.add(new LocalityDto(locality, null, true, false)));
     	

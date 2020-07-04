@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ConferenceRepository extends Neo4jRepository<Conference, Long> {
+    
     @Query("MATCH (n:Conference)-[cp:TARGETS]->(p:Plan) "
             + " WHERE ext.translate(n.name) CONTAINS ext.translate({0}) "
             + " AND (ID(p) = {1} OR {1} IS NULL) "
