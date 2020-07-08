@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import br.gov.es.participe.util.ParticipeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,11 +30,14 @@ public class LocalityService {
     @Autowired
     private DomainService domainService;
 
+    @Autowired
+    private ParticipeUtils participeUtils;
+
     private static final String DOMAIN_ERROR_NOT_FOUND = "domain.error.not-found";
 
     public List<Locality> findAll() {
         List<Locality> localities = new ArrayList<>();
-        
+
         localityRepository
                 .findAll()
                 .iterator()
@@ -40,16 +45,16 @@ public class LocalityService {
 
         return localities;
     }
-    
-    public List<Locality> findByIdConference(Long id){
-    	List<Locality> localities = new ArrayList<>();
-    	localityRepository.findCardsByIdConference(id)
-    						.stream()
-    						.filter(l -> l.getParents().isEmpty())
-    						.iterator()
-    						.forEachRemaining(localities::add);
-    	localities.sort((l1, l2) -> l1.getName().trim().compareTo(l2.getName().trim()));
-    	return localities;
+
+    public List<Locality> findByIdConference(Long id) {
+        List<Locality> localities = new ArrayList<>();
+        localityRepository.findCardsByIdConference(id)
+                .stream()
+                .filter(l -> l.getParents().isEmpty())
+                .iterator()
+                .forEachRemaining(localities::add);
+        localities.sort((l1, l2) -> l1.getName().trim().compareTo(l2.getName().trim()));
+        return localities;
     }
 
     public List<Locality> search(String query, Long type) {
@@ -72,14 +77,14 @@ public class LocalityService {
         Locality existentLocality = find(locality.getName(), locality.getType().getId());
 
         if (existentLocality != null && locality.getType() != null && locality.getType().getId() != null
-            && locality.getType().getId().equals(existentLocality.getType().getId())) {
+                && locality.getType().getId().equals(existentLocality.getType().getId())) {
             Set<Domain> domains = new HashSet<>();
             for (Domain localityDomain : locality.getDomains()) {
                 domains.add(domainService.find(localityDomain.getId()));
             }
             existentLocality.addDomains(domains);
 
-            if(!locality.getParents().isEmpty()) {
+            if (!locality.getParents().isEmpty()) {
                 for (Locality l : locality.getParents()) {
                     existentLocality.addParent(l);
                 }
@@ -89,7 +94,7 @@ public class LocalityService {
             loadAttributes(locality);
         }
         if (locality.getName() != null && !locality.getName().isEmpty()) {
-        	locality.setName(locality.getName().trim().replaceAll("\\s+"," "));
+            locality.setName(locality.getName().trim().replaceAll("\\s+", " "));
         }
         return localityRepository.save(locality);
     }
@@ -99,7 +104,7 @@ public class LocalityService {
         Locality locality = find(id);
 
         if (name != null && !name.isEmpty()) {
-        	name = name.trim().replaceAll("\\s+"," ");
+            name = name.trim().replaceAll("\\s+", " ");
         }
         locality.setName(name);
 
@@ -114,14 +119,19 @@ public class LocalityService {
     }
 
     public Locality findSelfDeclarationById(Long id) {
-    	return localityRepository
-    							.findSelfDeclarationById(id);
+        return localityRepository
+                .findSelfDeclarationById(id);
     }
-    
-    public List<Locality> findLocalitiesToComplement(Long idConference){
-    	return localityRepository.findLocalitiesToComplement(idConference);
+    public List<Locality> findLocalitiesToComplement(Long idConference, boolean orderByName) {
+        if (orderByName) {
+            List<Locality> localities = localityRepository.findLocalitiesToComplement(idConference);
+            localities.sort((l1, l2) -> participeUtils.normalize(l1.getName()).compareTo(participeUtils.normalize(l2.getName())));
+            return localities;
+        } else {
+            return localityRepository.findLocalitiesToComplement(idConference);
+        }
     }
-    
+
     public List<Locality> findByDomain(Long idDomain) {
         List<Locality> localities = new ArrayList<>();
 
@@ -132,46 +142,46 @@ public class LocalityService {
 
         return localities;
     }
-    
-    public Integer countLocalitiesParticipation(Long idConference){
-    	return localityRepository.countLocalitiesParticipation(idConference);
+
+    public Integer countLocalitiesParticipation(Long idConference) {
+        return localityRepository.countLocalitiesParticipation(idConference);
     }
-    
+
     public Locality findByIdConferenceAndIdPerson(Long idConference, Long idPerson) {
-    	return localityRepository.findByIdConferenceAndIdPerson(idConference, idPerson);
+        return localityRepository.findByIdConferenceAndIdPerson(idConference, idPerson);
     }
-    
+
     public void removeSelfDeclaration(SelfDeclaration selfDeclaration, Locality locality) {
-    	SelfDeclaration selfDeclarationToRemove = null;
-    	
-    	Locality localityBD = localityRepository.findSelfDeclarationById(locality.getId());
-    	Set<SelfDeclaration> selfs = localityBD.getSelfDeclaration();
-    	
-    	if(selfs != null) {
-	    	for(SelfDeclaration self: selfs) {
-	    		if(self.getId().equals(selfDeclaration.getId())) {
-	    			selfDeclarationToRemove = self;
-	    		}
-	    	}
-	    	
-	    	if(selfDeclarationToRemove != null) {
-	    		selfs.remove(selfDeclarationToRemove);
-	    		localityRepository.save(localityBD);
-	    	}
-    	}
+        SelfDeclaration selfDeclarationToRemove = null;
+
+        Locality localityBD = localityRepository.findSelfDeclarationById(locality.getId());
+        Set<SelfDeclaration> selfs = localityBD.getSelfDeclaration();
+
+        if (selfs != null) {
+            for (SelfDeclaration self : selfs) {
+                if (self.getId().equals(selfDeclaration.getId())) {
+                    selfDeclarationToRemove = self;
+                }
+            }
+
+            if (selfDeclarationToRemove != null) {
+                selfs.remove(selfDeclarationToRemove);
+                localityRepository.save(localityBD);
+            }
+        }
     }
-    
+
     public void addSelfDeclaration(SelfDeclaration selfDeclaration, Locality locality) {
-    	Locality localityBD = localityRepository.findSelfDeclarationById(locality.getId());
-    	Set<SelfDeclaration> ListDeclaraions = localityBD.getSelfDeclaration();
-    	if(ListDeclaraions == null)
-    		ListDeclaraions = new HashSet<>();
-    	
-    	selfDeclaration.setLocality(localityBD);
-    	ListDeclaraions.add(selfDeclaration);
-    	localityBD.setSelfDeclaration(ListDeclaraions);
+        Locality localityBD = localityRepository.findSelfDeclarationById(locality.getId());
+        Set<SelfDeclaration> ListDeclaraions = localityBD.getSelfDeclaration();
+        if (ListDeclaraions == null)
+            ListDeclaraions = new HashSet<>();
+
+        selfDeclaration.setLocality(localityBD);
+        ListDeclaraions.add(selfDeclaration);
+        localityBD.setSelfDeclaration(ListDeclaraions);
     }
-    
+
     private boolean isInvalidTypeLevel(Locality locality) {
         Domain domain = getDomainFromLocality(locality);
 
@@ -308,7 +318,7 @@ public class LocalityService {
     public Locality find(String name, Long typeId) {
         List<Locality> localities = localityRepository
                 .findByNameAndType(name, typeId);
-        if(localities != null && !localities.isEmpty()){
+        if (localities != null && !localities.isEmpty()) {
             return localities.get(0);
         }
         return null;
