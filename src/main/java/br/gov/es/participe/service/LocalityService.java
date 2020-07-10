@@ -122,6 +122,7 @@ public class LocalityService {
         return localityRepository
                 .findSelfDeclarationById(id);
     }
+
     public List<Locality> findLocalitiesToComplement(Long idConference, boolean orderByName) {
         if (orderByName) {
             List<Locality> localities = localityRepository.findLocalitiesToComplement(idConference);

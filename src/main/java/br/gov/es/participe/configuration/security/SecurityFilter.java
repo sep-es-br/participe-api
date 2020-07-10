@@ -29,12 +29,19 @@ public class SecurityFilter extends OncePerRequestFilter {
             String url = request.getRequestURI();
 
             boolean isPublicUrl = url.endsWith("/signin/refresh")
-                    || url.endsWith("/signin/acesso-cidadao")
+                    
                     || url.contains("/files/")
-                    || url.equals("/participe/login")
+                    || url.contains("/localities/complement")
+                    || url.contains("/participation/portal-header")
                     || url.contains("/conferences/AuthenticationScreen")
+                    || url.contains("/person")
+                    || url.endsWith("/person/forgot-password")
+                    || url.endsWith("/login")
+                    || url.endsWith("/signin/acesso-cidadao")
                     || url.endsWith("/signin/acesso-cidadao-response")
                     || url.endsWith("/acesso-cidadao-response.html")
+                    || url.endsWith("/signin")
+                    || url.endsWith("/signin/participe")
                     || url.endsWith("/signin/facebook")
                     || url.endsWith("/signin/facebook-response")
                     || url.endsWith("/signin/google")
@@ -61,9 +68,15 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception e) {
-            response.setStatus(HttpStatus.SC_UNAUTHORIZED);
-            MessageDto messageDto = new MessageDto(401, "Invalid token");
-            response.getWriter().write(messageDto.getJSON());
+        	if (e instanceof IllegalArgumentException && "Captcha inválido".equals(e.getMessage())) {
+        		response.setStatus(HttpStatus.SC_BAD_REQUEST);
+        		MessageDto messageDto = new MessageDto(400, e.getMessage());
+        		response.getWriter().write(messageDto.getJSON());       		
+        	} else {
+        		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+        		MessageDto messageDto = new MessageDto(401, "Invalid token");
+        		response.getWriter().write(messageDto.getJSON());        		
+        	}
         }
     }
 

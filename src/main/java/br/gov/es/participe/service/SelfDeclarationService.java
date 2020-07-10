@@ -43,14 +43,19 @@ public class SelfDeclarationService {
 			throw new IllegalArgumentException("Person is required to create or edit Self Declaration");
 		}
 		
-		Conference conference = conferenceService.find(selfDeclaration.getConference().getId());
-		Locality locality = localityService.find(selfDeclaration.getLocality().getId());
-		Person person = personService.find(selfDeclaration.getPerson().getId());
-
-		selfDeclaration.setConference(conference);
-		selfDeclaration.setLocality(locality);
-		selfDeclaration.setPerson(person);
-		return selfDeclarationRepository.save(selfDeclaration);
+		SelfDeclaration self = selfDeclarationRepository.findByIdConferenceAndIdPerson(selfDeclaration.getConference().getId(), selfDeclaration.getPerson().getId());
+		
+		if(self == null) {
+			Conference conference = conferenceService.find(selfDeclaration.getConference().getId());
+			Locality locality = localityService.find(selfDeclaration.getLocality().getId());
+			Person person = personService.find(selfDeclaration.getPerson().getId());
+	
+			selfDeclaration.setConference(conference);
+			selfDeclaration.setLocality(locality);
+			selfDeclaration.setPerson(person);
+			return selfDeclarationRepository.save(selfDeclaration);
+		}
+		return self;
 	}
 	
 	

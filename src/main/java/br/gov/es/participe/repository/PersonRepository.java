@@ -76,4 +76,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     		+" WHERE id(c)={0} "
     		+" RETURN p ")
     List<Person> findPersonLikedByIdComment(Long idComment);
+    
+    @Query("MATCH (p:Person)-[i:IS_AUTHENTICATED_BY]->(a:AuthService) WHERE p.contactEmail={0} AND a.server={1} RETURN p")
+    Person validate(String email, String server);
 }
