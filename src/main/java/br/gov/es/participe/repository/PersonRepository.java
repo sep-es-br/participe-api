@@ -38,7 +38,9 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     Person findRelatioships(Long id);
     
     @Query("MATCH (p:Person) "
-    		+" WHERE (p.contactEmail={0} OR p.contactEmail IS NULL) AND (p.cpf={1} OR p.cpf IS NULL)"
+    		+" WHERE (p.contactEmail={0} AND p.cpf = {1}) "
+    		+ "OR (p.contactEmail={0} AND  p.cpf IS NULL) "
+    		+ "OR (p.cpf = {1} AND p.contactEmail IS NULL) "
     		+" RETURN p")
     Person findByEmailOrCpf(String email, String cpf);
 
