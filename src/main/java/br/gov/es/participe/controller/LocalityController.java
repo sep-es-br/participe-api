@@ -1,22 +1,5 @@
 package br.gov.es.participe.controller;
 
-import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import br.gov.es.participe.controller.dto.CardScreenDto;
 import br.gov.es.participe.controller.dto.ComplementLocalityDto;
 import br.gov.es.participe.controller.dto.LocalityDto;
@@ -24,6 +7,14 @@ import br.gov.es.participe.controller.dto.LocalityParamDto;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.service.ConferenceService;
 import br.gov.es.participe.service.LocalityService;
+import br.gov.es.participe.util.ParticipeUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @CrossOrigin

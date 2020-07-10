@@ -1,11 +1,16 @@
 package br.gov.es.participe.controller;
 
+import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.service.*;
+import br.gov.es.participe.util.dto.MessageDto;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,6 +42,9 @@ public class SigninController {
 
     @Autowired
     private CookieService cookieService;
+    
+    @Autowired
+	private PersonService personService;
 
     private final String FRONT_CALLBACK_URL = "front_callback_url";
     private final String FRONT_CONFERENCE_ID = "front_conference_id";
@@ -46,6 +54,20 @@ public class SigninController {
         SigninDto signinDto = acessoCidadaoService.refresh(refreshToken);
 
         return ResponseEntity.ok().body(signinDto);
+    }
+    
+    @PostMapping
+    public ResponseEntity indexparticipe(@RequestBody PersonParamDto user,
+    									 @RequestParam(name = "conference",required = true ) Long conference) {
+    	SigninDto signinDto = personService.authenticate(user, "Participe", conference);
+    	
+    	if(signinDto != null) {
+    		return ResponseEntity.status(200).body(signinDto);
+    	}
+    	MessageDto msg = new MessageDto();
+		msg.setMessage("E-mail ou Senha incorretos");
+		msg.setCode(403);
+		return ResponseEntity.status(403).body(msg);
     }
 
     @GetMapping("/acesso-cidadao")

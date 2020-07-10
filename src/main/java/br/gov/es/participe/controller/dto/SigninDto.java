@@ -13,6 +13,8 @@ public class SigninDto {
     private String refreshToken;
 
     private boolean isCompleted;
+    
+    private boolean isTemporaryPassword;
 
     public SigninDto(Person person, String token, String refreshToken) {
         this.type = "Bearer";
@@ -75,5 +77,13 @@ public class SigninDto {
             return false;
         }
     }
+
+	public boolean isTemporaryPassword() {
+		return isTemporaryPassword;
+	}
+
+	public void setTemporaryPassword(boolean isTemporaryPassword) {
+		this.isTemporaryPassword = isTemporaryPassword;
+	}
 
 }

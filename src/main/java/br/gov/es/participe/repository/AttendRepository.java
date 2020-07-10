@@ -14,7 +14,7 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long>{
 			+" return m, a")
 	List<Attend> findAllAttendByIdperson(Long id);
 	
-	@Query(" MATCH (c:Conference)<-[t:TO]-(self:SelfDeclaration)<-[m:MADE]-(p:Person)<-[ma:MADE_BY]-(a:Attend)"
+	@Query(" MATCH (c:Conference)<-[t:TO]-(self:SelfDeclaration)<-[m:MADE]-(p:Person) "
 			+" WHERE id(c)={0} RETURN COUNT(DISTINCT p)")
 	Integer countParticipationByConference(Long idConference);
 }

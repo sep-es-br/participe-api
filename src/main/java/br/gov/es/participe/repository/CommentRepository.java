@@ -60,14 +60,14 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 			"MATCH (con:Conference)<-[:ABOUT]-(c:Comment)-[:MADE_BY]->(p:Person)" +
 			", (c)-[:ABOUT]->(loc:Locality) " +
 			", (c)-[:ABOUT]->(pl:PlanItem) " +
-			", (con)-[trg:TARGETS]->(plan:Plan)<-[comp:COMPOSES*]-(pi:PlanItem)<-[comp2:COMPOSES]-(pl) " +
+			", (con)-[trg:TARGETS]->(plan:Plan)<-[comp:COMPOSES*]-(pi:PlanItem) " +
 			", (pl)-[:OBEYS]->(si:StructureItem) " +
 			"WHERE (c.status IN {0} OR NOT {0}) AND (c.type CONTAINS {1} OR {1} IS NULL)  AND id(con)={4} " +
 			"AND (id(loc) IN {2} OR NOT {2}) " +
 			"AND (id(pl) IN {3} OR NOT {3}) " +
 			"AND (id(si) IN {5} OR NOT {5}) " +
 			"OPTIONAL MATCH (c)-[mb:MODERATED_BY]->(m:Person) " +
-			"RETURN Id(c) AS commentId, c.status AS status, c.text AS text, c.time AS time, " +
+			"RETURN DISTINCT Id(c) AS commentId, c.status AS status, c.text AS text, c.time AS time, " +
 			"c.type AS type, p.name AS citizenName, m.name AS moderatorName, mb.time as moderateTime, mb.finish as moderated, " +
 			"id(m) as moderatorId, id(loc) as localityId, loc.name as localityName, c.classification AS classification, " +
 			"Id(pl) as planItemId, pl.name as planItemName, id(si) AS structureItemId, si.name AS structureItemName"

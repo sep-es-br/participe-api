@@ -16,7 +16,7 @@ public interface SelfDeclarationRepository extends Neo4jRepository<SelfDeclarati
 	
 	@Query(" MATCH (c:Conference)-[t:TO]-(s:SelfDeclaration)-[m:MADE]-(p:Person) "
 			+" WHERE id(c) = {0} AND id(p) = {1} "
-			+" RETURN s "
+			+" RETURN s, t, c "
 			+" ,[ "
 			+"		[(s)-[a:AS_BEING_FROM]-(l:Locality) | [a,l]] "
 			+" ] ")

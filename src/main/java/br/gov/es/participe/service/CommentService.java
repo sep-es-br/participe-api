@@ -407,9 +407,12 @@ public class CommentService {
 	public Comment update(Comment comment, ModerationParamDto moderationParamDto, Long idModerator) {
 		Person moderator = personService.find(idModerator);
 		ModeratedBy moderatedBy = moderatedByRepository.findByComment(comment);
+		if(moderatedBy == null) {
+			moderatedBy = new ModeratedBy(true, new Date(), comment, moderator);
+		}
 		final boolean adm = moderator.getRoles() != null && moderator.getRoles().contains("Administrator");
 		if(!adm) {
-			if(!moderatedBy.getPerson().getId().equals(moderator.getId())) {
+			if((moderatedBy.getFinish() != null && !moderatedBy.getFinish()) && !moderatedBy.getPerson().getId().equals(moderator.getId())) {
 				throw new IllegalArgumentException("moderation.error.moderator");
 			}
 		}
@@ -475,9 +478,6 @@ public class CommentService {
 			comment.setPlanItem(planItem);
 		}
 		
-		if(moderatedBy == null) {
-			moderatedBy = new ModeratedBy(true, new Date(), comment, moderator);
-		}
 		moderatedBy.setFinish(true);
 		moderatedBy = moderatedByRepository.save(moderatedBy);
 		return commentRepository.save(comment);
