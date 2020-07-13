@@ -130,7 +130,7 @@ public class PersonController {
 
 		if(personParam.getConfirmPassword().equals(personParam.getPassword())) {
 			int size = personParam.getPassword().length();
-			if(size >= 6 && size <=8 && personParam.getPassword().matches("[A-Za-z0-9]+")) {
+			if(size >= 6 && personParam.getPassword().matches("[A-Za-z0-9]+")) {
 				Person person = personService.find(idPerson);
 				
 				PersonDto response = new PersonDto(person);
@@ -144,7 +144,7 @@ public class PersonController {
 				return ResponseEntity.status(200).body(response);
 			}
 			MessageDto msg = new MessageDto();
-			msg.setMessage("Senha deve conter entre 6 a 8 caracteres alfanuméricos");
+			msg.setMessage("Senha deve conter no mínimo 6 caracteres alfanuméricos");
 			msg.setCode(403);
 			return ResponseEntity.status(403).body(msg);
 		}

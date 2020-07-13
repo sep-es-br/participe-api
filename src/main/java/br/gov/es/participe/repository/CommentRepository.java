@@ -76,8 +76,8 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 												  Long conferenceId, Long[] structureItemIds);
 
 	@Query(
-		"MATCH (com:Comment)-[ab:ABOUT]->(pi1:PlanItem)-[comp1:COMPOSES*]->(pi2:PlanItem)-[:COMPOSES]->(plan:Plan) " +
-		"<-[trg:TARGETS]-(conf:Conference) " +
+		"MATCH (com:Comment)-[ab:ABOUT]->(pi1:PlanItem), " +
+		"(com)-[:ABOUT]->(conf:Conference) " +
 		"WHERE id(com)={0} AND id(conf)={1} " +
 		"MATCH (com)-[:ABOUT]->(loc:Locality) " +
 		"OPTIONAL MATCH (com)-[:MADE_BY]->(p:Person) " +
