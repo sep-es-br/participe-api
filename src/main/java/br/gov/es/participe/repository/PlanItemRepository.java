@@ -17,7 +17,7 @@ public interface PlanItemRepository extends Neo4jRepository<PlanItem, Long> {
     @Query(
         "MATCH (con:Conference)-[trg:TARGETS]->(plan:Plan)-[ob:OBEYS]->(stt:Structure)<-[comp:COMPOSES]-(si:StructureItem)" +
         "WHERE id(con)={0} "+
-        " MATCH list=(plan)<-[comp2:COMPOSES*]-(pi2:PlanItem) " +
+        " MATCH list=(plan)<-[comp2:COMPOSES]-(pi2:PlanItem) " +
         "RETURN id(con) as conferenceId, con.description as conferenceDescription, " +
         "id(si) as structureItemId, si.name as structureItemName, " +
         "COLLECT({planItemId: id(pi2), planItemName: pi2.name}) as planItems"
