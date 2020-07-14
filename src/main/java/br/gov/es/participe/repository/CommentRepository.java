@@ -52,25 +52,28 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 	Integer countCommentByPlanItem(Long id);
 	
 	@Query(" MATCH (co:Conference)-[a:ABOUT]-(c:Comment) "
-			+" WHERE id(co)={0} "
+			+" WHERE id(co)={0} AND NOT c.status IN ['rem']"
 			+" RETURN COUNT(c)")
 	Integer countCommentByConference(Long id);
 
 	@Query(
 			"MATCH (con:Conference)<-[:ABOUT]-(c:Comment)-[:MADE_BY]->(p:Person)" +
 			", (c)-[:ABOUT]->(loc:Locality) " +
-			", (c)-[:ABOUT]->(pl:PlanItem) " +
-			", (con)-[trg:TARGETS]->(plan:Plan)<-[comp:COMPOSES*]-(pi:PlanItem) " +
-			", (pl)-[:OBEYS]->(si:StructureItem) " +
+			", (c)-[:ABOUT]->(pi:PlanItem)  " +
+			", (con)-[trg:TARGETS]->(plan:Plan)  " +
+			", (pi)-[:OBEYS]->(si:StructureItem) " +
+			", (pi)<-[]->(pi2:PlanItem) " +
 			"WHERE (c.status IN {0} OR NOT {0}) AND (c.type CONTAINS {1} OR {1} IS NULL)  AND id(con)={4} " +
 			"AND (id(loc) IN {2} OR NOT {2}) " +
-			"AND (id(pl) IN {3} OR NOT {3}) " +
+			"AND ((id(pi) IN {3} OR id(pi2) IN {3}) OR NOT {3}) " +
 			"AND (id(si) IN {5} OR NOT {5}) " +
 			"OPTIONAL MATCH (c)-[mb:MODERATED_BY]->(m:Person) " +
-			"RETURN DISTINCT Id(c) AS commentId, c.status AS status, c.text AS text, c.time AS time, " +
+			"OPTIONAL MATCH (plan)<-[:COMPOSES]-(piArea:PlanItem)-[]-(pi) " +
+			"RETURN DISTINCT id(con) AS conferenceId, id(c) AS commentId, c.status AS status, c.text AS text, c.time AS time, " +
 			"c.type AS type, p.name AS citizenName, m.name AS moderatorName, mb.time as moderateTime, mb.finish as moderated, " +
 			"id(m) as moderatorId, id(loc) as localityId, loc.name as localityName, c.classification AS classification, " +
-			"Id(pl) as planItemId, pl.name as planItemName, id(si) AS structureItemId, si.name AS structureItemName"
+			"id(pi) as planItemId, pi.name as planItemName, id(si) AS structureItemId, si.name AS structureItemName, " +
+			"id(piArea) AS areaEstrategicaId, piArea.name AS nameAreaEstrategica "
 		)
 		List<ModerationResultDto> findAllByStatus(String[] status, String type, Long[] localityIds, Long[] planItemIds,
 												  Long conferenceId, Long[] structureItemIds);

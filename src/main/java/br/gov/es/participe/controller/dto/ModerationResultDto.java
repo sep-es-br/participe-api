@@ -6,6 +6,7 @@ import org.springframework.data.neo4j.annotation.QueryResult;
 
 @QueryResult
 public class ModerationResultDto {
+	private Long conferenceId;
 	private Long commentId;
 	private String status;
 	private String text;
@@ -26,14 +27,17 @@ public class ModerationResultDto {
 	private List<ModerationStructure> commentStructure;
 	private Long structureItemId;
 	private String structureItemName;
+	private Long areaEstrategicaId;
+	private String nameAreaEstrategica;
 
 	public ModerationResultDto() {
 	}
 
-	public ModerationResultDto(Long commentId, String status, String text, String time, String type, Long localityId,
+	public ModerationResultDto(Long conferenceId, Long commentId, String status, String text, String time, String type, Long localityId,
 			String localityName, Long planItemId, String planItemName, String citizenName, String moderatorName,
 			Boolean moderated, String moderateTime, Long moderatorId, String classification, String localityType, 
-			List<ModerationStructure> commentStructure, Long structureItemId, String structureItemName) {
+			List<ModerationStructure> commentStructure, Long structureItemId, String structureItemName,
+			Long areaEstrategicaId, String nameAreaEstrategica) {
 		this.commentId = commentId;
 		this.status = status;
 		if (status == null) {
@@ -55,6 +59,9 @@ public class ModerationResultDto {
 		this.localityType = localityType;
 		this.structureItemId = structureItemId;
 		this.structureItemName = structureItemName;
+		this.areaEstrategicaId = areaEstrategicaId;
+		this.nameAreaEstrategica = nameAreaEstrategica;
+		this.conferenceId = conferenceId;
 	}
 
 	public Long getCommentId() {
@@ -215,5 +222,29 @@ public class ModerationResultDto {
 
 	public void setStructureItemName(String structureItemName) {
 		this.structureItemName = structureItemName;
+	}
+
+	public Long getAreaEstrategicaId() {
+		return areaEstrategicaId;
+	}
+
+	public void setAreaEstrategicaId(Long areaEstrategicaId) {
+		this.areaEstrategicaId = areaEstrategicaId;
+	}
+
+	public String getNameAreaEstrategica() {
+		return nameAreaEstrategica;
+	}
+
+	public void setNameAreaEstrategica(String nameAreaEstrategica) {
+		this.nameAreaEstrategica = nameAreaEstrategica;
+	}
+
+	public Long getConferenceId() {
+		return conferenceId;
+	}
+
+	public void setConferenceId(Long conferenceId) {
+		this.conferenceId = conferenceId;
 	}
 }
