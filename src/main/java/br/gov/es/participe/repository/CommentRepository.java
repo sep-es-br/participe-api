@@ -52,7 +52,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 	Integer countCommentByPlanItem(Long id);
 	
 	@Query(" MATCH (co:Conference)-[a:ABOUT]-(c:Comment) "
-			+" WHERE id(co)={0} AND NOT c.status IN ['rem']"
+			+" WHERE id(co)={0} AND NOT c.status IN ['rem', 'pen']"
 			+" RETURN COUNT(c)")
 	Integer countCommentByConference(Long id);
 

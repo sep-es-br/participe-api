@@ -32,7 +32,7 @@ public interface HighlightRepository extends Neo4jRepository<Highlight,Long>{
 			+" RETURN COUNT(h)")
 	Integer countHighlightByPlanItem(Long id);
 	
-	@Query(" MATCH (co:Conference)-[a:ABOUT]-(h:Highlight) "
+	@Query(" MATCH (co:Conference)-[a:ABOUT]-(h:Highlight)-[:ABOUT]->(d:PlanItem)-[:COMPOSES]->(ae:PlanItem) "
 			+" WHERE id(co)={0}  "
 			+" RETURN COUNT(h)")
 	Integer countHighlightByConference(Long id);
