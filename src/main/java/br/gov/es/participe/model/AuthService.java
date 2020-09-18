@@ -1,12 +1,14 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @NodeEntity
-public class AuthService extends Entity {
+public class AuthService extends Entity implements Serializable {
 
     private String server;
 

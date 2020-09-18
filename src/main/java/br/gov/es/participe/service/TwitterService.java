@@ -37,6 +37,7 @@ import br.gov.es.participe.util.domain.TokenType;
 public class TwitterService {
 
     private static final String SERVER = "Twitter";
+    private static final String EMAIL = "email";
 
     @Value("#{environment.getProperty('twitter.consumer.key')}")
     private String twitterKey;
@@ -80,13 +81,11 @@ public class TwitterService {
                 .build()
                 .toUri();
         ResponseEntity<String> responseEntity = restTemplate.exchange(targetUrl.toURL().toString(), HttpMethod.POST, participeUtils.htmlEntityResponse(), String.class);
-        HashMap<String, String> result = participeUtils.convertQueryStringToHashMap(responseEntity.getBody());
-        String url = participeUtils.getServerBaseUrl(request).concat("/signin/twitter-response?").concat(responseEntity.getBody());
-
-        return url;
+        participeUtils.convertQueryStringToHashMap(responseEntity.getBody());
+        return participeUtils.getServerBaseUrl(request).concat("/signin/twitter-response?").concat(responseEntity.getBody());
     }
 
-    public SigninDto authenticate(String oauthToken, String oauthTokenSecret, String userId, String screenName, Long conferenceId) {
+    public SigninDto authenticate(String oauthToken, String oauthTokenSecret, Long conferenceId) {
         Person person = findOrCreatePerson(oauthToken, oauthTokenSecret, conferenceId);
         String authenticationToken = tokenService.generateToken(person, TokenType.AUTHENTICATION);
         String refreshToken = tokenService.generateToken(person, TokenType.REFRESH);
@@ -106,13 +105,14 @@ public class TwitterService {
 
     private Person findOrCreatePerson(String oauthToken, String oauthTokenSecret, Long conferenceId) {
         TwitterProfile profile = twitterProfile(oauthToken, oauthTokenSecret);
-        Optional<Person> findPerson = personService.findByContactEmail(profile.getExtraData().get("email").toString());
+        Optional<Person> findPerson = personService.findByContactEmail(profile.getExtraData().get(EMAIL).toString());
         String accessToken = genereateAccessToken(oauthToken, oauthTokenSecret);
 
         if (findPerson.isPresent()) {
             Person person = findPerson.get();
             person.setAccessToken(accessToken);
-            return personService.createRelationshipWithAthService(person, null, SERVER, profile.getExtraData().get("email").toString(), conferenceId);
+            return personService.createRelationshipWithAthService(person, null, SERVER,
+                    profile.getExtraData().get(EMAIL).toString(), conferenceId, false, true, null);
         }
 
         return createPerson(profile, accessToken, conferenceId);
@@ -122,8 +122,9 @@ public class TwitterService {
         Person person = new Person();
         person.setAccessToken(accessTokenUri);
         person.setName(profile.getName());
-        person.setContactEmail(profile.getExtraData().get("email").toString());
-        return personService.createRelationshipWithAthService(person, null, SERVER, profile.getExtraData().get("email").toString(), conferenceId);
+        person.setContactEmail(profile.getExtraData().get(EMAIL).toString());
+        return personService.createRelationshipWithAthService(person, null, SERVER,
+                profile.getExtraData().get(EMAIL).toString(), conferenceId, false, true, null);
     }
 
     private TwitterProfile twitterProfile(String token, String secret) {
@@ -149,5 +150,4 @@ public class TwitterService {
 
         return object.get("access_token").toString();
     }
-
 }

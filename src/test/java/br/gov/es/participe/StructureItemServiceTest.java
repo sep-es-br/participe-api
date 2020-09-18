@@ -54,6 +54,12 @@ class StructureItemServiceTest extends BaseTest {
     }
 
     @Test
+    public void shouldListAllStructureItemsController() {
+        ResponseEntity  response = structureItemController.index(null);
+        Assert.assertEquals(200, response.getStatusCodeValue());
+    }
+
+    @Test
     public void shouldListAllStructureItems() {
         Collection<StructureItem> list = structureItemService.findAll();
         Assert.assertTrue(list.isEmpty());

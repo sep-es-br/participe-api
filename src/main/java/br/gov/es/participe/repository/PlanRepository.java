@@ -31,6 +31,16 @@ public interface PlanRepository extends Neo4jRepository<Plan, Long> {
     		+" 		[(pi)<-[com:COMPOSES]-(pli:PlanItem) | [com,pli]]"
     		+" ]")
     Plan findByConference(Long id);
+    
+    @Query(" MATCH (p:Plan)-[t:TARGETS]-(c:Conference) "
+    		+" WHERE id(c)={0} "
+    		+" RETURN p"
+    		+" ,[ "
+    		+" 		[(p)<-[bti:COMPOSES]-(pi:PlanItem) | [bti, pi]],"
+    		+" 		[(pi)-[bts:OBEYS]->(st:StructureItem)| [bts, st]], "
+    		+" 		[(pi)<-[com:COMPOSES]-(pli:PlanItem) | [com,pli]]"
+    		+" ]")
+    Plan findByConferenceWithPlanItem(Long id);
 
 	@Query(" MATCH (p:Plan)-[a:APPLIES_TO]->(d:Domain) "
 			+" WHERE id(d)={0} "

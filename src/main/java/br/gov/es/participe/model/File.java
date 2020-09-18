@@ -1,11 +1,13 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import br.gov.es.participe.controller.dto.FileDto;
 
 @NodeEntity
-public class File extends Entity {
+public class File extends Entity implements Serializable {
 
     private String mimeType;
 

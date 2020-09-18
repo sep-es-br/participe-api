@@ -30,40 +30,6 @@ public class ModerationResultDto {
 	private Long areaEstrategicaId;
 	private String nameAreaEstrategica;
 
-	public ModerationResultDto() {
-	}
-
-	public ModerationResultDto(Long conferenceId, Long commentId, String status, String text, String time, String type, Long localityId,
-			String localityName, Long planItemId, String planItemName, String citizenName, String moderatorName,
-			Boolean moderated, String moderateTime, Long moderatorId, String classification, String localityType, 
-			List<ModerationStructure> commentStructure, Long structureItemId, String structureItemName,
-			Long areaEstrategicaId, String nameAreaEstrategica) {
-		this.commentId = commentId;
-		this.status = status;
-		if (status == null) {
-			this.status = "Pendente";
-		}
-		this.text = text;
-		this.time = time;
-		this.type = type;
-		this.localityId = localityId;
-		this.localityName = localityName;
-		this.planItemId = planItemId;
-		this.planItemName = planItemName;
-		this.citizenName = citizenName;
-		this.moderatorName = moderatorName;
-		this.moderated = moderated;
-		this.moderateTime = moderateTime;
-		this.moderatorId = moderatorId;
-		this.classification = classification;
-		this.localityType = localityType;
-		this.structureItemId = structureItemId;
-		this.structureItemName = structureItemName;
-		this.areaEstrategicaId = areaEstrategicaId;
-		this.nameAreaEstrategica = nameAreaEstrategica;
-		this.conferenceId = conferenceId;
-	}
-
 	public Long getCommentId() {
 		return commentId;
 	}

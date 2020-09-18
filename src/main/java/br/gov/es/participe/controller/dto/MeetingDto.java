@@ -17,11 +17,14 @@ public class MeetingDto {
     private List<LocalityDto> localityCovers;
     private ConferenceDto conference;
     
-    @JsonFormat(pattern="dd/MM/yyyy")
+    @JsonFormat(pattern="dd/MM/yyyy HH:mm:ss")
     private Date endDate;
-    @JsonFormat(pattern="dd/MM/yyyy")
+    @JsonFormat(pattern="dd/MM/yyyy HH:mm:ss")
     private Date beginDate;
-    
+
+	private List<PersonDto> receptionists;
+	private List<PersonDto> participants;
+
     public MeetingDto() {
     	
     }
@@ -49,8 +52,17 @@ public class MeetingDto {
         }
         if(meeting.getLocalityCovers() != null && !meeting.getLocalityCovers().isEmpty()) {
         	this.localityCovers = new ArrayList<>();
-          	meeting.getLocalityCovers().forEach(locality -> localityCovers.add(new LocalityDto(locality)));
+          	meeting.getLocalityCovers().forEach(locality -> this.localityCovers.add(new LocalityDto(locality)));
         }
+
+        if(meeting.getReceptionists() != null && !meeting.getReceptionists().isEmpty()) {
+			this.receptionists = new ArrayList<>();
+			meeting.getReceptionists().forEach(receptionist -> this.receptionists.add(new PersonDto(receptionist)));
+		}
+        if(meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
+			this.participants = new ArrayList<>();
+			meeting.getParticipants().forEach(participant -> this.participants.add(new PersonDto(participant)));
+		}
     }
     
 	public Long getId() {
@@ -111,5 +123,20 @@ public class MeetingDto {
 	public void setBeginDate(Date beginDate) {
 		this.beginDate = beginDate;
 	}
-    
+
+	public List<PersonDto> getReceptionists() {
+		return receptionists;
+	}
+
+	public void setReceptionists(List<PersonDto> receptionists) {
+		this.receptionists = receptionists;
+	}
+
+	public List<PersonDto> getParticipants() {
+		return participants;
+	}
+
+	public void setParticipants(List<PersonDto> participants) {
+		this.participants = participants;
+	}
 }

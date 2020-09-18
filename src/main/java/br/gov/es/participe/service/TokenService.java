@@ -17,7 +17,7 @@ import java.util.Date;
 @Service
 public class TokenService {
 
-    private final static String ISSUER = "SEP-PI Participe";
+    private static final String ISSUER = "SEP-PI Participe";
 
     @Value("${jwt.secret}")
     private String secret;

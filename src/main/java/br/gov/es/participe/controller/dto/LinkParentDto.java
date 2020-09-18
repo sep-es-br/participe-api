@@ -6,6 +6,7 @@ public class LinkParentDto {
 	private String textLink;
 	
 	public LinkParentDto() {
+		//Construtor criado por conveniencia.
 	}
 
 	public Long getIdParent() {

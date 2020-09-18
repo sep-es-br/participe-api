@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -62,17 +61,6 @@ public class ConferenceService {
 		}
 		auth.setProposal(commentService.countCommentByConference(id));
 		auth.setHighlights(highlightService.countHighlightByConference(id));
-//		for(PlanItem planitem: plan.getItems()) {
-//			if(planitem.getStructureItem().getComments()) 
-//				auth.setProposal(auth.getProposal() + commentService.countCommentByPlanItem(planitem.getId()));
-//			
-//			if(planitem.getStructureItem().getVotes()) 
-//				auth.setHighlights(auth.getHighlights() + highlightService.countHighlightByPlanItem(planitem.getId()));
-//			
-//			if(planitem.getChildren() != null)
-//				count(planitem.getChildren(), auth);
-//		}
-		
 		auth.setParticipations(attendRepository.countParticipationByConference(conference.getId()));
 		auth.setNumberOfLocalities(localityService.countLocalitiesParticipation(conference.getId()));
     }
@@ -127,18 +115,15 @@ public class ConferenceService {
     	Person person = personService.find(idPerson);
     	final boolean adm = person.getRoles() != null && person.getRoles().contains("Administrator");
     	List<ConferenceDto> conferences = new ArrayList<>();
-    	LocalDate now = LocalDate.now();
-    	conferenceRepository.findAllActives(now.getMonthValue(), now.getYear()).forEach(conference -> {
-    		Date date = new Date();
-    		if(date.after(conference.getBeginDate()) && date.before(conference.getEndDate())) {
-    			if(adm || (conference.getModerators() != null && conference.getModerators().stream().filter(m -> m.getId().equals(idPerson)).findFirst().isPresent())) {
-    				ConferenceDto dto = new ConferenceDto(conference);
-    				dto.setPlan(null);
-    				dto.setLocalityType(null);
-    				dto.setFileAuthentication(null);
-    				dto.setFileParticipation(null);
-    				conferences.add(dto);
-    			} 
+    	conferenceRepository.findAllActives(new Date()).forEach(conference -> {
+    		if(adm || (conference.getModerators() != null 
+    						&& conference.getModerators().stream().anyMatch(m -> m.getId().equals(idPerson)))) {
+    			ConferenceDto dto = new ConferenceDto(conference);
+    			dto.setPlan(null);
+    			dto.setLocalityType(null);
+    			dto.setFileAuthentication(null);
+    			dto.setFileParticipation(null);
+    			conferences.add(dto);
     		}
     	});
     	return conferences;
@@ -146,7 +131,67 @@ public class ConferenceService {
 
     @Transactional
     public Conference save(Conference conference) {
-        if (conference.getPlan() == null || conference.getPlan().getId() == null) {
+        validateConference(conference);
+        clearAttributes(conference);
+        loadAttributes(conference);
+
+        if (conference.getModerators() != null && !conference.getModerators().isEmpty()) {
+            HashSet<Person> moderators = new HashSet<>();
+            conference.getModerators().forEach(p -> {
+                Optional<Person> find = personService.findByContactEmail(p.getContactEmail());
+                moderators.add(find.isPresent() ? find.get() : personService.save(p, true));
+            });
+            conference.setModerators(moderators);
+        }
+        
+        conference.setName(conference.getName().trim().replaceAll(" +", " "));
+        return conferenceRepository.save(conference);
+    }
+    
+    private void clearAttributes(Conference conference) {
+    	if(conference.getId() != null) {
+    		if (conference.getPlan() != null && conference.getPlan().getId() != null) {
+    			Conference conference1 = find(conference.getId());
+    			conference1.setPlan(null);
+    			conferenceRepository.save(conference1);
+    		}
+    		if (conference.getFileAuthentication() != null && conference.getFileAuthentication().getId() != null) {
+    			Conference conference1 = find(conference.getId());
+    			conference1.setFileAuthentication(null);
+    			conferenceRepository.save(conference1);
+    		}
+    		if (conference.getFileParticipation() != null && conference.getFileParticipation().getId() != null) {
+    			Conference conference1 = find(conference.getId());
+    			conference1.setFileParticipation(null);
+    			conferenceRepository.save(conference1);
+    		}
+    		if (conference.getLocalityType() != null && conference.getLocalityType().getId() != null) {
+    			Conference conference1 = find(conference.getId());
+    			conference1.setLocalityType(null);
+    			conferenceRepository.save(conference1);
+    		}
+    	}
+    }
+    
+    private void loadAttributes(Conference conference) {
+    	if (conference.getPlan() != null && conference.getPlan().getId() != null) {
+            conference.setPlan(planService.find(conference.getPlan().getId()));
+        }
+        
+    	if (conference.getFileAuthentication() != null && conference.getFileAuthentication().getId() != null) {
+            conference.setFileAuthentication(fileService.find(conference.getFileAuthentication().getId()));
+        }
+        
+    	if (conference.getFileParticipation() != null && conference.getFileParticipation().getId() != null) {
+            conference.setFileParticipation(fileService.find(conference.getFileParticipation().getId()));
+        }
+    	if (conference.getLocalityType() != null && conference.getLocalityType().getId() != null) {
+            conference.setLocalityType(localityTypeService.find(conference.getLocalityType().getId()));
+        }
+    }
+    
+    private void validateConference(Conference conference) {
+    	if (conference.getPlan() == null || conference.getPlan().getId() == null) {
             throw new IllegalArgumentException("Plan is required");
         }
         
@@ -168,57 +213,9 @@ public class ConferenceService {
                 throw new IllegalArgumentException("This name already exists");
             }
         }
-        if (conference.getPlan().getId() != null) {
-            if (conference.getId() != null) {
-                Conference conference1 = find(conference.getId());
-                conference1.setPlan(null);
-                conferenceRepository.save(conference1);
-            }
-            conference.setPlan(planService.find(conference.getPlan().getId()));
-        }
-        
-        if (conference.getFileAuthentication().getId() != null) {
-            if (conference.getId() != null) {
-                Conference conference1 = find(conference.getId());
-                conference1.setFileAuthentication(null);
-                conferenceRepository.save(conference1);
-            }
-            conference.setFileAuthentication(fileService.find(conference.getFileAuthentication().getId()));
-        }
-        
-        if (conference.getFileParticipation().getId() != null) {
-            if (conference.getId() != null) {
-                Conference conference1 = find(conference.getId());
-                conference1.setFileParticipation(null);
-                conferenceRepository.save(conference1);
-            }
-            conference.setFileParticipation(fileService.find(conference.getFileParticipation().getId()));
-        }
-        
-        if (conference.getLocalityType() != null && conference.getLocalityType().getId() != null) {
-            if (conference.getId() != null) {
-                Conference conference1 = find(conference.getId());
-                conference1.setLocalityType(null);
-                conferenceRepository.save(conference1);
-            }
-            conference.setLocalityType(localityTypeService.find(conference.getLocalityType().getId()));
-        }
-
-        if (conference.getModerators() != null && !conference.getModerators().isEmpty()) {
-            HashSet<Person> moderatos = new HashSet<>();
-            conference.getModerators().forEach(p -> {
-                Optional<Person> find = personService.findByContactEmail(p.getContactEmail());
-                moderatos.add(find.isPresent() ? find.get() : personService.save(p, true));
-            });
-            conference.setModerators(moderatos);
-        }
-        
-        conference.setName(conference.getName().trim().replaceAll(" +", " "));
-        return conferenceRepository.save(conference);
     }
 
     public Conference find(Long id) {
-
         return conferenceRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Conference not found: " + id));
@@ -242,30 +239,6 @@ public class ConferenceService {
         
         return deleteConference;
     }
-    
-    public void removeSelfDeclaration(SelfDeclaration selfDeclaration, Conference conference) {
-    	SelfDeclaration selfDeclarationToRemove = null;
-    	
-    	Conference conferenceBD = conferenceRepository.findSelfDeclarationById(conference.getId());
-    	Set<SelfDeclaration> selfs = conferenceBD.getSelfDeclaration();
-    	
-    	for(SelfDeclaration self: selfs) {
-    		if(self.getId().equals(selfDeclaration.getId())) {
-    			selfDeclarationToRemove = self;
-    		}
-    	}
-    	
-    	if(selfDeclarationToRemove != null) {
-    		selfs.remove(selfDeclarationToRemove);
-    		conferenceRepository.save(conferenceBD);
-    	}
-    }
-    
-    public void addSelfDeclaration(SelfDeclaration selfDeclaration, Conference conference) {
-    	Conference conferenceBD = conferenceRepository.findSelfDeclarationById(conference.getId());
-    	conferenceBD.getSelfDeclaration().add(selfDeclaration);
-    	conferenceRepository.save(conferenceBD);
-    }
 
     public List<PersonDto> findModeratorsByConferenceId(Long id) {
         List<PersonDto> persons = new ArrayList<>();
@@ -277,17 +250,25 @@ public class ConferenceService {
         return conferenceRepository.countSelfDeclarationById(id);
     }
 
-    private void count(Set<PlanItem> itens, AuthenticationScreenDto auth) {
-    	for(PlanItem planitem: itens) {
-			if(planitem.getStructureItem().getComments()) {
-				auth.setProposal(auth.getProposal() + commentService.countCommentByPlanItem(planitem.getId()));
-			}
-			
-			if(planitem.getStructureItem().getVotes()) {
-				auth.setHighlights(auth.getHighlights() + highlightService.countHighlightByPlanItem(planitem.getId()));
-			}
-			if(planitem.getChildren() != null)
-				count(planitem.getChildren(), auth);
-		}
+    public List<Conference> findAllWithMeetings(Date date, Long idPerson) {
+        List<Conference> conferences = new ArrayList<>();
+        conferenceRepository.findAllWithMeeting(date, idPerson).iterator().forEachRemaining(conferences::add);
+
+        for(Conference conference: conferences) {
+            conference.setTitleAuthentication(null);
+            conference.setSubtitleAuthentication(null);
+            conference.setTitleParticipation(null);
+            conference.setSubtitleParticipation(null);
+            conference.setTitleRegionalization(null);
+            conference.setSubtitleRegionalization(null);
+            conference.setPlan(null);
+            conference.setLocalityType(null);
+
+            for(Meeting meeting : conference.getMeeting()) {
+                meeting.setReceptionists(null);
+            }
+        }
+
+        return conferences;
     }
 }

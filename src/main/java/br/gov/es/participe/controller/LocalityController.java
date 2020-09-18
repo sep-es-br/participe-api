@@ -7,7 +7,6 @@ import br.gov.es.participe.controller.dto.LocalityParamDto;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.service.ConferenceService;
 import br.gov.es.participe.service.LocalityService;
-import br.gov.es.participe.util.ParticipeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -89,7 +88,7 @@ public class LocalityController {
     	
     	ComplementLocalityDto response = new ComplementLocalityDto();
     	response.setLocalities(localitiesDto);
-    	if(localities != null && !localities.isEmpty()) {
+    	if(!localities.isEmpty()) {
     		Locality type = localityService.find(localities.get(0).getId());
     		response.setNameType(type.getType().getName());
     	}

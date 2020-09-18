@@ -7,11 +7,12 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.Transient;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 @NodeEntity
-public class PlanItem extends Entity {
+public class PlanItem extends Entity implements Serializable {
 
     private String name;
 

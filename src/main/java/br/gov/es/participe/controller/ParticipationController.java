@@ -1,17 +1,38 @@
 package br.gov.es.participe.controller;
 
-import br.gov.es.participe.controller.dto.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import br.gov.es.participe.controller.dto.BodyParticipationDto;
+import br.gov.es.participe.controller.dto.CommentDto;
+import br.gov.es.participe.controller.dto.CommentParamDto;
+import br.gov.es.participe.controller.dto.ConferenceDto;
+import br.gov.es.participe.controller.dto.ParticipationsDto;
+import br.gov.es.participe.controller.dto.PlanItemDto;
+import br.gov.es.participe.controller.dto.PortalHeader;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Highlight;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
-import br.gov.es.participe.service.*;
+import br.gov.es.participe.service.CommentService;
+import br.gov.es.participe.service.HighlightService;
+import br.gov.es.participe.service.ParticipationService;
+import br.gov.es.participe.service.PlanItemService;
+import br.gov.es.participe.service.TokenService;
 import br.gov.es.participe.util.domain.TokenType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @CrossOrigin
@@ -32,6 +53,19 @@ public class ParticipationController {
 	
 	@Autowired
 	private PlanItemService planItemService;
+	
+	@GetMapping("/{idConference}")
+	public ResponseEntity<ParticipationsDto> getParticipation(@RequestHeader (name="Authorization") String token,
+			@RequestParam(name = "text", required = false, defaultValue="") String text,
+			@PathVariable Long idConference, 
+			@RequestParam(name = "pageNumber", required = true) Integer pageNumber,
+			UriComponentsBuilder uriComponentsBuilder) {
+		String[] keys = token.split(" ");
+		Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
+		Pageable pageable = PageRequest.of(pageNumber, 30);
+		ParticipationsDto participations = participationService.findAll(idPerson, text, idConference, pageable);
+		return ResponseEntity.status(200).body(participations);
+	}
 	
 	@GetMapping("/plan-item/{idConference}")
 	public ResponseEntity<BodyParticipationDto> getBody(@RequestHeader (name="Authorization") String token,
@@ -96,7 +130,7 @@ public class ParticipationController {
 		
 		Comment comment = new Comment(commentParamDto);
 		comment.setPersonMadeBy(person);
-		CommentDto response = new CommentDto(commentService.save(comment, null, "rem", true), false, true);
+		CommentDto response = new CommentDto(commentService.save(comment, null, "rem", true), true);
 		response.setTime(null);
 		response.setFrom(null);
 		response.setType(null);

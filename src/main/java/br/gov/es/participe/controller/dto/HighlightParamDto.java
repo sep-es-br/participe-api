@@ -15,8 +15,6 @@ public class HighlightParamDto {
 	
 	private Long conference;
 	
-	public HighlightParamDto(){
-	}
 	
 	public Long getId() {
 		return id;

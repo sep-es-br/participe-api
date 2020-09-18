@@ -1,5 +1,6 @@
 package br.gov.es.participe.repository;
 
+import br.gov.es.participe.controller.dto.LocalityCitizenSelectDto;
 import br.gov.es.participe.model.Locality;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -36,20 +37,6 @@ public interface LocalityRepository extends Neo4jRepository<Locality, Long> {
     		+" RETURN i1, child, [(child)-[i:IS_LOCATED_IN]->(children:Locality) | [ i, children ] ]")
     List<Locality> findCardsByIdConference(Long idConference);
     
-    @Query("MATCH(l:Locality) "
-    		+" WHERE id(l) = {0} "
-    		+" RETURN l "
-    		+" ,[ "
-    		+"		[(l)<-[a:AS_BEING_FROM]-(s:SelfDeclaration) | [a,s]] "
-    		+" ]")
-    Locality findSelfDeclarationById(Long id);
-    
-    @Query(" MATCH (c:Conference)<-[t:TO]-(s:SelfDeclaration)<-[m:MADE]-(p:Person) "
-    		+" OPTIONAL MATCH (s)-[a:AS_BEGIN_FROM]->(l:Locality) "
-    		+" WHERE id(c)={0} AND id(p)={1} "
-    		+" RETURN l")
-    Locality findByIdConferenceAndIdPerson(Long idConference, Long idPerson);
-    
     @Query(" MATCH (lt:LocalityType)<-[lc:LOCALIZES_CITIZEN_BY]-(c:Conference)-[t:TARGETS]->(p:Plan)"
     		+" OPTIONAL MATCH (p)-[a:APPLIES_TO]->(d:Domain)<-[i:IS_LOCATED_IN]-(l:Locality)-[o:OF_TYPE]->(lt) "
     		+" WHERE id(c)={0} "
@@ -61,4 +48,18 @@ public interface LocalityRepository extends Neo4jRepository<Locality, Long> {
 
     @Query("MATCH (l:Locality) DETACH DELETE l")
     void deleteAll();
+
+    @Query(
+            "MATCH (c:Conference)-[t:TARGETS]-(p:Plan)-[a:APPLIES_TO]->(d:Domain) " +
+            "MATCH (p)-[reg:REGIONALIZABLE]->(lt:LocalityType) " +
+            "MATCH (d)<-[i1:IS_LOCATED_IN]-(loc:Locality)-[o:OF_TYPE]->(lt) " +
+            "WHERE id(c)={0} " +
+            "AND (loc.name IS NULL OR ext.translate(loc.name) CONTAINS ext.translate({1})) " +
+            "WITH id(lt) AS localityTypeId, lt.name AS localityTypeName, id(loc) AS localityId, " +
+            "loc.name AS localityName " +
+            "ORDER BY localityName " +
+            "RETURN localityTypeId, localityTypeName, " +
+            "COLLECT({localityId: localityId, localityName: localityName}) AS localities"
+    )
+    LocalityCitizenSelectDto getLocalitiesToDisplay(Long idConference, String name);
 }

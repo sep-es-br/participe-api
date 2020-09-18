@@ -24,7 +24,6 @@ import br.gov.es.participe.service.CommentService;
 import br.gov.es.participe.service.TokenService;
 import br.gov.es.participe.util.domain.TokenType;
 
-
 @RestController
 @CrossOrigin
 @RequestMapping(value = "/comments")
@@ -41,9 +40,9 @@ public class CommentController {
 			@RequestParam(value = "idPerson", required = false, defaultValue = "") Long idPerson,
 			@RequestParam(value = "idConference", required = false) Long idConference
 	) {
-		List<Comment> Comments = commentService.findAll(idPerson, idConference);
+		List<Comment> comments = commentService.findAll(idPerson, idConference);
 		List<CommentDto> response = new ArrayList<>();		
-		Comments.forEach(comment -> response.add(new CommentDto(comment, false, false)));
+		comments.forEach(comment -> response.add(new CommentDto(comment, false)));
 	
 		return ResponseEntity.status(200).body(response);
 	}
@@ -59,16 +58,15 @@ public class CommentController {
 		Person person = new Person();
 		person.setId(idPerson);
 		comment.setPersonMadeBy(person);
-		CommentDto response = new CommentDto(commentService.save(comment, null, "com", true), false, false);
+		CommentDto response = new CommentDto(commentService.save(comment, null, "com", true), false);
 		
 		return ResponseEntity.status(200).body(response);
 	}
-	
-	
+
 	@PostMapping("/fatherPlanItem")
 	public ResponseEntity<CommentDto> storeFatherPlanItemNode(@RequestBody CommentParamDto commentParamDto) {
 		Comment comment = new Comment(commentParamDto);
-		CommentDto response = new CommentDto(commentService.save(comment, null, "com", false), false, false);
+		CommentDto response = new CommentDto(commentService.save(comment, null, "com", false), false);
 
 		return ResponseEntity.status(200).body(response);
 	}
@@ -78,5 +76,4 @@ public class CommentController {
 		commentService.deleteAllByIdPerson(id);
 		return ResponseEntity.status(200).build();
 	}
-
 }

@@ -13,7 +13,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.social.google.api.impl.GoogleTemplate;
 import org.springframework.social.google.api.oauth2.UserInfo;
 import org.springframework.social.google.connect.GoogleConnectionFactory;
-import org.springframework.social.oauth2.OAuth2Parameters;
 import org.springframework.stereotype.Service;
 
 import br.gov.es.participe.controller.dto.SigninDto;
@@ -84,7 +83,8 @@ public class GoogleService {
         if (findPerson.isPresent()) {
             Person person = findPerson.get();
             person.setAccessToken(accessToken);
-            return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(), conferenceId);
+            return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(),
+                    conferenceId, false, true, null);
         }
 
         return createPerson(user, accessToken, conferenceId);
@@ -95,16 +95,7 @@ public class GoogleService {
         person.setAccessToken(accessToken);
         person.setName(user.getName());
         person.setContactEmail(user.getEmail());
-        return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(), conferenceId);
-    }
-
-    @Deprecated
-    private String googleLogin(HttpServletRequest request) {
-        OAuth2Parameters parameters = new OAuth2Parameters();
-
-        parameters.setRedirectUri(participeUtils.getServerBaseUrl(request).concat("/google"));
-        parameters.setScope(googleScope);
-
-        return createGoogleConnectionFactory().getOAuthOperations().buildAuthenticateUrl(parameters);
+        return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(),
+                conferenceId, false, true, null);
     }
 }

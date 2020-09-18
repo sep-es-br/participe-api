@@ -6,16 +6,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import br.gov.es.participe.controller.dto.LocalityCitizenSelectDto;
 import br.gov.es.participe.util.ParticipeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.gov.es.participe.model.Domain;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.LocalityType;
-import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.repository.LocalityRepository;
 
 @Service
@@ -53,7 +52,9 @@ public class LocalityService {
                 .filter(l -> l.getParents().isEmpty())
                 .iterator()
                 .forEachRemaining(localities::add);
-        localities.sort((l1, l2) -> l1.getName().trim().compareTo(l2.getName().trim()));
+        if(!localities.isEmpty()) {
+        	localities.sort((l1, l2) -> l1.getName().trim().compareTo(l2.getName().trim()));
+        }
         return localities;
     }
 
@@ -118,11 +119,6 @@ public class LocalityService {
                 .orElseThrow(() -> new IllegalArgumentException("Locality not found: " + id));
     }
 
-    public Locality findSelfDeclarationById(Long id) {
-        return localityRepository
-                .findSelfDeclarationById(id);
-    }
-
     public List<Locality> findLocalitiesToComplement(Long idConference, boolean orderByName) {
         if (orderByName) {
             List<Locality> localities = localityRepository.findLocalitiesToComplement(idConference);
@@ -146,41 +142,6 @@ public class LocalityService {
 
     public Integer countLocalitiesParticipation(Long idConference) {
         return localityRepository.countLocalitiesParticipation(idConference);
-    }
-
-    public Locality findByIdConferenceAndIdPerson(Long idConference, Long idPerson) {
-        return localityRepository.findByIdConferenceAndIdPerson(idConference, idPerson);
-    }
-
-    public void removeSelfDeclaration(SelfDeclaration selfDeclaration, Locality locality) {
-        SelfDeclaration selfDeclarationToRemove = null;
-
-        Locality localityBD = localityRepository.findSelfDeclarationById(locality.getId());
-        Set<SelfDeclaration> selfs = localityBD.getSelfDeclaration();
-
-        if (selfs != null) {
-            for (SelfDeclaration self : selfs) {
-                if (self.getId().equals(selfDeclaration.getId())) {
-                    selfDeclarationToRemove = self;
-                }
-            }
-
-            if (selfDeclarationToRemove != null) {
-                selfs.remove(selfDeclarationToRemove);
-                localityRepository.save(localityBD);
-            }
-        }
-    }
-
-    public void addSelfDeclaration(SelfDeclaration selfDeclaration, Locality locality) {
-        Locality localityBD = localityRepository.findSelfDeclarationById(locality.getId());
-        Set<SelfDeclaration> ListDeclaraions = localityBD.getSelfDeclaration();
-        if (ListDeclaraions == null)
-            ListDeclaraions = new HashSet<>();
-
-        selfDeclaration.setLocality(localityBD);
-        ListDeclaraions.add(selfDeclaration);
-        localityBD.setSelfDeclaration(ListDeclaraions);
     }
 
     private boolean isInvalidTypeLevel(Locality locality) {
@@ -380,5 +341,12 @@ public class LocalityService {
                 locality.addParent(find(parent.getId()));
             }
         }
+    }
+
+    public LocalityCitizenSelectDto getLocalitiesToDisplay(Long conferenceId, String name) {
+        if(conferenceId == null) {
+            throw new IllegalArgumentException("Conference Id must be informed.");
+        }
+        return localityRepository.getLocalitiesToDisplay(conferenceId, name);
     }
 }

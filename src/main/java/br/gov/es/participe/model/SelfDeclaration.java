@@ -1,10 +1,13 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
+
 import org.neo4j.ogm.annotation.Relationship;
 
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
+import br.gov.es.participe.controller.dto.SelfDeclarationParamDto;
 
-public class SelfDeclaration extends Entity {
+public class SelfDeclaration extends Entity implements Serializable {
 
 	@Relationship(type = "TO")
 	private Conference conference;
@@ -41,6 +44,24 @@ public class SelfDeclaration extends Entity {
 		}
 	}
 	
+	public SelfDeclaration(SelfDeclarationParamDto selfDeclaration) {
+		
+		setId(selfDeclaration.getId());
+		if(selfDeclaration.getConference() != null) {
+			this.conference = new Conference();
+			this.conference.setId(selfDeclaration.getConference());
+		}
+		
+		if(selfDeclaration.getLocality() != null) {
+			this.locality = new Locality();
+			this.locality.setId(selfDeclaration.getLocality());
+		}
+		
+		if(selfDeclaration.getPerson() != null) {
+			this.person = new Person();
+			this.person.setId(selfDeclaration.getPerson());
+		}
+	}
 
 	public Conference getConference() {
 		return conference;

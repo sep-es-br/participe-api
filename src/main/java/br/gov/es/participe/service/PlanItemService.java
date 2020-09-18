@@ -14,6 +14,8 @@ import java.util.Set;
 
 @Service
 public class PlanItemService {
+	
+	private static final String PLAN_ITEM_NOT_FOUND = "Plan item not found: ";
 
     @Autowired
     private PlanItemRepository planItemRepository;
@@ -66,13 +68,13 @@ public class PlanItemService {
     public PlanItem find(Long id) {
         return planItemRepository
                 .findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Plan item not found: " + id));
+                .orElseThrow(() -> new IllegalArgumentException(PLAN_ITEM_NOT_FOUND + id));
     }
     
     public PlanItem findByIdWithLocalities(Long id) {
         return planItemRepository
                 .findByIdWithLocalities(id)
-                .orElseThrow(() -> new IllegalArgumentException("Plan item not found: " + id));
+                .orElseThrow(() -> new IllegalArgumentException(PLAN_ITEM_NOT_FOUND + id));
     }
     
     public List<PlanItem> findChildren(Long idPlanItem){
@@ -82,7 +84,7 @@ public class PlanItemService {
     public PlanItem findFatherPlanItem(Long id) {
         return planItemRepository
                 .findFatherPlanItem(id)
-                .orElseThrow(() -> new IllegalArgumentException("Plan item not found: " + id));
+                .orElseThrow(() -> new IllegalArgumentException(PLAN_ITEM_NOT_FOUND + id));
     }
 
     public List<PlanItem> findAllByIdPlan(Long idPlan){

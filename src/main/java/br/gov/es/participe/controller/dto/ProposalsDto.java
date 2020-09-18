@@ -7,9 +7,6 @@ public class ProposalsDto {
 	private List<ProposalDto> proposals;
 	private Integer totalPages;
 	
-	public ProposalsDto() {
-		
-	}
 	public List<ProposalDto> getProposals() {
 		return proposals;
 	}

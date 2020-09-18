@@ -1,5 +1,6 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -10,7 +11,7 @@ import br.gov.es.participe.controller.dto.PlanDto;
 import br.gov.es.participe.controller.dto.PlanParamDto;
 
 @NodeEntity
-public class Plan extends Entity {
+public class Plan extends Entity implements Serializable {
 
     private String name;
 
@@ -87,5 +88,4 @@ public class Plan extends Entity {
     public void setlocalitytype(LocalityType type) {
     	this.localitytype = type;
     }
-
 }

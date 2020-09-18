@@ -8,6 +8,7 @@ public class ComplementLocalityDto {
 	private List<LocalityDto> localities;
 	
 	public ComplementLocalityDto() {
+		//Contrutor criado por conveniencia.
 	}
 	
 	public String getNameType() {

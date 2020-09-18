@@ -11,13 +11,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ParticipeUtils {
@@ -47,12 +45,11 @@ public class ParticipeUtils {
         Charset utf8 = Charset.forName("UTF-8");
         MediaType mediaType = new MediaType("text", "html", utf8);
         headers.setContentType(mediaType);
-        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-        return entity;
+        return new HttpEntity<>("parameters", headers);
     }
 
-    public HashMap<String, String> convertQueryStringToHashMap(String source) {
-        HashMap<String, String> data = new HashMap<String, String>();
+    public Map<String, String> convertQueryStringToHashMap(String source) {
+        Map<String, String> data = new HashMap<>();
         final String[] arrParameters = source.split("&");
 
         for (final String tempParameterString : arrParameters) {

@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import br.gov.es.participe.controller.dto.LocalityDto;
 import br.gov.es.participe.controller.dto.PlanItemDto;
@@ -52,10 +51,9 @@ public class ProposalsService {
     	localities.forEach(locality -> localitiesDto.add(new LocalityDto(locality, null, false, false)));
 		
 		Plan plan = planService.findFilesById(conference.getPlan().getId());
-		Set<PlanItem> PlanItems = plan.getItems();
-		if(PlanItems != null) {
-			
-			for(PlanItem planItem: PlanItems) {
+		Set<PlanItem> planItems = plan.getItems();
+		if(planItems != null) {
+			for(PlanItem planItem: planItems) {
 				structureItemName = planItem.getStructureItem().getName();
 				PlanItemDto planItemDto = new PlanItemDto(planItem, null, false);
 				
@@ -66,7 +64,6 @@ public class ProposalsService {
 				planItemDto.setLocalities(null);
 				planItemDto.setFile(null);
 				itens.add(planItemDto);
-				
 			}
 		}
 		
@@ -78,8 +75,7 @@ public class ProposalsService {
     	
 		return filters;
 	}
-	
-	
+
 	public Integer makeLike(Long idPerson, Long idComment) {
 		Comment comment = commentService.findPersonLiked(idComment);
 		Person person = personService.likescomments(idPerson);

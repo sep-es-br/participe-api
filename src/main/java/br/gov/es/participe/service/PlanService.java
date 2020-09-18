@@ -57,6 +57,10 @@ public class PlanService {
     	return planRepository.findByConference(id);
     }
     
+    public Plan findByConferenceWithPlanItem(Long id) {
+    	return planRepository.findByConferenceWithPlanItem(id);
+    }
+    
     public Plan findByPlanItem(Long id) {
     	return planRepository.findByPlanItem(id);
     }
@@ -103,7 +107,7 @@ public class PlanService {
 
         List<Conference> conferences = conferenceService.findByPlan(plan.getId());
 
-        if (conferences != null && conferences.size() > 0) {
+        if (conferences != null && !conferences.isEmpty()) {
             throw new IllegalArgumentException("This plan is in use by a conference");
         }
 

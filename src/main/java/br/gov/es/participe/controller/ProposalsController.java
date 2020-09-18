@@ -1,7 +1,5 @@
 package br.gov.es.participe.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.gov.es.participe.controller.dto.ProposalDto;
 import br.gov.es.participe.controller.dto.ProposalsDto;
 import br.gov.es.participe.controller.dto.ProposalsFilterDto;
 import br.gov.es.participe.service.CommentService;
-import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.ProposalsService;
 import br.gov.es.participe.service.TokenService;
 import br.gov.es.participe.util.domain.TokenType;

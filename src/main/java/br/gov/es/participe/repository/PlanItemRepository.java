@@ -30,8 +30,7 @@ public interface PlanItemRepository extends Neo4jRepository<PlanItem, Long> {
     		+ " [(pi)<-[apt1:APPLIES_TO]-(l1:Locality) | [apt1, l1]],"
     		+ " [(pi)<-[com:COMPOSES*]-(child:PlanItem) | [com, child]],"
     		+ " [(child)<-[apt2:APPLIES_TO]-(l2:Locality) | [apt2, l2]]"
-    		+"]"
-    		)
+    		+"]")
     Optional<PlanItem> findByIdWithLocalities(Long id);
     
     @Query("Match(p:Plan)<-[co:COMPOSES]-(pi:PlanItem)"
@@ -62,7 +61,6 @@ public interface PlanItemRepository extends Neo4jRepository<PlanItem, Long> {
     		+" ,[ "
     		+" 		[(planI)-[com:COMPOSES*]->(parent:PlanItem) | [com,parent]],"
     		+" 		[(parent)-[ob:OBEYS]->(siP:StructureItem) | [ob,siP]]"
-    		+"]"
-    		)
+    		+"]")
     PlanItem findParentsByCommentId(Long idComment);
 }

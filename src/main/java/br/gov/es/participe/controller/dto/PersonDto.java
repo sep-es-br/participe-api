@@ -13,7 +13,8 @@ public class PersonDto {
     private String telephone;
     private SelfDeclarationDto selfDeclaretion;
     private Set<String> roles;
-    
+    private Boolean active;
+
     public PersonDto() {
     	 
     }
@@ -25,6 +26,7 @@ public class PersonDto {
         this.cpf = person.getCpf();
         this.telephone = person.getTelephone();
         this.roles = person.getRoles();
+        this.active = person.getActive();
     }
     
     public Long getId() {
@@ -98,4 +100,11 @@ public class PersonDto {
 		return null;
 	}
 
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 }

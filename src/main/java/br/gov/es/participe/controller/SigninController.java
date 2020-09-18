@@ -5,6 +5,7 @@ import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.service.*;
 import br.gov.es.participe.util.dto.MessageDto;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Base64;
@@ -46,11 +49,11 @@ public class SigninController {
     @Autowired
 	private PersonService personService;
 
-    private final String FRONT_CALLBACK_URL = "front_callback_url";
-    private final String FRONT_CONFERENCE_ID = "front_conference_id";
+    private static final String FRONT_CALLBACK_URL = "front_callback_url";
+    private static final String FRONT_CONFERENCE_ID = "front_conference_id";
 
     @GetMapping("/refresh")
-    public ResponseEntity<SigninDto> refresh(@RequestParam(name = "refreshToken") String refreshToken) throws Exception {
+    public ResponseEntity<SigninDto> refresh(@RequestParam(name = "refreshToken") String refreshToken) {
         SigninDto signinDto = acessoCidadaoService.refresh(refreshToken);
 
         return ResponseEntity.ok().body(signinDto);
@@ -62,16 +65,22 @@ public class SigninController {
     	SigninDto signinDto = personService.authenticate(user, "Participe", conference);
     	
     	if(signinDto != null) {
+    	    if(signinDto.getPerson().getActive() != null && !signinDto.getPerson().getActive()) {
+                MessageDto msg = new MessageDto();
+                msg.setMessage("Usuário inativo.");
+                msg.setCode(403);
+                return ResponseEntity.status(403).body(msg);
+            }
     		return ResponseEntity.status(200).body(signinDto);
     	}
     	MessageDto msg = new MessageDto();
 		msg.setMessage("E-mail ou Senha incorretos");
-		msg.setCode(403);
-		return ResponseEntity.status(403).body(msg);
+		msg.setCode(404);
+		return ResponseEntity.status(404).body(msg);
     }
 
     @GetMapping("/acesso-cidadao")
-    public ResponseEntity index() {
+    public ResponseEntity<Void> index() {
         return ResponseEntity.ok().build();
     }
 
@@ -80,7 +89,7 @@ public class SigninController {
             @RequestParam(name = "access_token") String token,
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws Exception {
+    ) throws IOException {
         SigninDto signinDto = acessoCidadaoService.authenticate(token, getConferenceId(request, response));
         String valor = Base64.getEncoder().withoutPadding().encodeToString(
                 new ObjectMapper().writeValueAsString(signinDto).getBytes());
@@ -104,7 +113,7 @@ public class SigninController {
             @RequestParam(name = "access_token") String accessToken,
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws Exception {
+    ) throws JsonProcessingException {
         SigninDto signinDto = facebookService.authenticate(accessToken, getConferenceId(request, response));
         String valor = Base64.getEncoder().withoutPadding().encodeToString(
                 new ObjectMapper().writeValueAsString(signinDto).getBytes());
@@ -117,8 +126,7 @@ public class SigninController {
             HttpServletRequest request
     ) {
         String accessToken = googleService.googleAcessToken(authorizationCode, request);
-        RedirectView redirectView = new RedirectView("google-response?access_token=" + accessToken);
-        return redirectView;
+        return  new RedirectView("google-response?access_token=" + accessToken);
     }
 
     @GetMapping("/google-response")
@@ -126,7 +134,7 @@ public class SigninController {
             @RequestParam(name = "access_token") String accessToken,
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws Exception {
+    ) throws JsonProcessingException {
         SigninDto signinDto = googleService.authenticate(accessToken, getConferenceId(request, response));
         String valor = Base64.getEncoder().withoutPadding().encodeToString(
                 new ObjectMapper().writeValueAsString(signinDto).getBytes());
@@ -140,8 +148,7 @@ public class SigninController {
             @RequestParam("oauth_verifier") String oauthVerifier,
             HttpServletRequest request
     ) throws MalformedURLException {
-        RedirectView redirectView = new RedirectView(twitterService.oauthTokenAndSecret(request, oauthToken, oauthVerifier));
-        return redirectView;
+    	return new RedirectView(twitterService.oauthTokenAndSecret(request, oauthToken, oauthVerifier));
     }
 
 
@@ -153,8 +160,8 @@ public class SigninController {
             @RequestParam(name = "screen_name") String screenName,
             HttpServletRequest request,
             HttpServletResponse response
-    ) throws Exception {
-        SigninDto signinDto = twitterService.authenticate(oauthToken, oauthTokenSecret, userId, screenName, getConferenceId(request, response));
+    ) throws JsonProcessingException {
+        SigninDto signinDto = twitterService.authenticate(oauthToken, oauthTokenSecret, getConferenceId(request, response));
         String valor = Base64.getEncoder().withoutPadding().encodeToString(
                 new ObjectMapper().writeValueAsString(signinDto).getBytes());
         return new RedirectView(buildFronstCallBackUrl(request, response, valor));
@@ -165,7 +172,7 @@ public class SigninController {
         cookieService.deleteCookie(request, response, FRONT_CALLBACK_URL, "/participe");
         String url = cookie.getValue();
         if (url.contains("?")) {
-        	url = url.substring(0, url.indexOf("?"));
+        	url = url.substring(0, url.indexOf('?'));
         }
         return url.concat("/#/home?signinDto=".concat(valor));
     }

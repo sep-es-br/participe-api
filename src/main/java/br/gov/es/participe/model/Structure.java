@@ -1,5 +1,6 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +12,7 @@ import br.gov.es.participe.controller.dto.StructureDto;
 import br.gov.es.participe.controller.dto.StructureParamDto;
 
 @NodeEntity
-public class Structure extends Entity {
+public class Structure extends Entity implements Serializable {
 
     private String name;
 

@@ -30,7 +30,9 @@ public class StructureItemDto {
     }
 
     public StructureItemDto(StructureItem structureItem, Structure parentStructure, boolean loadChildren, boolean loadPlanItems) {
-        if (structureItem == null) return;
+        if (structureItem == null) {
+        	return;
+        }
 
         this.logo = structureItem.getLogo();
         this.id = structureItem.getId();
@@ -41,21 +43,7 @@ public class StructureItemDto {
         this.locality = structureItem.getLocality();
         this.votes = structureItem.getVotes();
         
-        if(structureItem.getTitle() != null) 
-        	this.title = structureItem.getTitle();
-        
-        if(structureItem.getSubtitle() != null) 
-        	this.subtitle = structureItem.getSubtitle();
-        
-        if(structureItem.getLink() != null) 
-        	this.link = structureItem.getLink();
-        
-        
-        if(structureItem.getChildren() != null && !structureItem.getChildren().isEmpty())
-        	this.hasNext = true;
-        else
-        	this.hasNext = false;
-
+        loadStructureItem(structureItem);
 
         if (loadChildren && structureItem.getChildren() != null && !structureItem.getChildren().isEmpty()) {
             this.children = new ArrayList<>();
@@ -76,6 +64,24 @@ public class StructureItemDto {
                 }
             });
         }
+    }
+    
+    private void loadStructureItem(StructureItem structureItem) {
+    	if(structureItem.getTitle() != null) 
+        	this.title = structureItem.getTitle();
+        
+        if(structureItem.getSubtitle() != null) 
+        	this.subtitle = structureItem.getSubtitle();
+        
+        if(structureItem.getLink() != null) 
+        	this.link = structureItem.getLink();
+        
+        
+        if(structureItem.getChildren() != null && !structureItem.getChildren().isEmpty())
+        	this.hasNext = true;
+        else
+        	this.hasNext = false;
+
     }
 
     public StructureItemDto(StructureItem structureItem) {

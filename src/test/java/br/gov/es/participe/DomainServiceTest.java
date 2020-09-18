@@ -50,6 +50,12 @@ class DomainServiceTest extends BaseTest {
     }
 
     @Test
+    public void shouldListDomainsController() {
+        ResponseEntity  response = domainController.index(null);
+        Assert.assertEquals(200, response.getStatusCodeValue());
+    }
+
+    @Test
     public void shouldListAllDomains() {
         Collection<Domain> list = domainService.findAll(null);
         Assert.assertTrue(list.isEmpty());

@@ -74,7 +74,7 @@ public class DomainService {
 
         List<Plan> plans = planService.findByDomain(domain.getId());
 
-        if (plans != null && plans.size() > 0) {
+        if (plans != null && !plans.isEmpty()) {
             throw new IllegalArgumentException("This domain is in use by a plan");
         }
 
