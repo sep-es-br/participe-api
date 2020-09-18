@@ -70,9 +70,8 @@ public class SigninDto {
             if (person.getContactEmail() == null) return false;
             if (person.getSelfDeclaretions() == null) return false;
             if (person.getSelfDeclaretions().isEmpty()) return false;
-            if (person.getName() == null) return false;
-
-            return true;
+            
+            return person.getName() != null;
         } else {
             return false;
         }

@@ -5,7 +5,6 @@ import br.gov.es.participe.model.Plan;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.model.Structure;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +15,7 @@ public class PlanItemDto implements  Comparable<PlanItemDto> {
     private String name;    
     private String description;
     private String image;
-    private String StructureItemName;
+    private String structureItemName;
     private Boolean votes;
     private Integer commentsMade;
     private List<CommentDto> comments;
@@ -30,6 +29,7 @@ public class PlanItemDto implements  Comparable<PlanItemDto> {
     private Set<Long> localitiesIds;
 
     public PlanItemDto() {
+    	//Construtor criado por conveniencia.
     }
     
     public PlanItemDto(PlanItem planItem, boolean proposal) {
@@ -39,7 +39,7 @@ public class PlanItemDto implements  Comparable<PlanItemDto> {
         if(!proposal)
         	this.description = planItem.getDescription();
         else {			
-        	this.StructureItemName = planItem.getStructureItem().getName();
+        	this.structureItemName = planItem.getStructureItem().getName();
         }
     }
 
@@ -175,11 +175,11 @@ public class PlanItemDto implements  Comparable<PlanItemDto> {
 	}
 
 	public String getStructureItemName() {
-		return StructureItemName;
+		return structureItemName;
 	}
 
 	public void setStructureItemName(String structureItemName) {
-		StructureItemName = structureItemName;
+		this.structureItemName = structureItemName;
 	}
 
 	public Boolean getVotes() {
@@ -209,8 +209,43 @@ public class PlanItemDto implements  Comparable<PlanItemDto> {
 	@Override
 	public int compareTo(PlanItemDto plan) {
 		return this.name.compareTo(plan.getName());
-	} 
+	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof PlanItemDto)) {
+			return false;
+		}
+		PlanItemDto other = (PlanItemDto) obj;
+		if (id == null) {
+			if (other.id != null) {
+				return false;
+			}
+		} else if (!id.equals(other.id)) {
+			return false;
+		}
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		return true;
+	}
+
 	@Override
 	public String toString() {
 		return " Name: "+this.name+" ID: "+this.id;

@@ -1,8 +1,6 @@
 package br.gov.es.participe.service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,8 +55,12 @@ public class SelfDeclarationService {
 		}
 		return self;
 	}
-	
-	
+
+	public SelfDeclaration update(SelfDeclaration selfDeclaration, Locality newLocality) {
+		selfDeclaration.setLocality(newLocality);
+		return selfDeclarationRepository.save(selfDeclaration);
+	}
+
 	public SelfDeclaration find(Long id) {
 		return selfDeclarationRepository
 				.findById(id)
@@ -78,12 +80,5 @@ public class SelfDeclarationService {
 	public List<SelfDeclaration> findAll(Long id){
 		return selfDeclarationRepository
 				.findAllByIdPerson(id);
-	}
-
-	public Set<SelfDeclaration> findAllAsSet(Long id){
-		List<SelfDeclaration> list = findAll(id);
-		Set<SelfDeclaration> set = new HashSet<>();
-		list.forEach(l -> set.add(l));
-		return set;
 	}
 }

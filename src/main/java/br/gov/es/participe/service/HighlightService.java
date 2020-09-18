@@ -1,5 +1,6 @@
 package br.gov.es.participe.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,7 @@ public class HighlightService {
 			highlight.setPlanItem(planItem);
 			highlight.setLocality(locality);
 			highlight.setPersonMadeBy(person);
+			highlight.setTime(new Date());
 		
 			return highlightRepository.save(highlight);
 		}
@@ -107,12 +109,7 @@ public class HighlightService {
 		return highlightRepository.findAllByIdPersonAndIdPlanItemAndIdConferenceAndIdLoclity(idPerson, idPlanItem, idConference, idLocality);
 	}
 	
-	public Integer countHighlightByPlanItem(Long id) {
-		return highlightRepository.countHighlightByPlanItem(id);
-	}
-	
 	public Integer countHighlightByConference(Long id) {
 		return highlightRepository.countHighlightByConference(id);
 	}
-
 }

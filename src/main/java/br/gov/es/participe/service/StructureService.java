@@ -50,7 +50,6 @@ public class StructureService {
     }
 
     public Structure find(Long id) {
-
         return structureRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Structure not found: " + id));

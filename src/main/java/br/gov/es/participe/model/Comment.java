@@ -1,5 +1,6 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
@@ -11,7 +12,7 @@ import br.gov.es.participe.controller.dto.CommentDto;
 import br.gov.es.participe.controller.dto.CommentParamDto;
 
 @NodeEntity
-public class Comment extends Attend{
+public class Comment extends Attend implements Serializable {
 
 	private String text;
 	private String type;
@@ -19,8 +20,7 @@ public class Comment extends Attend{
 	private String classification;
 	private Boolean moderated;
 
-	@DateString
-	private Date time;
+	
 	
 	@Relationship(type = "LIKED_BY")
 	private Set<Person> personLiked;
@@ -32,12 +32,12 @@ public class Comment extends Attend{
 	}
 	
 	public Comment(CommentDto comment) {
-		this.time = comment.getTime();
 		this.text = comment.getText();
 		this.type = comment.getType();
 		this.status = comment.getStatus();
 		this.setId(comment.getId());
 		this.setFrom(comment.getFrom());
+		setTime(new Date());
 		this.moderated = false;
 	}
 	
@@ -47,7 +47,7 @@ public class Comment extends Attend{
 		this.type = comment.getType();
 		this.setFrom(comment.getFrom());
 		this.status = comment.getStatus();
-		this.time = new Date();
+		setTime(new Date());
 		if(comment.getLocality() != null) {
 			Locality l = new Locality();
 			l.setId(comment.getLocality());
@@ -77,12 +77,6 @@ public class Comment extends Attend{
 		}
 	}
 	
-	public Date getTime() {
-		return time;
-	}
-	public void setTime(Date time) {
-		this.time = time;
-	}
 	public String getText() {
 		return text;
 	}

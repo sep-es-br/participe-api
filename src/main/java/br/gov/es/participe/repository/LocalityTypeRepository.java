@@ -14,5 +14,4 @@ public interface LocalityTypeRepository extends Neo4jRepository<LocalityType, Lo
 
     @Query("MATCH (l:LocalityType) DETACH DELETE l")
     void deleteAll();
-
 }

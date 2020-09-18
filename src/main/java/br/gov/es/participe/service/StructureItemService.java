@@ -66,14 +66,12 @@ public class StructureItemService {
     }
 
     public StructureItem find(Long id) {
-
         return structureItemRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Structure item not found: " + id));
     }
 
     public StructureItem find(String name) {
-
         return structureItemRepository
                 .findByNameIgnoreCase(name);
     }

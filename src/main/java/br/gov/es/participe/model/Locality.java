@@ -1,5 +1,6 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +12,7 @@ import br.gov.es.participe.controller.dto.LocalityDto;
 import br.gov.es.participe.controller.dto.LocalityParamDto;
 
 @NodeEntity
-public class Locality extends Entity {
+public class Locality extends Entity implements Serializable {
 
     private String name;
 
@@ -174,21 +175,6 @@ public class Locality extends Entity {
         return Collections.unmodifiableSet(children);
     }
 
-    public void addChild(Locality locality) {
-        if (children == null) children = new HashSet<>();
-        children.add(locality);
-    }
-
-    public boolean belongsToDomain(Long idDomain) {
-        if (domains == null || domains.isEmpty()) return false;
-
-        for (Domain domain : domains) {
-            if (domain.getId().equals(idDomain)) return true;
-        }
-
-        return false;
-    }
-
 	public Set<Meeting> getMeetingPlace() {
 		return meetingPlace;
 	}
@@ -220,4 +206,8 @@ public class Locality extends Entity {
 	public void setAttends(Set<Attend> attends) {
 		this.attends = attends;
 	}
+
+    public void setDomains(Set<Domain> domains) {
+        this.domains = domains;
+    }
 }

@@ -10,9 +10,8 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @WebFilter(
@@ -31,12 +30,14 @@ public class OAuth2AuthorizationFilter implements Filter {
 
     @Autowired
     private ParticipeUtils participeUtils;
+    
+    private static final String FRONT_CALLBACK_URL = "front_callback_url";
+    private static final String FRONT_CONFERENCE_ID = "front_conference_id";
 
-    @Autowired
-    private HttpSession httpSession;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+    	//Método não implementado.
     }
 
     @Override
@@ -46,20 +47,20 @@ public class OAuth2AuthorizationFilter implements Filter {
 
         if (request.getRequestURI().contains("/oauth2/authorization/")) {
             if (request.getQueryString() != null && !request.getQueryString().isEmpty()) {
-                HashMap<String, String> params = participeUtils.convertQueryStringToHashMap(request.getQueryString());
-                if (params.get("front_callback_url") != null) {
+                Map<String, String> params = participeUtils.convertQueryStringToHashMap(request.getQueryString());
+                if (params.get(FRONT_CALLBACK_URL) != null) {
                 	cookieService.createCookie(
                 			response,
-                			"front_callback_url",
-                			params.get("front_callback_url"),
+                			FRONT_CALLBACK_URL,
+                			params.get(FRONT_CALLBACK_URL),
                 			"/participe"
         			);
                 }
-                if (params.get("front_conference_id") != null) {
+                if (params.get(FRONT_CONFERENCE_ID) != null) {
                 	cookieService.createCookie(
                 			response,
-                			"front_conference_id",
-                			params.get("front_conference_id"),
+                			FRONT_CONFERENCE_ID,
+                			params.get(FRONT_CONFERENCE_ID),
                 			"/participe"
         			);
                 }
@@ -74,6 +75,6 @@ public class OAuth2AuthorizationFilter implements Filter {
 
     @Override
     public void destroy() {
-
+    	//Método não implementado por não haver necessidade.
     }
 }

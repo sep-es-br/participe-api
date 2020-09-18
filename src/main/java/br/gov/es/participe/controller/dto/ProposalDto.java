@@ -8,16 +8,13 @@ public class ProposalDto {
 	private Boolean isLiked;
 	private String comment;
 	private String personName;
-	private String LocalityPerson;
-	private String LocalityName;
-	private String LocalityTypeName;
+	private String localityPerson;
+	private String localityName;
+	private String localityTypeName;
 	
 	private Integer likes;
 	
 	private List<PlanItemDto> planItens;
-	
-	public ProposalDto() {
-	}
 	
 	public Long getCommentid() {
 		return commentid;
@@ -48,25 +45,25 @@ public class ProposalDto {
 		this.personName = personName;
 	}
 	public String getLocalityPerson() {
-		return LocalityPerson;
+		return localityPerson;
 	}
 	public void setLocalityPerson(String localityPerson) {
-		LocalityPerson = localityPerson;
+		this.localityPerson = localityPerson;
 	}
 	public String getLocalityName() {
-		return LocalityName;
+		return this.localityName;
 	}
 
 	public void setLocalityName(String localityName) {
-		LocalityName = localityName;
+		this.localityName = localityName;
 	}
 
 	public String getLocalityTypeName() {
-		return LocalityTypeName;
+		return this.localityTypeName;
 	}
 
 	public void setLocalityTypeName(String localityTypeName) {
-		LocalityTypeName = localityTypeName;
+		this.localityTypeName = localityTypeName;
 	}
 
 	public Integer getLikes() {

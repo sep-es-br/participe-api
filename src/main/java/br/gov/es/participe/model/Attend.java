@@ -1,12 +1,16 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
+import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 @NodeEntity
-public abstract class Attend {
+public abstract class Attend implements Serializable {
 	
 	@Id @GeneratedValue
     private Long id;
@@ -27,6 +31,9 @@ public abstract class Attend {
 	
 	@Relationship(type = "DURING")
 	private Meeting meeting;
+	
+	@DateString
+	private Date time;
 
     public Long getId() {
         return id;
@@ -84,4 +91,11 @@ public abstract class Attend {
 		this.conference = conference;
 	}
 
+	public Date getTime() {
+		return time;
+	}
+
+	public void setTime(Date time) {
+		this.time = time;
+	}
 }

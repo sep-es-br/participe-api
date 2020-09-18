@@ -11,9 +11,11 @@ public class PersonParamDto {
     private String telephone;
     private String password;
     private String confirmPassword;
-    private SelfDeclarationDto selfDeclaretion;
-    
-    
+    private String typeAuthentication;
+    private SelfDeclarationParamDto selfDeclaration;
+    private boolean resetPassword;
+    private Boolean active;
+
 	public Long getId() {
 		return id;
 	}
@@ -68,12 +70,28 @@ public class PersonParamDto {
 	public void setConfirmPassword(String confirmPassword) {
 		this.confirmPassword = confirmPassword;
 	}
-	public SelfDeclarationDto getSelfDeclaretion() {
-		return selfDeclaretion;
+	public String getTypeAuthentication() {
+		return typeAuthentication;
 	}
-	public void setSelfDeclaretion(SelfDeclarationDto selfDeclaretion) {
-		this.selfDeclaretion = selfDeclaretion;
+	public void setTypeAuthentication(String typeAuthentication) {
+		this.typeAuthentication = typeAuthentication;
 	}
-    
-    
+	public SelfDeclarationParamDto getSelfDeclaration() {
+		return selfDeclaration;
+	}
+	public void setSelfDeclaration(SelfDeclarationParamDto selfDeclaration) {
+		this.selfDeclaration = selfDeclaration;
+	}
+	public boolean isResetPassword() {
+		return resetPassword;
+	}
+	public void setResetPassword(boolean resetPassword) {
+		this.resetPassword = resetPassword;
+	}
+	public Boolean getActive() {
+		return active;
+	}
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
 }

@@ -29,6 +29,4 @@ public interface SelfDeclarationRepository extends Neo4jRepository<SelfDeclarati
 			+"Optional Match (s)-[m:MADE]-(p:Person) "
 			+"Return s, c, p, l")
 	SelfDeclaration find(Long id);
-	
-	
 }

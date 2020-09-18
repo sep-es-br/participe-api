@@ -27,11 +27,6 @@ public interface HighlightRepository extends Neo4jRepository<Highlight,Long>{
 			+" RETURN h")
 	List<Highlight> findAllByIdPersonAndIdPlanItemAndIdConferenceAndIdLoclity(Long idPerson, Long idPlanItem, Long idConference, Long idLocality);
 	
-	@Query(" MATCH (pi:PlanItem)-[a:ABOUT]-(h:Highlight) "
-			+" WHERE id(pi)={0}  "
-			+" RETURN COUNT(h)")
-	Integer countHighlightByPlanItem(Long id);
-	
 	@Query(" MATCH (co:Conference)-[a:ABOUT]-(h:Highlight)-[:ABOUT]->(d:PlanItem)-[:COMPOSES]->(ae:PlanItem) "
 			+" WHERE id(co)={0}  "
 			+" RETURN COUNT(h)")

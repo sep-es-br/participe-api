@@ -1,6 +1,5 @@
 package br.gov.es.participe.util.domain;
 
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 

@@ -1,5 +1,7 @@
 package br.gov.es.participe.model;
 
+import java.util.Date;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import br.gov.es.participe.controller.dto.HighlightParamDto;
@@ -13,6 +15,7 @@ public class Highlight extends Attend{
 	public Highlight(HighlightParamDto highlightParamDto) {
 		this.setId(highlightParamDto.getId());
 		this.setFrom(highlightParamDto.getFrom());
+		setTime(new Date());
 		
 		if(highlightParamDto.getLocality() != null)
 			this.setLocality(new Locality(highlightParamDto.getLocality()));

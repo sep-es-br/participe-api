@@ -3,8 +3,6 @@ package br.gov.es.participe.util.domain;
 public enum CommentTypeType {
     PRESENTIAL("Presential", "pre"),
     REMOTE("Remote", "com");
-    //                                        ^ no banco está com.
-    // Quando alterar método store em CommentController, este valor deve mudar.
 
     public final String completeName;
     public final String leanName;

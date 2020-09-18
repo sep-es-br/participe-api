@@ -61,6 +61,4 @@ public class Login extends Entity {
 	public void setTime(Date time) {
 		this.time = time;
 	}
-    
-    
 }

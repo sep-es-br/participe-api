@@ -5,12 +5,13 @@ import br.gov.es.participe.controller.dto.StructureItemParamDto;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 @NodeEntity
-public class StructureItem extends Entity {
+public class StructureItem extends Entity implements Serializable {
 
     private String name;
     private Boolean logo;
@@ -200,41 +201,11 @@ public class StructureItem extends Entity {
         return Collections.unmodifiableSet(children);
     }
 
-    public void addItem(StructureItem item) {
-        if (children == null) {
-            children = new HashSet<>();
-        }
-
-        this.children.add(item);
-    }
-
     public Set<PlanItem> getPlanItems() {
         if (planItems == null) {
             return Collections.emptySet();
         }
 
         return Collections.unmodifiableSet(planItems);
-    }
-
-    public void addPlanItem(PlanItem planItem) {
-        if (planItems == null) {
-            planItems = new HashSet<>();
-        }
-
-        planItems.add(planItem);
-    }
-
-    public void removePlanItem(Long id) {
-        PlanItem planItemToRemove = null;
-        for (PlanItem planItem : planItems) {
-            if (planItem.getId().equals(id)) {
-                planItemToRemove = planItem;
-                break;
-            }
-        }
-
-        if (planItemToRemove != null) {
-            planItems.remove(planItemToRemove);
-        }
     }
 }

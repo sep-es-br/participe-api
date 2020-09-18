@@ -31,23 +31,16 @@ public class LocalityDto {
         	type = new LocalityTypeDto(locality.getType());
     }
     public LocalityDto(Locality locality, Domain parentDomain, boolean loadChildren, boolean loadParent) {
-        if (locality == null ||(parentDomain != null && !locality.getDomains().contains(parentDomain))) return;
-
+        if (locality == null ||(parentDomain != null && !locality.getDomains().contains(parentDomain))) {
+        	return;
+        }
         id = locality.getId();
         name = locality.getName();
-        if(locality.getType() != null)
-        	type = new LocalityTypeDto(locality.getType());
-        
-        if (!locality.getDomains().isEmpty()) {
-            domains = new ArrayList<>();
-            locality.getDomains().forEach(domain -> domains.add(new DomainDto(domain, false)));
-        }
-
+        loadLoclity(locality);
         if (loadParent && !locality.getParents().isEmpty()) {
             parents = new ArrayList<>();
             locality.getParents().forEach(parent -> parents.add(new LocalityDto(parent, parentDomain, false, loadParent)));
         }
-
         if (loadChildren && !locality.getChildren().isEmpty()) {
             children = new ArrayList<>();
             locality.getChildren().forEach(child -> {
@@ -57,16 +50,25 @@ public class LocalityDto {
                 }
             });
         }
-        if(locality.getMeetingPlace() != null && !locality.getMeetingPlace().isEmpty()) {
+        
+    }
+    
+    private void loadLoclity(Locality locality) {
+    	if(locality.getType() != null) {
+    		type = new LocalityTypeDto(locality.getType());
+    	}        
+        if (!locality.getDomains().isEmpty()) {
+            domains = new ArrayList<>();
+            locality.getDomains().forEach(domain -> domains.add(new DomainDto(domain, false)));
+        }
+    	if(locality.getMeetingPlace() != null && !locality.getMeetingPlace().isEmpty()) {
         	meetingPlace = new ArrayList<>();
         	locality.getMeetingPlace().forEach(meet -> meetingPlace.add(new MeetingDto(meet)));
         }
-        
         if(locality.getMeetingCovers() != null && !locality.getMeetingCovers().isEmpty()) {
         	meetingCovers = new ArrayList<>();
         	locality.getMeetingCovers().forEach(meet -> meetingCovers.add(new MeetingDto(meet)));
         }
-        
         if(locality.getSelfDeclaration() != null && !locality.getSelfDeclaration().isEmpty()) {
         	selfDeclarations = new ArrayList<>();
         	locality.getSelfDeclaration().forEach(self -> selfDeclarations.add(new SelfDeclarationDto(self, true)));

@@ -14,14 +14,15 @@ public class AuthenticationScreenDto {
 	private Integer numberOfLocalities;
 	
 	public AuthenticationScreenDto () {
+		//Contrutor criado por conveniencia
 	}
 	
 	public String getLocalityType() {
 		return localityType;
 	}
 
-	public void setLocalityType(String LocalityType) {
-		this.localityType = LocalityType;
+	public void setLocalityType(String localityType) {
+		this.localityType = localityType;
 	}
 
 	public String getTitleAuthentication() {

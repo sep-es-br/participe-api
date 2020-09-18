@@ -7,10 +7,7 @@ public class ProposalsFilterDto {
 	private String regionName;
 	private List<PlanItemDto> itens;
 	private List<LocalityDto> localities;
-	
-	public ProposalsFilterDto() {
-	}
-	
+		
 	public String getItemName() {
 		return itemName;
 	}

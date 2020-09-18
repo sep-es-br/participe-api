@@ -1,5 +1,6 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +14,7 @@ import br.gov.es.participe.controller.dto.ConferenceDto;
 import br.gov.es.participe.controller.dto.ConferenceParamDto;
 
 @NodeEntity
-public class Conference extends Entity {
+public class Conference extends Entity implements Serializable {
 
     private String name;
     private String description;
@@ -261,8 +262,8 @@ public class Conference extends Entity {
 		return localityType;
 	}
 
-	public void setLocalityType(LocalityType LocalityType) {
-		this.localityType = LocalityType;
+	public void setLocalityType(LocalityType localityType) {
+		this.localityType = localityType;
 	}
 
 	public Set<Meeting> getMeeting() {

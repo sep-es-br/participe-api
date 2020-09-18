@@ -3,6 +3,7 @@ package br.gov.es.participe.model;
 import java.util.Date;
 
 import org.neo4j.ogm.annotation.EndNode;
+import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 import org.neo4j.ogm.annotation.typeconversion.DateLong;
@@ -15,10 +16,13 @@ public class IsAuthenticatedBy extends Entity{
 	private String authType;
 	private String email;
 	private String password;
-	private Boolean temporary_password;
+	
+	@Property(name="temporary_password")
+	private Boolean temporaryPassword;
 	
 	@DateLong
-	private Date password_time;
+	@Property(name="password_time")
+	private Date passwordTime;
 	
 	@StartNode
 	private Person person;
@@ -29,16 +33,16 @@ public class IsAuthenticatedBy extends Entity{
 	public IsAuthenticatedBy() {
 	}
 	
-	public IsAuthenticatedBy(String idByAuth, String name, String authType, String email, String password,
-			Boolean temporary_password, Date password_time, Person person, AuthService authService) {
+	public IsAuthenticatedBy(String name, String authType, String password,
+			Boolean temporaryPassword, Date passwordTime, Person person, AuthService authService) {
 
-		this.idByAuth = idByAuth;
+		this.idByAuth = authService.getServerId();
 		this.name = name;
 		this.authType = authType;
-		this.email = email;
+		this.email = person.getContactEmail();
 		this.password = password;
-		this.temporary_password = temporary_password;
-		this.password_time = password_time;
+		this.temporaryPassword = temporaryPassword;
+		this.passwordTime = passwordTime;
 		this.person = person;
 		this.authService = authService;
 	}
@@ -67,17 +71,17 @@ public class IsAuthenticatedBy extends Entity{
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public Boolean getTemporary_password() {
-		return temporary_password;
+	public Boolean getTemporaryPassword() {
+		return temporaryPassword;
 	}
-	public void setTemporary_password(Boolean temporary_password) {
-		this.temporary_password = temporary_password;
+	public void setTemporaryPassword(Boolean temporaryPassword) {
+		this.temporaryPassword = temporaryPassword;
 	}
-	public Date getPassword_time() {
-		return password_time;
+	public Date getPasswordTime() {
+		return passwordTime;
 	}
-	public void setPassword_time(Date password_time) {
-		this.password_time = password_time;
+	public void setPasswordTime(Date passwordTime) {
+		this.passwordTime = passwordTime;
 	}
 	public String getIdByAuth() {
 		return idByAuth;

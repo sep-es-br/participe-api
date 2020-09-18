@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -29,6 +30,9 @@ public class CaptchaFilter extends OncePerRequestFilter {
 
 	@Value("${google.recaptcha.verify.url}")
 	public String recaptchaVerifyUrl;
+	
+	@Autowired
+    private Logger log;
 	
 	@Autowired
 	public CaptchaFilter(RestTemplateBuilder restTemplateBuilder) {
@@ -54,9 +58,9 @@ public class CaptchaFilter extends OncePerRequestFilter {
 				try {
 					recaptchaResponse = this.restTemplate.postForObject(recaptchaVerifyUrl, param, RecaptchaResponse.class);
 				} catch (RestClientException e) {
-					System.out.print(e.getMessage());
+					log.error("Error verify recaptchaResponse", e);
 				}
-				if (recaptchaResponse.isSuccess()) {
+				if (recaptchaResponse != null && recaptchaResponse.isSuccess()) {
 					filterChain.doFilter(request, response);
 				} else {
 					throw new IllegalArgumentException("Captcha inválido");

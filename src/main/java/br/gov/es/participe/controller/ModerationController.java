@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import br.gov.es.participe.controller.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.gov.es.participe.controller.dto.CommentParamDto;
-import br.gov.es.participe.controller.dto.ConferenceDto;
-import br.gov.es.participe.controller.dto.LeanLocalityResultDto;
-import br.gov.es.participe.controller.dto.LeanPlanItemResultDto;
-import br.gov.es.participe.controller.dto.LocalityDto;
-import br.gov.es.participe.controller.dto.ModerationParamDto;
-import br.gov.es.participe.controller.dto.ModerationResultDto;
-import br.gov.es.participe.controller.dto.PlanDto;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.model.Locality;
@@ -41,7 +34,6 @@ import br.gov.es.participe.service.TokenService;
 import br.gov.es.participe.util.domain.CommentStatusType;
 import br.gov.es.participe.util.domain.CommentTypeType;
 import br.gov.es.participe.util.domain.TokenType;
-
 
 @RestController
 @CrossOrigin
@@ -82,17 +74,19 @@ public class ModerationController {
 		CommentStatusType commStatus = ALL;
 		CommentTypeType commType = REMOTE;
 		Long idModerator = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
+		ModerationFilterDto moderationFilterDto = new ModerationFilterDto();
+		moderationFilterDto.setIdModerator(idModerator);
+		moderationFilterDto.setConferenceId(conferenceId);
+		moderationFilterDto.setStatus(commStatus.getLeanNameByCompleteName(status));
+		moderationFilterDto.setType(commType.getLeanNameByCompleteName(type));
+		moderationFilterDto.setText(text);
+		moderationFilterDto.setLocalityIds(localityIds != null ? localityIds : emptyList);
+		moderationFilterDto.setPlanItemIds(planItemIds != null ? planItemIds : emptyList);
+		moderationFilterDto.setStructureItemIds(structureItemIds != null ? structureItemIds : emptyList);
+		moderationFilterDto.setInitialDate(initialDate);
+		moderationFilterDto.setEndDate(endDate);
 		List<ModerationResultDto> response = commentService
-				.findAllByStatus(idModerator,
-						conferenceId,
-						commStatus.getLeanNameByCompleteName(status),
-						commType.getLeanNameByCompleteName(type),
-						text,
-						localityIds != null ? localityIds : emptyList,
-						planItemIds != null ? planItemIds : emptyList,
-						structureItemIds != null ? structureItemIds : emptyList,
-						initialDate,
-						endDate);
+				.findAllByStatus(moderationFilterDto);
 
 		response.forEach(c -> {
 			c.setStatus(commStatus.getCompleteNameFromLeanName(c.getStatus()));
@@ -114,7 +108,7 @@ public class ModerationController {
 	}
 	
 	@GetMapping("/treeView/{idComment}")
-	public ResponseEntity<PlanDto> findModerationResultById(@PathVariable Long idComment) {
+	public ResponseEntity<PlanDto> findPlanByCommentId(@PathVariable Long idComment) {
 		PlanDto response = commentService
 				.findTreeViewByCommentId(idComment);
 		return ResponseEntity.status(200).body(response);

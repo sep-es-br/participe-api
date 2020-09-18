@@ -25,10 +25,14 @@ public class Person extends Entity implements UserDetails {
     private String contactEmail;
 
     private String cpf;
+    
+    private Boolean status;
 
     private String telephone;
 
     private String accessToken;
+
+    private Boolean active;
 
     @Relationship(type = "IS_AUTHENTICATED_BY")
     private Set<AuthService> authServices;
@@ -44,9 +48,14 @@ public class Person extends Entity implements UserDetails {
 
     @Relationship(type = "MODERATED_BY")
     private Set<Comment> moderatedComments;
-    
-    private Set<String> roles;
 
+    @Relationship(type = "IS_RECEPTIONIST_OF")
+    private Set<Meeting> welcomesMeetings;
+
+    @Relationship(type = "CHECKED_IN_AT")
+    private Set<Meeting> checkedInMeetings;
+
+    private Set<String> roles;
 
     public Person() {
     }
@@ -75,6 +84,18 @@ public class Person extends Entity implements UserDetails {
             this.contactEmail = person.getContactEmail();
     }
 
+    public Person(PersonParamDto person, Boolean isTypeAuthenticationCpf) {
+        setId(person.getId());
+        this.name = person.getName().trim().replaceAll(" +", " ");
+        this.cpf = person.getCpf();
+        this.telephone = person.getTelephone();
+
+        if (isTypeAuthenticationCpf)
+            this.contactEmail = person.getCpf() + "@cpf";
+        else
+            this.contactEmail = person.getContactEmail();
+    }
+
     public String getName() {
         return name;
     }
@@ -98,8 +119,15 @@ public class Person extends Entity implements UserDetails {
     public void setCpf(String cpf) {
         this.cpf = cpf;
     }
+	public Boolean getStatus() {
+		return status;
+	}
 
-    public String getTelephone() {
+	public void setStatus(Boolean status) {
+		this.status = status;
+	}
+
+	public String getTelephone() {
         return telephone;
     }
 
@@ -177,7 +205,23 @@ public class Person extends Entity implements UserDetails {
 		this.accessToken = accessToken;
 	}
 
-	public Set<String> getRoles() {
+    public Set<Meeting> getWelcomesMeetings() {
+        return welcomesMeetings;
+    }
+
+    public void setWelcomesMeetings(Set<Meeting> welcomesMeetings) {
+        this.welcomesMeetings = welcomesMeetings;
+    }
+
+    public Set<Meeting> getCheckedInMeetings() {
+        return checkedInMeetings;
+    }
+
+    public void setCheckedInMeetings(Set<Meeting> checkedInMeetings) {
+        this.checkedInMeetings = checkedInMeetings;
+    }
+
+    public Set<String> getRoles() {
         if (roles == null) {
             roles = new HashSet<>();
         }
@@ -187,15 +231,23 @@ public class Person extends Entity implements UserDetails {
 	public void setRoles(Set<String> roles) {
 		this.roles = roles;
 	}
-	
-	@Override
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    @Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Set<String> personRoles = getRoles();
-		List<String> roles = new ArrayList<>();
+		List<String> listRoles = new ArrayList<>();
 		if(personRoles != null && !personRoles.isEmpty()) {
-			personRoles.forEach(r -> roles.add("ROLE_" + r));
+			personRoles.forEach(r -> listRoles.add("ROLE_" + r));
 		}
-		return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+		return listRoles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 	}
 
 	@Override

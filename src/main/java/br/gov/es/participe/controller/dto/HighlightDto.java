@@ -16,6 +16,7 @@ public class HighlightDto {
 	private MeetingDto meeting;
 	
 	public HighlightDto(){
+		//Construtor criado por conveniencia.
 	}
 	
 	

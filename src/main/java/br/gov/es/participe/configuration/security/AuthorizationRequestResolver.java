@@ -6,8 +6,6 @@ import org.springframework.security.oauth2.client.web.DefaultOAuth2Authorization
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
-import org.springframework.social.oauth1.OAuthToken;
-import org.springframework.social.twitter.connect.TwitterConnectionFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -27,16 +25,16 @@ public class AuthorizationRequestResolver implements OAuth2AuthorizationRequestR
     @Override
     public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
         OAuth2AuthorizationRequest req = delegatedRequestResolver.resolve(request);
-        return customizeRequest(req, request);
+        return customizeRequest(req);
     }
 
     @Override
     public OAuth2AuthorizationRequest resolve(HttpServletRequest request, String clientRegistrationId) {
         OAuth2AuthorizationRequest req = delegatedRequestResolver.resolve(request, clientRegistrationId);
-        return customizeRequest(req, request);
+        return customizeRequest(req);
     }
 
-    private OAuth2AuthorizationRequest customizeRequest(OAuth2AuthorizationRequest request, HttpServletRequest httpRequest) {
+    private OAuth2AuthorizationRequest customizeRequest(OAuth2AuthorizationRequest request) {
         if (request != null) {
             return OAuth2AuthorizationRequest
                     .from(request)

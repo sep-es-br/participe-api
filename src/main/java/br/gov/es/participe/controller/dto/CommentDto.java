@@ -18,7 +18,7 @@ public class CommentDto {
 	public CommentDto() {
 	}
 	
-	public CommentDto(Comment comment, boolean loadPersons, boolean front) {
+	public CommentDto(Comment comment, boolean front) {
 		
 		this.id = comment.getId();
 		this.text = comment.getText();

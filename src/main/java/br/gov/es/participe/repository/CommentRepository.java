@@ -20,16 +20,6 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 			+" WHERE id(p)={0} AND (id(conf) = {1} OR {1} IS NULL )"
 			+" Return c")
 	List<Comment> findByIdPerson(Long idPerson, Long idConference);
-
-	@Query(" MATCH (c:Comment)-[a:ABOUT]-(pi:PlanItem) "
-			+" WHERE id(pi)={0} AND c.status CONTAINS {1} "
-			+" RETURN c "
-			+" ,[ "
-			+" 		[(c)-[ab:ABOUT]-(l:Locality) | [ab,l]], "
-			+" 		[(l)-[o:OF_TYPE]-(lt:LocalityType) | [o,lt]], "
-			+" 		[(c)-[m:MADE_BY]-(p:Person) | [m,p]] "
-			+"]")
-	List<Comment> finsByIdPlanItem(Long idPlanItem, String status);
 	
 	@Query("MATCH (co:Conference)<-[:ABOUT]-(c:Comment)-[:ABOUT]->(pi:PlanItem)-[:COMPOSES]->(pi2:PlanItem) "
 			+" , (c)-[:MADE_BY]->(p:Person) "
@@ -45,11 +35,6 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 					+" WHERE id(c)={0} AND comment.status CONTAINS {1} AND ext.translate(comment.text) CONTAINS ext.translate({2}) AND (id(parent) IN {4} OR NOT {4}) AND (id(loc) IN {3} OR NOT {3}) AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment)))"
 					+" RETURN COUNT(DISTINCT comment)")
 	Page<Comment> findAllCommentsByConference(Long idConference, String status, String text, Long[] localityIds, Long[] planItemIds, Pageable pageable);
-	
-	@Query(" MATCH (pi:PlanItem)-[a:ABOUT]-(c:Comment) "
-			+" WHERE id(pi)={0} "
-			+" RETURN COUNT(c)")
-	Integer countCommentByPlanItem(Long id);
 	
 	@Query(" MATCH (co:Conference)-[a:ABOUT]-(c:Comment) "
 			+" WHERE id(co)={0} AND NOT c.status IN ['rem', 'pen']"
@@ -73,9 +58,8 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 			"c.type AS type, p.name AS citizenName, m.name AS moderatorName, mb.time as moderateTime, mb.finish as moderated, " +
 			"id(m) as moderatorId, id(loc) as localityId, loc.name as localityName, c.classification AS classification, " +
 			"id(pi) as planItemId, pi.name as planItemName, id(si) AS structureItemId, si.name AS structureItemName, " +
-			"id(piArea) AS areaEstrategicaId, piArea.name AS nameAreaEstrategica "
-		)
-		List<ModerationResultDto> findAllByStatus(String[] status, String type, Long[] localityIds, Long[] planItemIds,
+			"id(piArea) AS areaEstrategicaId, piArea.name AS nameAreaEstrategica ")
+	List<ModerationResultDto> findAllByStatus(String[] status, String type, Long[] localityIds, Long[] planItemIds,
 												  Long conferenceId, Long[] structureItemIds);
 
 	@Query(
@@ -117,21 +101,6 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 		"RETURN si2 AS structureItems"
 	)
 	Collection<StructureItem> findModerationStructureItemsByCommentId(Long idComment);
-
-	@Query(
-	"MATCH (com:Comment)-[ab:ABOUT]->(pi1:PlanItem)-[:OBEYS]->(si1:StructureItem)-[:COMPOSES*]->(stt:Structure) " +
-	"MATCH (stt)<-[:COMPOSES*]-(siAll:StructureItem) " +
-	"WHERE id(com)={0} " +
-	"RETURN siAll as structureItem"
-	)
-	Collection<StructureItem> findTreeViewStructureItemsByCommentId(Long idComment);
-
-	@Query(
-		"MATCH (si:StructureItem)<-[:OBEYS]-(piAll:PlanItem) " +
-		"WHERE id(si)={0}" +
-		"RETURN piAll as planItems"
-	)
-	Collection<PlanItem> findTreeViewPlanItemsByStructureItemId(Long idStructureItem);
 	
 	@Query(" MATCH (c:Comment) "
 			+" WHERE id(c)={0} "

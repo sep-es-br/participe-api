@@ -11,7 +11,6 @@ import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.User;
 import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.social.facebook.connect.FacebookConnectionFactory;
-import org.springframework.social.oauth2.OAuth2Parameters;
 import org.springframework.stereotype.Service;
 
 import br.gov.es.participe.controller.dto.SigninDto;
@@ -77,7 +76,8 @@ public class FacebookService {
         if (findPerson.isPresent()) {
             Person person = findPerson.get();
             person.setAccessToken(accessToken);
-            return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(), conferenceId);
+            return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(),
+                    conferenceId, false, true, null);
         }
 
         return createPerson(user, accessToken, conferenceId);
@@ -89,17 +89,7 @@ public class FacebookService {
         person.setName(user.getName());
         person.setContactEmail(user.getEmail());
         
-        return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(), conferenceId);
+        return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(),
+                conferenceId, false, true, null);
     }
-
-    @Deprecated
-    private String facebookLogin(HttpServletRequest request) {
-        OAuth2Parameters parameters = new OAuth2Parameters();
-
-        parameters.setRedirectUri(participeUtils.getServerBaseUrl(request).concat("/facebook"));
-        parameters.setScope(facebookScope);
-
-        return createFacebookConnection().getOAuthOperations().buildAuthenticateUrl(parameters);
-    }
-
 }

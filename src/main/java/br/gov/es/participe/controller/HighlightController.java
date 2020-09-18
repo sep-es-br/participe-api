@@ -36,11 +36,11 @@ public class HighlightController {
 		highlightService.deleteAllByIdPerson(id);
 		return ResponseEntity.status(200).build();
 	}
-	
+
 	@DeleteMapping
 	public ResponseEntity delete(@RequestBody HighlightParamDto highlightParamDto) {
 		boolean response = highlightService.delete(new Highlight(highlightParamDto));
-		
+
 		return ResponseEntity.status(200).body(response);
 	}
 }

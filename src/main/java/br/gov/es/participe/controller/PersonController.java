@@ -1,13 +1,7 @@
 package br.gov.es.participe.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -30,11 +24,7 @@ import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.SelfDeclaration;
-import br.gov.es.participe.service.CookieService;
 import br.gov.es.participe.service.PersonService;
-import br.gov.es.participe.service.SelfDeclarationService;
-import br.gov.es.participe.service.TokenService;
-import br.gov.es.participe.util.domain.TokenType;
 import br.gov.es.participe.util.dto.MessageDto;
 
 @RestController
@@ -46,9 +36,6 @@ public class PersonController {
 
 	@Autowired
 	private PersonService personService;
-	
-	@Autowired
-	private TokenService tokenService;
 	
 	@GetMapping
     public ResponseEntity index() {
@@ -70,45 +57,16 @@ public class PersonController {
 	
 	@PostMapping
 	public ResponseEntity store(@RequestBody PersonParamDto personParam) {
-		if(personParam.getContactEmail().equals(personParam.getConfirmEmail())) {
-			if(personService.validate(personParam.getContactEmail(), "", SERVER)) {
-				Person person = personService.save(	new Person(personParam), false);
-				
-				SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaretion());
-				
-				person = personService.complement(person, self);
-				
-				personService.createRelationshipWithAthService(person, 
-															   personParam.getPassword(), 
-															   "Participe", 
-															   person.getId().toString(), 
-															   self.getConference().getId());
-				
-				PersonDto res = new PersonDto(person);
-				
-				return ResponseEntity.status(200).body(res);
-			}
-			MessageDto msg = new MessageDto();
-			msg.setMessage("E-mail já cadastrado");
-			msg.setCode(403);
-			return ResponseEntity.status(403).body(msg);
-		}
-		
-		MessageDto msg = new MessageDto();
-		msg.setMessage("E-mails Incompatíveis");
-		msg.setCode(403);
-		return ResponseEntity.status(403).body(msg);
-		
+		return personService.storePerson(personParam, false);
 	}
 	
 	@PostMapping("/complement")
 	public ResponseEntity complement(@RequestBody PersonParamDto personParam) {
 		
-		if(personParam.getSelfDeclaretion() == null) 
+		if(personParam.getSelfDeclaration() == null)
 			throw new IllegalArgumentException("Self Declaration is required");
 		
-		SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaretion());
-		
+		SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaration());
 		Person person = personService.complement(	new Person(personParam),
 													self);
 		
@@ -123,35 +81,12 @@ public class PersonController {
 		return ResponseEntity.status(200).build();
 	}
 	
-	@PutMapping
-	public ResponseEntity update(@RequestHeader (name="Authorization") String token, @RequestBody PersonParamDto personParam) {
-		String[] keys = token.split(" ");
-		Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
-
-		if(personParam.getConfirmPassword().equals(personParam.getPassword())) {
-			int size = personParam.getPassword().length();
-			if(size >= 6 && personParam.getPassword().matches("[A-Za-z0-9]+")) {
-				Person person = personService.find(idPerson);
-				
-				PersonDto response = new PersonDto(person);
-				
-				personService.createRelationshipWithAthService(person, 
-															   personParam.getPassword(), 
-															   SERVER, 
-															   idPerson.toString(), 
-															   null);
-				
-				return ResponseEntity.status(200).body(response);
-			}
-			MessageDto msg = new MessageDto();
-			msg.setMessage("Senha deve conter no mínimo 6 caracteres alfanuméricos");
-			msg.setCode(403);
-			return ResponseEntity.status(403).body(msg);
-		}
-		MessageDto msg = new MessageDto();
-		msg.setMessage("Senhas fornecidas são incompatíveis");
-		msg.setCode(403);
-		return ResponseEntity.status(403).body(msg);
+	@PutMapping("/{personId}")
+	public ResponseEntity update(@RequestHeader (name="Authorization") String token,
+								 @RequestBody PersonParamDto personParam,
+								 @PathVariable(name = "personId") Long personId) {
+		personParam.setId(personId);
+		return personService.updatePerson(token, personParam, false);
 	}
 	
 	@PostMapping("/forgot-password")

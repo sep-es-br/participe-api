@@ -4,10 +4,11 @@ import br.gov.es.participe.controller.dto.LocalityTypeDto;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @NodeEntity
-public class LocalityType extends Entity {
+public class LocalityType extends Entity implements Serializable {
     private String name;
 
     @Relationship(type = "OF_TYPE", direction = Relationship.INCOMING)

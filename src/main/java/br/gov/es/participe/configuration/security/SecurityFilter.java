@@ -34,7 +34,8 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.contains("/localities/complement")
                     || url.contains("/participation/portal-header")
                     || url.contains("/conferences/AuthenticationScreen")
-                    || url.contains("/person")
+                    || (url.contains("/person") && !url.endsWith("/persons"))
+                    || url.contains("/meetings")
                     || url.endsWith("/person/forgot-password")
                     || url.endsWith("/login")
                     || url.endsWith("/signin/acesso-cidadao")
@@ -51,7 +52,6 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.endsWith("/swagger-ui.html")
                     || url.endsWith("/v2/api-docs")
                     || url.contains("/swagger-resources")
-                    || url.endsWith("/acesso-cidadao-response.html")
                     || url.contains("/webjars/");
 
             if (!isPublicUrl) {
@@ -67,20 +67,24 @@ public class SecurityFilter extends OncePerRequestFilter {
             	filterChain.doFilter(request, response);            	
             }
 
-        } catch (Exception e) {
-        	if (e instanceof IllegalArgumentException && "Captcha inválido".equals(e.getMessage())) {
+        } catch (IllegalArgumentException e) {
+        	if ("Captcha inválido".equals(e.getMessage())) {
         		response.setStatus(HttpStatus.SC_BAD_REQUEST);
         		MessageDto messageDto = new MessageDto(400, e.getMessage());
-        		response.getWriter().write(messageDto.getJSON());       		
+        		response.getWriter().write(messageDto.getJSON());
         	} else {
         		response.setStatus(HttpStatus.SC_UNAUTHORIZED);
         		MessageDto messageDto = new MessageDto(401, "Invalid token");
-        		response.getWriter().write(messageDto.getJSON());        		
+        		response.getWriter().write(messageDto.getJSON());
         	}
+        } catch (Exception e) {
+        	response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+    		MessageDto messageDto = new MessageDto(401, "Invalid token");
+    		response.getWriter().write(messageDto.getJSON());        	
         }
     }
 
-    private String getToken(HttpServletRequest request) throws IllegalArgumentException {
+    private String getToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
 
         if (token == null) {
