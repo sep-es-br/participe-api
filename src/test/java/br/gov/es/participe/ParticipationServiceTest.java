@@ -212,22 +212,26 @@ class ParticipationServiceTest extends BaseTest {
 
         File file = fileRepository.save(new File());
         Locality locality = new Locality();
+        locality.setName("nome");
         locality.setType(localityType);
         locality = localityRepository.save(locality);
         Set<Locality> localities = new HashSet<>();
         localities.add(locality);
 
         PlanItem planItem1 = new PlanItem();
+        planItem1.setName("nome");
         planItem1.setStructureItem(structureItem1);
         planItem1.setLocalities(localities);
         planItem1.setPlan(plan);
         planItem1.setFile(file);
         planItem1 = planItemRepository.save(planItem1);
         PlanItem planItem2 = new PlanItem();
+        planItem2.setName("nome");
         planItem2.setParent(planItem1);
         planItem2.setStructureItem(structureItem2);
         planItem2 = planItemRepository.save(planItem2);
         PlanItem planItem3 = new PlanItem();
+        planItem3.setName("nome");
         planItem3.setParent(planItem2);
         planItem3.setStructureItem(structureItem3);
         planItem3 = planItemRepository.save(planItem3);

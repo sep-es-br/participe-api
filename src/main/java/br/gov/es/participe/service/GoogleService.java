@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -83,8 +84,14 @@ public class GoogleService {
         if (findPerson.isPresent()) {
             Person person = findPerson.get();
             person.setAccessToken(accessToken);
-            return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(),
-                    conferenceId, false, true, null);
+            return personService.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+                    .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+                    .server(SERVER)
+                    .serverId(user.getId())
+                    .conferenceId(conferenceId)
+                    .resetPassword(false)
+                    .makeLogin(true)
+                    .build());
         }
 
         return createPerson(user, accessToken, conferenceId);
@@ -95,7 +102,13 @@ public class GoogleService {
         person.setAccessToken(accessToken);
         person.setName(user.getName());
         person.setContactEmail(user.getEmail());
-        return personService.createRelationshipWithAthService(person, null, SERVER, user.getId(),
-                conferenceId, false, true, null);
+        return personService.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+                .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+                .server(SERVER)
+                .serverId(user.getId())
+                .conferenceId(conferenceId)
+                .resetPassword(false)
+                .makeLogin(true)
+                .build());
     }
 }

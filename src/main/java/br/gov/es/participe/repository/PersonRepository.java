@@ -61,7 +61,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     Person validate(String email, String server);
 
     @Query(value = "MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
-    		",(s)-[:TO]->(c:Conference) " +
+    		"MATCH (s)-[:TO]->(c:Conference) " +
+			//"WHERE id(c) = {5} " +
 			"WHERE (p.name IS NULL OR  ext.translate(p.name) CONTAINS ext.translate({0})) " +
 			"AND (p.contactEmail IS NULL OR ext.translate(p.contactEmail) CONTAINS ext.translate({1})) " +
 			"AND ({3} IS NULL OR COALESCE(p.active,true) = {3}) " +
@@ -70,7 +71,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     		"RETURN DISTINCT id(p) AS id, lower(p.name) AS name, p.contactEmail AS email, COALESCE(p.active,true) AS active"
 	, countQuery =
 			"MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
-			",(s)-[:TO]->(c:Conference) " +
+			"MATCH (s)-[:TO]->(c:Conference) " +
+			//"WHERE id(c) = {5} " +
 			"WHERE (p.name IS NULL OR  ext.translate(p.name) CONTAINS ext.translate({0})) " +
 			"AND (p.contactEmail IS NULL OR ext.translate(p.contactEmail) CONTAINS ext.translate({1})) " +
 			"AND ({3} IS NULL OR COALESCE(p.active,true) = {3}) " +
@@ -89,14 +91,23 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
 			"RETURN DISTINCT aut.name AS loginName, COUNT(log) AS acesses")
 	List<LoginAccessDto> findAccessByPerson(Long idConference, Long idPerson);
 
-	@Query("MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
+	@Query("MATCH (p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
 			"WHERE id(p) = {1} " +
-			"OPTIONAL MATCH (au)<-[:USING]-(log:Login)-[:TO]->(c:Conference)<-[:TO]-(s) " +
+			"MATCH (c:Conference)<-[:TO]-(s) " +
 			"WHERE id(c) = {0} " +
+			"OPTIONAL MATCH (p)-[:MADE]->(log:Login)-[:TO]->(c) " +
 			"WITH {time: log.time, locality: loc.name, localityId: id(loc)} AS tuple ORDER BY log.time desc limit 1 " +
 			"RETURN tuple.locality AS localityName, tuple.localityId AS localityId")
 	LocalityInfoDto findRecentLocalityByPerson(Long idConference, Long idPerson);
-	
+
+	@Query("MATCH (p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
+			"WHERE id(p) = {1} " +
+			"MATCH (c:Conference)<-[:TO]-(s) " +
+			"WHERE id(c) = {0} " +
+			"WITH {locality: loc.name, localityId: id(loc)} AS tuple " +
+			"RETURN tuple.locality AS localityName, tuple.localityId AS localityId")
+	LocalityInfoDto findLocalityByPersonAndConference(Long idConference, Long idPerson);
+
 	@Query("MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
 			",(s)-[:TO]->(c:Conference) " +
 			"WHERE id(c) = {0} " +
@@ -109,39 +120,49 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
 		"UNWIND search AS s " +
 		"WITH ext.translate(s) AS s2 " +
 		"WITH COLLECT(s2) AS s3 " +
-		"MATCH (p:Person) " +
+		"MATCH (p:Person)-[:MADE]->(sd:SelfDeclaration) " +
 		"WHERE all(x in s3 where ext.translate(p.name) CONTAINS x) OR all(x in s3 where ext.translate(p.contactEmail) contains x) " +
 		"OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m:Meeting) " +
 		"WHERE id(m) = {0} " +
-		"RETURN id(p) AS personId, lower(p.name) AS name, p.contactEmail AS email, p.telephone as telephone, " +
+		"RETURN DISTINCT id(p) AS personId, lower(p.name) AS name, p.contactEmail AS email, p.telephone as telephone, " +
 		"cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf"
 	, countQuery =
 		"WITH split({1},' ') AS search " +
 		"UNWIND search AS s " +
 		"WITH ext.translate(s) AS s2 " +
 		"WITH COLLECT(s2) AS s3 " +
-		"MATCH (p:Person) " +
+		"MATCH (p:Person)-[:MADE]->(sd:SelfDeclaration) " +
 		"WHERE all(x in s3 where ext.translate(p.name) CONTAINS x) OR all(x in s3 where ext.translate(p.contactEmail) contains x) " +
 		"OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m:Meeting) " +
 		"WHERE id(m) = {0} " +
-		"WITH id(p) AS personId, lower(p.name) AS name, p.contactEmail AS email, p.telephone as telephone, " +
+		"WITH DISTINCT id(p) AS personId, lower(p.name) AS name, p.contactEmail AS email, p.telephone as telephone, " +
 		"cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf " +
 		"RETURN COUNT(*)")
 	Page<PersonMeetingDto> findPersonForMeeting(Long idMeeting, String name, Pageable pageable);
 
 	@Query(
-			"MATCH (p:Person)-[md:MADE]-(sd:SelfDeclaration)-[abf:AS_BEING_FROM]-(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) " +
-			"WHERE id(p)={0} " +
-			"MATCH (m:Meeting)-[oi:OCCURS_IN]->(c:Conference) " +
+			"MATCH (m:Meeting)-[:OCCURS_IN]->(c:Conference) " +
 			"WHERE id(m)={1} " +
-			"MATCH (l)-[ili2:IS_LOCATED_IN]->(loc2:Locality)-[ot2:OF_TYPE]->(lt2:LocalityType) " +
-			"OPTIONAL MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p)-[md2:MADE]->(log:Login)-[:TO]->(c)<-[:TO]-(s) " +
-			"WITH DISTINCT log AS log, l.name AS locality, loc2.name AS superLocality, id(loc2) AS superLocalityId, " +
+			"MATCH (p:Person)-[:MADE]->(log:Login)-[:TO]->(c)<-[:TO]-(sd:SelfDeclaration)<-[:MADE]-(p) " +
+			"WHERE id(p) = {0} " +
+			"MATCH (sd)-[abf:AS_BEING_FROM]->(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) " +
+			"OPTIONAL MATCH (l)-[ili2:IS_LOCATED_IN]->(loc2:Locality)-[ot2:OF_TYPE]->(lt2:LocalityType) " +
+			"RETURN l.name AS locality, loc2.name AS superLocality, id(loc2) AS superLocalityId, " +
 			"lt.name AS regionalizable " +
-			"RETURN locality AS locality, superLocality AS superLocality, superLocalityId AS superLocalityId, " +
-			"regionalizable AS regionalizable " +
-			"ORDER BY log.time desc limit 1")
+			"ORDER BY log.time desc LIMIT 1")
 	LocalityRegionalizableDto findMostRecentLocality(Long idPerson, Long idMeeting);
+
+	@Query(
+			"MATCH (m:Meeting)-[:OCCURS_IN]->(c:Conference) " +
+			"WHERE id(m)={1} " +
+			"MATCH (c)<-[:TO]-(sd:SelfDeclaration)<-[:MADE]-(p) " +
+			"WHERE id(p) = {0} " +
+			"MATCH (sd)-[abf:AS_BEING_FROM]->(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) " +
+			"OPTIONAL MATCH (l)-[ili2:IS_LOCATED_IN]->(loc2:Locality)-[ot2:OF_TYPE]->(lt2:LocalityType) " +
+			"RETURN l.name AS locality, loc2.name AS superLocality, id(loc2) AS superLocalityId, " +
+			"lt.name AS regionalizable " +
+			"ORDER BY p.name desc LIMIT 1")
+	LocalityRegionalizableDto findLocalityIfThereIsNoLogin(Long idPerson, Long idMeeting);
 
 	@Query(
 			value = "MATCH (m:Meeting) " +

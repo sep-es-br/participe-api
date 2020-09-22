@@ -25,6 +25,8 @@ import java.util.Optional;
 @SpringBootTest
 class PersonServiceTest extends BaseTest {
 
+    private static final String EMAIL = "participesep@gmail.com";
+
     @Autowired
     private TokenService tokenService;
 
@@ -69,13 +71,13 @@ class PersonServiceTest extends BaseTest {
 
     @Test
     public void shouldValidatePerson() {
-        ResponseEntity response1 = personController.validate("email1@gmail.com", "12345678901", null);
+        ResponseEntity response1 = personController.validate(EMAIL, "12345678901", null);
         Assert.assertEquals(200, response1.getStatusCodeValue());
 
         PersonParamDto personParamDto = getPersonParamDto();
         personController.store(personParamDto);
 
-        ResponseEntity response2 = personController.validate("email1@gmail.com", "12345678901", null);
+        ResponseEntity response2 = personController.validate(EMAIL, "12345678901", null);
         Assert.assertEquals(200, response2.getStatusCodeValue());
     }
 
@@ -113,7 +115,7 @@ class PersonServiceTest extends BaseTest {
     }
 
     private PersonParamDto getPersonParamDto() {
-        Conference conference = conferenceRepository.save(new Conference());
+        Conference conference = getConference();
         ConferenceDto conferenceDto = new ConferenceDto();
         conferenceDto.setId(conference.getId());
         Locality locality = localityRepository.save(new Locality());
@@ -136,5 +138,16 @@ class PersonServiceTest extends BaseTest {
         personParamDto.setSelfDeclaration(selfDeclarationDto);
 
         return personParamDto;
+    }
+
+    private Conference getConference() {
+        Conference conference = new Conference();
+        conference.setTitleAuthentication("titulo");
+        conference.setSubtitleAuthentication("subtitulo");
+        conference.setTitleParticipation("titulo");
+        conference.setSubtitleParticipation("subtitulo");
+        conference.setTitleRegionalization("titulo");
+        conference.setSubtitleRegionalization("subtitulo");
+        return conferenceRepository.save(conference);
     }
 }

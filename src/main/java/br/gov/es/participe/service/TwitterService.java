@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -111,8 +112,14 @@ public class TwitterService {
         if (findPerson.isPresent()) {
             Person person = findPerson.get();
             person.setAccessToken(accessToken);
-            return personService.createRelationshipWithAthService(person, null, SERVER,
-                    profile.getExtraData().get(EMAIL).toString(), conferenceId, false, true, null);
+            return personService.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+                            .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+                            .server(SERVER)
+                            .serverId(profile.getExtraData().get(EMAIL).toString())
+                            .conferenceId(conferenceId)
+                            .resetPassword(false)
+                            .makeLogin(true)
+                            .build());
         }
 
         return createPerson(profile, accessToken, conferenceId);
@@ -123,8 +130,14 @@ public class TwitterService {
         person.setAccessToken(accessTokenUri);
         person.setName(profile.getName());
         person.setContactEmail(profile.getExtraData().get(EMAIL).toString());
-        return personService.createRelationshipWithAthService(person, null, SERVER,
-                profile.getExtraData().get(EMAIL).toString(), conferenceId, false, true, null);
+        return personService.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+                .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+                .server(SERVER)
+                .serverId(profile.getExtraData().get(EMAIL).toString())
+                .conferenceId(conferenceId)
+                .resetPassword(false)
+                .makeLogin(true)
+                .build());
     }
 
     private TwitterProfile twitterProfile(String token, String secret) {

@@ -55,9 +55,14 @@ public class SelfDeclarationService {
 		}
 		return self;
 	}
-
-	public SelfDeclaration update(SelfDeclaration selfDeclaration, Locality newLocality) {
-		selfDeclaration.setLocality(newLocality);
+	
+	@Transactional
+	public SelfDeclaration updateLocality(SelfDeclaration selfDeclaration, Long idLocality) {
+		selfDeclaration.setLocality(null);
+		selfDeclarationRepository.save(selfDeclaration);
+		selfDeclaration.setPerson(personService.find(selfDeclaration.getPerson().getId()));
+		selfDeclaration.setConference(conferenceService.find(selfDeclaration.getConference().getId()));
+		selfDeclaration.setLocality(localityService.find(idLocality));
 		return selfDeclarationRepository.save(selfDeclaration);
 	}
 

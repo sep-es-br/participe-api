@@ -30,6 +30,8 @@ import java.util.*;
 @SpringBootTest
 class MeetingServiceTest extends BaseTest {
 
+    private static final String EMAIL = "participesep@gmail.com";
+
     @Autowired
     private PersonController personController;
 
@@ -253,7 +255,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     private MeetingParamDto getMeetingParamDto() throws ParseException {
-        Conference conference = conferenceRepository.save(new Conference());
+        Conference conference = getConference();
         ConferenceDto conferenceDto = new ConferenceDto();
         conferenceDto.setId(conference.getId());
         Locality locality = localityRepository.save(new Locality());
@@ -266,8 +268,8 @@ class MeetingServiceTest extends BaseTest {
 
         PersonParamDto personParamDto = new PersonParamDto();
         personParamDto.setLogin("p1");
-        personParamDto.setContactEmail("email1@gmail.com");
-        personParamDto.setConfirmEmail("email1@gmail.com");
+        personParamDto.setContactEmail(EMAIL);
+        personParamDto.setConfirmEmail(EMAIL);
         personParamDto.setCpf("12345678901");
         personParamDto.setTelephone("991191199");
         personParamDto.setPassword("senha123");
@@ -283,16 +285,18 @@ class MeetingServiceTest extends BaseTest {
         localityIds.add(locality.getId());
         meetingParamDto.setLocalityCovers(localityIds);
         meetingParamDto.setConference(conference.getId());
-        Date beginDate = new SimpleDateFormat("dd/MM/yyyy").parse("01/08/2020");
-        Date endDate = new SimpleDateFormat("dd/MM/yyyy").parse("03/08/2020");
+
+        Date beginDate = this.dateFromNow(-1);
+        Date endDate = this.dateFromNow(1);
         meetingParamDto.setBeginDate(beginDate);
         meetingParamDto.setEndDate(endDate);
 
+        //Date endDate = new SimpleDateFormat("dd/MM/yyyy").format(this.dateFromNow(-1));
         return meetingParamDto;
     }
 
     private PersonParamDto getPersonParamDto() {
-        Conference conference = conferenceRepository.save(new Conference());
+        Conference conference = getConference();
         ConferenceDto conferenceDto = new ConferenceDto();
         conferenceDto.setId(conference.getId());
         Locality locality = localityRepository.save(new Locality());
@@ -307,8 +311,8 @@ class MeetingServiceTest extends BaseTest {
         personParamDto.setTypeAuthentication("mail");
         personParamDto.setName("pessoa1");
         personParamDto.setLogin("p1");
-        personParamDto.setContactEmail("email1@gmail.com");
-        personParamDto.setConfirmEmail("email1@gmail.com");
+        personParamDto.setContactEmail(EMAIL);
+        personParamDto.setConfirmEmail(EMAIL);
         personParamDto.setCpf("12345678901");
         personParamDto.setTelephone("991191199");
         personParamDto.setPassword("senha123");
@@ -326,5 +330,24 @@ class MeetingServiceTest extends BaseTest {
             person = personRepository.save(person);
         }
         return person;
+    }
+
+    private Conference getConference() {
+        Conference conference = new Conference();
+        conference.setTitleAuthentication("titulo");
+        conference.setSubtitleAuthentication("subtitulo");
+        conference.setTitleParticipation("titulo");
+        conference.setSubtitleParticipation("subtitulo");
+        conference.setTitleRegionalization("titulo");
+        conference.setSubtitleRegionalization("subtitulo");
+        conference.setBeginDate(this.dateFromNow(-2));
+        conference.setEndDate(this.dateFromNow(2));
+        return conferenceRepository.save(conference);
+    }
+
+    private Date dateFromNow(int days) {
+        final Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, days);
+        return cal.getTime();
     }
 }
