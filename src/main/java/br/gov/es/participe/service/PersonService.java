@@ -32,6 +32,17 @@ import br.gov.es.participe.util.domain.TokenType;
 public class PersonService {
 	
 	private static final String PERSON_ERROR_NOT_FOUND = "person.error.not-found";
+	private static final String PERSON_ERROR_CONFERENCE_NOT_SPECIFIED = "person.error.conference-not-specified";
+	private static final String PERSON_ERROR_SELFDECLARATION_NOT_SPECIFIED = "person.error.selfdeclaration-not-specified";
+	private static final String PERSON_ERROR_CPF_NOT_INFORMED = "person.error.cpf-not-informed";
+	private static final String PERSON_ERROR_INVALID_PASS = "person.error.invalid-password";
+	private static final String PERSON_ERROR_PASS_NOT_MATCHING = "person.error.password-not-matching";
+	private static final String PERSON_ERROR_EMAILS_NOT_MATCHING = "person.error.emails-not-matching";
+	private static final String PERSON_ERROR_CPF_ALREADY_STORED = "person.error.cpf-already-stored";
+	private static final String PERSON_ERROR_EMAIL_ALREADY_STORED = "person.error.email-already-stored";
+	private static final String PERSON_ERROR_EMAIL_NOT_INFORMED = "person.error.email-not-informed";
+	private static final String PERSON_ERROR_PASS_LACKING_CHARACTERS = "person.error.password-lacking-characters";
+	private static final String PERSON_ERROR_MEETING_ID_NOT_SPECIFIED = "person.error.meeting-id-not-specified";
 	private static final String PARTICIPE = "Participe";
 	private static final String SERVER = "Participe";
 	private static final String TITLE = "title";
@@ -39,6 +50,7 @@ public class PersonService {
 	private static final String NAME = "name";
 	private static final String PASS_PARAM = "password";
 	private static final String EMAIL_RESPONSE_MESSAGE = " - Confirme seu Email";
+	private static final String VALID_CHARACTERS = "[A-Za-z0-9]+";
 	
     @Autowired
     private PersonRepository personRepository;
@@ -63,9 +75,6 @@ public class PersonService {
     
     @Autowired
     private LoginRepository loginRepository;
-
-	@Autowired
-	private LocalityService localityService;
 
     @Autowired
     private TokenService tokenService;
@@ -121,8 +130,15 @@ public class PersonService {
             			return null;
             		singniDto.setTemporaryPassword(a.getTemporaryPassword());
             	}
-            createRelationshipWithAthService(person.get(), user.getPassword(), server, person.get().getId().toString(),
-					conferenceId, false, true, null);
+            createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+					.RelationshipAuthServiceAuxiliaryDtoBuilder(person.get())
+					.password(user.getPassword())
+					.server(server)
+					.serverId(person.get().getId().toString())
+					.conferenceId(conferenceId)
+					.resetPassword(false)
+					.makeLogin(true)
+					.build());
             return singniDto;
     	}
 		return null;
@@ -143,23 +159,31 @@ public class PersonService {
 	}
 
 	@Transactional
-	public Person createRelationshipWithAthService(Person person, String password, String server, String serverid,
-												   Long conferenceId, boolean resetPassword, Boolean makeLogin,
-												   String typeAuthentication) {
-		boolean newAuthService = true;
+	public Person createRelationshipWithAuthService(RelationshipAuthServiceAuxiliaryDto relationshipAuthServiceAuxiliaryDto) {
+    	Person person = relationshipAuthServiceAuxiliaryDto.getPerson();
+		Long conferenceId = relationshipAuthServiceAuxiliaryDto.getConferenceId();
+		String server = relationshipAuthServiceAuxiliaryDto.getServer();
+		String serverId = relationshipAuthServiceAuxiliaryDto.getServerId();
+		Boolean makeLogin = relationshipAuthServiceAuxiliaryDto.getMakeLogin();
+		String password = relationshipAuthServiceAuxiliaryDto.getPassword();
+		String typeAuthentication = relationshipAuthServiceAuxiliaryDto.getTypeAuthentication();
+		Boolean resetPassword = relationshipAuthServiceAuxiliaryDto.getResetPassword();
+
+		AuthService authService = null;
+		Conference conference = null;
+		Boolean newAuthService = true;
 		if(person.getId() == null) {
 			person = personRepository.save(person);
 		} else {
 			loadSelfDeclaration(person, conferenceId);
 		}
-		AuthService authService = null;
+
 		IsAuthenticatedBy authenticatedBy = getIsAuthenticatedBy(person.getId(), server);
 		if(authenticatedBy != null) {
 			authService = authenticatedBy.getAuthService();
 			newAuthService = false;
 		}
 
-		Conference conference = null;
 		if(conferenceId != null) {
 			conference = conferenceService.find(conferenceId);
 		}
@@ -167,7 +191,7 @@ public class PersonService {
 		if(newAuthService) {
 			authService = new AuthService();
 			authService.setServer(server);
-			authService.setServerId(serverid);
+			authService.setServerId(serverId);
 			if(makeLogin)
 				authService.setNumberOfAccesses(1);
 			else
@@ -181,18 +205,28 @@ public class PersonService {
 			authService.setNumberOfAccesses(makeLogin ? authService.getNumberOfAccesses() + 1 :
 					authService.getNumberOfAccesses());
 			authServiceRepository.save(authService);
-			loadAuthenticatedBy(authenticatedBy, person, serverid, password, conferenceId, typeAuthentication);
+			loadAuthenticatedBy(authenticatedBy, person, serverId, password, conferenceId, typeAuthentication);
 		}
-		if(resetPassword && !newAuthService) {
-			resetPassword(person, conference, authenticatedBy);
-		}
-		if(makeLogin) {
-			createLogin(person, authService, conferenceId);
-		}
+
+		this.verifyResetPasswordCondition(resetPassword, newAuthService, person, conference, authenticatedBy);
+		this.verifyMakeLoginCondition(person, makeLogin, authService, conferenceId);
 		isAuthenticatedByRepository.save(authenticatedBy);
 		return person;
 	}
-	
+
+	private void verifyResetPasswordCondition(Boolean resetPassword, Boolean newAuthService, Person person,
+														   Conference conference, IsAuthenticatedBy authenticatedBy) {
+		if (resetPassword && !newAuthService) {
+			resetPassword(person, conference, authenticatedBy);
+		}
+	}
+
+	private void verifyMakeLoginCondition(Person person, Boolean makeLogin, AuthService authService, Long conferenceId) {
+		if (makeLogin) {
+			createLogin(person, authService, conferenceId);
+		}
+	}
+
 	private void resetPassword(Person person, Conference conference, IsAuthenticatedBy authenticatedBy) {
 		Date passwordTime = expirationTime((long) 24);
 		String password = genereateTemporaryPassword();
@@ -335,7 +369,7 @@ public class PersonService {
 			List<LoginAccessDto> loginAccessDtos = personRepository.findAccessByPerson(conferenceId, personId);
 			if(loginAccessDtos == null) {
 				loginAccessDtos = new ArrayList<>();
-				loginAccessDtos.add(new LoginAccessDto("Participe", 0L));
+				loginAccessDtos.add(new LoginAccessDto(SERVER, 0L));
 			}
 			personCitizen.setAutentication(loginAccessDtos);
 
@@ -345,10 +379,7 @@ public class PersonService {
 			}
 			personCitizen.setNumberOfAcesses(total);
 
-			LocalityInfoDto recentLocality = personRepository.findRecentLocalityByPerson(conferenceId, personId);
-			if(recentLocality == null) {
-				recentLocality = personRepository.findLocalityByPerson(conferenceId, personId);
-			}
+			LocalityInfoDto recentLocality = personRepository.findLocalityByPersonAndConference(conferenceId, personId);
 			if(recentLocality != null) {
 				personCitizen.setLocalityId(recentLocality.getLocalityId());
 				personCitizen.setLocalityName(recentLocality.getLocalityName());
@@ -356,7 +387,7 @@ public class PersonService {
 
 			List<IsAuthenticatedBy> auth = isAuthenticatedByRepository.findByIdPerson(personId);
 			for(IsAuthenticatedBy a: auth) {
-				if(a.getName().equals("Participe")) {
+				if(a.getName().equals(SERVER)) {
 					personCitizen.setPassword(a.getPassword());
 				}
 			}
@@ -482,7 +513,7 @@ public class PersonService {
 	public Page<PersonKeepCitizenDto> listKeepCitizen(String name, String email, String autentication, Boolean active,
 													  List<Long> locality, Long conferenceId, Pageable page){
     	if(conferenceId == null) {
-			throw new IllegalArgumentException("Conference Id must be specified.");
+			throw new IllegalArgumentException(PERSON_ERROR_CONFERENCE_NOT_SPECIFIED);
 		}
 
 		Page<PersonKeepCitizenDto> response = personRepository
@@ -492,7 +523,7 @@ public class PersonService {
 			List<LoginAccessDto> loginAccessDtos = personRepository.findAccessByPerson(conferenceId, element.getId());
 			if(loginAccessDtos == null || loginAccessDtos.isEmpty()) {
 				loginAccessDtos = new ArrayList<>();
-				loginAccessDtos.add(new LoginAccessDto("Participe", 0L));
+				loginAccessDtos.add(new LoginAccessDto(SERVER, 0L));
 			}
 			element.setAutentication(loginAccessDtos);
 
@@ -502,10 +533,7 @@ public class PersonService {
 			}
 			element.setNumberOfAcesses(total);
 
-			LocalityInfoDto recentLocality = personRepository.findRecentLocalityByPerson(conferenceId, element.getId());
-			if(recentLocality == null) {
-				recentLocality = personRepository.findLocalityByPerson(conferenceId, element.getId());
-			}
+			LocalityInfoDto recentLocality = personRepository.findLocalityByPersonAndConference(conferenceId, element.getId());
 			if(recentLocality != null) {
 				element.setLocalityId(recentLocality.getLocalityId());
 				element.setLocalityName(recentLocality.getLocalityName());
@@ -516,42 +544,29 @@ public class PersonService {
 	}
 
 	public ResponseEntity storePerson(PersonParamDto personParam, Boolean makeLogin) {
-    	Boolean typeAuthenticationCpf = false;
-    	if(personParam.getTypeAuthentication() != null && personParam.getTypeAuthentication().equals("cpf")) {
-    		if(personParam.getCpf() == null || personParam.getCpf().isEmpty()) {
-    			throw new IllegalArgumentException("When authentication type is 'cpf', the cpf must be informed.");
-			}
-			int size = personParam.getPassword() != null ? personParam.getPassword().length() : 0;
-    		if(personParam.getPassword() == null || size < 6 || !personParam.getPassword().matches("[A-Za-z0-9]+")) {
-    			throw new IllegalArgumentException("Password must be specified with at least 6 characters. Characters allowed: A-Z, a-z, 0-9.");
-			}
-			if(personParam.getPassword() == null || personParam.getConfirmPassword() == null ||
-					!personParam.getPassword().equals(personParam.getConfirmPassword())) {
-				throw new IllegalArgumentException("Parameters password and confirmPassword must match.");
-			}
-			personParam.setContactEmail(personParam.getCpf() + "@cpf");
-			personParam.setConfirmEmail(personParam.getCpf() + "@cpf");
-			typeAuthenticationCpf = true;
-		}
-
+		Boolean typeAuthenticationCpf = storePersonValidation(personParam);
 		if(personParam.getContactEmail().equals(personParam.getConfirmEmail())) {
 			if(this.validate(personParam.getContactEmail(), "", SERVER)) {
 				Person person = this.save(new Person(personParam,typeAuthenticationCpf), false);
 
 				if(personParam.getSelfDeclaration() == null) {
-					throw new IllegalArgumentException("Self Declaration must be informed.");
+					throw new IllegalArgumentException(PERSON_ERROR_SELFDECLARATION_NOT_SPECIFIED);
 				}
 
 				SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaration());
 
 				person = this.complement(person, self);
 
-				this.createRelationshipWithAthService(person,
-						personParam.getPassword(),
-						SERVER,
-						person.getId().toString(),
-						self.getConference().getId(), false, makeLogin,
-						personParam.getTypeAuthentication());
+				this.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+						.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+						.password(personParam.getPassword())
+						.server(SERVER)
+						.serverId(person.getId().toString())
+						.conferenceId(self.getConference().getId())
+						.resetPassword(false)
+						.makeLogin(makeLogin)
+						.typeAuthentication(personParam.getTypeAuthentication())
+						.build());
 
 				PersonDto res = new PersonDto(person);
 
@@ -572,45 +587,41 @@ public class PersonService {
 		msg.setCode(422);
 		return ResponseEntity.status(422).body(msg);
 	}
-	
+
+	private Boolean storePersonValidation(PersonParamDto personParam) {
+		Boolean typeAuthenticationCpf = false;
+		if(personParam.getTypeAuthentication() != null && personParam.getTypeAuthentication().equals("cpf")) {
+			if(personParam.getCpf() == null || personParam.getCpf().isEmpty()) {
+				throw new IllegalArgumentException(PERSON_ERROR_CPF_NOT_INFORMED);
+			}
+			int size = personParam.getPassword() != null ? personParam.getPassword().length() : 0;
+			if(personParam.getPassword() == null || size < 6 || !personParam.getPassword().matches(VALID_CHARACTERS)) {
+				throw new IllegalArgumentException(PERSON_ERROR_INVALID_PASS);
+			}
+			if(personParam.getPassword() == null || personParam.getConfirmPassword() == null ||
+					!personParam.getPassword().equals(personParam.getConfirmPassword())) {
+				throw new IllegalArgumentException(PERSON_ERROR_PASS_NOT_MATCHING);
+			}
+			personParam.setContactEmail(personParam.getCpf() + "@cpf");
+			personParam.setConfirmEmail(personParam.getCpf() + "@cpf");
+			typeAuthenticationCpf = true;
+		}
+		return typeAuthenticationCpf;
+	}
+
 	public ResponseEntity updatePerson(PersonParamDto personParam, Boolean makeLogin) {
 		Person person = this.find(personParam.getId());
-		if(personParam.getTypeAuthentication() != null) {
-			switch (personParam.getTypeAuthentication()) {
-			case "mail":
-				if(personParam.getContactEmail() == null || personParam.getConfirmEmail().isEmpty()) {
-					throw new IllegalArgumentException("E-mails must be informed");
-				}
-				break;
-			case "cpf":
-				if(personParam.getCpf() == null || personParam.getCpf().isEmpty()) {
-	    			throw new IllegalArgumentException("When authentication type is 'cpf', the cpf must be informed.");
-				}
-				int size = personParam.getPassword() != null ? personParam.getPassword().length() : 0;
-				if(personParam.getPassword() == null || size < 6 || !personParam.getPassword().matches("[A-Za-z0-9]+")) {
-					throw new IllegalArgumentException("Password must be specified with at least 6 characters. Characters allowed: A-Z, a-z, 0-9.");
-				}
-				if(personParam.getPassword() == null || personParam.getConfirmPassword() == null ||
-						!personParam.getPassword().equals(personParam.getConfirmPassword())) {
-					throw new IllegalArgumentException("Parameters password and confirmPassword must match.");
-				}
-				personParam.setContactEmail(personParam.getCpf() + "@cpf");
-				personParam.setConfirmEmail(personParam.getCpf() + "@cpf");
-				break;
-			default:
-				break;
-			}
-		}
+		this.verifyTypeAuthentication(personParam);
 		if(!personParam.getContactEmail().equals(personParam.getConfirmEmail())) {
-			throw new IllegalArgumentException("Contact email and confirm email must match.");
+			throw new IllegalArgumentException(PERSON_ERROR_EMAILS_NOT_MATCHING);
 		}
 		if(!person.getContactEmail().equals(personParam.getContactEmail()) &&
 				!this.validate(personParam.getContactEmail(), "", SERVER)) {
 			MessageDto msg = new MessageDto();
 			if(personParam.getTypeAuthentication() != null && personParam.getTypeAuthentication().equals("cpf")) {
-				msg.setMessage("O CPF informado já existe para outro usuário");
+				msg.setMessage(PERSON_ERROR_CPF_ALREADY_STORED);
 			} else {
-				msg.setMessage("E-mail já cadastrado");
+				msg.setMessage(PERSON_ERROR_EMAIL_ALREADY_STORED);
 			}
 			msg.setCode(400);
 			return ResponseEntity.status(400).body(msg);
@@ -626,21 +637,70 @@ public class PersonService {
 
 		SelfDeclaration sd  = selfDeclarationService.findByPersonAndConference(person.getId(),
 				personParam.getSelfDeclaration().getConference());
-		if(sd != null && personParam.getSelfDeclaration().getLocality() != sd.getLocality().getId()) {
-			Locality locality = localityService.find(personParam.getSelfDeclaration().getLocality());
-			sd = selfDeclarationService.update(sd, locality);
+		if(sd == null) {
+			Person personSdCreation = new Person();
+			Conference conferenceSdCreation = new Conference();
+			Locality localitySdCreation = new Locality();
+
+			personSdCreation.setId(person.getId());
+			conferenceSdCreation.setId(personParam.getSelfDeclaration().getConference());
+			localitySdCreation.setId(personParam.getSelfDeclaration().getLocality());
+			SelfDeclaration selfDeclaration = new SelfDeclaration(conferenceSdCreation, localitySdCreation, personSdCreation);
+			selfDeclarationService.save(selfDeclaration);
+		} else if(!personParam.getSelfDeclaration().getLocality().equals(sd.getLocality().getId())) {
+			selfDeclarationService.updateLocality(sd, personParam.getSelfDeclaration().getLocality());			
 		}
 
 		PersonDto response = new PersonDto(person);
-		this.createRelationshipWithAthService(person,
-				personParam.getPassword(),
-				SERVER,
-				person.getId().toString(),
-				personParam.getSelfDeclaration().getConference(),
-				personParam.isResetPassword(),
-				makeLogin, personParam.getTypeAuthentication());
+		this.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+				.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+				.password(personParam.getPassword())
+				.server(SERVER)
+				.serverId(person.getId().toString())
+				.conferenceId(personParam.getSelfDeclaration().getConference())
+				.resetPassword(personParam.isResetPassword())
+				.makeLogin(makeLogin)
+				.typeAuthentication(personParam.getTypeAuthentication())
+				.build());
 
 		return ResponseEntity.status(200).body(response);
+	}
+
+	private void verifyTypeAuthentication(PersonParamDto personParam) {
+		if(personParam.getTypeAuthentication() != null) {
+			switch (personParam.getTypeAuthentication()) {
+				case "mail":
+					this.typeAuthenticationEmailValidation(personParam);
+					break;
+				case "cpf":
+					this.typeAuthenticationCpfValidation(personParam);
+					personParam.setContactEmail(personParam.getCpf() + "@cpf");
+					personParam.setConfirmEmail(personParam.getCpf() + "@cpf");
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+	private void typeAuthenticationEmailValidation(PersonParamDto personParam) {
+		if(personParam.getContactEmail() == null || personParam.getConfirmEmail().isEmpty()) {
+			throw new IllegalArgumentException(PERSON_ERROR_EMAIL_NOT_INFORMED);
+		}
+	}
+
+	private void typeAuthenticationCpfValidation(PersonParamDto personParam) {
+		if(personParam.getCpf() == null || personParam.getCpf().isEmpty()) {
+			throw new IllegalArgumentException(PERSON_ERROR_CPF_NOT_INFORMED);
+		}
+		int size = personParam.getPassword() != null ? personParam.getPassword().length() : 0;
+		if(personParam.getPassword() == null || size < 6 || !personParam.getPassword().matches(VALID_CHARACTERS)) {
+			throw new IllegalArgumentException(PERSON_ERROR_PASS_LACKING_CHARACTERS);
+		}
+		if(personParam.getPassword() == null || personParam.getConfirmPassword() == null ||
+				!personParam.getPassword().equals(personParam.getConfirmPassword())) {
+			throw new IllegalArgumentException(PERSON_ERROR_PASS_NOT_MATCHING);
+		}
 	}
 
 	public ResponseEntity updatePerson(String token, PersonParamDto personParam, Boolean makeLogin) {
@@ -649,40 +709,49 @@ public class PersonService {
 
 		if(personParam.getConfirmPassword().equals(personParam.getPassword())) {
 			int size = personParam.getPassword().length();
-			if(size >= 6 && personParam.getPassword().matches("[A-Za-z0-9]+")) {
+			if(size >= 6 && personParam.getPassword().matches(VALID_CHARACTERS)) {
 				Person person = this.find(idPerson);
 				PersonDto response = new PersonDto(person);
 
-				this.createRelationshipWithAthService(person,
-						personParam.getPassword(),
-						SERVER,
-						idPerson.toString(),
-						null, false, makeLogin, personParam.getTypeAuthentication());
+				this.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+						.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+						.password(personParam.getPassword())
+						.server(SERVER)
+						.serverId(idPerson.toString())
+						.resetPassword(false)
+						.makeLogin(makeLogin)
+						.typeAuthentication(personParam.getTypeAuthentication())
+						.build());
 
 				return ResponseEntity.status(200).body(response);
 			}
 			MessageDto msg = new MessageDto();
-			msg.setMessage("Senha deve conter no mínimo 6 caracteres alfanuméricos");
+			msg.setMessage(PERSON_ERROR_PASS_LACKING_CHARACTERS);
 			msg.setCode(403);
 			return ResponseEntity.status(403).body(msg);
 		}
 		MessageDto msg = new MessageDto();
-		msg.setMessage("Senhas fornecidas são incompatíveis");
+		msg.setMessage(PERSON_ERROR_PASS_NOT_MATCHING);
 		msg.setCode(422);
 		return ResponseEntity.status(422).body(msg);
 	}
 
 	public Page<PersonMeetingDto> findPersonForMeeting(Long meetingId, String name, Pageable pageable) {
 		if(meetingId == null) {
-			throw new IllegalArgumentException("Meeting Id must be informed.");
+			throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
 		}
 
 		Page<PersonMeetingDto> personMeetingDtoPage = personRepository.findPersonForMeeting(meetingId, name, pageable);
 
 		personMeetingDtoPage.forEach(element -> {
 			element.setAuthTypeCpf(element.getEmail().endsWith("@cpf"));
-			LocalityRegionalizableDto localityInfo = personRepository.findMostRecentLocality(element.getPersonId(),
+			LocalityRegionalizableDto localityInfo;
+			localityInfo = personRepository.findMostRecentLocality(element.getPersonId(),
 					meetingId);
+			if(localityInfo == null) {
+				localityInfo = personRepository.findLocalityIfThereIsNoLogin(element.getPersonId(),
+						meetingId);
+			}
 			if(localityInfo != null) {
 				element.setLocality(localityInfo.getLocality());
 				element.setRegionalizable(localityInfo.getRegionalizable());
@@ -697,15 +766,20 @@ public class PersonService {
 	public Page<PersonMeetingDto> findPersonsCheckedInOnMeeting(Long meetingId, List<Long> localities, String name,
 																Pageable pageable) {
 		if(meetingId == null) {
-			throw new IllegalArgumentException("Meeting Id must be informed.");
+			throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
 		}
-
 
 		Page<PersonMeetingDto> personMeetingDtoPage = personRepository.findPersonsCheckedInOnMeeting(meetingId,
 				localities, name, pageable);
 
 		personMeetingDtoPage.forEach(element -> {
-			LocalityRegionalizableDto localityInfo = personRepository.findMostRecentLocality(element.getPersonId(), meetingId);
+			LocalityRegionalizableDto localityInfo;
+			localityInfo = personRepository.findMostRecentLocality(element.getPersonId(),
+					meetingId);
+			if(localityInfo == null) {
+				localityInfo = personRepository.findLocalityIfThereIsNoLogin(element.getPersonId(),
+						meetingId);
+			}
 			if(localityInfo != null) {
 				element.setLocality(localityInfo.getLocality());
 				element.setRegionalizable(localityInfo.getRegionalizable());

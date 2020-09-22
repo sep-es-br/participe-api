@@ -1,6 +1,7 @@
 package br.gov.es.participe;
 
 import br.gov.es.participe.controller.CitizenController;
+import br.gov.es.participe.controller.SigninController;
 import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
@@ -19,14 +20,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Testcontainers
 @SpringBootTest
 class CitizenServiceTest extends BaseTest {
+
+    private static final String EMAIL1 = "participesep@gmail.com";
+    private static final String EMAIL2 = "marcelocarbonera@alunos.utfpr.edu.br";
 
     @Autowired
     private TokenService tokenService;
@@ -61,6 +62,9 @@ class CitizenServiceTest extends BaseTest {
     @Autowired
     private PlanRepository planRepository;
 
+    @Autowired
+    private SigninController signinController;
+
     @TestConfiguration
     static class Config {
 
@@ -91,6 +95,15 @@ class CitizenServiceTest extends BaseTest {
     }
 
     @Test
+    public void shouldCreateCitizenWithCpf() {
+        PersonParamDto personParamDto = getPersonParamDto();
+        personParamDto.setCpf("12345678912");
+        personParamDto.setTypeAuthentication("cpf");
+        ResponseEntity response = citizenController.store(personParamDto);
+        Assert.assertEquals(200, response.getStatusCodeValue());
+    }
+
+    @Test
     public void shouldDeleteCitizen() {
         PersonParamDto personParamDto = getPersonParamDto();
         ResponseEntity<PersonDto> personResponse = citizenController.store(personParamDto);
@@ -114,6 +127,22 @@ class CitizenServiceTest extends BaseTest {
     }
 
     @Test
+    public void shouldUpdateCitizenWithCpf() {
+        PersonParamDto personParamDto = getPersonParamDto();
+        personParamDto.setCpf("12345678912");
+        personParamDto.setTypeAuthentication("cpf");
+        ResponseEntity<PersonDto> personResponse = citizenController.store(personParamDto);
+        PersonDto personDto = personResponse.getBody();
+
+        Optional<Person> person = personRepository.findById(personDto.getId());
+        String token = "Bearer " + tokenService.generateToken(person.get(), TokenType.AUTHENTICATION);
+
+        personParamDto.setName("outro nome");
+        ResponseEntity response = citizenController.update(token, person.get().getId(), personParamDto);
+        Assert.assertEquals(200, response.getStatusCodeValue());
+    }
+
+    @Test
     public void shouldFailToListCitizenWithoutConferenceId() {
         PersonParamDto personParamDto = getPersonParamDto();
         citizenController.store(personParamDto);
@@ -127,8 +156,8 @@ class CitizenServiceTest extends BaseTest {
     public void shouldListCitizen() {
         Conference conference = getConference();
         Locality locality = getLocality();
-        PersonParamDto personParamDto1 = getPersonParamDtoWithLoginInformation("1", conference, locality);
-        PersonParamDto personParamDto2 = getPersonParamDtoWithLoginInformation("2", conference, locality);
+        PersonParamDto personParamDto1 = getPersonParamDtoWithLoginInformation(1, conference, locality);
+        PersonParamDto personParamDto2 = getPersonParamDtoWithLoginInformation(2, conference, locality);
 
         citizenController.store(personParamDto1);
         citizenController.store(personParamDto2);
@@ -142,8 +171,8 @@ class CitizenServiceTest extends BaseTest {
     public void shouldListCitizenById() {
         Conference conference = getConference();
         Locality locality = getLocality();
-        PersonParamDto personParamDto1 = getPersonParamDtoWithLoginInformation("1", conference, locality);
-        PersonParamDto personParamDto2 = getPersonParamDtoWithLoginInformation("2", conference, locality);
+        PersonParamDto personParamDto1 = getPersonParamDtoWithLoginInformation(1, conference, locality);
+        PersonParamDto personParamDto2 = getPersonParamDtoWithLoginInformation(2, conference, locality);
 
         citizenController.store(personParamDto1);
         citizenController.store(personParamDto2);
@@ -161,7 +190,7 @@ class CitizenServiceTest extends BaseTest {
     }
 
     private PersonParamDto getPersonParamDto() {
-        Conference conference = conferenceRepository.save(new Conference());
+        Conference conference = getConference();
         ConferenceDto conferenceDto = new ConferenceDto();
         conferenceDto.setId(conference.getId());
         Locality locality = localityRepository.save(new Locality());
@@ -175,8 +204,8 @@ class CitizenServiceTest extends BaseTest {
         PersonParamDto personParamDto = new PersonParamDto();
         personParamDto.setName("pessoa1");
         personParamDto.setLogin("p1");
-        personParamDto.setContactEmail("email1@gmail.com");
-        personParamDto.setConfirmEmail("email1@gmail.com");
+        personParamDto.setContactEmail(EMAIL1);
+        personParamDto.setConfirmEmail(EMAIL1);
         personParamDto.setCpf("12345678901");
         personParamDto.setTelephone("991191199");
         personParamDto.setPassword("senha123");
@@ -187,14 +216,21 @@ class CitizenServiceTest extends BaseTest {
     }
 
     private Conference getConference() {
-        return conferenceRepository.save(new Conference());
+        Conference conference = new Conference();
+        conference.setTitleAuthentication("titulo");
+        conference.setSubtitleAuthentication("subtitulo");
+        conference.setTitleParticipation("titulo");
+        conference.setSubtitleParticipation("subtitulo");
+        conference.setTitleRegionalization("titulo");
+        conference.setSubtitleRegionalization("subtitulo");
+        return conferenceRepository.save(conference);
     }
 
     private Locality getLocality() {
         return localityRepository.save(new Locality());
     }
 
-    private PersonParamDto getPersonParamDtoWithLoginInformation(String uniqueEmailString, Conference conference, Locality locality) {
+    private PersonParamDto getPersonParamDtoWithLoginInformation(int uniqueEmailValue, Conference conference, Locality locality) {
         ConferenceDto conferenceDto = new ConferenceDto();
         conferenceDto.setId(conference.getId());
         LocalityDto localityDto = new LocalityDto();
@@ -204,21 +240,17 @@ class CitizenServiceTest extends BaseTest {
         selfDeclarationDto.setConference(conferenceDto.getId());
         selfDeclarationDto.setLocality(localityDto.getId());
 
-        AuthService authService = new AuthService();
-        authService.setServer("Participe");
-        authService = authServiceRepository.save(authService);
-
-        Login login = new Login();
-        login.setConference(conference);
-        login.setAuthService(authService);
-        loginRepository.save(login);
-
         PersonParamDto personParamDto = new PersonParamDto();
         personParamDto.setName("pessoa1");
         personParamDto.setLogin("p1");
-        personParamDto.setContactEmail("email"+uniqueEmailString+"@gmail.com");
-        personParamDto.setConfirmEmail("email"+uniqueEmailString+"@gmail.com");
-        personParamDto.setCpf("1234567"+uniqueEmailString+"8901");
+        if(uniqueEmailValue == 1) {
+            personParamDto.setContactEmail(EMAIL1);
+            personParamDto.setConfirmEmail(EMAIL1);
+        } else {
+            personParamDto.setContactEmail(EMAIL2);
+            personParamDto.setConfirmEmail(EMAIL2);
+        }
+        personParamDto.setCpf("1234567"+uniqueEmailValue+"8901");
         personParamDto.setTelephone("991191199");
         personParamDto.setPassword("senha123");
         personParamDto.setConfirmPassword("senha123");
@@ -226,11 +258,13 @@ class CitizenServiceTest extends BaseTest {
 
         ResponseEntity<PersonDto> response = citizenController.store(personParamDto);
         Optional<Person> personOpt = personRepository.findById(response.getBody().getId());
+        Person person = personOpt.get();
 
-        Set<AuthService> authServicesSet = new HashSet<>();
-        authServicesSet.add(authService);
-        personOpt.get().setAuthServices(authServicesSet);
-        Person person = personRepository.save(personOpt.get());
+        PersonParamDto loginInfo = new PersonParamDto();
+        loginInfo.setLogin(personParamDto.getContactEmail());
+        loginInfo.setPassword(personParamDto.getPassword());
+
+        signinController.indexparticipe(loginInfo, conference.getId());
 
         personParamDto.setId(person.getId());
         return personParamDto;
@@ -246,7 +280,7 @@ class CitizenServiceTest extends BaseTest {
         plan.setDomain(domain);
         plan.setlocalitytype(localityType);
         plan = planRepository.save(plan);
-        Conference conference = new Conference();
+        Conference conference = getConference();
         conference.setPlan(plan);
         conference = conferenceRepository.save(conference);
 

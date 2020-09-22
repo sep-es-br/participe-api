@@ -33,6 +33,8 @@ import br.gov.es.participe.service.FileService;
 @SpringBootTest
 class ConferenceServiceTest extends BaseTest {
 
+    private static final String EMAIL = "participesep@gmail.com";
+
     @Autowired
     private ConferenceController conferenceController;
 
@@ -252,7 +254,7 @@ class ConferenceServiceTest extends BaseTest {
     }
 
     private PersonParamDto getPersonParamDto() {
-        Conference conference = conferenceRepository.save(new Conference());
+        Conference conference = getConference();
         ConferenceDto conferenceDto = new ConferenceDto();
         conferenceDto.setId(conference.getId());
         Locality locality = localityRepository.save(new Locality());
@@ -266,8 +268,8 @@ class ConferenceServiceTest extends BaseTest {
         PersonParamDto personParamDto = new PersonParamDto();
         personParamDto.setName("pessoa1");
         personParamDto.setLogin("p1");
-        personParamDto.setContactEmail("email1@gmail.com");
-        personParamDto.setConfirmEmail("email1@gmail.com");
+        personParamDto.setContactEmail(EMAIL);
+        personParamDto.setConfirmEmail(EMAIL);
         personParamDto.setCpf("12345678901");
         personParamDto.setTelephone("991191199");
         personParamDto.setPassword("senha123");
@@ -291,8 +293,8 @@ class ConferenceServiceTest extends BaseTest {
         Set<Person> personSet = new HashSet<>();
         personSet.add(person);
 
-        Conference conference1 = conferenceRepository.save(new Conference());
-        Conference conference2 = conferenceRepository.save(new Conference());
+        Conference conference1 = getConference();
+        Conference conference2 = getConference();
 
         for(int i = 0; i<4; i++) {
             Meeting meetingItr = new Meeting();
@@ -304,5 +306,16 @@ class ConferenceServiceTest extends BaseTest {
             }
             meetingRepository.save(meetingItr);
         }
+    }
+
+    private Conference getConference() {
+        Conference conference = new Conference();
+        conference.setTitleAuthentication("titulo");
+        conference.setSubtitleAuthentication("subtitulo");
+        conference.setTitleParticipation("titulo");
+        conference.setSubtitleParticipation("subtitulo");
+        conference.setTitleRegionalization("titulo");
+        conference.setSubtitleRegionalization("subtitulo");
+        return conferenceRepository.save(conference);
     }
 }

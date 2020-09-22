@@ -82,7 +82,7 @@ public class MeetingService {
 			}
 		});
 
-		if(conf != null && localityPlace != null && !localityCovers.isEmpty()) {
+		if(localityPlace != null && !localityCovers.isEmpty()) {
 			meeting.setConference(conf);
 			meeting.setLocalityPlace(localityPlace);
 			meeting.setLocalityCovers(localityCovers);
@@ -225,7 +225,6 @@ public class MeetingService {
 	public CheckedInAt checkInOnMeeting(Long personId, Long meetingId) {
 		Meeting meeting = this.find(meetingId);
 		Person person = personService.find(personId);
-
 		if(person != null && meeting != null) {
 			Optional<CheckedInAt> checkedInAt = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
 			if(!checkedInAt.isPresent()) {

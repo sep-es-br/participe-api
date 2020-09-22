@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -118,8 +119,14 @@ public class AcessoCidadaoService {
             }
             person.setRoles(getRoles(userInfo));
             
-            return personService.createRelationshipWithAthService(person, null, SERVER,
-                    userInfo.getString(FIELD_SUB_NOVO), conferenceId, false, true, null);
+            return personService.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+                    .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+                    .server(SERVER)
+                    .serverId(userInfo.getString(FIELD_SUB_NOVO))
+                    .conferenceId(conferenceId)
+                    .resetPassword(false)
+                    .makeLogin(true)
+                    .build());
         }
         userInfo.append("accessToken", token);
 
@@ -158,8 +165,14 @@ public class AcessoCidadaoService {
     	}else {
     		person.setContactEmail(userInfo.getString(FIELD_EMAIL));
     	}
-        return personService.createRelationshipWithAthService(person, null, SERVER,
-                userInfo.getString(FIELD_SUB_NOVO), conferenceId, false, true, null);
+        return personService.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
+                .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+                .server(SERVER)
+                .serverId(userInfo.getString(FIELD_SUB_NOVO))
+                .conferenceId(conferenceId)
+                .resetPassword(false)
+                .makeLogin(true)
+                .build());
     }
 
     private JSONObject getUserInfo(String token) throws IOException {

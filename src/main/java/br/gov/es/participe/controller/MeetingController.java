@@ -100,20 +100,19 @@ public class MeetingController {
 	}
 
 	@PostMapping("/checkIn")
-	public ResponseEntity<CheckedInAtDto> checkInOnMeeting(@RequestBody CheckInParamDto checkInParamDto) {
-		if(checkInParamDto == null || checkInParamDto.getPersonId() == null || checkInParamDto.getMeetingId() == null) {
+		public ResponseEntity<CheckedInAtDto> checkInOnMeeting(@RequestBody CheckInParamDto checkInParamDto) {
+
+		if (checkInParamDto == null || checkInParamDto.getPersonId() == null || checkInParamDto.getMeetingId() == null) {
 			throw new IllegalArgumentException("An object with Person Id and Meeting Id parameters must be informed.");
 		}
 		CheckedInAt checkedInAt = meetingService
 				.checkInOnMeeting(checkInParamDto.getPersonId(), checkInParamDto.getMeetingId());
-
-		if(checkedInAt != null) {
+		if (checkedInAt != null) {
 			CheckedInAtDto checkedInAtDto = new CheckedInAtDto(checkedInAt);
 			return ResponseEntity.ok().body(checkedInAtDto);
 		}
 		return ResponseEntity.noContent().build();
 	}
-
 	@ApiPageable
 	@GetMapping("/{meetingId}/participants")
 	public ResponseEntity<Page<PersonMeetingDto>> findMeetingParticipants(@PathVariable Long meetingId,

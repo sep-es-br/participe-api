@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 import br.gov.es.participe.controller.dto.CommentDto;
 import br.gov.es.participe.controller.dto.CommentParamDto;
@@ -19,8 +18,6 @@ public class Comment extends Attend implements Serializable {
 	private String status;
 	private String classification;
 	private Boolean moderated;
-
-	
 	
 	@Relationship(type = "LIKED_BY")
 	private Set<Person> personLiked;

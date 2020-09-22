@@ -34,7 +34,7 @@ public class Locality extends Entity implements Serializable {
     @Relationship(type = "COVERS", direction = Relationship.INCOMING)
     private Set<Meeting> meetingCovers;
     
-    @Relationship(type = "AS_BEGIN_FROM", direction = Relationship.INCOMING)
+    @Relationship(type = "AS_BEING_FROM", direction = Relationship.INCOMING)
     private Set<SelfDeclaration> selfDeclaration;
     
     @Relationship(type = "ABOUT", direction = Relationship.INCOMING)

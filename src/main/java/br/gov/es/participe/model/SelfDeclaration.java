@@ -20,7 +20,7 @@ public class SelfDeclaration extends Entity implements Serializable {
 	
 	public SelfDeclaration() {
 	}
-	
+
 	public SelfDeclaration(Conference conference, Locality locality, Person person){
 		
 		this.person = person;
