@@ -14,7 +14,6 @@ public interface PlanRepository extends Neo4jRepository<Plan, Long> {
     		   " RETURN p, bt, i, reg, lt, [ " +
                " [ (p)-[r_a1:APPLIES_TO]->(d1:Domain) | [ r_a1, d1 ] ], " +
                " [ (p)-[r_o1:OBEYS]->(s1:Structure) | [ r_o1, s1 ] ], " +
-               " [ (p)-[reg:REGIONALIZABLE]->(lt:LocalType) | [reg, lt] ],"+
                " [ (i)-[bts:OBEYS]->(st:StructureItem)| [bts, st] ], " +
                " [ (i)<-[bti:COMPOSES*]-(pi:PlanItem)-[bts:OBEYS]-(st:StructureItem)| [bti, pi,bts, st] ] " +
                "]")
@@ -70,7 +69,9 @@ public interface PlanRepository extends Neo4jRepository<Plan, Long> {
             + " OPTIONAL MATCH (planItem:PlanItem)-[c:COMPOSES*]->(parentPlan:Plan) WHERE ext.translate(planItem.name) CONTAINS ext.translate({0}) "
             + " OPTIONAL MATCH (planItem)-[c2:COMPOSES]->(parentPlan:Structure) "
             + " OPTIONAL MATCH (planItem)<-[c3:COMPOSES*]-(child:PlanItem) "
-            + " RETURN plan, planItem, c, parentPlan, c2, c3, child  "
+			+ " OPTIONAL MATCH (plan)-[reg:REGIONALIZABLE]->(lt:LocalityType) "
+			+ " OPTIONAL MATCH (parentPlan)-[reg2:REGIONALIZABLE]->(lt2:LocalityType) "
+            + " RETURN plan, planItem, c, parentPlan, c2, c3, child, reg, lt, reg2, lt2 "
             + ", [ "
             + "      [ (plan)-[o:OBEYS]->(s:Structure) | [ o, s ] ] "
             + "     ,[ (plan)-[a:APPLIES_TO]->(d:Domain) | [ a, d ] ] "

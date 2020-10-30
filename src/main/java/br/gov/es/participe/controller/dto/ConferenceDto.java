@@ -21,7 +21,8 @@ public class ConferenceDto {
     private String subtitleParticipation;
     private String titleRegionalization;
     private String subtitleRegionalization;
-    
+    private Boolean isActive;
+
     private PlanDto plan;
     private LocalityTypeDto localityType;
     private List<MeetingDto> meeting;
@@ -105,6 +106,14 @@ public class ConferenceDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     public PlanDto getPlan() {

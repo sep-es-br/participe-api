@@ -26,11 +26,11 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
     Collection<Conference> findAllByQuery(String name, Long plan, Integer month, Integer year);
 
     @Query("MATCH (n:Conference) "
-            + " WHERE datetime(n.beginDate) <= datetime({0}) "
-            + " AND datetime(n.endDate) >= datetime({0}) "
+            + " WHERE NOT {1} OR (datetime(n.beginDate) <= datetime({0}) "
+            + " AND datetime(n.endDate) >= datetime({0})) "
             + " RETURN n, [(n)-[md:MODERATORS]->(p:Person) |[n, md, p] ] "
             + " ORDER BY n.beginDate")
-    Collection<Conference> findAllActives(Date date);
+    Collection<Conference> findAllActives(Date date, Boolean active);
 
     Conference findByNameIgnoreCase(String name);
 

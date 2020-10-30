@@ -111,11 +111,11 @@ public class ConferenceService {
         return conferenceRepository.findByPlan(id);
     }
     
-    public List<ConferenceDto> findAllActives(Long idPerson) {
+    public List<ConferenceDto> findAllActives(Long idPerson, Boolean activeConferences) {
     	Person person = personService.find(idPerson);
     	final boolean adm = person.getRoles() != null && person.getRoles().contains("Administrator");
     	List<ConferenceDto> conferences = new ArrayList<>();
-    	conferenceRepository.findAllActives(new Date()).forEach(conference -> {
+    	conferenceRepository.findAllActives(new Date(), activeConferences || !adm).forEach(conference -> {
     		if(adm || (conference.getModerators() != null 
     						&& conference.getModerators().stream().anyMatch(m -> m.getId().equals(idPerson)))) {
     			ConferenceDto dto = new ConferenceDto(conference);
@@ -123,6 +123,13 @@ public class ConferenceService {
     			dto.setLocalityType(null);
     			dto.setFileAuthentication(null);
     			dto.setFileParticipation(null);
+    			if(adm) {
+                    Date today = new Date();
+                    dto.setIsActive((today.after(dto.getBeginDate()) || today.equals(dto.getBeginDate()))
+                            && (today.before(dto.getEndDate()) || today.equals(dto.getEndDate())));
+                } else {
+                    dto.setIsActive(true);
+                }
     			conferences.add(dto);
     		}
     	});

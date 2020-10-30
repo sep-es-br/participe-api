@@ -7,12 +7,14 @@ import br.gov.es.participe.controller.dto.LocalityParamDto;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.service.ConferenceService;
 import br.gov.es.participe.service.LocalityService;
+import br.gov.es.participe.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -60,7 +62,8 @@ public class LocalityController {
     	localities.forEach(locality -> {
     		LocalityDto dto = new LocalityDto(locality, null, true, false);
     		if(dto.getChildren() != null && !dto.getChildren().isEmpty()) {
-    			dto.getChildren().sort((c1, c2) -> c1.getName().trim().compareTo(c2.getName().trim()));
+                StringUtils stringUtils = new StringUtils();
+    			dto.getChildren().sort(Comparator.comparing(c -> stringUtils.replaceSpecialCharacters(c.getName())));
     			dto.setMapSplit(new ArrayList<>());
     			dto.getChildren().forEach(loc -> {
     				String name = loc.getName().trim().toLowerCase();
