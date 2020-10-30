@@ -13,4 +13,8 @@ public class StringUtils {
         response = response.replaceAll("[^a-z0-9\\s]","");
         return response;
     }
+
+    public Boolean compareIfAContainsB(String a, String b) {
+        return replaceSpecialCharacters(a).contains(replaceSpecialCharacters(b));
+    }
 }

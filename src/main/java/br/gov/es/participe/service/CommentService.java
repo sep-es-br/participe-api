@@ -102,6 +102,7 @@ public class CommentService {
 		for(Comment comment: comments.getContent()) {
 			List<PlanItemDto> itens = new ArrayList<>();
 			proposal = new ProposalDto();
+			proposal.setTime(comment.getTime().toString());
 			proposal.setCommentid(comment.getId());
 			proposal.setComment(comment.getText());
 			proposal.setLocalityName(comment.getLocality().getName());
@@ -114,17 +115,15 @@ public class CommentService {
 			
 			Person personMadeBy = personService.findPersonMadeByIdComment(comment.getId());
 			List<Person> personLiked = personService.findPersonLikedByIdComment(comment.getId());
+			if(personMadeBy == null) {
+				continue;
+			}
 			proposal.setPersonName(personMadeBy.getName());
 			if(personLiked == null || personLiked.isEmpty())  
 				proposal.setLikes(null);
 			else {
 				proposal.setLikes(personLiked.size());
-				proposal.setIsLiked(false);
-				for(Person person: personLiked) {
-					if(person.getId().compareTo(idPerson) == 0) {
-						proposal.setIsLiked(true);
-					}
-				}
+				setIsLiked(proposal, personLiked, idPerson);
 			}
 			
 			SelfDeclaration selfDeclaration = selfDeclarationService.findByPersonAndConference(personMadeBy.getId(), idConference);
@@ -135,10 +134,18 @@ public class CommentService {
 			proposals.add(proposal);
 		}
 		screen.setProposals(proposals);
-		
 		return screen;
 	}
-	
+
+	private void setIsLiked(ProposalDto proposal, List<Person> personLiked, Long idPerson) {
+		proposal.setIsLiked(false);
+		for(Person person: personLiked) {
+			if(person.getId().compareTo(idPerson) == 0) {
+				proposal.setIsLiked(true);
+			}
+		}
+	}
+
 	private void listPlanItem(PlanItem planItem, List<PlanItemDto> items) {
 		PlanItemDto plani = new PlanItemDto(planItem, true);
 		

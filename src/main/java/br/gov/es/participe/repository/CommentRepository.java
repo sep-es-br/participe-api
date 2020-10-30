@@ -29,10 +29,30 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long>{
 	List<Comment> findByIdPersonAndIdPlanItemAndIdConferenceAndIdLoclity(Long idPerson, Long idPlanItem, Long idConference, Long idLocality);
 	
 	@Query(value="MATCH (loc:Locality)<-[a:ABOUT]-(comment:Comment)-[:ABOUT]->(c:Conference)-[t:TARGETS]-(p:Plan)<-[comP:COMPOSES]-(parent:PlanItem)-[comC:COMPOSES*]-(child:PlanItem) "
-			+" WHERE id(c)={0} AND comment.status CONTAINS {1} AND ext.translate(comment.text) CONTAINS ext.translate({2}) AND (id(parent) IN {4} OR NOT {4}) AND (id(loc) IN {3} OR NOT {3}) AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment)))"
-			+" RETURN DISTINCT comment ,a ,loc",
-			countQuery = "MATCH (loc:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(c:Conference)-[t:TARGETS]-(p:Plan)<-[comP:COMPOSES]-(parent:PlanItem)-[comC:COMPOSES*]-(child:PlanItem) "
-					+" WHERE id(c)={0} AND comment.status CONTAINS {1} AND ext.translate(comment.text) CONTAINS ext.translate({2}) AND (id(parent) IN {4} OR NOT {4}) AND (id(loc) IN {3} OR NOT {3}) AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment)))"
+			+" WHERE id(c)={0} AND comment.status CONTAINS {1} AND (id(parent) IN {4} OR NOT {4}) AND (id(loc) IN {3} OR NOT {3}) AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment))) "
+			+" WITH loc,a,comment,p "
+			+" MATCH (comment)-[:MADE_BY]->(person:Person) "
+			+" MATCH (comment)-[:ABOUT]->(pi2:PlanItem) "
+			+" OPTIONAL MATCH (pi2)-[:COMPOSES*]->(pi3:PlanItem)-[:COMPOSES]->(p) "
+			+" WITH loc,a,comment,person,pi2,COLLECT(pi3) as listPi3,p "
+			+" WHERE ext.translate(comment.text) CONTAINS ext.translate({2}) "
+			+" OR ext.translate(person.name) CONTAINS ext.translate({2}) "
+			+" OR ext.translate(loc.name) CONTAINS ext.translate({2}) "
+			+" OR ext.translate(pi2.name) CONTAINS ext.translate({2}) "
+			+" OR listPi3 IS NOT NULL AND any(piIte in listPi3 WHERE ext.translate(piIte.name) CONTAINS ext.translate({2})) "
+			+" RETURN DISTINCT comment,a,loc",
+			countQuery = "MATCH (loc:Locality)<-[a:ABOUT]-(comment:Comment)-[:ABOUT]->(c:Conference)-[t:TARGETS]-(p:Plan)<-[comP:COMPOSES]-(parent:PlanItem)-[comC:COMPOSES*]-(child:PlanItem) "
+					+" WHERE id(c)={0} AND comment.status CONTAINS {1} AND (id(parent) IN {4} OR NOT {4}) AND (id(loc) IN {3} OR NOT {3}) AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment))) "
+					+" WITH loc,a,comment,p "
+					+" MATCH (comment)-[:MADE_BY]->(person:Person) "
+					+" MATCH (comment)-[:ABOUT]->(pi2:PlanItem) "
+					+" OPTIONAL MATCH (pi2)-[:COMPOSES*]->(pi3:PlanItem)-[:COMPOSES]->(p) "
+					+" WITH loc,a,comment,person,pi2,COLLECT(pi3) as listPi3,p "
+					+" WHERE ext.translate(comment.text) CONTAINS ext.translate('educ') "
+					+" OR ext.translate(person.name) CONTAINS ext.translate({2}) "
+					+" OR ext.translate(loc.name) CONTAINS ext.translate('educ') "
+					+" OR ext.translate(pi2.name) CONTAINS ext.translate('educ') "
+					+" OR listPi3 IS NOT NULL AND any(piIte in listPi3 WHERE ext.translate(piIte.name) CONTAINS ext.translate('educ')) "
 					+" RETURN COUNT(DISTINCT comment)")
 	Page<Comment> findAllCommentsByConference(Long idConference, String status, String text, Long[] localityIds, Long[] planItemIds, Pageable pageable);
 	

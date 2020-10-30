@@ -149,9 +149,11 @@ public class ModerationController {
 	}
 	
 	@GetMapping("/conferences")
-	public ResponseEntity<List<ConferenceDto>> findConferencesAtctives(@RequestHeader (name="Authorization") String token) {
+	public ResponseEntity<List<ConferenceDto>> findConferencesActives(
+			@RequestHeader(name="Authorization") String token,
+			@RequestParam(name = "activeConferences", required = false, defaultValue = "false") Boolean activeConferences) {
 		Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
-		List<ConferenceDto> conferences = conferenceService.findAllActives(idPerson);
+		List<ConferenceDto> conferences = conferenceService.findAllActives(idPerson, activeConferences);
 		return ResponseEntity.status(200).body(conferences);
 	}
 	

@@ -11,7 +11,8 @@ public class ProposalDto {
 	private String localityPerson;
 	private String localityName;
 	private String localityTypeName;
-	
+	private String time;
+
 	private Integer likes;
 	
 	private List<PlanItemDto> planItens;
@@ -66,6 +67,14 @@ public class ProposalDto {
 		this.localityTypeName = localityTypeName;
 	}
 
+	public String getTime() {
+		return time;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
+	}
+
 	public Integer getLikes() {
 		return likes;
 	}
@@ -77,6 +86,7 @@ public class ProposalDto {
 	public List<PlanItemDto> getPlanItens() {
 		return planItens;
 	}
+
 	public void setPlanItens(List<PlanItemDto> planItem) {
 		this.planItens = planItem;
 	}

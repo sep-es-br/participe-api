@@ -21,25 +21,38 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long>{
 			+" WHERE id(c)={0} RETURN COUNT(DISTINCT p)")
 	Integer countParticipationByConference(Long idConference);
 	
-	@Query(value="MATCH  (p:Person)<-[a:MADE_BY]-(at:Attend)-[ab:ABOUT]->(conf:Conference), (at)-[ap:ABOUT]->(pi:PlanItem) "
-			+" ,(at)-[al:ABOUT]->(loc:Locality)-[ot:OF_TYPE]->(lt:LocalityType) "
+	@Query(value="MATCH (p:Person)<-[a:MADE_BY]-(at:Attend)-[ab:ABOUT]->(conf:Conference)"
+			+" MATCH (at)-[ap:ABOUT]->(pi:PlanItem) "
+			+" MATCH (at)-[al:ABOUT]->(loc:Locality)-[ot:OF_TYPE]->(lt:LocalityType) "
 			+" WHERE id(p)={0} AND id(conf) = {1} "
 			+" AND (at.status IS NULL OR NOT at.status IN ['rem', 'arq']) "
-			+" AND ({2} IS NULL OR (at.text IS NOT NULL AND ext.translate(at.text) CONTAINS ext.translate({2})) "
+
+			+" OPTIONAL MATCH (pi)-[comp:COMPOSES*]->(pi2:PlanItem) "
+			+" WITH p,at,conf,pi,loc,lt,pi2 "
+			+" WHERE ({2} IS NULL OR (at.text IS NOT NULL AND ext.translate(at.text) CONTAINS ext.translate({2})) "
 			+" OR (at.text IS NULL AND ext.translate(pi.name) CONTAINS ext.translate({2})) "
-			+" OR (at.text IS NULL AND ext.translate(loc.name) CONTAINS ext.translate({2}))) "
+			+" OR (at.text IS NULL AND ext.translate(loc.name) CONTAINS ext.translate({2})) "
+			+" OR (at.text IS NULL AND pi2 IS NOT NULL AND ext.translate(pi2.name) CONTAINS ext.translate({2}))) "
+
 			+" OPTIONAL MATCH (at)-[mb:MODERATED_BY]->(m:Person) "
 			+" RETURN DISTINCT id(at) AS id, at.text AS text, at.status AS status, at.time AS time, "
 			+" at.classification AS classification, m.name AS moderatorName, mb.time as moderateTime, mb.finish as moderated, "
 			+" pi AS planItem, loc AS locality, lt AS localityType, [(at)-[lk:LIKED_BY]->(plk:Person) | [plk]] AS personLiked  "
 			+" ORDER BY at.time DESC ",
-			countQuery="MATCH  (p:Person)<-[a:MADE_BY]-(at:Attend)-[ab:ABOUT]->(conf:Conference), (at)-[ap:ABOUT]->(pi:PlanItem) "
-					+" ,(at)-[al:ABOUT]->(loc:Locality)-[ot:OF_TYPE]->(lt:LocalityType) "
+			countQuery="MATCH (p:Person)<-[a:MADE_BY]-(at:Attend)-[ab:ABOUT]->(conf:Conference)"
+					+" MATCH (at)-[ap:ABOUT]->(pi:PlanItem) "
+					+" MATCH (at)-[al:ABOUT]->(loc:Locality)-[ot:OF_TYPE]->(lt:LocalityType) "
 					+" WHERE id(p)={0} AND id(conf) = {1} "
 					+" AND (at.status IS NULL OR NOT at.status IN ['rem', 'arq']) "
-					+" AND ({2} IS NULL OR (at.text IS NOT NULL AND ext.translate(at.text) CONTAINS ext.translate({2})) "
+
+					+" OPTIONAL MATCH (pi)-[comp:COMPOSES*]->(pi2:PlanItem) "
+					+" WITH p,at,conf,pi,loc,lt,pi2 "
+					+" WHERE ({2} IS NULL OR (at.text IS NOT NULL AND ext.translate(at.text) CONTAINS ext.translate({2})) "
 					+" OR (at.text IS NULL AND ext.translate(pi.name) CONTAINS ext.translate({2})) "
-					+" OR (at.text IS NULL AND ext.translate(loc.name) CONTAINS ext.translate({2}))) "
+					+" OR (at.text IS NULL AND ext.translate(loc.name) CONTAINS ext.translate({2})) "
+					+" OR (at.text IS NULL AND pi2 IS NOT NULL AND ext.translate(pi2.name) CONTAINS ext.translate({2}))) "
+
+					+" OPTIONAL MATCH (at)-[mb:MODERATED_BY]->(m:Person) "
 					+" RETURN COUNT(DISTINCT id(at)) "
 	)
 	Page<ParticipationDto> findByIdConferenceAndIdPersonAndText(Long idPerson, Long idConference, String text, Pageable pageable);

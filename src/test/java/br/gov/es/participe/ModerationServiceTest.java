@@ -20,8 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Testcontainers
 @SpringBootTest
@@ -242,11 +244,17 @@ class ModerationServiceTest extends BaseTest {
 
     @Test
     public void shouldFindConferences() throws IOException {
-        Person person = getPerson();
-        String token = "Bearer " + tokenService.generateToken(person, TokenType.AUTHENTICATION);
+        Person personAdm = getPersonWithRole("Administrator");
+        String tokenAdm = "Bearer " + tokenService.generateToken(personAdm, TokenType.AUTHENTICATION);
+        Person personMod = getPersonWithRole("Moderator");
+        String tokenMod = "Bearer " + tokenService.generateToken(personMod, TokenType.AUTHENTICATION);
 
         ResponseEntity<List<ConferenceDto>> response = moderationController
-                .findConferencesAtctives(token);
+                .findConferencesActives(tokenAdm, false);
+        Assert.assertEquals(200, response.getStatusCodeValue());
+
+        ResponseEntity<List<ConferenceDto>> response2 = moderationController
+                .findConferencesActives(tokenMod, false);
         Assert.assertEquals(200, response.getStatusCodeValue());
     }
 
@@ -331,6 +339,32 @@ class ModerationServiceTest extends BaseTest {
             person = new Person();
             person.setName("Person Teste");
             person = personRepository.save(person);
+        }
+        return person;
+    }
+
+    private Person getPersonWithRole(String role) {
+        Person person = null;
+        if(role.contains("Administrator")) {
+            person = personRepository.findById(2L).orElse(null);
+            if (person == null) {
+                person = new Person();
+                person.setName("Person Teste Administrador");
+                Set<String> roles = new HashSet<>();
+                roles.add(role);
+                person.setRoles(roles);
+                person = personRepository.save(person);
+            }
+        } else if(role.contains("Moderator")) {
+            person = personRepository.findById(3L).orElse(null);
+            if (person == null) {
+                person = new Person();
+                person.setName("Person Teste Moderador");
+                Set<String> roles = new HashSet<>();
+                roles.add(role);
+                person.setRoles(roles);
+                person = personRepository.save(person);
+            }
         }
         return person;
     }

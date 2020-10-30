@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import br.gov.es.participe.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -126,11 +127,15 @@ public class ParticipationService {
 		return body;
 	}
 	
-	private List<PlanItemDto> getListPlanItemDto(Set<PlanItem> planItems, String text, Long idPerson, Long idConference, Long idLocality) {
+	private List<PlanItemDto> getListPlanItemDto(Set<PlanItem> planItems, String text, Long idPerson, Long idConference,
+												 Long idLocality) {
 		List<PlanItemDto> itens = new ArrayList<>();
 		if(planItems != null) {
 			if (!planItems.isEmpty() && text != null && !text.isEmpty()) {
-				planItems = planItems.stream().filter(planItem -> (isNameOrDescription(planItem, text))).collect(Collectors.toSet());
+				planItems = planItems
+						.stream()
+						.filter(planItem -> isMatchingText(planItem, text))
+						.collect(Collectors.toSet());
 			}
 			
 			for(PlanItem planItem: planItems) {
@@ -146,14 +151,26 @@ public class ParticipationService {
 		}
 		return itens;
 	}
-	
-	private boolean isNameOrDescription(PlanItem planItem, String text) {
-		return (planItem.getName() != null 
-				&& !planItem.getName().isEmpty() && planItem.getName().toLowerCase().contains(text.toLowerCase())) 
-				|| planItem.getDescription() != null && !planItem.getDescription().isEmpty() 
-				&& planItem.getDescription().toLowerCase().contains(text.toLowerCase());
+
+	private boolean isMatchingText(PlanItem planItem, String text) {
+		if(isNameOrDescription(planItem, text)) {
+			return true;
+		}
+		PlanItem planItem1 = planItemService.findByIdWithLocalities(planItem.getId());
+		if(planItem1 != null && planItem1.getChildren() != null && !planItem1.getChildren().isEmpty()) {
+			return planItem1.getChildren().stream().anyMatch(pi -> isNameOrDescription(pi, text));
+		}
+		return false;
 	}
-	
+
+	private boolean isNameOrDescription(PlanItem planItem, String text) {
+		StringUtils stringUtils = new StringUtils();
+		return (planItem.getName() != null 
+				&& !planItem.getName().isEmpty() && stringUtils.compareIfAContainsB(planItem.getName(), text))
+				|| (planItem.getDescription() != null && !planItem.getDescription().isEmpty()
+				&& stringUtils.compareIfAContainsB(planItem.getDescription(), text));
+	}
+
 	public PlanItemDto generatePlanItemDtoFront(PlanItem planItem, Long idPerson, Long idConference, Long idLocality) {
 		PlanItemDto planItemDto = new PlanItemDto(planItem, null, false);
 		
