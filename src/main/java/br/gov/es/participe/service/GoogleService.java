@@ -57,7 +57,7 @@ public class GoogleService {
     public String googleAcessToken(String authorizationCode, HttpServletRequest request) {
         return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
                 authorizationCode,
-                participeUtils.getServerBaseUrl(request).concat("/signin/google-response"),
+                participeUtils.getServerBaseUrl(request).concat("/signin/google"),
                 null
         ).getAccessToken();
     }
