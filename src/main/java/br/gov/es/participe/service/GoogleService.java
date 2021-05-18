@@ -63,7 +63,7 @@ public class GoogleService {
         
         return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
                 authorizationCode,
-                participeUtils.getServerBaseUrl(request).concat("/signin/google"),
+                "https://hom.orcamento.es.gov.br/participe/signin/google" /*participeUtils.getServerBaseUrl(request).concat("/signin/google")*/,
                 null
         ).getAccessToken();
     }
