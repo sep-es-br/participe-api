@@ -60,19 +60,11 @@ public class GoogleService {
     private GoogleProperties googleProperties;
 
     public String googleAcessToken(String authorizationCode, HttpServletRequest request) {
-  
-       System.out.println("code:"+authorizationCode);
-    	
-       System.out.println("uri:"+ participeUtils.getServerBaseUrl(request).concat("/signin/google"));
-       
-       System.out.println("googleuri:"+ googleProperties.getRedirecturi());
-       
     	return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
                 authorizationCode,
-                googleProperties.getRedirecturi()  /*"https://hom.orcamento.es.gov.br/participe/signin/google" participeUtils.getServerBaseUrl(request).concat("/signin/google")*/,
+                googleProperties.getRedirecturi(),
                 null
         ).getAccessToken();
-    	
     }
 
     public SigninDto authenticate(String accessToken, Long conferenceId) {
