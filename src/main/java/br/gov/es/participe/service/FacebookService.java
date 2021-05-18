@@ -58,15 +58,6 @@ public class FacebookService {
         ).getAccessToken();
     }
 
-
-    public String googleAcessToken(String authorizationCode, HttpServletRequest request) {
-    	return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
-                authorizationCode,
-                googleProperties.getRedirecturi(),
-                null
-        ).getAccessToken();
-    }
-
     public SigninDto authenticate(String accessToken, Long conferenceId) {
         Person person = findOrCreatePerson(accessToken, conferenceId);
         String authenticationToken = tokenService.generateToken(person, TokenType.AUTHENTICATION);
