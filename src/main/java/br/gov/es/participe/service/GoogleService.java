@@ -1,3 +1,4 @@
+
 package br.gov.es.participe.service;
 
 import java.util.Optional;
@@ -5,19 +6,16 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.social.google.api.impl.GoogleTemplate;
+import org.springframework.social.google.api.oauth2.UserInfo;
 import org.springframework.social.google.connect.GoogleConnectionFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.model.Person;
@@ -51,23 +49,22 @@ public class GoogleService {
     @Autowired
     private TokenService tokenService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     public String googleAcessToken(String authorizationCode, HttpServletRequest request) {
-        
+       
+    	
        System.out.println("code:"+authorizationCode);
     	
        System.out.println("uri:"+ participeUtils.getServerBaseUrl(request).concat("/signin/google"));
-        
-       System.out.println("requestURL:"+ request.getRequestURL());
-
-        
-        return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
+              
+    	return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
                 authorizationCode,
-                "https://hom.orcamento.es.gov.br/participe/signin/google" /*participeUtils.getServerBaseUrl(request).concat("/signin/google")*/,
+                participeUtils.getServerBaseUrl(request).concat("/signin/google"),
                 null
         ).getAccessToken();
+        
+       
+    	
+    	
     }
 
     public SigninDto authenticate(String accessToken, Long conferenceId) {
@@ -79,25 +76,13 @@ public class GoogleService {
     }
 
     private UserInfo googleUserProfile(String accessToken) {
+        GoogleTemplate google = new GoogleTemplate(accessToken);
         String token = "Bearer " + accessToken;
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", token);
         HttpEntity entity = new HttpEntity(headers);
 
-        RestTemplate restTemplate = new RestTemplate();
-        String strUserInfo = restTemplate.exchange(googleUserInfoUri, HttpMethod.GET, entity, String.class).getBody();
-        UserInfo userInfo = null;
-        try {
-            JsonNode usr = objectMapper.readTree(strUserInfo);
-            userInfo = new UserInfo();
-            userInfo.setId(usr.get("id").asText());
-            userInfo.setEmail(usr.get("email").asText());
-            userInfo.setName(usr.get("name").asText());
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return userInfo;
+        return google.restOperations().exchange(googleUserInfoUri, HttpMethod.GET, entity, UserInfo.class).getBody();
     }
 
     private GoogleConnectionFactory createGoogleConnectionFactory() {
@@ -136,35 +121,5 @@ public class GoogleService {
                 .resetPassword(false)
                 .makeLogin(true)
                 .build());
-    }
-
-    class UserInfo {
-        private String name;
-        private String email;
-        private String id;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
     }
 }
