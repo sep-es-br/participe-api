@@ -18,6 +18,7 @@ import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.util.ParticipeUtils;
 import br.gov.es.participe.util.domain.TokenType;
+import br.gov.es.participe.configuration.FacebookProperties;
 
 @Service
 @PropertySource(name = "social", value = "classpath:/social-cfg.properties")
@@ -45,11 +46,23 @@ public class FacebookService {
 
     @Autowired
     private TokenService tokenService;
-
+    
+    @Autowired
+    private FacebookProperties facebookProperties;
+    
     public String facebookAcessToken(String authorizationCode, HttpServletRequest request) {
         return createFacebookConnection().getOAuthOperations().exchangeForAccess(
                 authorizationCode,
-                participeUtils.getServerBaseUrl(request).concat("/signin/facebook"),
+                facebookProperties.getRedirecturi(),
+                null
+        ).getAccessToken();
+    }
+
+
+    public String googleAcessToken(String authorizationCode, HttpServletRequest request) {
+    	return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
+                authorizationCode,
+                googleProperties.getRedirecturi(),
                 null
         ).getAccessToken();
     }
