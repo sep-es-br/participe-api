@@ -24,6 +24,7 @@ import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.util.ParticipeUtils;
 import br.gov.es.participe.util.domain.TokenType;
+import br.gov.es.participe.configuration.GoogleProperties;
 
 @Service
 @PropertySource(name = "social", value = "classpath:/social-cfg.properties")
