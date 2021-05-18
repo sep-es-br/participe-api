@@ -55,6 +55,12 @@ public class GoogleService {
     private ObjectMapper objectMapper;
 
     public String googleAcessToken(String authorizationCode, HttpServletRequest request) {
+        
+       System.out.println("code:"+authorizationCode);
+    	
+       System.out.println("uri:"+ participeUtils.getServerBaseUrl(request).concat("/signin/google"));
+
+        
         return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
                 authorizationCode,
                 participeUtils.getServerBaseUrl(request).concat("/signin/google"),
