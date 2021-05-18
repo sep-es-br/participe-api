@@ -59,6 +59,8 @@ public class GoogleService {
        System.out.println("code:"+authorizationCode);
     	
        System.out.println("uri:"+ participeUtils.getServerBaseUrl(request).concat("/signin/google"));
+        
+       System.out.println("requestURL:"+ request.getRequestURL());
 
         
         return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
