@@ -14,11 +14,5 @@ public class GoogleProperties {
 	public void setRedirecturi(String redirecturi) {
 		this.redirecturi = redirecturi;
 	}
-
-
-   
     
 }
-
-
-
