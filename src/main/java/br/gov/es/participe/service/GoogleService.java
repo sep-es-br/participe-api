@@ -49,21 +49,22 @@ public class GoogleService {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private GoogleProperties googleProperties;
+
     public String googleAcessToken(String authorizationCode, HttpServletRequest request) {
-       
     	
        System.out.println("code:"+authorizationCode);
     	
        System.out.println("uri:"+ participeUtils.getServerBaseUrl(request).concat("/signin/google"));
-              
+       
+       System.out.println("googleuri:"+ googleProperties.getRedirecturi());
+       
     	return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
                 authorizationCode,
-                participeUtils.getServerBaseUrl(request).concat("/signin/google"),
+                googleProperties.getRedirecturi()  /*"https://hom.orcamento.es.gov.br/participe/signin/google" participeUtils.getServerBaseUrl(request).concat("/signin/google")*/,
                 null
-        ).getAccessToken();
-        
-       
-    	
+        ).getAccessToken(); 	
     	
     }
 
