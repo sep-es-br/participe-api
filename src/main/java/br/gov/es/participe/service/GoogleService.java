@@ -1,3 +1,4 @@
+
 package br.gov.es.participe.service;
 
 import java.util.Optional;
@@ -23,6 +24,7 @@ import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.util.ParticipeUtils;
 import br.gov.es.participe.util.domain.TokenType;
+import br.gov.es.participe.configuration.GoogleProperties;
 
 @Service
 @PropertySource(name = "social", value = "classpath:/social-cfg.properties")
@@ -54,10 +56,13 @@ public class GoogleService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private GoogleProperties googleProperties;
+
     public String googleAcessToken(String authorizationCode, HttpServletRequest request) {
-        return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
+    	return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
                 authorizationCode,
-                participeUtils.getServerBaseUrl(request).concat("/signin/google"),
+                googleProperties.getRedirecturi(),
                 null
         ).getAccessToken();
     }
