@@ -139,7 +139,7 @@ class ParticipationServiceTest extends BaseTest {
         commentController.store(token, ids.getCommentParamDto());
 
         ResponseEntity<PortalHeader> response = participationController
-                .getHeader(ids.getConferenceId(), UriComponentsBuilder.fromPath("https://localhost:8443/participe"));
+                .getHeader(token, ids.getConferenceId(), UriComponentsBuilder.fromPath("https://localhost:8443/participe"));
         Assert.assertEquals(200, response.getStatusCodeValue());
     }
 

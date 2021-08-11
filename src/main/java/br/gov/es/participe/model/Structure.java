@@ -22,6 +22,8 @@ public class Structure extends Entity implements Serializable {
     @Relationship(type = "OBEYS", direction = Relationship.INCOMING)
     private Set<Plan> plans;
 
+    private Boolean regionalization;
+
     public Structure() {
     }
 
@@ -38,6 +40,7 @@ public class Structure extends Entity implements Serializable {
             return;
 
         setId(structureDto.getId());
+        this.regionalization = structureDto.getRegionalization();
         this.name = structureDto.getName();
     }
 
@@ -82,5 +85,13 @@ public class Structure extends Entity implements Serializable {
         if (plans == null)
             return Collections.emptySet();
         return Collections.unmodifiableSet(plans);
+    }
+
+    public Boolean getRegionalization() {
+        return regionalization;
+    }
+
+    public void setRegionalization(Boolean regionalization) {
+        this.regionalization = regionalization;
     }
 }

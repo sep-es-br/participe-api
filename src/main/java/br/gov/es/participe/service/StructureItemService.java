@@ -46,12 +46,24 @@ public class StructureItemService {
     public StructureItem create(StructureItem structureItem) {
         loadAttributes(structureItem);
 
+        validateStructureItem(structureItem);
+
         return structureItemRepository.save(structureItem);
+    }
+
+    private void validateStructureItem(StructureItem structureItem) {
+        if(structureItem.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("The name cannot be empty");
+        }
     }
 
     @Transactional
     public StructureItem update(Long id, StructureItemDto structureItemDto) {
         StructureItem structureItem = find(id);
+
+        if(structureItemDto.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("The name cannot be empty");
+        }
 
         structureItem.setName(structureItemDto.getName());
         structureItem.setLogo(structureItemDto.getLogo());
@@ -122,5 +134,13 @@ public class StructureItemService {
                 structureItem.setStructure(parentStructure);
             }
         }
+    }
+
+    public List<StructureItem> findByStructure(Long idStructure) {
+        return structureItemRepository.findByStructure(idStructure);
+    }
+
+    public List<StructureItem> findByIds(List<Long> targetedByItems) {
+        return structureItemRepository.findByIds(targetedByItems);
     }
 }

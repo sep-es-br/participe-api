@@ -1,18 +1,22 @@
 package br.gov.es.participe.controller.dto;
 
+import java.text.*;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.*;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import br.gov.es.participe.util.domain.DisplayModeType;
+import br.gov.es.participe.util.domain.StatusConferenceType;
 
 public class ConferenceParamDto {
 
+    static Logger log = Logger.getLogger(ConferenceParamDto.class.getName());
+    private static String formatDate = "dd/MM/yyyy HH:mm:ss";
+
     private Long id;
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date beginDate;
+    private String beginDate;
     private String name;
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date endDate;
+    private String endDate;
     private String description;
     private PlanParamDto plan;
     private String titleAuthentication;
@@ -27,6 +31,55 @@ public class ConferenceParamDto {
     private List<MeetingDto> meeting;
     private List<SelfDeclarationDto> selfDeclaration;
     private List<PersonDto> moderators;
+    private boolean segmentation;
+    private List<Long> targetedByItems;
+    private DisplayModeType displayMode;
+    private StatusConferenceType displayStatusConference;
+    private String preOpeningText;
+    private String postClosureText;
+    private List<HowItWorkStepDto> howItWork;
+    private String externalLinksMenuLabel;
+    private List<ExternalLinksDto> externalLinks;
+    private List<FileDto> backgroundImages;
+    private String serverName;
+    private boolean defaultServerConference;
+    private ResearchConfigurationParamDto researchConfiguration;
+
+    public ConferenceParamDto() {
+    }
+
+    public ConferenceParamDto(ConferenceDto conferenceDto) {
+        id = conferenceDto.getId();
+        beginDate = conferenceDto.getBeginDate();
+        name = conferenceDto.getName();
+        endDate = conferenceDto.getEndDate();
+        description = conferenceDto.getDescription();
+        plan = new PlanParamDto(conferenceDto.getPlan());
+        titleAuthentication = conferenceDto.getTitleAuthentication();
+        subtitleAuthentication = conferenceDto.getSubtitleAuthentication();
+        titleParticipation = conferenceDto.getTitleParticipation();
+        subtitleParticipation = conferenceDto.getSubtitleParticipation();
+        titleRegionalization = conferenceDto.getTitleRegionalization();
+        subtitleRegionalization = conferenceDto.getSubtitleRegionalization();
+        fileParticipation = conferenceDto.getFileParticipation();
+        fileAuthentication = conferenceDto.getFileAuthentication();
+        localityType = conferenceDto.getLocalityType();
+        meeting = conferenceDto.getMeeting();
+        selfDeclaration = conferenceDto.getSelfDeclaration();
+        moderators = conferenceDto.getModerators();
+        segmentation = conferenceDto.getSegmentation();
+        targetedByItems = conferenceDto.getTargetedByItems();
+        displayMode = conferenceDto.getDisplayMode();
+        displayStatusConference = conferenceDto.getDisplayStatusConference();
+        preOpeningText = conferenceDto.getPreOpeningText();
+        postClosureText = conferenceDto.getPostClosureText();
+        howItWork = conferenceDto.getHowItWork();
+        externalLinks = conferenceDto.getExternalLinks();
+        backgroundImages = conferenceDto.getBackgroundImages();
+        serverName = conferenceDto.getServerName();
+        defaultServerConference = conferenceDto.getDefaultServerConference();
+        researchConfiguration = new ResearchConfigurationParamDto(conferenceDto.getResearchConfiguration());
+    }
 
     public List<SelfDeclarationDto> getSelfDeclaration() {
         return selfDeclaration;
@@ -60,11 +113,19 @@ public class ConferenceParamDto {
         this.plan = plan;
     }
 
-    public Date getBeginDate() {
-        return beginDate;
+    public Date getBeginDate() throws ParseException {
+        if (beginDate != null && !beginDate.isEmpty()) {
+            return new SimpleDateFormat(formatDate).parse(beginDate);
+        }
+        return null;
     }
 
     public void setBeginDate(Date beginDate) {
+        DateFormat dateFormat = new SimpleDateFormat(formatDate);
+        this.beginDate = dateFormat.format(beginDate);
+    }
+
+    public void setBeginDate(String beginDate) {
         this.beginDate = beginDate;
     }
 
@@ -76,11 +137,19 @@ public class ConferenceParamDto {
         this.name = name;
     }
 
-    public Date getEndDate() {
-        return endDate;
+    public Date getEndDate() throws ParseException {
+        if (endDate != null && !endDate.isEmpty()) {
+            return new SimpleDateFormat(formatDate).parse(endDate);
+        }
+        return null;
     }
 
     public void setEndDate(Date endDate) {
+        DateFormat dateFormat = new SimpleDateFormat(formatDate);
+        this.endDate = dateFormat.format(endDate);
+    }
+
+    public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
 
@@ -171,4 +240,110 @@ public class ConferenceParamDto {
     public void setModerators(List<PersonDto> moderators) {
         this.moderators = moderators;
     }
+
+    public Boolean getSegmentation() {
+        return segmentation;
+    }
+
+    public void setSegmentation(Boolean segmentation) {
+        this.segmentation = segmentation;
+    }
+
+    public List<Long> getTargetedByItems() {
+        return targetedByItems;
+    }
+
+    public void setTargetedByItems(List<Long> targetedByItems) {
+        this.targetedByItems = targetedByItems;
+    }
+
+    public String getPreOpeningText() {
+        return preOpeningText;
+    }
+
+    public void setPreOpeningText(String preOpeningText) {
+        this.preOpeningText = preOpeningText;
+    }
+
+    public String getPostClosureText() {
+        return postClosureText;
+    }
+
+    public void setPostClosureText(String postClosureText) {
+        this.postClosureText = postClosureText;
+    }
+
+    public List<HowItWorkStepDto> getHowItWork() {
+        return howItWork;
+    }
+
+    public void setHowItWork(List<HowItWorkStepDto> howItWork) {
+        this.howItWork = howItWork;
+    }
+
+    public String getExternalLinksMenuLabel() {
+        return externalLinksMenuLabel;
+    }
+
+    public void setExternalLinksMenuLabel(String externalLinksMenuLabel) {
+        this.externalLinksMenuLabel = externalLinksMenuLabel;
+    }
+
+    public List<ExternalLinksDto> getExternalLinks() {
+        return externalLinks;
+    }
+
+    public void setExternalLinks(List<ExternalLinksDto> externalLinks) {
+        this.externalLinks = externalLinks;
+    }
+
+    public List<FileDto> getBackgroundImages() {
+        return backgroundImages;
+    }
+
+    public void setBackgroundImages(List<FileDto> backgroundImages) {
+        this.backgroundImages = backgroundImages;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public Boolean getDefaultServerConference() {
+        return defaultServerConference;
+    }
+
+    public void setDefaultServerConference(Boolean defaultServerConference) {
+        this.defaultServerConference = defaultServerConference;
+    }
+
+    public ResearchConfigurationParamDto getResearchConfiguration() {
+        return researchConfiguration;
+    }
+
+    public void setResearchConfiguration(ResearchConfigurationParamDto researchConfiguration) {
+        this.researchConfiguration = researchConfiguration;
+    }
+
+
+    public DisplayModeType getDisplayMode() {
+        return displayMode;
+    }
+
+    public void setDisplayMode(DisplayModeType displayMode) {
+        this.displayMode = displayMode;
+    }
+
+    public StatusConferenceType getDisplayStatusConference() {
+        return displayStatusConference;
+    }
+
+    public void setDisplayStatusConference(StatusConferenceType displayStatusConference) {
+        this.displayStatusConference = displayStatusConference;
+    }
+
 }

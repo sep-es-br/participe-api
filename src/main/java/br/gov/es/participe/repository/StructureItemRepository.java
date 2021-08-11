@@ -28,4 +28,10 @@ public interface StructureItemRepository extends Neo4jRepository<StructureItem, 
 
     @Query("MATCH (s:StructureItem) DETACH DELETE s")
     void deleteAll();
+
+    @Query("MATCH (s:Structure)<-[c:COMPOSES*]-(si:StructureItem) WHERE id(s)={0} RETURN si")
+    List<StructureItem> findByStructure(Long idStructure);
+
+    @Query("MATCH (si:StructureItem) WHERE id(si) IN {0} RETURN si")
+    List<StructureItem> findByIds(List<Long> targetedByItems);
 }

@@ -67,7 +67,6 @@ public class PlanItemDto implements  Comparable<PlanItemDto> {
         if (planItem.getLocalities() != null && !planItem.getLocalities().isEmpty()) {
             this.localities = new ArrayList<>();
             planItem.getLocalities()
-                    .stream()
                     .forEach(locality -> this.localities.add(new LocalityDto(locality, domain, false, true)));
         }
 

@@ -2,7 +2,7 @@ package br.gov.es.participe.model;
 
 import java.io.Serializable;
 
-import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.*;
 
 import br.gov.es.participe.controller.dto.FileDto;
 
@@ -16,6 +16,9 @@ public class File extends Entity implements Serializable {
     private String name;
 
     private String subtype;
+
+    @Relationship(type = "IS_BACKGROUND_IMAGE_OF", direction = Relationship.OUTGOING)
+    private Conference conferenceBackGround;
 
     public String getUrl() {
         return url;
@@ -60,4 +63,14 @@ public class File extends Entity implements Serializable {
     public void setSubtype(String subtype) {
         this.subtype = subtype;
     }
+
+    public Conference getConferenceBackGround() {
+        return conferenceBackGround;
+    }
+
+    public File setConferenceBackGround(Conference conferenceBackGround) {
+        this.conferenceBackGround = conferenceBackGround;
+        return this;
+    }
+
 }

@@ -6,8 +6,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.*;
 
+import br.gov.es.participe.model.*;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
@@ -80,5 +81,17 @@ public class FileService {
         }
 
         fileRepository.delete(file1);
+    }
+
+    public List<br.gov.es.participe.model.File> findAllBackGroundImageFromConference(Long idConference) {
+        return fileRepository.findAllBackGroundImageFromIdConference(idConference);
+    }
+
+    public void saveAll(List<br.gov.es.participe.model.File> listFiles) {
+        fileRepository.saveAll(listFiles);
+    }
+
+    public br.gov.es.participe.model.File findRandomackGroundImage(Long idConference) {
+        return fileRepository.findRandomackGroundImage(idConference);
     }
 }

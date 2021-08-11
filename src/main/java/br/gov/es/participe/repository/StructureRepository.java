@@ -1,6 +1,7 @@
 package br.gov.es.participe.repository;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -31,4 +32,9 @@ public interface StructureRepository extends Neo4jRepository<Structure, Long> {
 
     @Query("MATCH (s:Structure) DETACH DELETE s")
     void deleteAll();
+
+    @Query("MATCH (structure:Structure)<-[ob:OBEYS]-(plan:Plan)<-[tgt:TARGETS]-(conference:Conference) " +
+             "WHERE ID(conference) = {0}" +
+             "RETURN COALESCE(structure.regionalization, false)")
+    Optional<Boolean> conferenceContainsRegionalizationStructure(Long conferenceId);
 }

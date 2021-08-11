@@ -92,10 +92,9 @@ public class LocalityController {
     	ComplementLocalityDto response = new ComplementLocalityDto();
     	response.setLocalities(localitiesDto);
     	if(!localities.isEmpty()) {
-    		Locality type = localityService.find(localities.get(0).getId());
-    		response.setNameType(type.getType().getName());
-    	}
-    	 
+            Locality type = localityService.find(localities.get(0).getId());
+            response.setNameType(type.getType().getName());
+        }
     	return ResponseEntity.status(200).body(response);
     }
 
@@ -114,7 +113,7 @@ public class LocalityController {
 
     @PutMapping("/{id}")
     public ResponseEntity update(@PathVariable Long id, @RequestBody LocalityParamDto localityParamDto) {
-        LocalityDto response = new LocalityDto(localityService.update(id, localityParamDto.getName()), null, true, true);
+        LocalityDto response = new LocalityDto(localityService.update(id, localityParamDto), null, true, true);
         return ResponseEntity.status(200).body(response);
     }
 

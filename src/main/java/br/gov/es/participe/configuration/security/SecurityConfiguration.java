@@ -10,7 +10,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import br.gov.es.participe.service.TokenService;
-import br.gov.es.participe.service.TwitterService;
 
 @Configuration
 @EnableWebSecurity
@@ -21,9 +20,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     
     @Autowired
     private TokenService tokenService;
-
-    @Autowired
-    private TwitterService twitterService;
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -40,7 +36,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authenticated().and().oauth2Login()
                 .authorizationEndpoint()
                 .authorizationRequestResolver(new AuthorizationRequestResolver(clientRegistrationRepository,
-                        "/oauth2/authorization", twitterService));
+                        "/oauth2/authorization"));
         httpSecurity.addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class);
     }
     

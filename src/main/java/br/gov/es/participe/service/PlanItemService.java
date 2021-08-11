@@ -44,7 +44,11 @@ public class PlanItemService {
     }
 
     public LeanPlanItemResultDto findPlanItemsByConference(Long id) {
-        return planItemRepository.findByConferenceId(id);
+        return planItemRepository.findByConferenceIdWithDto(id);
+    }
+
+    public List<PlanItem> findByIdConference(Long id) {
+        return planItemRepository.findByIdConference(id);
     }
 
     public List<PlanItem> search(String query) {

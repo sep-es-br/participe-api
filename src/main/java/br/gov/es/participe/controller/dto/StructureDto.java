@@ -12,6 +12,7 @@ public class StructureDto {
     private String name;
     private List<StructureItemDto> items;
     private boolean hasPlan;
+    private Boolean regionalization;
 
     public StructureDto() {
     }
@@ -22,6 +23,8 @@ public class StructureDto {
         this.id = structure.getId();
         this.name = structure.getName();
         this.hasPlan = structure.getPlans() != null && !structure.getPlans().isEmpty();
+        this.regionalization = structure.getRegionalization() != null ?
+                                 structure.getRegionalization() : null;
         if (loadItems && structure.getItems() != null && !structure.getItems().isEmpty()) {
             items = new ArrayList<>();
             structure.getItems()
@@ -63,5 +66,13 @@ public class StructureDto {
 
     public void setHasPlan(boolean hasPlan) {
         this.hasPlan = hasPlan;
+    }
+
+    public Boolean isRegionalization() {
+        return regionalization;
+    }
+
+    public void setRegionalization(Boolean regionalization) {
+        this.regionalization = regionalization;
     }
 }

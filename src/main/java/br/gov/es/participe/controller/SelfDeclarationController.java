@@ -1,8 +1,8 @@
 package br.gov.es.participe.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import br.gov.es.participe.controller.dto.SelfDeclarationDto;
+import br.gov.es.participe.model.SelfDeclaration;
+import br.gov.es.participe.service.SelfDeclarationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.gov.es.participe.controller.dto.SelfDeclarationDto;
-import br.gov.es.participe.model.SelfDeclaration;
-import br.gov.es.participe.service.SelfDeclarationService;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -29,7 +28,7 @@ public class SelfDeclarationController {
 	
 	@GetMapping("/{id}")
 	public ResponseEntity findAll(@PathVariable Long id) {
-		List<SelfDeclaration> selfDeclaraions = selfDeclarationService.findAll(id);
+		List<SelfDeclaration> selfDeclaraions = selfDeclarationService.findAllByPerson(id);
 		List<SelfDeclarationDto> response = new ArrayList<>();
 		
 		selfDeclaraions.forEach(self -> response.add(new SelfDeclarationDto(self, true)));

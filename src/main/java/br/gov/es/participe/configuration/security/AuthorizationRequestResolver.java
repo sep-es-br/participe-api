@@ -1,6 +1,5 @@
 package br.gov.es.participe.configuration.security;
 
-import br.gov.es.participe.service.TwitterService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
@@ -15,11 +14,8 @@ public class AuthorizationRequestResolver implements OAuth2AuthorizationRequestR
 
     private final OAuth2AuthorizationRequestResolver delegatedRequestResolver;
 
-    private final TwitterService twitterService;
-
-    public AuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository, String authorizeUri, TwitterService twitterService) {
+    public AuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository, String authorizeUri) {
         this.delegatedRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, authorizeUri);
-        this.twitterService = twitterService;
     }
 
     @Override
@@ -53,11 +49,7 @@ public class AuthorizationRequestResolver implements OAuth2AuthorizationRequestR
     private Map<String, Object> additionalParams(OAuth2AuthorizationRequest request, boolean isSocial) {
         Map<String, Object> params = new HashMap<>(request.getAdditionalParameters());
         if (isSocial) {
-            if (request.getRedirectUri().contains("twitter")) {
-                params.putAll(twitterService.oauthAuthorizeParams(request.getRedirectUri()));
-            } else {
-                params.put(OAuth2ParameterNames.RESPONSE_TYPE, request.getResponseType().getValue());
-            }
+            params.put(OAuth2ParameterNames.RESPONSE_TYPE, request.getResponseType().getValue());
         } else {
             params.put(OAuth2ParameterNames.RESPONSE_TYPE, request.getResponseType().getValue() + " id_token token");
         }

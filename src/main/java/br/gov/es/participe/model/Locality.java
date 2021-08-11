@@ -15,6 +15,7 @@ import br.gov.es.participe.controller.dto.LocalityParamDto;
 public class Locality extends Entity implements Serializable {
 
     private String name;
+    private String latitudeLongitude;
 
     @Relationship(type = "IS_LOCATED_IN")
     private Set<Domain> domains;
@@ -85,7 +86,7 @@ public class Locality extends Entity implements Serializable {
         setId(localityParamDto.getId());
         name = localityParamDto.getName();
         type = new LocalityType(localityParamDto.getType());
-
+        latitudeLongitude = localityParamDto.getLatitudeLongitude();
         if (localityParamDto.getParent() != null && localityParamDto.getParent().getId() != null) {
             parents = new HashSet<>();
             parents.add(new Locality(localityParamDto.getParent()));
@@ -113,6 +114,14 @@ public class Locality extends Entity implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLatitudeLongitude() {
+        return latitudeLongitude;
+    }
+
+    public void setLatitudeLongitude(String latitudeLongitude) {
+        this.latitudeLongitude = latitudeLongitude;
     }
 
     public Set<Domain> getDomains() {
