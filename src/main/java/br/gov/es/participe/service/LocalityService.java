@@ -1,21 +1,22 @@
 package br.gov.es.participe.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import br.gov.es.participe.controller.dto.LocalityCitizenSelectDto;
+import br.gov.es.participe.controller.dto.LocalityParamDto;
+import br.gov.es.participe.model.Domain;
+import br.gov.es.participe.model.Locality;
+import br.gov.es.participe.model.LocalityType;
+import br.gov.es.participe.repository.LocalityRepository;
 import br.gov.es.participe.util.ParticipeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.gov.es.participe.model.Domain;
-import br.gov.es.participe.model.Locality;
-import br.gov.es.participe.model.LocalityType;
-import br.gov.es.participe.repository.LocalityRepository;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class LocalityService {
@@ -101,13 +102,15 @@ public class LocalityService {
     }
 
     @Transactional
-    public Locality update(Long id, String name) {
+    public Locality update(Long id, LocalityParamDto dto) {
         Locality locality = find(id);
+        String name = dto.getName();
 
         if (name != null && !name.isEmpty()) {
             name = name.trim().replaceAll("\\s+", " ");
         }
         locality.setName(name);
+        locality.setLatitudeLongitude(dto.getLatitudeLongitude());
 
         return localityRepository.save(locality);
     }
@@ -122,7 +125,7 @@ public class LocalityService {
     public List<Locality> findLocalitiesToComplement(Long idConference, boolean orderByName) {
         if (orderByName) {
             List<Locality> localities = localityRepository.findLocalitiesToComplement(idConference);
-            localities.sort((l1, l2) -> participeUtils.normalize(l1.getName()).compareTo(participeUtils.normalize(l2.getName())));
+            localities.sort(Comparator.comparing(locality -> participeUtils.normalize(locality.getName())));
             return localities;
         } else {
             return localityRepository.findLocalitiesToComplement(idConference);

@@ -264,7 +264,7 @@ class CitizenServiceTest extends BaseTest {
         loginInfo.setLogin(personParamDto.getContactEmail());
         loginInfo.setPassword(personParamDto.getPassword());
 
-        signinController.indexparticipe(loginInfo, conference.getId());
+        signinController.signIn(loginInfo, conference.getId());
 
         personParamDto.setId(person.getId());
         return personParamDto;

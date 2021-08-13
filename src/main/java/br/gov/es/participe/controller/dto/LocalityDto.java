@@ -10,6 +10,8 @@ public class LocalityDto {
 
     private Long id;
     private String name;
+    private String latitudeLongitude;
+
     private LocalityTypeDto type;
     private List<DomainDto> domains;
     private List<LocalityDto> parents;
@@ -27,6 +29,7 @@ public class LocalityDto {
     		return;
     	id = locality.getId();
         name = locality.getName();
+        latitudeLongitude = locality.getLatitudeLongitude();
         if(locality.getType() != null)
         	type = new LocalityTypeDto(locality.getType());
     }
@@ -36,6 +39,8 @@ public class LocalityDto {
         }
         id = locality.getId();
         name = locality.getName();
+        latitudeLongitude = locality.getLatitudeLongitude();
+
         loadLoclity(locality);
         if (loadParent && !locality.getParents().isEmpty()) {
             parents = new ArrayList<>();
@@ -54,6 +59,8 @@ public class LocalityDto {
     }
     
     private void loadLoclity(Locality locality) {
+        latitudeLongitude = locality.getLatitudeLongitude();
+
     	if(locality.getType() != null) {
     		type = new LocalityTypeDto(locality.getType());
     	}        
@@ -73,6 +80,13 @@ public class LocalityDto {
         	selfDeclarations = new ArrayList<>();
         	locality.getSelfDeclaration().forEach(self -> selfDeclarations.add(new SelfDeclarationDto(self, true)));
         }
+    }
+    public String getLatitudeLongitude() {
+        return latitudeLongitude;
+    }
+
+    public void setLatitudeLongitude(String latitudeLongitude) {
+        this.latitudeLongitude = latitudeLongitude;
     }
 
     public Long getId() {

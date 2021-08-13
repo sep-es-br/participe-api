@@ -1,5 +1,9 @@
 package br.gov.es.participe.controller.dto;
 
+import br.gov.es.participe.util.domain.StatusConferenceType;
+
+import java.util.Date;
+
 public class AuthenticationScreenDto {
 	
 	private String localityType;
@@ -12,9 +16,16 @@ public class AuthenticationScreenDto {
 	private Integer highlights;
 	private Integer participations;
 	private Integer numberOfLocalities;
-	
-	public AuthenticationScreenDto () {
-		//Contrutor criado por conveniencia
+
+	private StatusConferenceType status;
+	private FileDto backgroundImageUrl;
+
+	private Date beginDate;
+	private Date endDate;
+
+	public AuthenticationScreenDto() {
+		setProposal(0);
+		setHighlights(0);
 	}
 	
 	public String getLocalityType() {
@@ -67,5 +78,28 @@ public class AuthenticationScreenDto {
 	public void setNumberOfLocalities(Integer numberOfLocalities) {
 		this.numberOfLocalities = numberOfLocalities;
 	}
-	
+	public StatusConferenceType getStatus() {
+		return status;
+	}
+	public void setStatus(StatusConferenceType status) {
+		this.status = status;
+	}
+	public void setBackgroundImageUrl(FileDto backgroundImageUrl) {
+		this.backgroundImageUrl = backgroundImageUrl;
+	}
+	public FileDto getBackgroundImageUrl() {
+		return this.backgroundImageUrl;
+	}
+	public Date getBeginDate() {
+		return beginDate;
+	}
+	public void setBeginDate(Date beginDate) {
+		this.beginDate = beginDate;
+	}
+	public Date getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
 }

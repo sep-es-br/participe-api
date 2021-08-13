@@ -1,14 +1,13 @@
 package br.gov.es.participe.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import br.gov.es.participe.controller.dto.PersonDto;
+import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
 import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
+import br.gov.es.participe.controller.dto.SigninDto;
+import br.gov.es.participe.model.Person;
+import br.gov.es.participe.util.ParticipeUtils;
+import br.gov.es.participe.util.domain.ProfileType;
+import br.gov.es.participe.util.domain.TokenType;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -24,304 +23,355 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import br.gov.es.participe.controller.dto.PersonDto;
-import br.gov.es.participe.controller.dto.SigninDto;
-import br.gov.es.participe.model.Person;
-import br.gov.es.participe.util.ParticipeUtils;
-import br.gov.es.participe.util.domain.ProfileType;
-import br.gov.es.participe.util.domain.TokenType;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class AcessoCidadaoService {
 
-    private static final String SERVER = "AcessoCidadao";
-    private static final String FIELD_EMAIL = "email";
-    private static final String FIELD_SUB_NOVO = "subNovo";
-    private static final String FIELD_ROLE = "role";
-    private static final String AUTHORIZATION = "Authorization";
-    private static final String BEARER = "Bearer ";
-    
-    @Value("${spring.security.oauth2.client.provider.idsvr.issuer-uri}")
-    private String issuerUri;
+  private static final String SERVER = "AcessoCidadao";
+  private static final String FIELD_EMAIL = "email";
+  private static final String FIELD_SUB_NOVO = "subNovo";
+  private static final String FIELD_ROLE = "role";
+  private static final String AUTHORIZATION = "Authorization";
+  private static final String BEARER = "Bearer ";
 
-    @Value("${api.acessocidadao.client-id}")
-    private String clientId;
+  @Value("${spring.security.oauth2.client.provider.idsvr.issuer-uri}")
+  private String issuerUri;
 
-    @Value("${api.acessocidadao.client-secret}")
-    private String clientSecret;
+  @Value("${api.acessocidadao.client-id}")
+  private String clientId;
 
-    @Value("${api.acessocidadao.uri.webapi}")
-    private String acessocidadaoUriWebApi;
+  @Value("${api.acessocidadao.client-secret}")
+  private String clientSecret;
 
-    @Value("${api.acessocidadao.uri.token}")
-    private String acessocidadaoUriToken;
+  @Value("${api.acessocidadao.uri.webapi}")
+  private String acessocidadaoUriWebApi;
 
-    @Value("${api.acessocidadao.administrator.profile.id}")
-    private String administratorProfileId;
+  @Value("${api.acessocidadao.uri.token}")
+  private String acessocidadaoUriToken;
 
-    @Value("${api.acessocidadao.moderator.profile.id}")
-    private String moderatorProfileId;
+  @Value("${api.acessocidadao.administrator.profile.id}")
+  private String administratorProfileId;
 
-    @Value("${api.acessocidadao.recepcionist.profile.id}")
-    private String recepcionistProfileId;
+  @Value("${api.acessocidadao.moderator.profile.id}")
+  private String moderatorProfileId;
 
-    @Value("${api.acessocidadao.grant_type}")
-    private String grantType;
+  @Value("${api.acessocidadao.recepcionist.profile.id}")
+  private String recepcionistProfileId;
 
-    @Value("${api.acessocidadao.scope}")
-    private String scopes;
+  @Value("${api.acessocidadao.grant_type}")
+  private String grantType;
 
-    @Value("${spring.security.oauth2.client.registration.idsvr.client-name}")
-    private String system;
+  @Value("${api.acessocidadao.scope}")
+  private String scopes;
 
-    @Autowired
-    private PersonService personService;
+  @Value("${spring.security.oauth2.client.registration.idsvr.client-name}")
+  private String system;
 
-    @Autowired
-    private TokenService tokenService;
+  @Autowired
+  private PersonService personService;
 
-    @Autowired
-    private ParticipeUtils participeUtils;
+  @Autowired
+  private TokenService tokenService;
 
-    public SigninDto authenticate(String token, Long conferenceId) throws IOException {
-    	Person person = findOrCreatePerson(token, conferenceId);
-        String authenticationToken = tokenService.generateToken(person, TokenType.AUTHENTICATION);
-        String refreshToken = tokenService.generateToken(person, TokenType.REFRESH);
+  @Autowired
+  private ParticipeUtils participeUtils;
 
-        return new SigninDto(person, authenticationToken, refreshToken);
+  public SigninDto authenticate(String token, Long conferenceId) throws IOException {
+    Person person = findOrCreatePerson(token, conferenceId, true);
+    String authenticationToken = tokenService.generateToken(person, TokenType.AUTHENTICATION);
+    String refreshToken = tokenService.generateToken(person, TokenType.REFRESH);
+
+    return new SigninDto(person, SERVER, authenticationToken, refreshToken);
+  }
+
+  public SigninDto refresh(String refreshToken) {
+    Long personId = tokenService.getPersonId(refreshToken, TokenType.REFRESH);
+    Person person = personService.find(personId);
+
+    String authenticationToken = tokenService.generateToken(person, TokenType.AUTHENTICATION);
+    String newRefreshToken = tokenService.generateToken(person, TokenType.REFRESH);
+
+    return new SigninDto(person, SERVER, authenticationToken, newRefreshToken);
+  }
+
+  private Person findOrCreatePerson(String token, Long conferenceId, boolean persistRelationship) throws IOException {
+    JSONObject userInfo = getUserInfo(token);
+    String email;
+    if(userInfo.isNull(FIELD_EMAIL)) {
+      email = findUserEmailInAcessoCidadao(userInfo.getString(FIELD_SUB_NOVO));
+    }
+    else {
+      email = userInfo.getString(FIELD_EMAIL);
+    }
+    Optional<Person> findPerson = personService.findByLoginEmail(email);
+
+    if(findPerson.isPresent()) {
+      Person person = findPerson.get();
+      person.setAccessToken(token);
+      if(person.getContactEmail() == null) {
+        person.setContactEmail(email);
+      }
+      person.setRoles(getRoles(userInfo));
+
+      return makeAuthServiceRelationship(conferenceId, persistRelationship, userInfo, person);
+    }
+    userInfo.append("accessToken", token);
+
+    return createPerson(userInfo, conferenceId, persistRelationship);
+  }
+
+  private Person makeAuthServiceRelationship(Long conferenceId, boolean persistRelationship, JSONObject userInfo, Person person) {
+    if(persistRelationship) {
+      return personService.createRelationshipWithAuthService(
+        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+          .server(SERVER)
+          .serverId(userInfo.getString(FIELD_SUB_NOVO))
+          .conferenceId(conferenceId)
+          .resetPassword(false)
+          .makeLogin(true)
+          .build()
+      );
+    }
+    else {
+      return personService.createRelationshipWithAuthServiceWithoutPersist(
+        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+          .server(SERVER)
+          .serverId(userInfo.getString(FIELD_SUB_NOVO))
+          .conferenceId(conferenceId)
+          .resetPassword(false)
+          .makeLogin(true)
+          .build()
+      );
+    }
+  }
+
+  private Set<String> getRoles(JSONObject userInfo) throws IOException {
+    Set<String> roles = new HashSet<>();
+    if(!userInfo.isNull(FIELD_ROLE)) {
+      if(userInfo.get(FIELD_ROLE).toString().contains("[")) {
+        userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));
+      }
+      else {
+        roles.add(userInfo.getString(FIELD_ROLE));
+      }
+    }
+    else {
+      return findAllRoles(userInfo.getString(FIELD_SUB_NOVO));
+    }
+    return roles;
+  }
+
+  private Person createPerson(JSONObject userInfo, Long conferenceId, boolean persistRelationship) throws IOException {
+    Person person = new Person();
+    person.setName(userInfo.getString("apelido"));
+    person.setAccessToken(userInfo.get("accessToken").toString());
+    if(!userInfo.isNull(FIELD_ROLE)) {
+      if(userInfo.get(FIELD_ROLE).toString().contains("[")) {
+        userInfo.getJSONArray(FIELD_ROLE).forEach(role -> person.getRoles().add((String) role));
+      }
+      else {
+        person.getRoles().add(userInfo.getString(FIELD_ROLE));
+      }
+    }
+    else {
+      person.setRoles(findAllRoles(userInfo.getString(FIELD_SUB_NOVO)));
+    }
+    if(userInfo.isNull(FIELD_EMAIL)) {
+      person.setContactEmail(findUserEmailInAcessoCidadao(userInfo.getString(FIELD_SUB_NOVO)));
+    }
+    else {
+      person.setContactEmail(userInfo.getString(FIELD_EMAIL));
+    }
+    return makeAuthServiceRelationship(conferenceId, persistRelationship, userInfo, person);
+  }
+
+  private JSONObject getUserInfo(String token) throws IOException {
+    String userInfoUri = issuerUri + "/connect/userinfo";
+    HttpPost postRequest = new HttpPost(userInfoUri);
+    postRequest.addHeader(AUTHORIZATION, BEARER + token);
+
+    try(CloseableHttpResponse response = HttpClients.createDefault().execute(postRequest)) {
+      if(response.getStatusLine().getStatusCode() == 200) {
+        return new JSONObject(EntityUtils.toString(response.getEntity()));
+      }
     }
 
-    public SigninDto refresh(String refreshToken) {
-        Long personId = tokenService.getPersonId(refreshToken, TokenType.REFRESH);
-        Person person = personService.find(personId);
+    throw new IllegalArgumentException();
+  }
 
-        String authenticationToken = tokenService.generateToken(person, TokenType.AUTHENTICATION);
-        String newRefreshToken = tokenService.generateToken(person, TokenType.REFRESH);
+  public List<PersonDto> listPersonsByPerfil(ProfileType profileType, String name, String email) throws IOException {
+    List<PersonDto> personList = new ArrayList<>();
+    String token = getClientToken();
+    if(token != null) {
+      String uri = acessocidadaoUriWebApi.concat("sistema/").concat(system);
+      if(profileType != null) {
+        uri = uri.concat("/perfil/").concat(getProfileId(profileType));
 
-        return new SigninDto(person, authenticationToken, newRefreshToken);
-    }
-
-    private Person findOrCreatePerson(String token, Long conferenceId) throws IOException {
-        JSONObject userInfo = getUserInfo(token);
-        String email = null;
-        if (userInfo.isNull(FIELD_EMAIL)) {
-    		email = findUserEmailInAcessoCidadao(userInfo.getString(FIELD_SUB_NOVO));
-    	}else {
-    		email = userInfo.getString(FIELD_EMAIL);
-    	}
-        Optional<Person> findPerson = personService.findByContactEmail(email);
-        		
-        if (findPerson.isPresent()) {
-            Person person = findPerson.get();
-            person.setAccessToken(token);
-            if (person.getContactEmail() == null) {
-            	person.setContactEmail(email);
+      }
+      uri = uri.concat("/usuarios");
+      HttpGet get = new HttpGet(uri);
+      get.addHeader(AUTHORIZATION, BEARER + token);
+      try(CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
+        if(response.getStatusLine().getStatusCode() == 200) {
+          JSONArray result = new JSONArray(EntityUtils.toString(response.getEntity()));
+          result.forEach(element -> {
+            if(element instanceof JSONObject) {
+              JSONObject obj = (JSONObject) element;
+              PersonDto person = new PersonDto();
+              person.setName(obj.getString("Nome"));
+              person.setContactEmail(obj.getString("Email"));
+              personList.add(person);
             }
-            person.setRoles(getRoles(userInfo));
-            
-            return personService.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
-                    .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
-                    .server(SERVER)
-                    .serverId(userInfo.getString(FIELD_SUB_NOVO))
-                    .conferenceId(conferenceId)
-                    .resetPassword(false)
-                    .makeLogin(true)
-                    .build());
+          });
         }
-        userInfo.append("accessToken", token);
-
-        return createPerson(userInfo, conferenceId);
-    }
-    
-    private Set<String> getRoles(JSONObject userInfo) throws IOException {
-    	Set<String> roles = new HashSet<>();
-    	if(!userInfo.isNull(FIELD_ROLE)) {
-        	if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
-        		userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));            		
-        	} else {
-        		roles.add(userInfo.getString(FIELD_ROLE));
-        	}
-        } else {
-        	 return findAllRoles(userInfo.getString(FIELD_SUB_NOVO));
-        }
-    	return roles;
+      }
     }
 
-    private Person createPerson(JSONObject userInfo, Long conferenceId) throws IOException  {
-        Person person = new Person();
-        person.setName(userInfo.getString("apelido"));
-        person.setAccessToken(userInfo.get("accessToken").toString());
-        if(!userInfo.isNull(FIELD_ROLE)) {
-        	if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
-        		userInfo.getJSONArray(FIELD_ROLE).forEach(role -> person.getRoles().add((String) role));            		
-        	} else {
-        		person.getRoles().add(userInfo.getString(FIELD_ROLE));
-        	}
-        } else {
-        	person.setRoles(findAllRoles(userInfo.getString(FIELD_SUB_NOVO)));
-        }
-        if (userInfo.isNull(FIELD_EMAIL)) {
-        	person.setContactEmail(findUserEmailInAcessoCidadao(userInfo.getString(FIELD_SUB_NOVO)));
-    	}else {
-    		person.setContactEmail(userInfo.getString(FIELD_EMAIL));
-    	}
-        return personService.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
-                .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
-                .server(SERVER)
-                .serverId(userInfo.getString(FIELD_SUB_NOVO))
-                .conferenceId(conferenceId)
-                .resetPassword(false)
-                .makeLogin(true)
-                .build());
+    if(!personList.isEmpty()) {
+      personList.removeIf(
+        p -> !participeUtils.normalize(p.getName()).contains(participeUtils.normalize(name))
+             || !participeUtils.normalize(p.getContactEmail()).contains(
+          participeUtils.normalize(email))
+      );
     }
 
-    private JSONObject getUserInfo(String token) throws IOException {
-        String userInfoUri = issuerUri + "/connect/userinfo";
-        HttpPost postRequest = new HttpPost(userInfoUri);
-        postRequest.addHeader(AUTHORIZATION, BEARER + token);
+    return personList;
+  }
 
-        try (CloseableHttpResponse response = HttpClients.createDefault().execute(postRequest)) {
-            if (response.getStatusLine().getStatusCode() == 200) {
-                return new JSONObject(EntityUtils.toString(response.getEntity()));
-            }
+  private Set<String> findAllRoles(String sub) throws IOException {
+    String token = getClientToken();
+    Set<String> roles = new HashSet<>();
+    if(token != null) {
+      for(ProfileType profileType : ProfileType.values()) {
+        String uri = acessocidadaoUriWebApi.concat("sistema/")
+          .concat(system)
+          .concat("/perfil/")
+          .concat(getProfileId(profileType))
+          .concat("/usuarios");
+        HttpGet get = new HttpGet(uri);
+        get.addHeader(AUTHORIZATION, BEARER + token);
+        try(CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
+          if(response.getStatusLine().getStatusCode() == 200) {
+            JSONArray result = new JSONArray(EntityUtils.toString(response.getEntity()));
+            result.forEach(element -> {
+              if(element instanceof JSONObject && ((JSONObject) element).getString("Sub").equals(
+                sub)) {
+                roles.add(getProfileName(profileType));
+              }
+            });
+
+          }
         }
 
-        throw new IllegalArgumentException();
+      }
+
     }
 
-    public List<PersonDto> listPersonsByPerfil(ProfileType profileType, String name, String email) throws IOException {
-        List<PersonDto> personList = new ArrayList<>();
-        String token = getClientToken();
-        if (token != null) {
-            String uri = acessocidadaoUriWebApi.concat("sistema/").concat(system);
-            if (profileType != null) {
-                uri = uri.concat("/perfil/").concat(getProfileId(profileType));
+    return roles;
+  }
 
-            }
-            uri = uri.concat("/usuarios");
-            HttpGet get = new HttpGet(uri);
-            get.addHeader(AUTHORIZATION, BEARER + token);
-            try (CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    JSONArray result = new JSONArray(EntityUtils.toString(response.getEntity()));
-                    List<PersonDto> finalPersonList = personList;
-                    result.forEach(element -> {
-                        if (element instanceof JSONObject) {
-                            JSONObject obj = (JSONObject) element;
-                            PersonDto person = new PersonDto();
-                            person.setName(obj.getString("Nome"));
-                            person.setContactEmail(obj.getString("Email"));
-                            finalPersonList.add(person);
-                        }
-                    });
-                }
-            }
+  private String findUserEmailInAcessoCidadao(String sub) throws IOException {
+    String token = getClientToken();
+    if(token != null) {
+      String uri = acessocidadaoUriWebApi.concat("cidadao/").concat(sub).concat("/email");
+      HttpGet get = new HttpGet(uri);
+      get.addHeader(AUTHORIZATION, BEARER + token);
+      try(CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
+        if(response.getStatusLine().getStatusCode() == 200) {
+          JSONObject result = new JSONObject(EntityUtils.toString(response.getEntity()));
+          return result.getString(FIELD_EMAIL);
         }
-
-        if (!personList.isEmpty()) {
-            personList.removeIf(
-                    p -> !participeUtils.normalize(p.getName()).contains(participeUtils.normalize(name))
-                            || !participeUtils.normalize(p.getContactEmail()).contains(participeUtils.normalize(email))
-            );
-        }
-
-        return personList;
+      }
     }
 
-    private Set<String> findAllRoles(String sub) throws IOException {
-    	String token = getClientToken();
-    	Set<String> roles = new HashSet<>();
-        if (token != null) {
-        	for (ProfileType profileType : ProfileType.values()) {
-        		String uri = acessocidadaoUriWebApi.concat("sistema/")
-        				.concat(system)
-        				.concat("/perfil/")
-        				.concat(getProfileId(profileType))
-        				.concat("/usuarios");
-        		HttpGet get = new HttpGet(uri);
-        		get.addHeader(AUTHORIZATION, BEARER + token);
-        		try (CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
-        			if (response.getStatusLine().getStatusCode() == 200) {
-        				JSONArray result = new JSONArray(EntityUtils.toString(response.getEntity()));
-        				result.forEach(element -> {
-                            if (element instanceof JSONObject && ((JSONObject) element).getString("Sub").equals(sub)) {
-                            	roles.add(getProfileName(profileType));
-                            }
-        				});
-        				
-        			}
-        		}
-        		
-        	}
-        	
-        }
+    return null;
+  }
 
-        return roles;
+  private String getClientToken() throws IOException {
+    String basicToken = clientId + ":" + clientSecret;
+    HttpPost postRequest = new HttpPost(acessocidadaoUriToken);
+
+    List<NameValuePair> urlParameters = new ArrayList<>();
+    urlParameters.add(new BasicNameValuePair("grant_type", grantType));
+    urlParameters.add(new BasicNameValuePair("scope", scopes));
+    postRequest.addHeader(
+      AUTHORIZATION,
+      "Basic " + Base64.getEncoder().encodeToString(basicToken.getBytes())
+    );
+
+    postRequest.setEntity(new UrlEncodedFormEntity(urlParameters, Consts.UTF_8));
+    try(CloseableHttpResponse response = HttpClients.createDefault().execute(postRequest)) {
+      if(response.getStatusLine().getStatusCode() == 200) {
+        JSONObject result = new JSONObject(EntityUtils.toString(response.getEntity()));
+        return result.getString("access_token");
+      }
     }
-    
-    private String findUserEmailInAcessoCidadao(String sub) throws IOException {
-        String token = getClientToken();
-        if (token != null) {
-            String uri = acessocidadaoUriWebApi.concat("cidadao/").concat(sub).concat("/email");
-            HttpGet get = new HttpGet(uri);
-            get.addHeader(AUTHORIZATION, BEARER + token);
-            try (CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    JSONObject result = new JSONObject(EntityUtils.toString(response.getEntity()));
-                    return result.getString(FIELD_EMAIL);
-                }
-            }
-        }
 
+    return null;
+  }
+
+  private String getProfileId(ProfileType profileType) {
+    switch(profileType) {
+      case ADMINISTRATOR:
+        return administratorProfileId;
+      case MODERATOR:
+        return moderatorProfileId;
+      case RECEPCIONIST:
+        return recepcionistProfileId;
+      default:
         return null;
+
     }
+  }
 
-    private String getClientToken() throws IOException {
-        String basicToken = clientId + ":" + clientSecret;
-        HttpPost postRequest = new HttpPost(acessocidadaoUriToken);
-
-        List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("grant_type", grantType));
-        urlParameters.add(new BasicNameValuePair("scope", scopes));
-        postRequest.addHeader(AUTHORIZATION, "Basic " + Base64.getEncoder().encodeToString(basicToken.getBytes()));
-
-        postRequest.setEntity(new UrlEncodedFormEntity(urlParameters, Consts.UTF_8));
-        try (CloseableHttpResponse response = HttpClients.createDefault().execute(postRequest)) {
-            if (response.getStatusLine().getStatusCode() == 200) {
-                JSONObject result = new JSONObject(EntityUtils.toString(response.getEntity()));
-                return result.getString("access_token");
-            }
-        }
-
+  private String getProfileName(ProfileType profileType) {
+    switch(profileType) {
+      case ADMINISTRATOR:
+        return "Administrator";
+      case MODERATOR:
+        return "Moderator";
+      case RECEPCIONIST:
+        return "Recepcionist";
+      default:
         return null;
+
+    }
+  }
+
+  public PersonProfileSignInDto authenticateProfile(String token, Long conferenceId) throws IOException {
+
+    JSONObject user = this.getUserInfo(token);
+
+    Optional<Person> personAlreadyUsingSocialLogin = this.personService.havePersonWithLoginEmail(user.getString(FIELD_EMAIL), SERVER, null);
+
+    if(personAlreadyUsingSocialLogin.isPresent()) {
+      return new PersonProfileSignInDto(
+        personAlreadyUsingSocialLogin.get(),
+        SERVER,
+        user.getString(FIELD_EMAIL),
+        user.getString(FIELD_SUB_NOVO),
+        "oauth",
+        true,
+        personAlreadyUsingSocialLogin.get().getId()
+      );
     }
 
-    private String getProfileId(ProfileType profileType) {
-        switch (profileType) {
-            case ADMINISTRATOR:
-                return administratorProfileId;
-            case MODERATOR:
-                return moderatorProfileId;
-            case RECEPCIONIST:
-                return recepcionistProfileId;
-            default:
-                return null;
+    Person person = findOrCreatePerson(token, conferenceId, false);
 
-        }
-    }
-    
-    private String getProfileName(ProfileType profileType) {
-        switch (profileType) {
-            case ADMINISTRATOR:
-                return "Administrator";
-            case MODERATOR:
-                return "Moderator";
-            case RECEPCIONIST:
-                return "Recepcionist";
-            default:
-                return null;
+    return new PersonProfileSignInDto(
+      person,
+      SERVER,
+      user.getString(FIELD_EMAIL),
+      user.getString(FIELD_SUB_NOVO),
+      "oauth"
 
-        }
-    }
-
+    );
+  }
 }

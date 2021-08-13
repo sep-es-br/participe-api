@@ -1,72 +1,104 @@
 package br.gov.es.participe.controller.dto;
 
+import br.gov.es.participe.enumerator.TypeMeetingEnum;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 public class MeetingParamDto {
-	
+
 	private String name;
 	private String address;
-    private String place;
-    private Long localityPlace;
-    private List<Long> localityCovers;
-    private Long conference;
-    @JsonFormat(pattern="dd/MM/yyyy HH:mm:ss")
-    private Date endDate;
-    @JsonFormat(pattern="dd/MM/yyyy HH:mm:ss")
-    private Date beginDate;
+	private String place;
+	private Long localityPlace;
+	private List<Long> localityCovers;
+	private Long conference;
+	@JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+	private Date endDate;
+	@JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+	private Date beginDate;
 	private List<Long> receptionists;
 	private List<String> receptionistEmails;
 	private List<Long> participants;
 
+	private List<ChannelDto> channels;
+	private TypeMeetingEnum type;
+	private List<Long> segmentations;
+
+	public MeetingParamDto() {
+
+	}
+
+	public List<Long> getSegmentations() {
+		return segmentations;
+	}
+
+	public void setSegmentations(List<Long> segmentations) {
+		this.segmentations = segmentations;
+	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public String getAddress() {
 		return address;
 	}
+
 	public void setAddress(String address) {
 		this.address = address;
 	}
+
 	public String getPlace() {
 		return place;
 	}
+
 	public void setPlace(String place) {
 		this.place = place;
 	}
+
 	public Long getLocalityPlace() {
 		return localityPlace;
 	}
+
 	public void setLocalityPlace(Long localityPlace) {
 		this.localityPlace = localityPlace;
 	}
+
 	public List<Long> getLocalityCovers() {
 		return localityCovers;
 	}
+
 	public void setLocalityCovers(List<Long> localityCovers) {
 		this.localityCovers = localityCovers;
 	}
+
 	public Long getConference() {
 		return conference;
 	}
+
 	public void setConference(Long conference) {
 		this.conference = conference;
 	}
+
 	public Date getEndDate() {
 		return endDate;
 	}
+
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
+
 	public Date getBeginDate() {
 		return beginDate;
 	}
+
 	public void setBeginDate(Date beginDate) {
 		this.beginDate = beginDate;
 	}
@@ -76,6 +108,7 @@ public class MeetingParamDto {
 		localityDto.setId(this.localityPlace);
 		return localityDto;
 	}
+
 	public List<LocalityDto> getLocalityCoversAsDto() {
 		List<LocalityDto> localitiesDto = new ArrayList<>();
 		this.localityCovers.forEach(elem -> {
@@ -85,6 +118,7 @@ public class MeetingParamDto {
 		});
 		return localitiesDto;
 	}
+
 	public ConferenceDto getConferenceAsDto() {
 		ConferenceDto conferenceDto = new ConferenceDto();
 		conferenceDto.setId(this.conference);
@@ -135,18 +169,32 @@ public class MeetingParamDto {
 		this.participants = participants;
 	}
 
+	public List<ChannelDto> getChannels() {
+		return channels;
+	}
+
+	public void setChannels(List<ChannelDto> channels) {
+		this.channels = channels;
+	}
+
+	public TypeMeetingEnum getType() {
+		return type;
+	}
+
+	public void setType(TypeMeetingEnum type) {
+		this.type = type;
+	}
+
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("MeetingParamDto{");
-		sb.append("name='").append(name).append('\'');
-		sb.append(", address='").append(address).append('\'');
-		sb.append(", place='").append(place).append('\'');
-		sb.append(", localityPlace=").append(localityPlace);
-		sb.append(", localityCovers=").append(localityCovers);
-		sb.append(", conference=").append(conference);
-		sb.append(", endDate=").append(endDate);
-		sb.append(", beginDate=").append(beginDate);
-		sb.append('}');
-		return sb.toString();
+		return "MeetingParamDto{" + "name='" + name + '\'' +
+					 ", address='" + address + '\'' +
+					 ", place='" + place + '\'' +
+					 ", localityPlace=" + localityPlace +
+					 ", localityCovers=" + localityCovers +
+					 ", conference=" + conference +
+					 ", endDate=" + endDate +
+					 ", beginDate=" + beginDate +
+					 '}';
 	}
 }

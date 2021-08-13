@@ -6,6 +6,8 @@ public class LocalityParamDto {
 
     private Long id;
     private String name;
+    private String latitudeLongitude;
+
     private LocalityTypeDto type;
     private DomainParamDto domain;
     private LocalityParamDto parent;
@@ -30,6 +32,14 @@ public class LocalityParamDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLatitudeLongitude() {
+        return latitudeLongitude;
+    }
+
+    public void setLatitudeLongitude(String latitudeLongitude) {
+        this.latitudeLongitude = latitudeLongitude;
     }
 
     public void setType(LocalityTypeDto type) {

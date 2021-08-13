@@ -90,6 +90,4 @@ public class ProposalDto {
 	public void setPlanItens(List<PlanItemDto> planItem) {
 		this.planItens = planItem;
 	}
-	
-	
 }

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Acesso Cidadao</title>
+</head>
+<body>
+</body>
+<script type="text/javascript">
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    const hash = window.location.hash;
+
+    let access_token = '';
+    if (hash) {
+        const hashItems = hash.split('&');
+        const hashAccessToken = hashItems.find(hashItem => hashItem.startsWith('access_token'));
+
+        if (hashAccessToken) {
+            access_token = hashAccessToken.split('=')[1];
+        }
+    }
+
+    const url = protocol + '//' + host + '/participe/signin/acesso-cidadao-profile-response?access_token=' + access_token;
+    window.location.href = url;
+</script>
+</html>

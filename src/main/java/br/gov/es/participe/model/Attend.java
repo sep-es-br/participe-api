@@ -1,101 +1,101 @@
 package br.gov.es.participe.model;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
 
+import java.io.Serializable;
+import java.util.Date;
+
 @NodeEntity
 public abstract class Attend implements Serializable {
-	
-	@Id @GeneratedValue
-    private Long id;
-	
-	private String from;
-	
-	@Relationship(type = "MADE_BY")
-	private Person personMadeBy;
-	
-	@Relationship(type = "ABOUT")
-	private Conference conference;
-	
-	@Relationship(type = "ABOUT")
-	private PlanItem planItem;
-	
-	@Relationship(type = "ABOUT")
-	private Locality locality;
-	
-	@Relationship(type = "DURING")
-	private Meeting meeting;
-	
-	@DateString
-	private Date time;
 
-    public Long getId() {
-        return id;
-    }
+  @Id @GeneratedValue
+  private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  private String from;
 
-	public String getFrom() {
-		return from;
-	}
+  @Relationship(type = "MADE_BY")
+  private Person personMadeBy;
 
-	public void setFrom(String from) {
-		this.from = from;
-	}
+  @Relationship(type = "ABOUT")
+  private Conference conference;
 
-	public Person getPersonMadeBy() {
-		return personMadeBy;
-	}
+  @Relationship(type = "ABOUT")
+  private PlanItem planItem;
 
-	public void setPersonMadeBy(Person personMadeBy) {
-		this.personMadeBy = personMadeBy;
-	}
+  @Relationship(type = "ABOUT")
+  private Locality locality;
 
-	public PlanItem getPlanItem() {
-		return planItem;
-	}
+  @Relationship(type = "DURING")
+  private Meeting meeting;
 
-	public void setPlanItem(PlanItem planItem) {
-		this.planItem = planItem;
-	}
+  @DateString
+  private Date time;
 
-	public Locality getLocality() {
-		return locality;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setLocality(Locality locality) {
-		this.locality = locality;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public Meeting getMeeting() {
-		return meeting;
-	}
+  public String getFrom() {
+    return from;
+  }
 
-	public void setMeeting(Meeting meeting) {
-		this.meeting = meeting;
-	}
+  public void setFrom(String from) {
+    this.from = from;
+  }
 
-	public Conference getConference() {
-		return conference;
-	}
+  public Person getPersonMadeBy() {
+    return personMadeBy;
+  }
 
-	public void setConference(Conference conference) {
-		this.conference = conference;
-	}
+  public void setPersonMadeBy(Person personMadeBy) {
+    this.personMadeBy = personMadeBy;
+  }
 
-	public Date getTime() {
-		return time;
-	}
+  public PlanItem getPlanItem() {
+    return planItem;
+  }
 
-	public void setTime(Date time) {
-		this.time = time;
-	}
+  public void setPlanItem(PlanItem planItem) {
+    this.planItem = planItem;
+  }
+
+  public Locality getLocality() {
+    return locality;
+  }
+
+  public void setLocality(Locality locality) {
+    this.locality = locality;
+  }
+
+  public Meeting getMeeting() {
+    return meeting;
+  }
+
+  public void setMeeting(Meeting meeting) {
+    this.meeting = meeting;
+  }
+
+  public Conference getConference() {
+    return conference;
+  }
+
+  public void setConference(Conference conference) {
+    this.conference = conference;
+  }
+
+  public Date getTime() {
+    return time;
+  }
+
+  public void setTime(Date time) {
+    this.time = time;
+  }
 }

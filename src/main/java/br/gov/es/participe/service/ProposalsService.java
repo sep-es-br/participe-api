@@ -78,7 +78,7 @@ public class ProposalsService {
 
 	public Integer makeLike(Long idPerson, Long idComment) {
 		Comment comment = commentService.findPersonLiked(idComment);
-		Person person = personService.likescomments(idPerson);
+		Person person = personService.likesComments(idPerson);
 		
 		if(comment.getPersonLiked() == null) {
 			comment.setPersonLiked(new HashSet<>());

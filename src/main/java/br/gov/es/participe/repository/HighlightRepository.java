@@ -6,29 +6,38 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 import java.util.List;
 
-public interface HighlightRepository extends Neo4jRepository<Highlight,Long>{
+public interface HighlightRepository extends Neo4jRepository<Highlight, Long> {
 
-	@Query("MATCH  (p:Person)"
-			+" WHERE id(p)={0}"
-			+" OPTIONAL MATCH (p)<-[lb:MADE_BY]-(h:Highlight)"
-			+" RETURN h")
-	List<Highlight> findByIdPerson(Long idPerson);
-	
-	@Query("MATCH (co:Conference)<-[:ABOUT]-(h:Highlight)-[:ABOUT]->(pi:PlanItem) "
-			+" MATCH (h)-[:MADE_BY]->(p:Person) "
-			+" WHERE id(p)={0} And id(pi)={1} AND (id(co)={2} OR {2} IS NULL)"
-			+" RETURN h")
-	Highlight findByIdPersonAndIdPlanItem(Long idPerson, Long idPlanItem, Long idConference);
-	
-	@Query("MATCH (co:Conference)<-[:ABOUT]-(h:Highlight)-[:ABOUT]->(pi:PlanItem)-[:COMPOSES]->(pi2:PlanItem) "
-			+" , (h)-[:MADE_BY]->(p:Person) "
-			+" , (h)-[:ABOUT]->(l:Locality) "
-			+" WHERE id(p)={0} And (id(pi)={1} OR id(pi2) = {1}) AND id(co)={2} AND id(l) = {3} "
-			+" RETURN h")
-	List<Highlight> findAllByIdPersonAndIdPlanItemAndIdConferenceAndIdLoclity(Long idPerson, Long idPlanItem, Long idConference, Long idLocality);
-	
-	@Query(" MATCH (co:Conference)-[a:ABOUT]-(h:Highlight)-[:ABOUT]->(d:PlanItem)-[:COMPOSES]->(ae:PlanItem) "
-			+" WHERE id(co)={0}  "
-			+" RETURN COUNT(h)")
-	Integer countHighlightByConference(Long id);
+  @Query("MATCH  (p:Person)"
+         + " WHERE id(p)={0}"
+         + " OPTIONAL MATCH (p)<-[lb:MADE_BY]-(h:Highlight)"
+         + " RETURN h")
+  List<Highlight> findByIdPerson(Long idPerson);
+
+  @Query("MATCH (co:Conference)<-[:ABOUT]-(h:Highlight)-[:ABOUT]->(pi:PlanItem) "
+         + "MATCH (h)-[:MADE_BY]->(p:Person) "
+         + "OPTIONAL MATCH (h)-[:ABOUT]->(l:Locality) "
+         + "WITH co, h, pi, p, l "
+         + "WHERE id(p)={0} "
+         + "AND id(pi)={1} "
+         + "AND (id(co)={2} OR {2} IS NULL) "
+         + "AND (id(l)={3} OR {3} IS NULL) "
+         + "RETURN h, co, pi, p"
+  )
+  Highlight findByIdPersonAndIdPlanItem(Long idPerson, Long idPlanItem, Long idConference, Long idLocality);
+
+  @Query("MATCH (co:Conference)<-[:ABOUT]-(h:Highlight)-[:ABOUT]->(pi:PlanItem), "
+         + "(h)-[:MADE_BY]->(p:Person) "
+         + "OPTIONAL MATCH (pi)-[:COMPOSES]->(pi2:PlanItem) "
+         + "OPTIONAL MATCH (h)-[:ABOUT]->(l:Locality) "
+         + "WITH h, l, co, p, pi, pi2 "
+         + "WHERE id(p)={0} AND (id(pi)={1} OR id(pi2) = {1}) AND id(co)={2} AND (id(l) = {3} OR {3} IS NULL) "
+         + "RETURN h, co, p, pi, pi2"
+  )
+  List<Highlight> findAllByIdPersonAndIdPlanItemAndIdConferenceAndIdLocality(Long idPerson, Long idPlanItem, Long idConference, Long idLocality);
+
+  @Query(" MATCH (co:Conference)-[a:ABOUT]-(h:Highlight)"
+         + " WHERE id(co)={0}  "
+         + " RETURN count(h)")
+  Integer countHighlightByConference(Long id);
 }

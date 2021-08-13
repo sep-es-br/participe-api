@@ -31,6 +31,8 @@ public class PersonKeepCitizenDto {
 
 	private Boolean active;
 
+	private Boolean receiveInformational;
+
 	public Long getId() {
 		return id;
 	}
@@ -125,5 +127,13 @@ public class PersonKeepCitizenDto {
 
 	public void setActive(Boolean active) {
 		this.active = active;
+	}
+
+	public Boolean getReceiveInformational() {
+		return receiveInformational;
+	}
+
+	public void setReceiveInformational(Boolean receiveInformational) {
+		this.receiveInformational = receiveInformational;
 	}
 }

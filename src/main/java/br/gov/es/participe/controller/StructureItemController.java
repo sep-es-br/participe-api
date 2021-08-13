@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -30,6 +31,16 @@ public class StructureItemController {
         List<StructureItemDto> response = new ArrayList<>();
         structureItems.forEach(structureItem -> response.add(new StructureItemDto(structureItem, null, true, true)));
 
+        return ResponseEntity.status(200).body(response);
+    }
+
+    @GetMapping("list")
+    public ResponseEntity listByStructure(@RequestParam(value = "id") Long idStructure) {
+        List<StructureItem> structureItems = structureItemService.findByStructure(idStructure);
+        List<StructureItemDto> response = null;
+        if (structureItems != null && !structureItems.isEmpty()) {
+            response = structureItems.stream().map(StructureItemDto::new).collect(Collectors.toList());
+        }
         return ResponseEntity.status(200).body(response);
     }
 

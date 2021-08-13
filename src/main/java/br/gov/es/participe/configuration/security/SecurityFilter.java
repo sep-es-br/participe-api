@@ -1,20 +1,18 @@
 package br.gov.es.participe.configuration.security;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import br.gov.es.participe.service.TokenService;
+import br.gov.es.participe.util.domain.TokenType;
+import br.gov.es.participe.util.dto.MessageDto;
 import org.apache.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import br.gov.es.participe.service.TokenService;
-import br.gov.es.participe.util.domain.TokenType;
-import br.gov.es.participe.util.dto.MessageDto;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class SecurityFilter extends OncePerRequestFilter {
 
@@ -38,17 +36,22 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.contains("/meetings")
                     || url.endsWith("/person/forgot-password")
                     || url.endsWith("/login")
+                    || url.endsWith("/portal")
                     || url.endsWith("/signin/acesso-cidadao")
+                    || url.endsWith("/signin/acesso-cidadao-profile-response")
+                    || url.endsWith("/acesso-cidadao-profile-response.html")
                     || url.endsWith("/signin/acesso-cidadao-response")
                     || url.endsWith("/acesso-cidadao-response.html")
                     || url.endsWith("/signin")
                     || url.endsWith("/signin/participe")
                     || url.endsWith("/signin/facebook")
                     || url.endsWith("/signin/facebook-response")
+                    || url.endsWith("/signin/facebook-profile")
+                    || url.endsWith("/signin/facebook-profile-response")
                     || url.endsWith("/signin/google")
                     || url.endsWith("/signin/google-response")
-                    || url.endsWith("/signin/twitter")
-                    || url.endsWith("/signin/twitter-response")
+                    || url.endsWith("/signin/google-profile")
+                    || url.endsWith("/signin/google-profile-response")
                     || url.endsWith("/swagger-ui.html")
                     || url.endsWith("/v2/api-docs")
                     || url.contains("/swagger-resources")

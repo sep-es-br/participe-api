@@ -1,102 +1,113 @@
 package br.gov.es.participe.model;
 
+import br.gov.es.participe.controller.dto.MeetingDto;
+import br.gov.es.participe.controller.dto.MeetingParamDto;
+import br.gov.es.participe.enumerator.TypeMeetingEnum;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
+import org.neo4j.ogm.annotation.typeconversion.DateString;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.typeconversion.DateString;
-
-import br.gov.es.participe.controller.dto.MeetingDto;
-import br.gov.es.participe.controller.dto.MeetingParamDto;
-
 @NodeEntity
-public class Meeting extends Entity implements Serializable{
-	
+public class Meeting extends Entity implements Serializable {
+
 	private String name;
 	@DateString
-    private Date beginDate;
+	private Date beginDate;
 
-    @DateString
-    private Date endDate;
-    private String address;
-    private String place;
-    
-    @Relationship(type = "TAKES_PLACE_AT")
-    private Locality localityPlace;
-    
-    @Relationship(type = "COVERS")
-    private Set<Locality> localityCovers;
-    
-    @Relationship(type = "OCCURS_IN")
-    private Conference conference;
-    
-    @Relationship(type = "DURING")
-    private Set<Attend> attends;
+	@DateString
+	private Date endDate;
+
+	private TypeMeetingEnum typeMeetingEnum;
+
+	private String address;
+
+	private String place;
+
+	@Relationship(type = "TAKES_PLACE_AT")
+	private Locality localityPlace;
+
+	@Relationship(type = "COVERS")
+	private Set<Locality> localityCovers;
+
+	@Relationship(type = "OCCURS_IN")
+	private Conference conference;
+
+	@Relationship(type = "DURING")
+	private Set<Attend> attends;
 
 	@Relationship(type = "IS_RECEPTIONIST_OF", direction = Relationship.INCOMING)
 	private Set<Person> receptionists;
 
+	@Relationship(type = "IS_CHANNEL_OF", direction = Relationship.INCOMING)
+	private Set<Channel> channels;
+
 	@Relationship(type = "CHECKED_IN_AT", direction = Relationship.INCOMING)
 	private Set<Person> participants;
 
-    public Meeting() {
-    	
-    }
-    
-    public Meeting(MeetingDto meeting) {
-    	
-    	setId(meeting.getId());
-    	this.name = meeting.getName();
-    	this.address = meeting.getAddress();
-        this.place = meeting.getPlace();
-        this.localityPlace = new Locality(meeting.getLocalityPlace());
-        this.conference = new Conference(meeting.getConference());
-        this.endDate = meeting.getEndDate();
-        this.beginDate = meeting.getBeginDate();
-        
-        if(meeting.getLocalityCovers() != null && !meeting.getLocalityCovers().isEmpty()) {
-        	this.localityCovers = new HashSet<>();
-          	meeting.getLocalityCovers().forEach(locality -> localityCovers.add(new Locality(locality)));
-        }
+	@Relationship(type = "IS_PLAN_ITEM_OF", direction = Relationship.INCOMING)
+	private Set<PlanItem> planItems;
 
-        if(meeting.getReceptionists() != null && !meeting.getReceptionists().isEmpty()) {
+	public Meeting() {
+
+	}
+
+	public Meeting(MeetingDto meeting) {
+
+		setId(meeting.getId());
+		this.name = meeting.getName();
+		this.address = meeting.getAddress();
+		this.place = meeting.getPlace();
+		this.localityPlace = new Locality(meeting.getLocalityPlace());
+		this.conference = new Conference(meeting.getConference());
+		this.endDate = meeting.getEndDate();
+		this.beginDate = meeting.getBeginDate();
+
+		if (meeting.getLocalityCovers() != null && !meeting.getLocalityCovers().isEmpty()) {
+			this.localityCovers = new HashSet<>();
+			meeting.getLocalityCovers().forEach(locality -> localityCovers.add(new Locality(locality)));
+		}
+
+		if (meeting.getReceptionists() != null && !meeting.getReceptionists().isEmpty()) {
 			this.receptionists = new HashSet<>();
 			meeting.getReceptionists().forEach(receptionist -> this.receptionists.add(new Person(receptionist)));
 		}
-		if(meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
+		if (meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
 			this.participants = new HashSet<>();
 			meeting.getParticipants().forEach(participant -> this.receptionists.add(new Person(participant)));
 		}
-    }
-    
-    public Meeting(MeetingParamDto meeting, Boolean loadPersons) {
-    	this.name = meeting.getName();
-    	this.address = meeting.getAddress();
-        this.place = meeting.getPlace();
-        this.localityPlace = new Locality(meeting.getLocalityPlaceAsDto());
-        this.conference = new Conference(meeting.getConferenceAsDto());
-        this.endDate = meeting.getEndDate();
-        this.beginDate = meeting.getBeginDate();
-        
-        if(meeting.getLocalityCovers() != null && !meeting.getLocalityCovers().isEmpty()) {
-        	this.localityCovers = new HashSet<>();
-          	meeting.getLocalityCoversAsDto().forEach(locality -> localityCovers.add(new Locality(locality)));
-        }
+	}
 
-        if(loadPersons) {
-			if(meeting.getReceptionists() != null && !meeting.getReceptionists().isEmpty()) {
+	public Meeting(MeetingParamDto meeting, Boolean loadPersons) {
+		this.name = meeting.getName();
+		this.address = meeting.getAddress();
+		this.place = meeting.getPlace();
+		this.localityPlace = new Locality(meeting.getLocalityPlaceAsDto());
+		this.conference = new Conference(meeting.getConferenceAsDto());
+		this.endDate = meeting.getEndDate();
+		this.beginDate = meeting.getBeginDate();
+
+		if (meeting.getLocalityCovers() != null && !meeting.getLocalityCovers().isEmpty()) {
+			this.localityCovers = new HashSet<>();
+			meeting.getLocalityCoversAsDto().forEach(locality -> localityCovers.add(new Locality(locality)));
+		}
+
+		if (loadPersons) {
+			if (meeting.getReceptionists() != null && !meeting.getReceptionists().isEmpty()) {
 				this.receptionists = new HashSet<>();
-				meeting.getReceptionistsAsDto().forEach(receptionist -> this.receptionists.add(new Person(receptionist)));
+				meeting.getReceptionistsAsDto()
+						.forEach(receptionist -> this.receptionists.add(new Person(receptionist)));
 			}
-			if(meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
+			if (meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
 				this.participants = new HashSet<>();
 				meeting.getParticipantsAsDto().forEach(participant -> this.receptionists.add(new Person(participant)));
 			}
 		}
-    }
+	}
 
 	public String getName() {
 		return name;
@@ -163,6 +174,10 @@ public class Meeting extends Entity implements Serializable{
 	}
 
 	public Set<Attend> getAttends() {
+		if(this.attends == null) {
+			return new HashSet<>();
+		}
+
 		return attends;
 	}
 
@@ -170,7 +185,11 @@ public class Meeting extends Entity implements Serializable{
 		this.attends = attends;
 	}
 
-	public Set<Person> getReceptionists() {
+	public Set<Person> getReceptionists(){
+		if(this.receptionists == null) {
+			return new HashSet<>();
+		}
+
 		return receptionists;
 	}
 
@@ -178,11 +197,46 @@ public class Meeting extends Entity implements Serializable{
 		this.receptionists = receptionists;
 	}
 
-	public Set<Person> getParticipants() {
+	public Set<Person> getParticipants(){
+		if(this.participants == null) {
+			return new HashSet<>();
+		}
+
 		return participants;
 	}
 
 	public void setParticipants(Set<Person> participants) {
 		this.participants = participants;
+	}
+
+	public TypeMeetingEnum getTypeMeetingEnum() {
+		return typeMeetingEnum;
+	}
+
+	public void setTypeMeetingEnum(TypeMeetingEnum typeMeetingEnum) {
+		this.typeMeetingEnum = typeMeetingEnum;
+	}
+
+	public Set<Channel> getChannels() {
+		if(this.channels == null) {
+			return new HashSet<>();
+		}
+		return channels;
+	}
+
+	public void setChannels(Set<Channel> channels) {
+		this.channels = channels;
+	}
+
+	public Set<PlanItem> getPlanItems() {
+		if(this.planItems == null) {
+			return new HashSet<>();
+		}
+
+		return planItems;
+	}
+
+	public void setPlanItems(Set<PlanItem> planItems) {
+		this.planItems = planItems;
 	}
 }

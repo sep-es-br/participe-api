@@ -7,6 +7,15 @@ public class SelfDeclarationParamDto {
 	private Long locality;
 	private Long person;
 
+	public SelfDeclarationParamDto() {
+	}
+
+	public SelfDeclarationParamDto(Long conference, Long locality, Long person) {
+		this.conference = conference;
+		this.locality = locality;
+		this.person = person;
+	}
+
 	public Long getId() {
 		return id;
 	}

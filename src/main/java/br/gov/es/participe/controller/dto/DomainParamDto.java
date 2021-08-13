@@ -5,6 +5,14 @@ public class DomainParamDto {
     private String name;
     private Long id;
 
+    public DomainParamDto() {
+    }
+
+    public DomainParamDto(DomainDto domain) {
+        id = domain.getId();
+        name = domain.getName();
+    }
+
     public void setId(Long id) {
         this.id = id;
     }

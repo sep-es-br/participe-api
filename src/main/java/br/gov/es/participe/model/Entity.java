@@ -15,4 +15,5 @@ public abstract class Entity {
     public void setId(Long id) {
         this.id = id;
     }
+
 }

@@ -17,9 +17,11 @@ import java.util.Map;
 @WebFilter(
         urlPatterns = {
                 "/oauth2/authorization/facebook",
-                "/oauth2/authorization/twitter",
+                "/oauth2/authorization/facebook-profile",
                 "/oauth2/authorization/google",
-                "/oauth2/authorization/idsvr"
+                "/oauth2/authorization/google-profile",
+                "/oauth2/authorization/idsvr",
+                "/oauth2/authorization/portal-profile"
         }
 )
 @Order(-150)

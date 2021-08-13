@@ -8,6 +8,17 @@ public class PlanParamDto {
     private DomainParamDto domain;
     private LocalityTypeDto localitytype;
 
+    public PlanParamDto() {
+    }
+
+    public PlanParamDto(PlanDto plan) {
+        id = plan.getId();
+        name = plan.getName();
+        structure = new StructureParamDto(plan.getStructure());
+        domain = new DomainParamDto(plan.getDomain());
+        localitytype = plan.getlocalitytype();
+    }
+
     public Long getId() {
         return id;
     }

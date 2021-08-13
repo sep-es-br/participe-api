@@ -3,6 +3,7 @@ package br.gov.es.participe.controller.dto;
 public class CheckInParamDto {
     private Long personId;
     private Long meetingId;
+    private String timeZone;
 
     public CheckInParamDto() {
     }
@@ -26,5 +27,13 @@ public class CheckInParamDto {
 
     public void setMeetingId(Long meetingId) {
         this.meetingId = meetingId;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 }

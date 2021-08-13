@@ -13,12 +13,33 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.Charset;
 import java.text.Normalizer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class ParticipeUtils {
+
+    public boolean isPosClosure(Date endDate) {
+        return endDate != null && (new Date()).after(endDate);
+    }
+
+    public boolean isPreOpening(Date beginDate) {
+        return beginDate != null && (new Date()).before(beginDate);
+    }
+
+    public boolean isActive(Date beginDate, Date endDate) {
+        Date today = new Date();
+        if (beginDate != null && endDate != null) {
+            return today.after(beginDate) && today.before(endDate);
+        }
+        else if (beginDate == null && endDate != null) {
+            return today.before(endDate);
+        }
+        else if (beginDate != null) {
+            return today.after(beginDate);
+        }
+        return true;
+    }
+
 
     public String getServerBaseUrl(HttpServletRequest request) {
         if (request.getServerPort() > 0 && request.getServerPort() != 443) {
@@ -67,8 +88,8 @@ public class ParticipeUtils {
         return data;
     }
 
-    public String normalize(String valor) {
-        return Normalizer.normalize(valor, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+    public String normalize(String value) {
+        return Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "").toLowerCase();
     }
 
 }

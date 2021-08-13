@@ -1,25 +1,15 @@
 package br.gov.es.participe.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import br.gov.es.participe.controller.dto.StructureDto;
 import br.gov.es.participe.controller.dto.StructureParamDto;
 import br.gov.es.participe.model.Structure;
 import br.gov.es.participe.service.StructureService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -32,7 +22,7 @@ public class StructureController {
     @GetMapping
     public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
         List<Structure> structures = structureService.findAll(query);
-        List<StructureDto> response = new ArrayList<>();
+       List<StructureDto> response = new ArrayList<>();
 
         structures.forEach(structure -> response.add(new StructureDto(structure, true)));
 
@@ -53,10 +43,10 @@ public class StructureController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody StructureParamDto structureParamDto) {
-        structureParamDto.setId(id);
-        Structure structure = new Structure(structureParamDto);
-        StructureDto response = new StructureDto(structureService.save(structure), true);
+    public ResponseEntity<StructureDto> update(@PathVariable Long id, @RequestBody StructureParamDto structureParamDto) {
+//        structureParamDto.setId(id);
+//        Structure structure = new Structure(structureParamDto);
+        StructureDto response = new StructureDto(structureService.update(structureParamDto, id), true);
         return ResponseEntity.status(200).body(response);
     }
 
