@@ -223,18 +223,21 @@ public class ConferenceService {
     // clearAttributes(conference);
     loadAttributes(conference);
 
-    if(conference.getModerators() != null && !conference.getModerators().isEmpty()) {
+    if(param.getModerators() != null && !param.getModerators().isEmpty()) {
       HashSet<Person> moderators = new HashSet<>();
-      conference.getModerators().forEach(p -> {
-        Optional<Person> find = personService.findByContactEmail(p.getContactEmail());
-        moderators.add(find.orElseGet(() -> personService.save(p, true)));
+      param.getModerators().forEach(p -> {
+        Optional<Person> find = personService.findByLoginEmail(p.getContactEmail());
+        moderators.add(find.orElseGet(() -> personService.save(new Person(p), true)));
       });
       conference.setModerators(moderators);
     }
 
     conference.setName(param.getName().trim().replaceAll(" +", " "));
+
     loadAttributesFromParam(conference, param);
+
     conferenceRepository.save(conference);
+
     return conference;
   }
 
@@ -276,17 +279,19 @@ public class ConferenceService {
       .orElse(new PortalServer(param.getServerName()));
 
     conference.setServer(portalServer);
+    portalServer.getConferences().add(conference);
 
     if(param.getDefaultServerConference()) {
       portalServer.getConferences().forEach(con -> con.setDefaultServer(null));
       portalServer.setConference(null);
       conference.setDefaultServer(portalServer);
-    } else {
-      if (conference.getDefaultServer() != null) {
+    }
+    else {
+      if(conference.getDefaultServer() != null) {
         conference.setDefaultServer(null);
       }
-      if (portalServer.getConference() != null && param.getId() != null
-          && param.getId().equals(portalServer.getConference().getId())) {
+      if(portalServer.getConference() != null && param.getId() != null
+         && param.getId().equals(portalServer.getConference().getId())) {
         portalServer.setConference(null);
       }
     }
