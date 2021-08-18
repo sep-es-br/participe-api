@@ -1,179 +1,200 @@
 package br.gov.es.participe.controller.dto;
 
+import br.gov.es.participe.enumerator.TypeMeetingEnum;
+import br.gov.es.participe.model.Meeting;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import br.gov.es.participe.enumerator.TypeMeetingEnum;
-import br.gov.es.participe.model.Meeting;
+import java.util.StringJoiner;
 
 public class MeetingDto {
-	private Long id;
-	private String name;
-	private String address;
-	private String place;
-	private LocalityDto localityPlace;
-	private List<LocalityDto> localityCovers;
-	private ConferenceDto conference;
-	private TypeMeetingEnum typeMeetingEnum;
+  private Long id;
+  private String name;
+  private String address;
+  private String place;
+  private LocalityDto localityPlace;
+  private List<LocalityDto> localityCovers;
+  private ConferenceDto conference;
+  private TypeMeetingEnum typeMeetingEnum;
 
-	@JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
-	private Date endDate;
-	@JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
-	private Date beginDate;
+  private String showChannels;
 
-	private List<PersonDto> receptionists;
-	private List<PersonDto> participants;
-	private List<ChannelDto> channels;
+  @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+  private Date endDate;
+  @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+  private Date beginDate;
 
-	public MeetingDto() {
+  private List<PersonDto> receptionists;
+  private List<PersonDto> participants;
+  private List<ChannelDto> channels;
 
-	}
+  public MeetingDto() {
 
-	public MeetingDto(Meeting meeting) {
-		loadMeetingDto(meeting, true);
-	}
+  }
 
-	public MeetingDto(Meeting meeting, boolean loadConference) {
-		loadMeetingDto(meeting, loadConference);
-	}
+  public MeetingDto(Meeting meeting) {
+    loadMeetingDto(meeting, true);
+  }
 
-	private void loadMeetingDto(Meeting meeting, boolean loadConference) {
-		this.id = meeting.getId();
-		this.name = meeting.getName();
-		this.address = meeting.getAddress();
-		this.place = meeting.getPlace();
-		this.localityPlace = new LocalityDto(meeting.getLocalityPlace());
+  public MeetingDto(Meeting meeting, boolean loadConference) {
+    loadMeetingDto(meeting, loadConference);
+  }
 
-		this.endDate = meeting.getEndDate();
-		this.beginDate = meeting.getBeginDate();
-		this.typeMeetingEnum = meeting.getTypeMeetingEnum();
+  private void loadMeetingDto(Meeting meeting, boolean loadConference) {
+    this.id = meeting.getId();
+    this.name = meeting.getName();
+    this.address = meeting.getAddress();
+    this.place = meeting.getPlace();
+    this.localityPlace = new LocalityDto(meeting.getLocalityPlace());
 
-		if (loadConference && meeting.getConference() != null) {
-			this.conference = new ConferenceDto(meeting.getConference());
-		}
-		if (meeting.getLocalityCovers() != null && !meeting.getLocalityCovers().isEmpty()) {
-			this.localityCovers = new ArrayList<>();
-			meeting.getLocalityCovers().forEach(locality -> this.localityCovers.add(new LocalityDto(locality)));
-		}
+    this.endDate = meeting.getEndDate();
+    this.beginDate = meeting.getBeginDate();
+    this.typeMeetingEnum = meeting.getTypeMeetingEnum();
 
-		if (meeting.getReceptionists() != null && !meeting.getReceptionists().isEmpty()) {
-			this.receptionists = new ArrayList<>();
-			meeting.getReceptionists().forEach(receptionist -> this.receptionists.add(new PersonDto(receptionist)));
-		}
-		if (meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
-			this.participants = new ArrayList<>();
-			meeting.getParticipants().forEach(participant -> this.participants.add(new PersonDto(participant)));
-		}
-		if (meeting.getChannels() != null && !meeting.getChannels().isEmpty()) {
-			this.channels = new ArrayList<>();
-			meeting.getChannels().forEach(channel -> this.channels.add(new ChannelDto(channel)));
-		}
-	}
+    if(loadConference && meeting.getConference() != null) {
+      this.conference = new ConferenceDto(meeting.getConference());
+    }
+    if(meeting.getLocalityCovers() != null && !meeting.getLocalityCovers().isEmpty()) {
+      this.localityCovers = new ArrayList<>();
+      meeting.getLocalityCovers().forEach(locality -> this.localityCovers.add(new LocalityDto(locality)));
+    }
 
-	public Long getId() {
-		return id;
-	}
+    if(meeting.getReceptionists() != null && !meeting.getReceptionists().isEmpty()) {
+      this.receptionists = new ArrayList<>();
+      meeting.getReceptionists().forEach(receptionist -> this.receptionists.add(new PersonDto(receptionist)));
+    }
+    if(meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
+      this.participants = new ArrayList<>();
+      meeting.getParticipants().forEach(participant -> this.participants.add(new PersonDto(participant)));
+    }
+    if(meeting.getChannels() != null && !meeting.getChannels().isEmpty()) {
+      this.channels = new ArrayList<>();
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+      StringJoiner joiner = new StringJoiner(", ");
 
-	public String getName() {
-		return name;
-	}
+      meeting.getChannels().forEach(channel -> {
+        this.channels.add(new ChannelDto(channel));
 
-	public void setName(String name) {
-		this.name = name;
-	}
+        if(channel.getName() != null) {
+          joiner.add(channel.getName());
+        }
+      });
 
-	public String getAddress() {
-		return address;
-	}
+      this.showChannels = joiner.toString();
+    }
+  }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public String getPlace() {
-		return place;
-	}
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-	public void setPlace(String place) {
-		this.place = place;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public LocalityDto getLocalityPlace() {
-		return localityPlace;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public void setLocalityPlace(LocalityDto localityPlace) {
-		this.localityPlace = localityPlace;
-	}
+  public String getAddress() {
+    return address;
+  }
 
-	public List<LocalityDto> getLocalityCovers() {
-		return localityCovers;
-	}
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
-	public void setLocalityCovers(List<LocalityDto> localityCovers) {
-		this.localityCovers = localityCovers;
-	}
+  public String getPlace() {
+    return place;
+  }
 
-	public ConferenceDto getConference() {
-		return conference;
-	}
+  public void setPlace(String place) {
+    this.place = place;
+  }
 
-	public void setConference(ConferenceDto conference) {
-		this.conference = conference;
-	}
+  public LocalityDto getLocalityPlace() {
+    return localityPlace;
+  }
 
-	public Date getEndDate() {
-		return endDate;
-	}
+  public void setLocalityPlace(LocalityDto localityPlace) {
+    this.localityPlace = localityPlace;
+  }
 
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+  public List<LocalityDto> getLocalityCovers() {
+    return localityCovers;
+  }
 
-	public Date getBeginDate() {
-		return beginDate;
-	}
+  public void setLocalityCovers(List<LocalityDto> localityCovers) {
+    this.localityCovers = localityCovers;
+  }
 
-	public void setBeginDate(Date beginDate) {
-		this.beginDate = beginDate;
-	}
+  public ConferenceDto getConference() {
+    return conference;
+  }
 
-	public List<PersonDto> getReceptionists() {
-		return receptionists;
-	}
+  public void setConference(ConferenceDto conference) {
+    this.conference = conference;
+  }
 
-	public void setReceptionists(List<PersonDto> receptionists) {
-		this.receptionists = receptionists;
-	}
+  public Date getEndDate() {
+    return endDate;
+  }
 
-	public List<PersonDto> getParticipants() {
-		return participants;
-	}
+  public void setEndDate(Date endDate) {
+    this.endDate = endDate;
+  }
 
-	public void setParticipants(List<PersonDto> participants) {
-		this.participants = participants;
-	}
+  public Date getBeginDate() {
+    return beginDate;
+  }
 
-	public List<ChannelDto> getChannels() {
-		return channels;
-	}
+  public void setBeginDate(Date beginDate) {
+    this.beginDate = beginDate;
+  }
 
-	public void setChannels(List<ChannelDto> channels) {
-		this.channels = channels;
-	}
+  public List<PersonDto> getReceptionists() {
+    return receptionists;
+  }
 
-	public TypeMeetingEnum getTypeMeetingEnum() {
-		return typeMeetingEnum;
-	}
+  public void setReceptionists(List<PersonDto> receptionists) {
+    this.receptionists = receptionists;
+  }
 
-	public void setTypeMeetingEnum(TypeMeetingEnum typeMeetingEnum) {
-		this.typeMeetingEnum = typeMeetingEnum;
-	}
+  public List<PersonDto> getParticipants() {
+    return participants;
+  }
+
+  public void setParticipants(List<PersonDto> participants) {
+    this.participants = participants;
+  }
+
+  public List<ChannelDto> getChannels() {
+    return channels;
+  }
+
+  public void setChannels(List<ChannelDto> channels) {
+    this.channels = channels;
+  }
+
+  public TypeMeetingEnum getTypeMeetingEnum() {
+    return typeMeetingEnum;
+  }
+
+  public void setTypeMeetingEnum(TypeMeetingEnum typeMeetingEnum) {
+    this.typeMeetingEnum = typeMeetingEnum;
+  }
+
+  public String getShowChannels() {
+    return showChannels;
+  }
+
+  public void setShowChannels(String showChannels) {
+    this.showChannels = showChannels;
+  }
 }
