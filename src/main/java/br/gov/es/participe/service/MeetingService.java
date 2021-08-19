@@ -3,7 +3,6 @@ package br.gov.es.participe.service;
 import br.gov.es.participe.controller.dto.MeetingDto;
 import br.gov.es.participe.controller.dto.MeetingParamDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
-import br.gov.es.participe.enumerator.TypeMeetingEnum;
 import br.gov.es.participe.model.Channel;
 import br.gov.es.participe.model.CheckedInAt;
 import br.gov.es.participe.model.Conference;
@@ -27,6 +26,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
+import static br.gov.es.participe.enumerator.TypeMeetingEnum.VIRTUAL;
 
 @Service
 public class MeetingService {
@@ -161,26 +163,19 @@ public class MeetingService {
   public Meeting save(Meeting meeting, MeetingParamDto meetingParamDto) {
     validateMeetingFields(meeting, meetingParamDto);
 
-    Conference conf = conferenceService.find(meeting.getConference().getId());
+    Conference conference = conferenceService.find(meeting.getConference().getId());
 
-    validateMeetingIntervalDate(conf, meetingParamDto);
+    validateMeetingIntervalDate(conference, meetingParamDto);
 
-    Set<Locality> localityCovers = new HashSet<>();
+    Set<Locality> localityCovers = extractLocalityFrom(meeting);
 
-    meeting.getLocalityCovers().forEach(locality -> {
-      Locality localityTemp = localityService.find(locality.getId());
-      if(localityTemp != null) {
-        localityCovers.add(localityTemp);
-      }
-    });
-
-    Set<PlanItem> planItems = setPlanItens(meetingParamDto);
+    Set<PlanItem> planItems = extractPlanItemFrom(meetingParamDto);
 
     if(localityCovers.isEmpty()) {
       return null;
     }
 
-    if(!meetingParamDto.getType().equals(TypeMeetingEnum.VIRTUAL)) {
+    if(!meetingParamDto.getType().equals(VIRTUAL)) {
       Locality localityPlace = localityService.find(meeting.getLocalityPlace().getId());
       if(localityPlace == null) {
         return null;
@@ -190,7 +185,7 @@ public class MeetingService {
 
     saveOrUpdateChannel(meeting, meetingParamDto);
 
-    meeting.setConference(conf);
+    meeting.setConference(conference);
     meeting.setPlanItems(planItems);
     meeting.setTypeMeetingEnum(meetingParamDto.getType());
     meeting.setLocalityCovers(localityCovers);
@@ -199,23 +194,15 @@ public class MeetingService {
 
     Meeting meetingUpdate = findWithoutConference(meetingResponse.getId());
 
-    if(!meetingParamDto.getType().equals(TypeMeetingEnum.VIRTUAL)) {
-      loadReceptionist(meeting, meetingUpdate, meetingParamDto);
+    if(!meetingParamDto.getType().equals(VIRTUAL)) {
+      makeRelationshipWithReceptionist(meeting, meetingUpdate, meetingParamDto);
     }
 
     return meetingRepository.save(meetingUpdate);
 
   }
 
-  private void saveOrUpdateChannel(Meeting meeting, MeetingParamDto meetingParamDto) {
-    if(TypeMeetingEnum.VIRTUAL.equals(meetingParamDto.getType())
-       || TypeMeetingEnum.PRESENCIAL_VIRTUAL.equals(meetingParamDto.getType())) {
-      Set<Channel> channels = channelService.saveChannelsMeeting(meetingParamDto.getChannels(), meeting);
-      meeting.setChannels(channels);
-    }
-  }
-
-  private Set<PlanItem> setPlanItens(MeetingParamDto meetingParamDto) {
+  private Set<PlanItem> extractPlanItemFrom(MeetingParamDto meetingParamDto) {
     Set<PlanItem> planItems = new HashSet<>();
     meetingParamDto.getSegmentations().forEach(idSegment -> {
       PlanItem planItem = planItemService.find(idSegment);
@@ -224,9 +211,29 @@ public class MeetingService {
     return planItems;
   }
 
+  private Set<Locality> extractLocalityFrom(Meeting meeting) {
+    Set<Locality> localityCovers = new HashSet<>();
+
+    meeting.getLocalityCovers().forEach(locality -> {
+      Locality localityTemp = localityService.find(locality.getId());
+      if(localityTemp != null) {
+        localityCovers.add(localityTemp);
+      }
+    });
+    return localityCovers;
+  }
+
+  private void saveOrUpdateChannel(Meeting meeting, MeetingParamDto meetingParamDto) {
+    if(VIRTUAL.equals(meetingParamDto.getType())
+       || PRESENCIAL_VIRTUAL.equals(meetingParamDto.getType())) {
+      Set<Channel> channels = channelService.saveChannelsMeeting(meetingParamDto.getChannels(), meeting);
+      meeting.setChannels(channels);
+    }
+  }
+
   private void validateMeetingFields(Meeting meeting, MeetingParamDto meetingParamDto) {
     if((meeting.getLocalityPlace() == null || meeting.getLocalityPlace().getId() == null)
-       && !meetingParamDto.getType().equals(TypeMeetingEnum.VIRTUAL)
+       && !meetingParamDto.getType().equals(VIRTUAL)
     ) {
       throw new IllegalArgumentException("Locality to 'TAKES_PLACE_AT' is required");
     }
@@ -266,12 +273,12 @@ public class MeetingService {
     meeting.setBeginDate(meetingParamDto.getBeginDate());
     meeting.setEndDate(meetingParamDto.getEndDate());
 
-    loadAttributes(meeting, meetingParamDto);
+    updateRelationships(meeting, meetingParamDto);
 
     return meetingRepository.save(meeting);
   }
 
-  private void loadAttributes(Meeting meeting, MeetingParamDto meetingParamDto) {
+  private void updateRelationships(Meeting meeting, MeetingParamDto meetingParamDto) {
     Meeting meetingUpdate = findWithoutConference(meeting.getId());
     if(meetingUpdate.getConference() == null
        || !meetingUpdate.getConference().getId().equals(meetingParamDto.getConference())) {
@@ -289,7 +296,14 @@ public class MeetingService {
         meeting.setLocalityPlace(newLocality);
       }
     }
-
+    if(meetingParamDto.getSegmentations() != null && !meetingParamDto.getSegmentations().isEmpty()) {
+      meetingUpdate.getPlanItems().clear();
+      Set<PlanItem> planItems = new HashSet<>();
+      meetingParamDto.getSegmentations().forEach(planItemId -> {
+        planItems.add(planItemService.find(planItemId));
+        meeting.setPlanItems(planItems);
+      });
+    }
     if(meetingParamDto.getLocalityCovers() != null && !meetingParamDto.getLocalityCovers().isEmpty()) {
       Set<Locality> covers = new HashSet<>();
       meetingUpdate.getLocalityCovers().clear();
@@ -298,11 +312,16 @@ public class MeetingService {
         meeting.setLocalityCovers(covers);
       });
     }
-    loadReceptionist(meeting, meetingUpdate, meetingParamDto);
+
+    if(VIRTUAL.equals(meetingParamDto.getType())
+       || PRESENCIAL_VIRTUAL.equals(meetingParamDto.getType())) {
+      saveOrUpdateChannel(meeting, meetingParamDto);
+    }
+    makeRelationshipWithReceptionist(meeting, meetingUpdate, meetingParamDto);
     meetingRepository.save(meetingUpdate);
   }
 
-  private void loadReceptionist(Meeting meeting, Meeting meetingUpdate, MeetingParamDto meetingParamDto) {
+  private void makeRelationshipWithReceptionist(Meeting meeting, Meeting meetingUpdate, MeetingParamDto meetingParamDto) {
     if((meetingParamDto.getReceptionists() != null && !meetingParamDto.getReceptionists().isEmpty())
        || (meetingParamDto.getReceptionistEmails() != null
            && !meetingParamDto.getReceptionistEmails().isEmpty())) {
@@ -311,11 +330,11 @@ public class MeetingService {
       }
       meeting.setReceptionists(new HashSet<>());
       meeting.getReceptionists().addAll(
-        getReceptionist(meetingParamDto.getReceptionistEmails(), meetingParamDto.getReceptionists()));
+        findReceptionist(meetingParamDto.getReceptionistEmails(), meetingParamDto.getReceptionists()));
     }
   }
 
-  private Set<Person> getReceptionist(List<String> emails, List<Long> idsReceptionist) {
+  private Set<Person> findReceptionist(List<String> emails, List<Long> idsReceptionist) {
     Set<Person> receptionists = new HashSet<>();
     if(idsReceptionist != null && !idsReceptionist.isEmpty()) {
       idsReceptionist.forEach(receptionist -> receptionists.add(personService.find(receptionist)));

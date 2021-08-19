@@ -65,10 +65,14 @@ public interface MeetingRepository extends Neo4jRepository<Meeting, Long> {
          + "	 	[(m)-[co:COVERS]-(lc:Locality) | [co, lc] ]" + " ] " + "ORDER BY m.beginDate")
   Collection<Meeting> findAllDashboard(Long idConference);
 
-  @Query("MATCH (m:Meeting) " + " WHERE id(m) = {0} " + " RETURN m " + " , ["
+  @Query("MATCH (m:Meeting) WHERE id(m) = {0} WITH m RETURN m, ["
          + "		[(m)-[tp:TAKES_PLACE_AT]-(lp:Locality) | [tp,lp]],"
+         + "		[(m)-[isChannelOf:IS_CHANNEL_OF]-(channel:Channel) | [isChannelOf, channel]],"
+         + "		[(m)-[itemPlanOf:IS_PLAN_ITEM_OF]-(planItem:PlanItem) | [itemPlanOf, planItem]],"
          + "		[(m)-[co:COVERS]-(lc:Locality) | [co, lc]],"
-         + "		[(m)<-[ir:IS_RECEPTIONIST_OF]-(recep:Person) | [ir, recep] ]" + " ]")
+         + "		[(m)<-[ir:IS_RECEPTIONIST_OF]-(recep:Person) | [ir, recep] ]"
+         + " ]"
+  )
   Optional<Meeting> findMeetingWithoutConference(Long id);
 
   @Query("MATCH (m:Meeting)-[oc:OCCURS_IN]->(c:Conference) " + " WHERE id(m) = {0} " + " RETURN m, oc, c " + " , ["

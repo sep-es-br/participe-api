@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class MeetingDto {
   private Long id;
@@ -29,6 +30,7 @@ public class MeetingDto {
   private List<PersonDto> receptionists;
   private List<PersonDto> participants;
   private List<ChannelDto> channels;
+  private List<PlanItemDto> segmentations;
 
   public MeetingDto() {
 
@@ -69,6 +71,12 @@ public class MeetingDto {
       this.participants = new ArrayList<>();
       meeting.getParticipants().forEach(participant -> this.participants.add(new PersonDto(participant)));
     }
+    if(meeting.getPlanItems() != null && !meeting.getPlanItems().isEmpty()) {
+      this.segmentations = meeting.getPlanItems().stream()
+        .map(PlanItemDto::new)
+        .collect(Collectors.toList());
+    }
+
     if(meeting.getChannels() != null && !meeting.getChannels().isEmpty()) {
       this.channels = new ArrayList<>();
 
@@ -196,5 +204,13 @@ public class MeetingDto {
 
   public void setShowChannels(String showChannels) {
     this.showChannels = showChannels;
+  }
+
+  public List<PlanItemDto> getSegmentations() {
+    return segmentations;
+  }
+
+  public void setSegmentations(List<PlanItemDto> segmentations) {
+    this.segmentations = segmentations;
   }
 }
