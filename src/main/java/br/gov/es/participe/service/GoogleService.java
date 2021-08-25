@@ -59,6 +59,14 @@ public class GoogleService {
     ).getAccessToken();
   }
 
+  public String googleProfileAccessToken(String authorizationCode) {
+    return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
+        authorizationCode,
+        googleProperties.getRedirecturi(),
+        null
+    ).getAccessToken();
+  }
+
   public PersonProfileSignInDto authenticateProfile(
     String accessToken,
     Long conferenceId

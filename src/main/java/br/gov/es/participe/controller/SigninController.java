@@ -187,11 +187,8 @@ public class SigninController {
     @RequestParam("code") String authorizationCode,
     HttpServletRequest request
   ) {
-    String accessToken = googleService.googleAccessToken(
-      authorizationCode,
-      request,
-      "/signin/google-profile"
-    );
+    String accessToken = googleService.googleProfileAccessToken(
+      authorizationCode);
     return new RedirectView("google-profile-response?access_token=" + accessToken);
   }
 
