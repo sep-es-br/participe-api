@@ -1,5 +1,6 @@
 package br.gov.es.participe.service;
 
+import br.gov.es.participe.configuration.GoogleProfileProperties;
 import br.gov.es.participe.configuration.GoogleProperties;
 import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
 import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
@@ -51,6 +52,9 @@ public class GoogleService {
   @Autowired
   private GoogleProperties googleProperties;
 
+  @Autowired
+  private GoogleProfileProperties googleProfileProperties;
+
   public String googleAccessToken(String authorizationCode, HttpServletRequest request, String url) {
     return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
       authorizationCode,
@@ -62,7 +66,7 @@ public class GoogleService {
   public String googleProfileAccessToken(String authorizationCode) {
     return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
         authorizationCode,
-        googleProperties.getRedirecturi(),
+        googleProfileProperties.getRedirecturi(),
         null
     ).getAccessToken();
   }
