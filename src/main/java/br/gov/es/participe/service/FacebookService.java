@@ -1,5 +1,6 @@
 package br.gov.es.participe.service;
 
+import br.gov.es.participe.configuration.FacebookProfileProperties;
 import br.gov.es.participe.configuration.FacebookProperties;
 import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
 import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
@@ -45,6 +46,9 @@ public class FacebookService {
   @Autowired
   private FacebookProperties facebookProperties;
 
+  @Autowired
+  private FacebookProfileProperties facebookProfileProperties;
+
   public String facebookAccessToken(
     String authorizationCode,
     HttpServletRequest request,
@@ -54,6 +58,16 @@ public class FacebookService {
       authorizationCode,
       facebookProperties.getRedirecturi(),
       null
+    ).getAccessToken();
+  }
+
+  public String facebookProfileAccessToken(
+      String authorizationCode
+  ) {
+    return createFacebookConnection().getOAuthOperations().exchangeForAccess(
+        authorizationCode,
+        facebookProfileProperties.getRedirecturi(),
+        null
     ).getAccessToken();
   }
 

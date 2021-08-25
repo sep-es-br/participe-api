@@ -133,10 +133,8 @@ public class SigninController {
     HttpServletRequest request,
     HttpServletResponse response
   ) {
-    String accessToken = facebookService.facebookAccessToken(
-      authorizationCode,
-      request,
-      "/signin/facebook-profile"
+    String accessToken = facebookService.facebookProfileAccessToken(
+      authorizationCode
     );
     RedirectView redirectView = new RedirectView(
       "facebook-profile-response?access_token=" + accessToken);
