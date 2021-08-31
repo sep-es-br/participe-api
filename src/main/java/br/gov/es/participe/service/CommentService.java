@@ -549,11 +549,22 @@ public class CommentService {
     if(planItem != null) {
       comment.setPlanItem(planItem);
     }
-
     comment.setTime(new Date());
 
     moderatedBy.setFinish(true);
     moderatedByRepository.save(moderatedBy);
+
+    if(comment.getStatus().equals("rem")) {
+      Highlight highlight = highlightService.find(
+        comment.getPersonMadeBy().getId(),
+        comment.getPlanItem().getId(),
+        comment.getConference().getId(),
+        comment.getLocality().getId()
+      );
+
+      highlightService.deleteById(highlight.getId());
+    }
+
     return commentRepository.save(comment);
   }
 

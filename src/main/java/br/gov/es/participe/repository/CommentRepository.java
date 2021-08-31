@@ -38,7 +38,11 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
          "OPTIONAL MATCH (c)-[:ABOUT]->(l:Locality) " +
          "OPTIONAL MATCH (pi)-[:COMPOSES]->(pi2:PlanItem) " +
          "WITH c, co, pi, pi2, p, l " +
-         "WHERE (id(p)={0} OR {0} IS NULL) AND (id(pi)={1} OR id(pi2)={1}) AND id(co)={2} AND (id(l) = {3} OR {3} IS NULL) " +
+         "WHERE (id(p)={0} OR {0} IS NULL) " +
+         "AND (id(pi)={1} OR id(pi2)={1}) " +
+         "AND id(co)={2} " +
+         "AND (id(l) = {3} OR {3} IS NULL) " +
+         "AND (c.status <> 'rem')" +
          "RETURN c, co, pi, pi2, p, l"
   )
   List<Comment> findByIdPersonAndIdPlanItemAndIdConferenceAndIdLocality(Long idPerson, Long idPlanItem, Long idConference, Long idLocality);
