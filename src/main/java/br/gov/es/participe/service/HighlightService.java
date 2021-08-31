@@ -127,6 +127,11 @@ public class HighlightService {
     }
   }
 
+  public void deleteById(Long highlightId) {
+    this.highlightRepository.deleteById(highlightId);
+  }
+
+
   @Transactional
   public boolean delete(Highlight highlight) {
     List<Comment> comment = commentService.find(highlight.getPersonMadeBy().getId(),

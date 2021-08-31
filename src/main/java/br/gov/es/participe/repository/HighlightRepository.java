@@ -31,7 +31,10 @@ public interface HighlightRepository extends Neo4jRepository<Highlight, Long> {
          + "OPTIONAL MATCH (pi)-[:COMPOSES]->(pi2:PlanItem) "
          + "OPTIONAL MATCH (h)-[:ABOUT]->(l:Locality) "
          + "WITH h, l, co, p, pi, pi2 "
-         + "WHERE id(p)={0} AND (id(pi)={1} OR id(pi2) = {1}) AND id(co)={2} AND (id(l) = {3} OR {3} IS NULL) "
+         + "WHERE id(p)={0} "
+         + "AND (id(pi)={1} OR id(pi2) = {1}) "
+         + "AND id(co)={2} "
+         + "AND (id(l) = {3} OR {3} IS NULL) "
          + "RETURN h, co, p, pi, pi2"
   )
   List<Highlight> findAllByIdPersonAndIdPlanItemAndIdConferenceAndIdLocality(Long idPerson, Long idPlanItem, Long idConference, Long idLocality);
