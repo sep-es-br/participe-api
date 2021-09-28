@@ -12,6 +12,7 @@ import org.neo4j.ogm.annotation.typeconversion.DateString;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -52,13 +53,11 @@ public class Conference extends Entity implements Serializable {
   @Relationship(type = "FEATURES_AUTHENTICATION_IMAGE")
   private File fileAuthentication;
 
-
   @Relationship(type = "IS_BACKGROUND_IMAGE_OF")
   private Set<File> backgroundImages;
 
   @Relationship(type = "LOCALIZES_CITIZEN_BY")
   private LocalityType localityType;
-
 
   @Relationship(type = "IS_DEFAULT", direction = Relationship.UNDIRECTED)
   private PortalServer defaultServer;
@@ -97,46 +96,47 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Conference(ConferenceDto conferenceDto) {
-      if(conferenceDto == null) {
-          return;
-      }
+    if (conferenceDto == null) {
+      return;
+    }
 
     setId(conferenceDto.getId());
     this.name = conferenceDto.getName();
     this.description = conferenceDto.getDescription();
-    if(conferenceDto.getPlan() != null && conferenceDto.getPlan().getId() != null) {
+    if (conferenceDto.getPlan() != null && conferenceDto.getPlan().getId() != null) {
       this.plan = new Plan(conferenceDto.getPlan());
     }
 
-    if(conferenceDto.getFileParticipation() != null && conferenceDto.getFileParticipation().getId() != null) {
+    if (conferenceDto.getFileParticipation() != null && conferenceDto.getFileParticipation().getId() != null) {
       this.fileParticipation = new File(conferenceDto.getFileParticipation());
     }
 
-    if(conferenceDto.getFileAuthentication() != null && conferenceDto.getFileAuthentication().getId() != null) {
+    if (conferenceDto.getFileAuthentication() != null && conferenceDto.getFileAuthentication().getId() != null) {
       this.fileAuthentication = new File(conferenceDto.getFileAuthentication());
     }
 
-    if(conferenceDto.getLocalityType() != null && conferenceDto.getLocalityType().getId() != null) {
+    if (conferenceDto.getLocalityType() != null && conferenceDto.getLocalityType().getId() != null) {
       this.localityType = new LocalityType(conferenceDto.getLocalityType());
     }
 
-    if(conferenceDto.getMeeting() != null && !conferenceDto.getMeeting().isEmpty()) {
+    if (conferenceDto.getMeeting() != null && !conferenceDto.getMeeting().isEmpty()) {
       this.meeting = new HashSet<>();
       conferenceDto.getMeeting().forEach(meet -> this.meeting.add(new Meeting(meet)));
     }
 
-    if(conferenceDto.getSelfDeclaration() != null && !conferenceDto.getSelfDeclaration().isEmpty()) {
+    if (conferenceDto.getSelfDeclaration() != null && !conferenceDto.getSelfDeclaration().isEmpty()) {
       this.selfDeclaration = new HashSet<>();
       conferenceDto.getSelfDeclaration().forEach(self -> selfDeclaration.add(new SelfDeclaration(self)));
     }
 
-    if(conferenceDto.getModerators() != null && !conferenceDto.getModerators().isEmpty()) {
+    if (conferenceDto.getModerators() != null && !conferenceDto.getModerators().isEmpty()) {
       this.moderators = new HashSet<>();
       conferenceDto.getModerators().forEach(person -> moderators.add(new Person(person)));
     }
 
     setBeginDate(conferenceDto.getBeginDate());
     setEndDate(conferenceDto.getEndDate());
+
     this.titleAuthentication = conferenceDto.getTitleAuthentication();
     this.titleParticipation = conferenceDto.getTitleParticipation();
     this.titleRegionalization = conferenceDto.getTitleRegionalization();
@@ -145,43 +145,42 @@ public class Conference extends Entity implements Serializable {
     this.subtitleRegionalization = conferenceDto.getSubtitleRegionalization();
   }
 
-
   public Conference(ConferenceParamDto conferenceParamDto) throws ParseException {
-      if(conferenceParamDto == null) {
-          return;
-      }
+    if (conferenceParamDto == null) {
+      return;
+    }
 
     setId(conferenceParamDto.getId());
 
-    if(conferenceParamDto.getPlan() != null && conferenceParamDto.getPlan().getId() != null) {
+    if (conferenceParamDto.getPlan() != null && conferenceParamDto.getPlan().getId() != null) {
       this.plan = new Plan(conferenceParamDto.getPlan());
     }
 
-    if(conferenceParamDto.getFileParticipation() != null
-       && conferenceParamDto.getFileParticipation().getId() != null) {
+    if (conferenceParamDto.getFileParticipation() != null
+        && conferenceParamDto.getFileParticipation().getId() != null) {
       this.fileParticipation = new File(conferenceParamDto.getFileParticipation());
     }
 
-    if(conferenceParamDto.getFileAuthentication() != null
-       && conferenceParamDto.getFileAuthentication().getId() != null) {
+    if (conferenceParamDto.getFileAuthentication() != null
+        && conferenceParamDto.getFileAuthentication().getId() != null) {
       this.fileAuthentication = new File(conferenceParamDto.getFileAuthentication());
     }
 
-    if(conferenceParamDto.getLocalityType() != null && conferenceParamDto.getLocalityType().getId() != null) {
+    if (conferenceParamDto.getLocalityType() != null && conferenceParamDto.getLocalityType().getId() != null) {
       this.localityType = new LocalityType(conferenceParamDto.getLocalityType());
     }
 
-    if(conferenceParamDto.getMeeting() != null && !conferenceParamDto.getMeeting().isEmpty()) {
+    if (conferenceParamDto.getMeeting() != null && !conferenceParamDto.getMeeting().isEmpty()) {
       this.meeting = new HashSet<>();
       conferenceParamDto.getMeeting().forEach(meet -> this.meeting.add(new Meeting(meet)));
     }
 
-    if(conferenceParamDto.getSelfDeclaration() != null && !conferenceParamDto.getSelfDeclaration().isEmpty()) {
+    if (conferenceParamDto.getSelfDeclaration() != null && !conferenceParamDto.getSelfDeclaration().isEmpty()) {
       this.selfDeclaration = new HashSet<>();
       conferenceParamDto.getSelfDeclaration().forEach(self -> selfDeclaration.add(new SelfDeclaration(self)));
     }
 
-    if(conferenceParamDto.getModerators() != null && !conferenceParamDto.getModerators().isEmpty()) {
+    if (conferenceParamDto.getModerators() != null && !conferenceParamDto.getModerators().isEmpty()) {
       this.moderators = new HashSet<>();
       conferenceParamDto.getModerators().forEach(person -> moderators.add(new Person(person)));
     }
@@ -191,8 +190,16 @@ public class Conference extends Entity implements Serializable {
 
   private void loadBasicAttributes(ConferenceParamDto conferenceParamDto) throws ParseException {
     this.description = conferenceParamDto.getDescription();
-    this.beginDate = conferenceParamDto.getBeginDate();
-    this.endDate = conferenceParamDto.getEndDate();
+
+    setBeginDate(conferenceParamDto.getBeginDate());
+    setEndDate(conferenceParamDto.getEndDate());
+
+    System.out.println(beginDate);
+    System.out.println(endDate);
+
+    System.out.println(ZoneId.systemDefault());
+    System.out.println(ZoneId.of("-04:00"));
+
     this.name = conferenceParamDto.getName();
     this.titleAuthentication = conferenceParamDto.getTitleAuthentication();
     this.titleParticipation = conferenceParamDto.getTitleParticipation();
@@ -205,6 +212,7 @@ public class Conference extends Entity implements Serializable {
     this.preOpening = conferenceParamDto.getPreOpeningText();
     this.modeType = conferenceParamDto.getDisplayMode();
     this.statusType = conferenceParamDto.getDisplayStatusConference();
+
     updateDisplayMode();
   }
 
@@ -244,12 +252,36 @@ public class Conference extends Entity implements Serializable {
     this.beginDate = beginDate;
   }
 
+  private void setBeginDate(String beginDate) {
+    if (beginDate != null && !beginDate.isEmpty()) {
+      try {
+        this.beginDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(beginDate);
+        return;
+      } catch (ParseException e) {
+        log.throwing(Conference.class.getName(), "setBeginDate", e);
+      }
+    }
+    this.beginDate = null;
+  }
+
   public Date getEndDate() {
     return endDate;
   }
 
   public void setEndDate(Date endDate) {
     this.endDate = endDate;
+  }
+
+  private void setEndDate(String endDate) {
+    if (endDate != null && !endDate.isEmpty()) {
+      try {
+        this.endDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(endDate);
+        return;
+      } catch (ParseException e) {
+        log.throwing(Conference.class.getName(), "setEndDate", e);
+      }
+    }
+    this.endDate = null;
   }
 
   public String getTitleAuthentication() {
@@ -356,7 +388,6 @@ public class Conference extends Entity implements Serializable {
     this.moderators = moderators;
   }
 
-
   public String getDisplayMode() {
     return displayMode;
   }
@@ -368,7 +399,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   private void updateDisplayMode() {
-    if(modeType != null && statusType != null) {
+    if (modeType != null && statusType != null) {
       this.displayMode = String.format("%s %s", modeType.name(), statusType.name());
     }
   }
@@ -397,7 +428,6 @@ public class Conference extends Entity implements Serializable {
     this.menuLabel = menuLabel;
   }
 
-
   public Set<Topic> getTopics() {
     return topics;
   }
@@ -415,21 +445,24 @@ public class Conference extends Entity implements Serializable {
   }
 
   public DisplayModeType getModeType() {
-    if(modeType == null && this.displayMode != null) {
-      modeType = Arrays.stream(DisplayModeType.values()).filter(f -> this.displayMode.contains(f.name())).findFirst().orElse(null);
+    if (modeType == null && this.displayMode != null) {
+      modeType = Arrays.stream(DisplayModeType.values())
+          .filter(f -> this.displayMode.contains(f.name()))
+          .findFirst().orElse(null);
     }
     return modeType;
   }
 
   public StatusConferenceType getStatusType() {
-    if(this.displayMode == null) {
+    if (this.displayMode == null) {
       statusType = StatusConferenceType.OPEN;
       return statusType;
     }
 
-    if(statusType == null) {
-      statusType = Arrays.stream(StatusConferenceType.values()).filter(f -> this.displayMode.contains(f.name())).findFirst().orElse(
-        null);
+    if (statusType == null) {
+      statusType = Arrays.stream(StatusConferenceType.values())
+          .filter(f -> this.displayMode.contains(f.name())).findFirst()
+          .orElse(null);
     }
     return statusType;
   }
@@ -457,7 +490,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Set<StructureItem> getStructureItems() {
-    if(structureItems == null) {
+    if (structureItems == null) {
       structureItems = new HashSet<>();
     }
     return structureItems;
@@ -473,32 +506,5 @@ public class Conference extends Entity implements Serializable {
 
   public void setResearch(Research research) {
     this.research = research;
-  }
-
-
-  private void setEndDate(String endDate) {
-    if(endDate != null && !endDate.isEmpty()) {
-      try {
-        this.endDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(endDate);
-        return;
-      }
-      catch(ParseException e) {
-        log.throwing(Conference.class.getName(), "setEndDate", e);
-      }
-    }
-    this.endDate = null;
-  }
-
-  private void setBeginDate(String beginDate) {
-    if(beginDate != null && !beginDate.isEmpty()) {
-      try {
-        this.beginDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(beginDate);
-        return;
-      }
-      catch(ParseException e) {
-        log.throwing(Conference.class.getName(), "setBeginDate", e);
-      }
-    }
-    this.beginDate = null;
   }
 }

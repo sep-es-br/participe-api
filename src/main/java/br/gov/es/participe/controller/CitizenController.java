@@ -21,55 +21,55 @@ import java.util.List;
 @RequestMapping(value = "/citizen", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CitizenController {
 
-    @Autowired
-    private PersonService personService;
+  @Autowired
+  private PersonService personService;
 
-    @Autowired
-    private LocalityService localityService;
+  @Autowired
+  private LocalityService localityService;
 
-    @ApiPageable
-    @GetMapping
-    public ResponseEntity<Page<PersonKeepCitizenDto>> listCitizen(@RequestParam(value = "name", required = false, defaultValue = "") String name ,
-                                                                  @RequestParam(value = "email", required = false, defaultValue = "") String email,
-                                                                  @RequestParam(value = "autentication", required = false, defaultValue = "") String autentication,
-                                                                  @RequestParam(value = "status", required = false, defaultValue = "") Boolean active,
-                                                                  @RequestParam(value = "locality", required = false, defaultValue = "") List<Long> locality,
-                                                                  @RequestParam(value = "conferenceId", required = false) Long conferenceId,
-                                                                  @ApiIgnore Pageable page) {
-        Page<PersonKeepCitizenDto> list = personService
-                .listKeepCitizen(name, email, autentication, active, locality, conferenceId, page);
-        return ResponseEntity.status(200).body(list);
-    }
+  @ApiPageable
+  @GetMapping
+  public ResponseEntity<Page<PersonKeepCitizenDto>> listCitizen(@RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                                @RequestParam(value = "email", required = false, defaultValue = "") String email,
+                                                                @RequestParam(value = "autentication", required = false, defaultValue = "") String autentication,
+                                                                @RequestParam(value = "status", required = false, defaultValue = "") Boolean active,
+                                                                @RequestParam(value = "locality", required = false, defaultValue = "") List<Long> locality,
+                                                                @RequestParam(value = "conferenceId", required = false) Long conferenceId,
+                                                                @ApiIgnore Pageable page) {
+    Page<PersonKeepCitizenDto> list = personService
+        .listKeepCitizen(name, email, autentication, active, locality, conferenceId, page);
+    return ResponseEntity.status(200).body(list);
+  }
 
-    @GetMapping("/{personId}")
-    public ResponseEntity<PersonKeepCitizenDto> getCitizenById(@PathVariable Long personId, @RequestParam Long conferenceId) {
-        PersonKeepCitizenDto citizen = personService.findCitizenById(personId, conferenceId);
-        return ResponseEntity.status(200).body(citizen);
-    }
+  @GetMapping("/{personId}")
+  public ResponseEntity<PersonKeepCitizenDto> getCitizenById(@PathVariable Long personId, @RequestParam Long conferenceId) {
+    PersonKeepCitizenDto citizen = personService.findCitizenById(personId, conferenceId);
+    return ResponseEntity.status(200).body(citizen);
+  }
 
-    @PostMapping
-    public ResponseEntity store(@RequestBody PersonParamDto personParam) {
-        return personService.storePerson(personParam, false);
-    }
+  @PostMapping
+  public ResponseEntity store(@RequestBody PersonParamDto personParam) {
+    return personService.storePerson(personParam, false);
+  }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity destroy(@PathVariable Long id) {
-        personService.delete(id);
-        return ResponseEntity.status(200).build();
-    }
+  @DeleteMapping("/{id}")
+  public ResponseEntity destroy(@PathVariable Long id) {
+    personService.delete(id);
+    return ResponseEntity.status(200).build();
+  }
 
-    @PutMapping("/{id}")
-    public ResponseEntity update(@RequestHeader (name="Authorization") String token, @PathVariable Long id,
-                                 @RequestBody PersonParamDto personParam) {
-        personParam.setId(id);
-        return personService.updatePerson(personParam, false);
-    }
+  @PutMapping("/{id}")
+  public ResponseEntity update(@RequestHeader(name = "Authorization") String token, @PathVariable Long id,
+                               @RequestBody PersonParamDto personParam) {
+    personParam.setId(id);
+    return personService.updatePerson(personParam, false);
+  }
 
-    @GetMapping("/localities/{idConferences}")
-    public ResponseEntity<LocalityCitizenSelectDto> getLocalities(
-            @PathVariable(name = "idConferences", required = false) Long idConferences,
-            @RequestParam(name = "name", required = false, defaultValue = "") String name) {
-        LocalityCitizenSelectDto localityCitizenSelectDto = localityService.getLocalitiesToDisplay(idConferences, name);
-        return ResponseEntity.status(200).body(localityCitizenSelectDto);
-    }
+  @GetMapping("/localities/{idConferences}")
+  public ResponseEntity<LocalityCitizenSelectDto> getLocalities(
+      @PathVariable(name = "idConferences", required = false) Long idConferences,
+      @RequestParam(name = "name", required = false, defaultValue = "") String name) {
+    LocalityCitizenSelectDto localityCitizenSelectDto = localityService.getLocalitiesToDisplay(idConferences, name);
+    return ResponseEntity.status(200).body(localityCitizenSelectDto);
+  }
 }

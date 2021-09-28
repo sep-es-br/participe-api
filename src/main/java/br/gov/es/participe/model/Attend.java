@@ -12,7 +12,8 @@ import java.util.Date;
 @NodeEntity
 public abstract class Attend implements Serializable {
 
-  @Id @GeneratedValue
+  @Id
+  @GeneratedValue
   private Long id;
 
   private String from;

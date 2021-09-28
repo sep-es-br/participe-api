@@ -61,7 +61,6 @@ public class IsAuthenticatedBy extends Entity {
     return newAuthenticatedBy;
   }
 
-
   public String getName() {
     return name;
   }

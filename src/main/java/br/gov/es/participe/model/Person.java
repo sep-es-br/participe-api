@@ -8,12 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @NodeEntity
@@ -65,10 +60,9 @@ public class Person extends Entity implements UserDetails {
     this.cpf = person.getCpf();
     this.telephone = person.getTelephone();
 
-    if(person.getCpf() != null) {
+    if (person.getCpf() != null) {
       this.contactEmail = person.getCpf() + "@cpf";
-    }
-    else {
+    } else {
       this.contactEmail = person.getContactEmail();
     }
   }
@@ -79,10 +73,9 @@ public class Person extends Entity implements UserDetails {
     this.cpf = person.getCpf();
     this.telephone = person.getTelephone();
 
-    if(person.getCpf() != null) {
+    if (person.getCpf() != null) {
       this.contactEmail = person.getCpf() + "@cpf";
-    }
-    else {
+    } else {
       this.contactEmail = person.getContactEmail();
     }
   }
@@ -93,10 +86,9 @@ public class Person extends Entity implements UserDetails {
     this.cpf = person.getCpf();
     this.telephone = person.getTelephone();
 
-    if(isTypeAuthenticationCpf) {
+    if (isTypeAuthenticationCpf) {
       this.contactEmail = person.getCpf() + "@cpf";
-    }
-    else {
+    } else {
       this.contactEmail = person.getContactEmail();
     }
   }
@@ -142,42 +134,39 @@ public class Person extends Entity implements UserDetails {
   }
 
   public Set<AuthService> getAuthServices() {
-    if(authServices == null) {
+    if (authServices == null) {
       return Collections.emptySet();
     }
 
     return Collections.unmodifiableSet(authServices);
   }
 
+  public void setAuthServices(Set<AuthService> authServices) {
+    this.authServices = authServices;
+  }
+
   public void addAuthService(AuthService authService) {
-    if(authServices == null) {
+    if (authServices == null) {
       authServices = new HashSet<>();
     }
 
     authServices.add(authService);
   }
 
-  public void addSelfDeclaration(SelfDeclaration selfDeclaration) {
-    if(this.selfDeclaretions == null) {
+  public void addSelfDeclaration(final SelfDeclaration selfDeclaration) {
+    if (this.selfDeclaretions == null) {
       this.selfDeclaretions = new HashSet<>();
     }
 
     this.selfDeclaretions.add(selfDeclaration);
   }
 
-
   public Set<SelfDeclaration> getSelfDeclaretions() {
     return selfDeclaretions;
   }
 
-
   public void setSelfDeclaretions(Set<SelfDeclaration> selfDeclaretions) {
     this.selfDeclaretions = selfDeclaretions;
-  }
-
-
-  public void setAuthServices(Set<AuthService> authServices) {
-    this.authServices = authServices;
   }
 
   public Set<Comment> getComments() {
@@ -229,7 +218,7 @@ public class Person extends Entity implements UserDetails {
   }
 
   public Set<String> getRoles() {
-    if(roles == null) {
+    if (roles == null) {
       roles = new HashSet<>();
     }
     return roles;
@@ -251,7 +240,7 @@ public class Person extends Entity implements UserDetails {
   public Collection<? extends GrantedAuthority> getAuthorities() {
     Set<String> personRoles = getRoles();
     List<String> listRoles = new ArrayList<>();
-    if(personRoles != null && !personRoles.isEmpty()) {
+    if (personRoles != null && !personRoles.isEmpty()) {
       personRoles.forEach(r -> listRoles.add("ROLE_" + r));
     }
     return listRoles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());

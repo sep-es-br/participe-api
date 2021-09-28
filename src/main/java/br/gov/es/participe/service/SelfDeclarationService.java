@@ -28,22 +28,22 @@ public class SelfDeclarationService {
 
   @Transactional
   public SelfDeclaration save(SelfDeclaration selfDeclaration) {
-    if(selfDeclaration.getConference() == null || selfDeclaration.getConference().getId() == null) {
+    if (selfDeclaration.getConference() == null || selfDeclaration.getConference().getId() == null) {
       throw new IllegalArgumentException("Conference is required to create or edit Self Declaration");
     }
 
-    if(selfDeclaration.getLocality() == null || selfDeclaration.getLocality().getId() == null) {
+    if (selfDeclaration.getLocality() == null || selfDeclaration.getLocality().getId() == null) {
       throw new IllegalArgumentException("Locality is required to create or edit Self Declaration");
     }
 
-    if(selfDeclaration.getPerson() == null || selfDeclaration.getPerson().getId() == null) {
+    if (selfDeclaration.getPerson() == null || selfDeclaration.getPerson().getId() == null) {
       throw new IllegalArgumentException("Person is required to create or edit Self Declaration");
     }
 
-    SelfDeclaration self = selfDeclarationRepository.findByIdConferenceAndIdPerson(
-      selfDeclaration.getConference().getId(), selfDeclaration.getPerson().getId());
+    SelfDeclaration self = selfDeclarationRepository.findByConferenceIdAndPersonId(
+        selfDeclaration.getConference().getId(), selfDeclaration.getPerson().getId());
 
-    if(self == null) {
+    if (self == null) {
       Conference conference = conferenceService.find(selfDeclaration.getConference().getId());
       Locality locality = localityService.find(selfDeclaration.getLocality().getId());
       Person person = personService.find(selfDeclaration.getPerson().getId());
@@ -52,7 +52,7 @@ public class SelfDeclarationService {
       selfDeclaration.setLocality(locality);
       selfDeclaration.setPerson(person);
       selfDeclaration.setAnswerSurvey(false);
-      selfDeclaration.setReceiveInformational(false);
+      selfDeclaration.setReceiveInformational(true);
     }
     return selfDeclarationRepository.save(selfDeclaration);
   }
@@ -69,12 +69,12 @@ public class SelfDeclarationService {
 
   public SelfDeclaration find(Long id) {
     return selfDeclarationRepository
-      .findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Self Declaration not found: " + id));
+        .findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Self Declaration not found: " + id));
   }
 
   public SelfDeclaration findByPersonAndConference(Long idPerson, Long idConference) {
-    return selfDeclarationRepository.findByIdConferenceAndIdPerson(idConference, idPerson);
+    return selfDeclarationRepository.findByConferenceIdAndPersonId(idConference, idPerson);
   }
 
   @Transactional
@@ -85,6 +85,6 @@ public class SelfDeclarationService {
 
   public List<SelfDeclaration> findAllByPerson(Long id) {
     return selfDeclarationRepository
-      .findAllByIdPerson(id);
+        .findAllByIdPerson(id);
   }
 }

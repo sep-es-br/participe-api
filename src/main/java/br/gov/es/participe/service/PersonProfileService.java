@@ -196,7 +196,7 @@ public class PersonProfileService {
   }
 
   private Optional<SelfDeclaration> findSelfDeclaration(Long personId, Long conferenceId) {
-    return Optional.ofNullable(this.selfDeclarationRepository.findByIdConferenceAndIdPerson(
+    return Optional.ofNullable(this.selfDeclarationRepository.findByConferenceIdAndPersonId(
       conferenceId,
       personId
     ));
