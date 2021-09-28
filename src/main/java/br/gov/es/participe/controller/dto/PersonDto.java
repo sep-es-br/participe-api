@@ -32,7 +32,7 @@ public class PersonDto {
 
   public PersonDto(Person person, Boolean receiveInformational) {
     this(person);
-    this.receiveInformational = receiveInformational != null ? receiveInformational : false;
+    this.receiveInformational = receiveInformational != null ? receiveInformational : true;
   }
 
   public Long getId() {

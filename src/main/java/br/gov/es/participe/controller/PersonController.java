@@ -39,13 +39,13 @@ public class PersonController {
 
   @GetMapping("/validate")
   public ResponseEntity validate(
-    @RequestParam(value = "email", required = false, defaultValue = "") String email,
-    @RequestParam(value = "cpf", required = false, defaultValue = "") String cpf,
-    @RequestParam(value = "id", required = false) Long id
+      @RequestParam(value = "email", required = false, defaultValue = "") String email,
+      @RequestParam(value = "cpf", required = false, defaultValue = "") String cpf,
+      @RequestParam(value = "id", required = false) Long id
   ) {
     return ResponseEntity
-      .status(200)
-      .body(personService.validate(email, cpf, SERVER));
+        .status(200)
+        .body(personService.validate(email, cpf, SERVER));
   }
 
   @PostMapping
@@ -56,14 +56,14 @@ public class PersonController {
   @PostMapping("/complement")
   public ResponseEntity complement(@RequestBody PersonParamDto personParam) {
 
-    if(personParam.getSelfDeclaration() == null) {
+    if (personParam.getSelfDeclaration() == null) {
       throw new IllegalArgumentException("Self Declaration is required");
     }
 
     SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaration());
     Person person = personService.complement(
-      new Person(personParam),
-      self
+        new Person(personParam),
+        self
     );
 
     PersonDto response = new PersonDto(person);
@@ -90,13 +90,13 @@ public class PersonController {
     Boolean isSend = personService.forgotPassword(forgotPassword.getEmail(), forgotPassword.getConference(), SERVER);
     MessageDto msg = new MessageDto();
 
-    if(isSend) {
+    if (isSend) {
       msg.setMessage("Nova senha enviada para " + forgotPassword.getEmail());
       msg.setCode(200);
       return ResponseEntity.status(200).body(msg);
     }
     msg.setMessage(
-      "Hummm... Não encontramos esse e-mail em nossos registros. Talvez você tenha se cadastrado com outro endereço ou utilizado o Acesso Cidadão, Google ou redes sociais");
+        "Hummm... Não encontramos esse e-mail em nossos registros. Talvez você tenha se cadastrado com outro endereço ou utilizado o Acesso Cidadão, Google ou redes sociais");
     msg.setCode(403);
     return ResponseEntity.status(403).body(msg);
   }

@@ -17,31 +17,47 @@ import java.util.List;
 @RequestMapping(value = "/control-panel-dashboard")
 public class ControlPanelController {
 
+  private final ControlPanelService service;
+
   @Autowired
-  private ControlPanelService service;
+  public ControlPanelController(ControlPanelService service) {
+    this.service = service;
+  }
 
   @GetMapping
   public ResponseEntity<ControlPanelDto> getDashboardInfo(
-    @RequestParam Long idConference,
-    @RequestParam(required = false) ResultTypeControlPanelEnum result,
-    @RequestParam(required = false) String origin, @RequestParam(required = false) List<Long> meetings,
-    @RequestParam(required = false) Long microregionChartAgroup,
-    @RequestParam(required = false) Long microregionLocalitySelected,
-    @RequestParam(required = false) Long structureItemSelected,
-    @RequestParam(required = false) Long structureItemPlanSelected,
-    @RequestParam(required = false, defaultValue = "false") Boolean stLastLevelLocality,
-    @RequestParam(required = false, defaultValue = "false") Boolean stLastLevelPlanItem
+      @RequestParam Long idConference,
+      @RequestParam(required = false) ResultTypeControlPanelEnum result,
+      @RequestParam(required = false) String origin,
+      @RequestParam(required = false) List<Long> meetings,
+      @RequestParam(required = false) Long microregionChartAgroup,
+      @RequestParam(required = false) Long microregionLocalitySelected,
+      @RequestParam(required = false) Long structureItemSelected,
+      @RequestParam(required = false) Long structureItemPlanSelected,
+      @RequestParam(required = false, defaultValue = "false") Boolean stLastLevelLocality,
+      @RequestParam(required = false, defaultValue = "false") Boolean stLastLevelPlanItem
   ) {
-    ControlPanelDto response = service.getInformationsDashboard(idConference, result, origin, meetings,
-                                                                microregionChartAgroup, microregionLocalitySelected,
-                                                                structureItemSelected, structureItemPlanSelected, stLastLevelLocality, stLastLevelPlanItem
+    ControlPanelDto response = service.getInformationsDashboard(
+        idConference,
+        result,
+        origin,
+        meetings,
+        microregionChartAgroup,
+        microregionLocalitySelected,
+        structureItemSelected,
+        structureItemPlanSelected,
+        stLastLevelLocality,
+        stLastLevelPlanItem
     );
+
     return ResponseEntity.status(200).body(response);
   }
 
   @GetMapping("/locality-parents")
-  public ResponseEntity<List<LocalityTypeDto>> getAllTypeLocalityFromParents(@RequestParam Long idDomain,
-                                                                             @RequestParam Long idTypeLocality) {
+  public ResponseEntity<List<LocalityTypeDto>> getAllTypeLocalityFromParents(
+      @RequestParam Long idDomain,
+      @RequestParam Long idTypeLocality
+  ) {
     List<LocalityTypeDto> response = service.getAllTypeLocality(idDomain, idTypeLocality);
     return ResponseEntity.status(200).body(response);
   }

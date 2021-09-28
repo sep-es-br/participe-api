@@ -7,78 +7,76 @@ import java.util.List;
 
 public class PlanDto {
 
-    private Long id;
-    private String name;
-    private StructureDto structure;
-    private DomainDto domain;
-    private LocalityTypeDto localitytype;
-    private List<PlanItemDto> items;
+  private Long id;
+  private String name;
+  private StructureDto structure;
+  private DomainDto domain;
+  private LocalityTypeDto localitytype;
+  private List<PlanItemDto> items;
 
-    public PlanDto() {
+  public PlanDto() {
+  }
+
+  public PlanDto(Plan plan, boolean loadItems) {
+    if (plan == null) return;
+
+    this.id = plan.getId();
+    this.name = plan.getName();
+    this.structure = new StructureDto(plan.getStructure(), true);
+    this.domain = new DomainDto(plan.getDomain(), false);
+    this.localitytype = new LocalityTypeDto(plan.getlocalitytype());
+
+    if (loadItems && plan.getItems() != null && !plan.getItems().isEmpty()) {
+      items = new ArrayList<>();
+      plan.getItems().forEach(item -> items.add(new PlanItemDto(item, plan, true)));
     }
+  }
 
-    public PlanDto(Plan plan, boolean loadItems) {
-        if (plan == null) return;
+  public Long getId() {
+    return id;
+  }
 
-        this.id = plan.getId();
-        this.name = plan.getName();
-        this.structure = new StructureDto(plan.getStructure(), true);
-        this.domain = new DomainDto(plan.getDomain(), true);
-        this.localitytype = new LocalityTypeDto(plan.getlocalitytype());
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-        if (loadItems && plan.getItems() != null && !plan.getItems().isEmpty()) {
-            items = new ArrayList<>();
-            plan.getItems()
-                    .stream()
-                    .forEach(item -> items.add(new PlanItemDto(item, plan, true)));
-        }
-    }
+  public String getName() {
+    return name;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public StructureDto getStructure() {
+    return structure;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public void setStructure(StructureDto structure) {
+    this.structure = structure;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public DomainDto getDomain() {
+    return domain;
+  }
 
-    public StructureDto getStructure() {
-        return structure;
-    }
+  public void setDomain(DomainDto domain) {
+    this.domain = domain;
+  }
 
-    public void setStructure(StructureDto structure) {
-        this.structure = structure;
-    }
+  public LocalityTypeDto getlocalitytype() {
+    return localitytype;
+  }
 
-    public DomainDto getDomain() {
-        return domain;
-    }
+  public void setlocalitytype(LocalityTypeDto type) {
+    this.localitytype = type;
+  }
 
-    public void setDomain(DomainDto domain) {
-        this.domain = domain;
-    }
-    
-    public LocalityTypeDto getlocalitytype() {
-		return localitytype;
-	}
+  public List<PlanItemDto> getItems() {
+    return items;
+  }
 
-	public void setlocalitytype(LocalityTypeDto type) {
-		this.localitytype = type;
-	}
-
-    public List<PlanItemDto> getItems() {
-        return items;
-    }
-
-    public void setItems(List<PlanItemDto> items) {
-        this.items = items;
-    }
+  public void setItems(List<PlanItemDto> items) {
+    this.items = items;
+  }
 }

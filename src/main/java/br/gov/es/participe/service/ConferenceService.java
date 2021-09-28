@@ -14,15 +14,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.ZoneOffset;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -86,9 +79,9 @@ public class ConferenceService {
   private ParticipeUtils participeUtils;
 
   public void generateAuthenticationScreen(
-    Long id,
-    AuthenticationScreenDto auth,
-    UriComponentsBuilder uriComponentsBuilder
+      Long id,
+      AuthenticationScreenDto auth,
+      UriComponentsBuilder uriComponentsBuilder
   ) {
     conferenceRepository.findByIdFull(id).ifPresent(conference -> {
       auth.setStatus(conference.getStatusType());
@@ -98,16 +91,16 @@ public class ConferenceService {
 
       File backGroundImage = fileService.findRandomackGroundImage(id);
       auth.setBackgroundImageUrl(
-        backGroundImage != null ? new FileDto(conference.getFileAuthentication()) : null);
+          backGroundImage != null ? new FileDto(conference.getFileAuthentication()) : null);
 
       String url = uriComponentsBuilder.path("/files/").build().toUri().toString();
       auth.getFileAuthentication().setUrl(url + conference.getFileAuthentication().getId());
-      if(backGroundImage != null) {
+      if (backGroundImage != null) {
         auth.getBackgroundImageUrl().setUrl(url + backGroundImage.getId());
       }
 
       Plan plan = planService.findByConference(conference.getId());
-      if(plan.getlocalitytype() != null) {
+      if (plan.getlocalitytype() != null) {
         auth.setLocalityType(plan.getlocalitytype().getName());
       }
       auth.setBeginDate(conference.getBeginDate());
@@ -123,7 +116,7 @@ public class ConferenceService {
     Conference conference = find(id);
     Plan plan = planService.find(conference.getPlan().getId());
 
-    if(plan.getlocalitytype() != null) {
+    if (plan.getlocalitytype() != null) {
       response.setRegionalizable(plan.getlocalitytype().getName());
     }
     response.setTitle(conference.getTitleRegionalization());
@@ -138,18 +131,19 @@ public class ConferenceService {
     List<Conference> conferences = new ArrayList<>();
 
     conferenceRepository.findAllByQuery(name, plan, month, year).iterator().forEachRemaining(conferences::add);
-    for(Conference conference : conferences) {
+    for (Conference conference : conferences) {
       boolean deleteConference = true;
-      if(conference.getMeeting() != null) {
-        for(Meeting m : conference.getMeeting()) {
+      if (conference.getMeeting() != null) {
+        for (Meeting m : conference.getMeeting()) {
           m.setConference(null);
         }
       }
-      if(conference.getPlan() != null) {
+      if (conference.getPlan() != null) {
         List<PlanItem> planItens = planItemService.findAllByIdPlan(conference.getPlan().getId());
-        for(PlanItem item : planItens) {
-          if(item.getAttends() != null) {
+        for (PlanItem item : planItens) {
+          if (item.getAttends() != null) {
             deleteConference = false;
+            break;
           }
         }
       }
@@ -168,19 +162,18 @@ public class ConferenceService {
     final boolean adm = person.getRoles() != null && person.getRoles().contains("Administrator");
     List<ConferenceDto> conferences = new ArrayList<>();
     conferenceRepository.findAllActives(new Date(), activeConferences || !adm).forEach(conference -> {
-      if(adm || (conference.getModerators() != null
-                 && conference.getModerators().stream().anyMatch(m -> idPerson.equals(m.getId())))) {
+      if (adm || (conference.getModerators() != null
+          && conference.getModerators().stream().anyMatch(m -> idPerson.equals(m.getId())))) {
         ConferenceDto dto = new ConferenceDto(conference);
         dto.setPlan(null);
         dto.setLocalityType(null);
         dto.setFileAuthentication(null);
         dto.setFileParticipation(null);
-        if(adm) {
+        if (adm) {
           Date begin = getDate(dto.getBeginDate());
           Date end = getDate(dto.getEndDate());
           dto.setIsActive(participeUtils.isActive(begin, end));
-        }
-        else {
+        } else {
           dto.setIsActive(true);
         }
         conferences.add(dto);
@@ -191,12 +184,11 @@ public class ConferenceService {
 
   private Date getDate(String date) {
     try {
-      if(date == null) {
+      if (date == null) {
         return null;
       }
       return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(date);
-    }
-    catch(ParseException e) {
+    } catch (ParseException e) {
       log.throwing(ConferenceParamDto.class.getName(), "getDate", e);
     }
     return null;
@@ -204,11 +196,8 @@ public class ConferenceService {
 
   @Transactional
   public ConferenceDto update(Long conferenceId, ConferenceParamDto conferenceParamDto) throws ParseException {
-    Conference conferenceStored = this.conferenceRepository
-      .findById(conferenceId)
-      .orElseThrow(
-        () -> new IllegalStateException("This conference not exist.")
-      );
+    Conference conferenceStored = this.conferenceRepository.findById(conferenceId)
+        .orElseThrow(() -> new IllegalStateException("This conference not exist."));
 
     conferenceStored.update(conferenceParamDto);
 
@@ -223,7 +212,7 @@ public class ConferenceService {
     // clearAttributes(conference);
     loadAttributes(conference);
 
-    if(param.getModerators() != null && !param.getModerators().isEmpty()) {
+    if (param.getModerators() != null && !param.getModerators().isEmpty()) {
       HashSet<Person> moderators = new HashSet<>();
       param.getModerators().forEach(p -> {
         Optional<Person> find = personService.findByLoginEmail(p.getContactEmail());
@@ -252,14 +241,14 @@ public class ConferenceService {
 
   private void loadResearch(Conference conference, ConferenceParamDto param) throws ParseException {
     Research research = conference.getId() == null ? new Research()
-      : researchService.findByIdConference(conference.getId()).orElse(new Research());
+        : researchService.findByIdConference(conference.getId()).orElse(new Research());
 
     research.setBeginDate(param.getResearchConfiguration().getBeginDate());
     research.setEndDate(param.getResearchConfiguration().getEndDate());
     research.setLink(param.getResearchConfiguration().getResearchLink());
     research.setEstimatedTime(param.getResearchConfiguration().getEstimatedTimeResearch());
     research.setDisplayMode(String.format("%s %s", param.getResearchConfiguration().getDisplayModeResearch().name(),
-                                          param.getResearchConfiguration().getResearchDisplayStatus().name()
+        param.getResearchConfiguration().getResearchDisplayStatus().name()
     ));
     research.setStatusType(param.getResearchConfiguration().getResearchDisplayStatus());
     research.setConference(conference);
@@ -268,7 +257,7 @@ public class ConferenceService {
 
   private void loadSegmentation(Conference conference, ConferenceParamDto param) {
     List<StructureItem> itens = new ArrayList<>();
-    if(param.getSegmentation()) {
+    if (param.getSegmentation()) {
       itens = structureItemService.findByIds(param.getTargetedByItems());
     }
     conference.setStructureItems(new HashSet<>(itens));
@@ -276,22 +265,21 @@ public class ConferenceService {
 
   private void loadServe(Conference conference, ConferenceParamDto param) {
     PortalServer portalServer = portalServerService.findByUrl(param.getServerName())
-      .orElse(new PortalServer(param.getServerName()));
+        .orElse(new PortalServer(param.getServerName()));
 
     conference.setServer(portalServer);
     portalServer.getConferences().add(conference);
 
-    if(param.getDefaultServerConference()) {
+    if (param.getDefaultServerConference()) {
       portalServer.getConferences().forEach(con -> con.setDefaultServer(null));
       portalServer.setConference(null);
       conference.setDefaultServer(portalServer);
-    }
-    else {
-      if(conference.getDefaultServer() != null) {
+    } else {
+      if (conference.getDefaultServer() != null) {
         conference.setDefaultServer(null);
       }
-      if(portalServer.getConference() != null && param.getId() != null
-         && param.getId().equals(portalServer.getConference().getId())) {
+      if (portalServer.getConference() != null && param.getId() != null
+          && param.getId().equals(portalServer.getConference().getId())) {
         portalServer.setConference(null);
       }
     }
@@ -300,48 +288,47 @@ public class ConferenceService {
 
   private void loadBackGroundImages(Conference conference, ConferenceParamDto param) {
     List<File> files = fileService.findAllBackGroundImageFromConference(conference.getId());
-    if(param.getBackgroundImages() != null && !param.getBackgroundImages().isEmpty()) {
+    if (param.getBackgroundImages() != null && !param.getBackgroundImages().isEmpty()) {
       List<File> listFiles = param.getBackgroundImages().stream()
-        .map(f -> new File(f).setConferenceBackGround(conference)).collect(Collectors.toList());
-      if(!listFiles.isEmpty()) {
+          .map(f -> new File(f).setConferenceBackGround(conference)).collect(Collectors.toList());
+      if (!listFiles.isEmpty()) {
         fileService.saveAll(listFiles);
       }
 
       files.stream().map(File::getId).filter(id -> listFiles.stream().noneMatch(file -> id.equals(file.getId())))
-        .forEach(fileService::delete);
+          .forEach(fileService::delete);
     }
   }
 
   private void loadTopics(Conference conference, ConferenceParamDto param) {
     List<Topic> topics = topicService.findAllByConference(conference.getId());
-    if(param.getHowItWork() != null && !param.getHowItWork().isEmpty()) {
+    if (param.getHowItWork() != null && !param.getHowItWork().isEmpty()) {
 
       List<Topic> listToAdd = param.getHowItWork().stream()
-        .map(work -> new Topic(work).setConferenceTopic(conference)).collect(Collectors.toList());
+          .map(work -> new Topic(work).setConferenceTopic(conference)).collect(Collectors.toList());
 
-      if(!listToAdd.isEmpty()) {
+      if (!listToAdd.isEmpty()) {
         topicService.saveAll(listToAdd);
       }
 
       List<Topic> listToRemove = topics.stream().filter(
-          filter -> param.getHowItWork().stream().noneMatch(work -> filter.getId().equals(work.getId())))
-        .collect(Collectors.toList());
-      if(!listToRemove.isEmpty()) {
+              filter -> param.getHowItWork().stream().noneMatch(work -> filter.getId().equals(work.getId())))
+          .collect(Collectors.toList());
+      if (!listToRemove.isEmpty()) {
         topicService.deleteAll(listToRemove);
       }
-    }
-    else {
+    } else {
       topicService.deleteAllByConference(conference);
     }
   }
 
   private void loadExternalLinks(Conference conference, ConferenceParamDto param) {
-    if(param.getExternalLinks() != null && !param.getExternalLinks().isEmpty()) {
+    if (param.getExternalLinks() != null && !param.getExternalLinks().isEmpty()) {
 
       List<String> urlsToSaveOrEdit = param.getExternalLinks().stream()
-        .map(ExternalLinksDto::getUrl)
-        .distinct()
-        .collect(Collectors.toList());
+          .map(ExternalLinksDto::getUrl)
+          .distinct()
+          .collect(Collectors.toList());
 
       List<ExternalContent> externalContents = externalContentService.findExternalContentsByUrls(urlsToSaveOrEdit);
 
@@ -349,7 +336,7 @@ public class ConferenceService {
 
       List<ExternalLinksDto> externalContentsToAdd = findNewExternalContent(param.getExternalLinks(), linked);
 
-      if(!externalContentsToAdd.isEmpty()) {
+      if (!externalContentsToAdd.isEmpty()) {
         createAllExternalContents(externalContentsToAdd, externalContents);
       }
       clearOldLinks(param.getExternalLinks(), linked);
@@ -357,28 +344,27 @@ public class ConferenceService {
       createNewLinks(param.getExternalLinks(), linked, externalContents, conference);
 
       isLinkedByService.saveAll(linked);
-    }
-    else {
+    } else {
       removeAllLinkedFromConference(conference);
     }
   }
 
   private void clearOldLinks(List<ExternalLinksDto> externalLinks, List<IsLinkedBy> linked) {
     List<IsLinkedBy> linksToDelete = linked.stream()
-      .filter(link -> externalLinks.stream().noneMatch(f -> link.getId().equals(f.getId())))
-      .collect(Collectors.toList());
+        .filter(link -> externalLinks.stream().noneMatch(f -> link.getId().equals(f.getId())))
+        .collect(Collectors.toList());
     linked.removeAll(linksToDelete);
     isLinkedByService.deleteAll(linksToDelete);
   }
 
   private void createNewLinks(
-    List<ExternalLinksDto> externalLinks,
-    List<IsLinkedBy> linked,
-    List<ExternalContent> externalContents,
-    Conference conference
+      List<ExternalLinksDto> externalLinks,
+      List<IsLinkedBy> linked,
+      List<ExternalContent> externalContents,
+      Conference conference
   ) {
     externalLinks.forEach(external -> {
-      if(external.getId() == null) {
+      if (external.getId() == null) {
 
         IsLinkedBy link = new IsLinkedBy();
 
@@ -386,9 +372,9 @@ public class ConferenceService {
         link.setConference(conference);
 
         externalContents.stream()
-          .filter(f -> f.getUrl().equals(external.getUrl()))
-          .findFirst()
-          .ifPresent(link::setExternalContent);
+            .filter(f -> f.getUrl().equals(external.getUrl()))
+            .findFirst()
+            .ifPresent(link::setExternalContent);
 
         linked.add(link);
       }
@@ -396,35 +382,35 @@ public class ConferenceService {
   }
 
   private void updateLinks(
-    List<ExternalLinksDto> externalLinks,
-    List<IsLinkedBy> linked,
-    List<ExternalContent> externalContents
+      List<ExternalLinksDto> externalLinks,
+      List<IsLinkedBy> linked,
+      List<ExternalContent> externalContents
   ) {
     externalLinks.forEach(external -> {
 
       Optional<IsLinkedBy> linkOptional = linked.stream().filter(f -> f.getId().equals(external.getId())).findFirst();
 
-      if(linkOptional.isPresent()) {
+      if (linkOptional.isPresent()) {
         IsLinkedBy link = linkOptional.get();
 
         link.setLabel(external.getLabel());
 
         externalContents.stream()
-          .filter(f -> f.getUrl().equals(external.getUrl()))
-          .findFirst()
-          .ifPresent(externalContent -> link.getExternalContent().setUrl(external.getUrl()));
+            .filter(f -> f.getUrl().equals(external.getUrl()))
+            .findFirst()
+            .ifPresent(externalContent -> link.getExternalContent().setUrl(external.getUrl()));
       }
     });
   }
 
   private List<ExternalLinksDto> findNewExternalContent(
-    List<ExternalLinksDto> externalLinks,
-    List<IsLinkedBy> linked
+      List<ExternalLinksDto> externalLinks,
+      List<IsLinkedBy> linked
   ) {
     return externalLinks.stream()
-      .filter(filter -> linked.stream()
-        .noneMatch(external -> external.getExternalContent().getUrl().equals(filter.getUrl()))
-      ).collect(Collectors.toList());
+        .filter(filter -> linked.stream()
+            .noneMatch(external -> external.getExternalContent().getUrl().equals(filter.getUrl()))
+        ).collect(Collectors.toList());
   }
 
   private void removeAllLinkedFromConference(Conference conference) {
@@ -436,9 +422,9 @@ public class ConferenceService {
     Set<String> urls = new HashSet<>();
     linked.forEach(external -> {
       Optional<ExternalContent> externalContentOptional = externalContents.stream()
-        .filter(link -> link.getUrl().equals(external.getUrl())).findFirst();
+          .filter(link -> link.getUrl().equals(external.getUrl())).findFirst();
       ExternalContent externalContent = externalContentOptional.orElseGet(() -> new ExternalContent(external));
-      if(externalContent.getId() == null && urls.add(externalContent.getUrl())) {
+      if (externalContent.getId() == null && urls.add(externalContent.getUrl())) {
         externalContentsToSave.add(externalContent);
       }
     });
@@ -447,23 +433,23 @@ public class ConferenceService {
   }
 
   private void clearAttributes(Conference conference) {
-    if(conference.getId() != null) {
-      if(conference.getPlan() != null && conference.getPlan().getId() != null) {
+    if (conference.getId() != null) {
+      if (conference.getPlan() != null && conference.getPlan().getId() != null) {
         Conference conference1 = find(conference.getId());
         conference1.setPlan(null);
         conferenceRepository.save(conference1);
       }
-      if(conference.getFileAuthentication() != null && conference.getFileAuthentication().getId() != null) {
+      if (conference.getFileAuthentication() != null && conference.getFileAuthentication().getId() != null) {
         Conference conference1 = find(conference.getId());
         conference1.setFileAuthentication(null);
         conferenceRepository.save(conference1);
       }
-      if(conference.getFileParticipation() != null && conference.getFileParticipation().getId() != null) {
+      if (conference.getFileParticipation() != null && conference.getFileParticipation().getId() != null) {
         Conference conference1 = find(conference.getId());
         conference1.setFileParticipation(null);
         conferenceRepository.save(conference1);
       }
-      if(conference.getLocalityType() != null && conference.getLocalityType().getId() != null) {
+      if (conference.getLocalityType() != null && conference.getLocalityType().getId() != null) {
         Conference conference1 = find(conference.getId());
         conference1.setLocalityType(null);
         conferenceRepository.save(conference1);
@@ -472,43 +458,42 @@ public class ConferenceService {
   }
 
   private void loadAttributes(Conference conference) {
-    if(conference.getPlan() != null && conference.getPlan().getId() != null) {
+    if (conference.getPlan() != null && conference.getPlan().getId() != null) {
       conference.setPlan(planService.find(conference.getPlan().getId()));
     }
 
-    if(conference.getFileAuthentication() != null && conference.getFileAuthentication().getId() != null) {
+    if (conference.getFileAuthentication() != null && conference.getFileAuthentication().getId() != null) {
       conference.setFileAuthentication(fileService.find(conference.getFileAuthentication().getId()));
     }
 
-    if(conference.getFileParticipation() != null && conference.getFileParticipation().getId() != null) {
+    if (conference.getFileParticipation() != null && conference.getFileParticipation().getId() != null) {
       conference.setFileParticipation(fileService.find(conference.getFileParticipation().getId()));
     }
-    if(conference.getLocalityType() != null && conference.getLocalityType().getId() != null) {
+    if (conference.getLocalityType() != null && conference.getLocalityType().getId() != null) {
       conference.setLocalityType(localityTypeService.find(conference.getLocalityType().getId()));
     }
   }
 
   private void validateConference(ConferenceParamDto conference) {
-    if(conference.getPlan() == null || conference.getPlan().getId() == null) {
+    if (conference.getPlan() == null || conference.getPlan().getId() == null) {
       throw new IllegalArgumentException("Plan is required");
     }
 
-    if(conference.getFileAuthentication() == null || conference.getFileAuthentication().getId() == null) {
+    if (conference.getFileAuthentication() == null || conference.getFileAuthentication().getId() == null) {
       throw new IllegalArgumentException("Authentication Image is required");
     }
 
-    if(conference.getFileParticipation() == null || conference.getFileParticipation().getId() == null) {
+    if (conference.getFileParticipation() == null || conference.getFileParticipation().getId() == null) {
       throw new IllegalArgumentException("Participation Image is required");
     }
 
     Conference c = conferenceRepository.findByNameIgnoreCase(conference.getName());
-    if(c != null) {
-      if(conference.getId() != null) {
-        if(!conference.getId().equals(c.getId())) {
+    if (c != null) {
+      if (conference.getId() != null) {
+        if (!conference.getId().equals(c.getId())) {
           throw new IllegalArgumentException("This name already exists");
         }
-      }
-      else {
+      } else {
         throw new IllegalArgumentException("This name already exists");
       }
     }
@@ -516,7 +501,7 @@ public class ConferenceService {
 
   public Conference find(Long id) {
     return conferenceRepository.findByIdFull(id)
-      .orElseThrow(() -> new IllegalArgumentException("Conference not found: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Conference not found: " + id));
   }
 
   public void loadOtherAttributes(ConferenceDto conference) {
@@ -525,24 +510,24 @@ public class ConferenceService {
 
     portalServerService.findByIdConference(conference.getId()).ifPresent(p -> {
       conference.setDefaultServerConference(
-        p.getConference() != null && conference.getId().equals(p.getConference().getId()));
+          p.getConference() != null && conference.getId().equals(p.getConference().getId()));
       conference.setServerName(p.getUrl());
     });
 
-    if(conference.getHowItWork() == null || conference.getHowItWork().isEmpty()) {
+    if (conference.getHowItWork() == null || conference.getHowItWork().isEmpty()) {
       List<Topic> topics = topicService.findAllByConference(conference.getId());
       conference.setHowItWork(topics.stream().map(HowItWorkStepDto::new)
-                                .sorted(Comparator.comparing(HowItWorkStepDto::getOrder)).collect(Collectors.toList()));
+          .sorted(Comparator.comparing(HowItWorkStepDto::getOrder)).collect(Collectors.toList()));
     }
 
-    if(conference.getBackgroundImages() == null || conference.getBackgroundImages().isEmpty()) {
+    if (conference.getBackgroundImages() == null || conference.getBackgroundImages().isEmpty()) {
       List<File> files = fileService.findAllBackGroundImageFromConference(conference.getId());
       conference.setBackgroundImages(files.stream().map(FileDto::new).collect(Collectors.toList()));
     }
 
-    if(conference.getResearchConfiguration() == null) {
+    if (conference.getResearchConfiguration() == null) {
       conference.setResearchConfiguration(researchService.findByIdConference(conference.getId())
-                                            .map(ResearchConfigurationDto::new).orElse(null));
+          .map(ResearchConfigurationDto::new).orElse(null));
     }
   }
 
@@ -551,17 +536,18 @@ public class ConferenceService {
     boolean deleteConference = true;
     Conference conference = find(id);
 
-    if(conference.getPlan() != null && conference.getPlan().getId() != null) {
+    if (conference.getPlan() != null && conference.getPlan().getId() != null) {
       List<PlanItem> planItens = planItemService.findAllByIdPlan(conference.getPlan().getId());
-      if(planItens != null && !planItens.isEmpty()) {
-        for(PlanItem item : planItens) {
-          if(item.getAttends() != null) {
+      if (planItens != null && !planItens.isEmpty()) {
+        for (PlanItem item : planItens) {
+          if (item.getAttends() != null) {
             deleteConference = false;
+            break;
           }
         }
       }
     }
-    if(deleteConference) {
+    if (deleteConference) {
       conferenceRepository.delete(conference);
     }
 
@@ -588,9 +574,7 @@ public class ConferenceService {
   }
 
   public List<Conference> findAllWithPresentialMeetings(Date date, Long idPerson) {
-    List<Conference> conferences = new ArrayList<>(conferenceRepository
-                                                     .findAllWithPresentialMeeting(date, idPerson)
-    );
+    List<Conference> conferences = new ArrayList<>(conferenceRepository.findAllWithPresentialMeeting(date, idPerson));
 
     removeUnusableFields(conferences);
 
@@ -598,7 +582,7 @@ public class ConferenceService {
   }
 
   private void removeUnusableFields(List<Conference> conferences) {
-    for(Conference conference : conferences) {
+    for (Conference conference : conferences) {
       conference.setTitleAuthentication(null);
       conference.setSubtitleAuthentication(null);
       conference.setTitleParticipation(null);
@@ -608,22 +592,20 @@ public class ConferenceService {
       conference.setPlan(null);
       conference.setLocalityType(null);
 
-      for(Meeting meeting : conference.getMeeting()) {
+      for (Meeting meeting : conference.getMeeting()) {
         meeting.setReceptionists(null);
       }
     }
   }
 
   public ConferenceRegionalizationDto conferenceContainsRegionalizationStructure(Long idConference) {
-
     Boolean regionalization = this.structureService.conferenceContainsRegionalizationStructure(idConference);
-
     return new ConferenceRegionalizationDto(regionalization);
   }
 
   public void updateAutomaticConference() {
     List<Conference> conferences = conferenceRepository.findAllAutomatic();
-    if(conferences != null) {
+    if (conferences != null) {
       conferences.forEach(this::checkConferenceStatus);
       this.conferenceRepository.saveAll(conferences);
     }
@@ -633,29 +615,26 @@ public class ConferenceService {
     try {
       StatusConferenceType status;
 
-      if(participeUtils.isPreOpening(conference.getBeginDate())) {
+      if (participeUtils.isPreOpening(conference.getBeginDate())) {
         status = StatusConferenceType.PRE_OPENING;
-      }
-      else if(participeUtils.isPosClosure(conference.getEndDate())) {
+      } else if (participeUtils.isPosClosure(conference.getEndDate())) {
         status = StatusConferenceType.POST_CLOSURE;
-      }
-      else {
+      } else {
         status = StatusConferenceType.OPEN;
       }
 
       conference.setStatusType(status);
-    }
-    catch(Exception e) {
+    } catch (Exception e) {
       log.throwing(Conference.class.getName(), "updateAutomaticConference", e);
     }
   }
 
   public String validateDefaultConference(String serverName, Long idConference) {
     Optional<PortalServer> portalOptional = portalServerService.findByUrl(serverName);
-    if(portalOptional.isPresent()) {
+    if (portalOptional.isPresent()) {
       PortalServer portal = portalOptional.get();
-      if(portal.getConference() != null
-         && (idConference == null || !idConference.equals(portal.getConference().getId()))) {
+      if (portal.getConference() != null
+          && (idConference == null || !idConference.equals(portal.getConference().getId()))) {
         return portal.getConference().getName();
       }
     }
@@ -665,13 +644,22 @@ public class ConferenceService {
   public PrePosConferenceDto getPreOpeningScreen(Long id) {
     PrePosConferenceDto response = new PrePosConferenceDto();
     Conference conference = find(id);
-    if(conference.getBeginDate() != null) {
-      LocalDateTime date = conference.getBeginDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-      List<Integer> dateInformattions = Arrays.asList(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth(),
-                                                      date.getHour(), date.getMinute(), date.getSecond()
+
+    if (conference.getBeginDate() != null) {
+      LocalDateTime date = conference.getBeginDate().toInstant().atOffset(ZoneOffset.of("+00:00")).toLocalDateTime();
+
+      List<Integer> dateInformattions = Arrays.asList(
+          date.getYear(),
+          date.getMonthValue() - 1,
+          date.getDayOfMonth(),
+          date.getHour(),
+          date.getMinute(),
+          date.getSecond()
       );
+
       response.setDate(dateInformattions);
     }
+
     response.setText(conference.getPreOpening());
     return response;
   }

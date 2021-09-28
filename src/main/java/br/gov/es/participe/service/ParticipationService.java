@@ -1,15 +1,7 @@
 package br.gov.es.participe.service;
 
 import br.gov.es.participe.controller.dto.*;
-import br.gov.es.participe.model.Comment;
-import br.gov.es.participe.model.Conference;
-import br.gov.es.participe.model.Highlight;
-import br.gov.es.participe.model.Person;
-import br.gov.es.participe.model.Plan;
-import br.gov.es.participe.model.PlanItem;
-import br.gov.es.participe.model.SelfDeclaration;
-import br.gov.es.participe.model.Structure;
-import br.gov.es.participe.model.StructureItem;
+import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.AttendRepository;
 import br.gov.es.participe.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,12 +54,12 @@ public class ParticipationService {
   private PersonService personService;
 
   public BodyParticipationDto body(
-    Long idPlanItem,
-    Long idLocality,
-    Long idConference,
-    Long idPerson,
-    String text,
-    UriComponentsBuilder uriComponentsBuilder
+      Long idPlanItem,
+      Long idLocality,
+      Long idConference,
+      Long idPerson,
+      String text,
+      UriComponentsBuilder uriComponentsBuilder
   ) {
     Conference conference = conferenceService.find(idConference);
     Plan plan;
@@ -76,23 +68,21 @@ public class ParticipationService {
     StructureItem structureItem = null;
     List<PlanItemDto> itens = new ArrayList<>();
 
-    if(idPlanItem == null) {
+    if (idPlanItem == null) {
       plan = planService.findFilesById(conference.getPlan().getId());
       planItems = plan.getItems();
-    }
-    else {
+    } else {
       planI = planItemService.findByIdWithLocalities(idPlanItem);
       planItems = planI.getChildren();
     }
 
-    if(planItems != null) {
+    if (planItems != null) {
       itens.addAll(getListPlanItemDto(planItems, text, idPerson, idConference, idLocality));
-      if(!itens.isEmpty()) {
+      if (!itens.isEmpty()) {
         structureItem = structureItemService.findByIdPlanItem(itens.get(0).getId());
       }
-    }
-    else {
-      if(planI != null) {
+    } else {
+      if (planI != null) {
         structureItem = structureItemService.findChild(planI.getStructureItem().getId());
       }
     }
@@ -105,7 +95,7 @@ public class ParticipationService {
 
     LinkParentDto link = new LinkParentDto();
 
-    if(structureItem != null && structureItem.getLink() != null && planI != null) {
+    if (structureItem != null && structureItem.getLink() != null && planI != null) {
       link.setIdParent(planI.getId());
       link.setTextLink(structureItem.getLink());
       structureItemDto.setLink(null);
@@ -114,7 +104,7 @@ public class ParticipationService {
 
     String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
     itens.forEach(item -> {
-      if(structureItemDto.getLogo() && item.getFile() != null && item.getFile().getId() != null) {
+      if (structureItemDto.getLogo() && item.getFile() != null && item.getFile().getId() != null) {
         item.setImage(url + item.getFile().getId());
         item.setFile(null);
       }
@@ -130,21 +120,20 @@ public class ParticipationService {
   private List<PlanItemDto> getListPlanItemDto(Set<PlanItem> planItems, String text, Long idPerson, Long idConference,
                                                Long idLocality) {
     List<PlanItemDto> itens = new ArrayList<>();
-    if(planItems != null) {
-      if(!planItems.isEmpty() && text != null && !text.isEmpty()) {
+    if (planItems != null) {
+      if (!planItems.isEmpty() && text != null && !text.isEmpty()) {
         planItems = planItems
-          .stream()
-          .filter(planItem -> isMatchingText(planItem, text))
-          .collect(Collectors.toSet());
+            .stream()
+            .filter(planItem -> isMatchingText(planItem, text))
+            .collect(Collectors.toSet());
       }
 
-      for(PlanItem planItem : planItems) {
+      for (PlanItem planItem : planItems) {
         PlanItemDto planItemDto = generatePlanItemDtoFront(planItem, idPerson, idConference, idLocality);
-        if(planItem.getLocalities() == null) {
+        if (planItem.getLocalities() == null) {
           itens.add(planItemDto);
-        }
-        else {
-          if(planItem.getLocalities().stream().anyMatch(l -> l.getId().equals(idLocality))) {
+        } else {
+          if (planItem.getLocalities().stream().anyMatch(l -> l.getId().equals(idLocality))) {
             itens.add(planItemDto);
           }
         }
@@ -154,11 +143,11 @@ public class ParticipationService {
   }
 
   private boolean isMatchingText(PlanItem planItem, String text) {
-    if(isNameOrDescription(planItem, text)) {
+    if (isNameOrDescription(planItem, text)) {
       return true;
     }
     PlanItem planItem1 = planItemService.findByIdWithLocalities(planItem.getId());
-    if(planItem1 != null && planItem1.getChildren() != null && !planItem1.getChildren().isEmpty()) {
+    if (planItem1 != null && planItem1.getChildren() != null && !planItem1.getChildren().isEmpty()) {
       return planItem1.getChildren().stream().anyMatch(pi -> isNameOrDescription(pi, text));
     }
     return false;
@@ -167,15 +156,15 @@ public class ParticipationService {
   private boolean isNameOrDescription(PlanItem planItem, String text) {
     StringUtils stringUtils = new StringUtils();
     return (planItem.getName() != null
-            && !planItem.getName().isEmpty() && stringUtils.compareIfAContainsB(planItem.getName(), text))
-           || (planItem.getDescription() != null && !planItem.getDescription().isEmpty()
-               && stringUtils.compareIfAContainsB(planItem.getDescription(), text));
+        && !planItem.getName().isEmpty() && stringUtils.compareIfAContainsB(planItem.getName(), text))
+        || (planItem.getDescription() != null && !planItem.getDescription().isEmpty()
+        && stringUtils.compareIfAContainsB(planItem.getDescription(), text));
   }
 
   public PlanItemDto generatePlanItemDtoFront(PlanItem planItem, Long idPerson, Long idConference, Long idLocality) {
     PlanItemDto planItemDto = new PlanItemDto(planItem, null, false);
 
-    if(planItemDto.getStructureItem().getId() == null) {
+    if (planItemDto.getStructureItem().getId() == null) {
       planItemDto.setStructureItem(null);
     }
 
@@ -184,21 +173,20 @@ public class ParticipationService {
 
     List<Comment> comments = commentService.find(idPerson, planItem.getId(), idConference, idLocality);
 
-    if(comments != null && !comments.isEmpty()) {
+    if (comments != null && !comments.isEmpty()) {
       List<CommentDto> commentsDto = new ArrayList<>();
       planItemDto.setCommentsMade(comments.size());
       comments.forEach(comment -> commentsDto.add(new CommentDto(comment, true)));
       planItemDto.setComments(commentsDto);
-    }
-    else {
+    } else {
       planItemDto.setCommentsMade(0);
     }
 
     List<Highlight> high = highlightService.findAll(
-      idPerson,
-      planItem.getId(),
-      idConference,
-      idLocality
+        idPerson,
+        planItem.getId(),
+        idConference,
+        idLocality
     );
     planItemDto.setVotes(high != null && !high.isEmpty());
     return planItemDto;
@@ -222,10 +210,10 @@ public class ParticipationService {
   public ConferenceDto getConferenceDto(Long id, UriComponentsBuilder uriComponentsBuilder) {
     Conference conference = conferenceService.find(id);
     ConferenceDto conferenceDto = new ConferenceDto(conference);
-    if(conference.getPlan() != null && conference.getPlan().getId() != null) {
+    if (conference.getPlan() != null && conference.getPlan().getId() != null) {
       Plan plan = planService.find(conference.getPlan().getId());
       PlanDto planDto = new PlanDto(plan, true);
-      if(plan.getStructure() != null && plan.getStructure().getId() != null) {
+      if (plan.getStructure() != null && plan.getStructure().getId() != null) {
         Structure structure = structureService.find(plan.getStructure().getId());
         StructureDto structureDto = new StructureDto(structure, true);
         planDto.setStructure(structureDto);
@@ -234,10 +222,10 @@ public class ParticipationService {
     }
 
     String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
-    if(conferenceDto.getFileAuthentication() != null && conferenceDto.getFileAuthentication().getId() != null) {
+    if (conferenceDto.getFileAuthentication() != null && conferenceDto.getFileAuthentication().getId() != null) {
       conferenceDto.getFileAuthentication().setUrl(url + conferenceDto.getFileAuthentication().getId());
     }
-    if(conferenceDto.getFileParticipation() != null && conferenceDto.getFileParticipation().getId() != null) {
+    if (conferenceDto.getFileParticipation() != null && conferenceDto.getFileParticipation().getId() != null) {
       conferenceDto.getFileParticipation().setUrl(url + conferenceDto.getFileParticipation().getId());
     }
 
@@ -248,9 +236,9 @@ public class ParticipationService {
     ParticipationsDto dto = new ParticipationsDto();
     Plan plan = planService.findByConferenceWithPlanItem(idConference);
     Page<ParticipationDto> participations = attendRepository.findByIdConferenceAndIdPersonAndText(idPerson, idConference, text,
-                                                                                                  pageable
+        pageable
     );
-    for(ParticipationDto participation : participations) {
+    for (ParticipationDto participation : participations) {
       PlanItem planItem = getPlanItemDto(plan.getItems(), participation.getPlanItem().getId());
 
       setPlanItens(participation, planItem);
@@ -272,15 +260,15 @@ public class ParticipationService {
   }
 
   private void setLikedQuantity(ParticipationDto participation) {
-    if(!participation.isHighlight()) {
+    if (!participation.isHighlight()) {
       participation.setQtdLiked(participation.getPersonLiked().size());
     }
   }
 
   private void setLocality(ParticipationDto participation) {
-    if(participation.getLocality() != null) {
+    if (participation.getLocality() != null) {
       participation.setLocalityDto(new LocalityDto(participation.getLocality()));
-      if(participation.getLocalityType() != null) {
+      if (participation.getLocalityType() != null) {
         participation.getLocalityDto().setType(new LocalityTypeDto(participation.getLocalityType()));
         participation.setLocalityType(null);
       }
@@ -289,7 +277,7 @@ public class ParticipationService {
   }
 
   private void setPlanItens(ParticipationDto participation, PlanItem planItem) {
-    if(planItem != null) {
+    if (planItem != null) {
       List<PlanItemDto> itens = new ArrayList<>();
       loadPlanItem(planItem, itens);
       participation.setPlanItems(itens);
@@ -300,7 +288,7 @@ public class ParticipationService {
     PlanItemDto planItemDto = new PlanItemDto(planItem, true);
     planItemDto.setDescription(planItem.getDescription());
 
-    if(planItem.getParent() != null) {
+    if (planItem.getParent() != null) {
       loadPlanItem(planItem.getParent(), itens);
     }
 
@@ -308,13 +296,13 @@ public class ParticipationService {
   }
 
   private PlanItem getPlanItemDto(Set<PlanItem> itens, Long id) {
-    for(PlanItem item : itens) {
-      if(item.getId().equals(id)) {
+    for (PlanItem item : itens) {
+      if (item.getId().equals(id)) {
         return item;
       }
-      if(item.getChildren() != null && !item.getChildren().isEmpty()) {
+      if (item.getChildren() != null && !item.getChildren().isEmpty()) {
         PlanItem planItem = getPlanItemDto(item.getChildren(), id);
-        if(planItem != null) {
+        if (planItem != null) {
           return planItem;
         }
       }
@@ -331,7 +319,7 @@ public class ParticipationService {
   }
 
   private void verifyPersonConsistence(Long idPerson, SelfDeclaration self) {
-    if(self.getPerson() == null) {
+    if (self.getPerson() == null) {
       Person person = personService.find(idPerson);
       self.setPerson(person);
     }

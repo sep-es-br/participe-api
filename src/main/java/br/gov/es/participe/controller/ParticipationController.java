@@ -1,36 +1,18 @@
 package br.gov.es.participe.controller;
 
-import br.gov.es.participe.controller.dto.BodyParticipationDto;
-import br.gov.es.participe.controller.dto.CommentDto;
-import br.gov.es.participe.controller.dto.CommentParamDto;
-import br.gov.es.participe.controller.dto.ConferenceDto;
-import br.gov.es.participe.controller.dto.ParticipationsDto;
-import br.gov.es.participe.controller.dto.PlanItemDto;
-import br.gov.es.participe.controller.dto.PortalHeader;
+import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Highlight;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
-import br.gov.es.participe.service.CommentService;
-import br.gov.es.participe.service.HighlightService;
-import br.gov.es.participe.service.ParticipationService;
-import br.gov.es.participe.service.PlanItemService;
-import br.gov.es.participe.service.TokenService;
+import br.gov.es.participe.service.*;
 import br.gov.es.participe.util.domain.TokenType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -57,7 +39,7 @@ public class ParticipationController {
   public ResponseEntity<ParticipationsDto> getParticipation(@RequestHeader(name = "Authorization") String token,
                                                             @RequestParam(name = "text", required = false, defaultValue = "") String text,
                                                             @PathVariable Long idConference,
-                                                            @RequestParam(name = "pageNumber", required = true) Integer pageNumber,
+                                                            @RequestParam(name = "pageNumber") Integer pageNumber,
                                                             UriComponentsBuilder uriComponentsBuilder) {
     String[] keys = token.split(" ");
     Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
@@ -68,28 +50,30 @@ public class ParticipationController {
 
   @GetMapping("/plan-item/{idConference}")
   public ResponseEntity<BodyParticipationDto> getBody(
-    @RequestHeader(name = "Authorization") String token,
-    @RequestParam(name = "text", required = false, defaultValue = "") String text,
-    @RequestParam(name = "idLocality", required = false) Long idLocality,
-    @RequestParam(name = "idPlanItem", required = false) Long idPlanItem,
-    @PathVariable Long idConference,
-    UriComponentsBuilder uriComponentsBuilder) {
+      @RequestHeader(name = "Authorization") String token,
+      @RequestParam(name = "text", required = false, defaultValue = "") String text,
+      @RequestParam(name = "idLocality", required = false) Long idLocality,
+      @RequestParam(name = "idPlanItem", required = false) Long idPlanItem,
+      @PathVariable Long idConference,
+      UriComponentsBuilder uriComponentsBuilder
+  ) {
     String[] keys = token.split(" ");
     Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
 
-    BodyParticipationDto body = participationService.body(idPlanItem, idLocality, idConference, idPerson, text,
-                                                          uriComponentsBuilder
-    );
-    if(body.getItens() != null) {
+    BodyParticipationDto body = participationService
+        .body(idPlanItem, idLocality, idConference, idPerson, text, uriComponentsBuilder);
+
+    if (body.getItens() != null) {
       body.getItens().sort((i1, i2) -> i1.getName().trim().compareToIgnoreCase(i2.getName().trim()));
     }
+
     return ResponseEntity.status(200).body(body);
   }
 
   @GetMapping("/portal-header/{idConference}")
   public ResponseEntity<PortalHeader> getHeader(@RequestHeader(name = "Authorization") String token
-    , @PathVariable Long idConference
-    , UriComponentsBuilder uriComponentsBuilder) {
+      , @PathVariable Long idConference
+      , UriComponentsBuilder uriComponentsBuilder) {
     String[] keys = token.split(" ");
     Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
     PortalHeader header = participationService.header(idPerson, idConference, uriComponentsBuilder);
@@ -98,10 +82,10 @@ public class ParticipationController {
 
   @PostMapping("/portal-header/{idConference}/selfdeclarations/decline")
   public ResponseEntity<PortalHeader> setSurvey(
-    @RequestHeader(name = "Authorization") String token,
-    @PathVariable Long idConference,
-    @RequestBody Boolean answerSurvey,
-    UriComponentsBuilder uriComponentsBuilder
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long idConference,
+      @RequestBody Boolean answerSurvey,
+      UriComponentsBuilder uriComponentsBuilder
   ) {
     String[] keys = token.split(" ");
     Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
@@ -121,13 +105,12 @@ public class ParticipationController {
     Person person = new Person();
     person.setId(idPerson);
 
-    PlanItemDto response = null;
-    if(commentParamDto.getText() != null) {
+    PlanItemDto response;
+    if (commentParamDto.getText() != null) {
       Comment comment = new Comment(commentParamDto);
       comment.setPersonMadeBy(person);
       commentService.save(comment, null, "rem", true);
-    }
-    else {
+    } else {
       Highlight highlight = new Highlight();
       Comment comment = new Comment(commentParamDto);
       highlight.setLocality(comment.getLocality());
@@ -140,11 +123,12 @@ public class ParticipationController {
     PlanItem planItem = planItemService.find(commentParamDto.getPlanItem());
 
     response = participationService.generatePlanItemDtoFront(
-      planItem,
-      idPerson,
-      commentParamDto.getConference(),
-      commentParamDto.getLocality()
+        planItem,
+        idPerson,
+        commentParamDto.getConference(),
+        commentParamDto.getLocality()
     );
+
     response.setStructureItem(null);
 
     return ResponseEntity.status(200).body(response);

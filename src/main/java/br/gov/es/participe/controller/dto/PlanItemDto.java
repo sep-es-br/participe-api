@@ -33,13 +33,14 @@ public class PlanItemDto implements Comparable<PlanItemDto> {
   }
 
   public PlanItemDto(PlanItem planItem, boolean proposal) {
+    if (planItem == null) return;
+
     this.id = planItem.getId();
     this.name = planItem.getName();
 
-    if(!proposal) {
+    if (!proposal) {
       this.description = planItem.getDescription();
-    }
-    else {
+    } else {
       this.structureItemName = planItem.getStructureItem().getName();
     }
   }
@@ -50,7 +51,7 @@ public class PlanItemDto implements Comparable<PlanItemDto> {
   }
 
   public PlanItemDto(PlanItem planItem, Plan parentPlan, boolean loadChildren) {
-    if(planItem == null) return;
+    if (planItem == null) return;
 
     Structure structure = parentPlan != null ? parentPlan.getStructure() : null;
 
@@ -60,26 +61,26 @@ public class PlanItemDto implements Comparable<PlanItemDto> {
     this.structureItem = new StructureItemDto(planItem.getStructureItem(), structure, false, false);
     this.plan = parentPlan != null ? new PlanDto(parentPlan, false) : null;
 
-    if(planItem.getFile() != null) {
+    if (planItem.getFile() != null) {
       this.file = new FileDto(planItem.getFile());
     }
 
     Domain domain = this.plan != null && this.plan.getDomain() != null ? new Domain(this.plan.getDomain()) : null;
-    if(planItem.getLocalities() != null && !planItem.getLocalities().isEmpty()) {
+    if (planItem.getLocalities() != null && !planItem.getLocalities().isEmpty()) {
       this.localities = new ArrayList<>();
       planItem.getLocalities()
-        .forEach(locality -> this.localities.add(new LocalityDto(locality, domain, false, true)));
+          .forEach(locality -> this.localities.add(new LocalityDto(locality, domain, false, true)));
     }
 
-    if(planItem.getParent() != null) {
+    if (planItem.getParent() != null) {
       this.parent = new PlanItemDto(planItem.getParent(), parentPlan, false);
     }
 
-    if(loadChildren && planItem.getChildren() != null && !planItem.getChildren().isEmpty()) {
+    if (loadChildren && planItem.getChildren() != null && !planItem.getChildren().isEmpty()) {
       this.children = new ArrayList<>();
       planItem.getChildren().forEach(child -> {
         PlanItemDto childPlanItem = new PlanItemDto(child, null, true);
-        if(childPlanItem.getId() != null) {
+        if (childPlanItem.getId() != null) {
           this.children.add(childPlanItem);
         }
       });
@@ -222,30 +223,25 @@ public class PlanItemDto implements Comparable<PlanItemDto> {
 
   @Override
   public boolean equals(Object obj) {
-    if(this == obj) {
+    if (this == obj) {
       return true;
     }
-    if(!(obj instanceof PlanItemDto)) {
+    if (!(obj instanceof PlanItemDto)) {
       return false;
     }
     PlanItemDto other = (PlanItemDto) obj;
-    if(id == null) {
-      if(other.id != null) {
+    if (id == null) {
+      if (other.id != null) {
         return false;
       }
-    }
-    else if(!id.equals(other.id)) {
+    } else if (!id.equals(other.id)) {
       return false;
     }
-    if(name == null) {
-      if(other.name != null) {
-        return false;
-      }
+    if (name == null) {
+      return other.name == null;
+    } else {
+      return name.equals(other.name);
     }
-    else if(!name.equals(other.name)) {
-      return false;
-    }
-    return true;
   }
 
   @Override

@@ -32,7 +32,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/signin")
-public class SigninController {
+public class SignInController {
 
   @Autowired
   private AcessoCidadaoService acessoCidadaoService;
@@ -133,8 +133,10 @@ public class SigninController {
     HttpServletRequest request,
     HttpServletResponse response
   ) {
-    String accessToken = facebookService.facebookProfileAccessToken(
-      authorizationCode
+    String accessToken = facebookService.facebookAccessToken(
+      authorizationCode,
+      request,
+      "/signin/facebook-profile"
     );
     RedirectView redirectView = new RedirectView(
       "facebook-profile-response?access_token=" + accessToken);
@@ -187,8 +189,11 @@ public class SigninController {
     @RequestParam("code") String authorizationCode,
     HttpServletRequest request
   ) {
-    String accessToken = googleService.googleProfileAccessToken(
-      authorizationCode);
+    String accessToken = googleService.googleAccessToken(
+      authorizationCode,
+      request,
+      "/signin/google-profile"
+    );
     return new RedirectView("google-profile-response?access_token=" + accessToken);
   }
 

@@ -1,7 +1,7 @@
 package br.gov.es.participe;
 
 import br.gov.es.participe.controller.CitizenController;
-import br.gov.es.participe.controller.SigninController;
+import br.gov.es.participe.controller.SignInController;
 import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
@@ -63,7 +63,7 @@ class CitizenServiceTest extends BaseTest {
     private PlanRepository planRepository;
 
     @Autowired
-    private SigninController signinController;
+    private SignInController signinController;
 
     @TestConfiguration
     static class Config {

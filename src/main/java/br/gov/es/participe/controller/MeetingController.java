@@ -1,12 +1,6 @@
 package br.gov.es.participe.controller;
 
-import br.gov.es.participe.controller.dto.CheckInParamDto;
-import br.gov.es.participe.controller.dto.CheckedInAtDto;
-import br.gov.es.participe.controller.dto.MeetingDto;
-import br.gov.es.participe.controller.dto.MeetingParamDto;
-import br.gov.es.participe.controller.dto.PersonDto;
-import br.gov.es.participe.controller.dto.PersonMeetingDto;
-import br.gov.es.participe.controller.dto.PlanItemComboDto;
+import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.CheckedInAt;
 import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
@@ -39,25 +33,25 @@ public class MeetingController {
 
   @GetMapping("/{idConference}/page-number")
   public ResponseEntity<Object> findPageNumberByConference(
-    @ApiIgnore Pageable pageable,
-    @PathVariable("idConference") Long idConference,
-    @RequestParam(value = "currentDate")  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date currentDate,
-    @RequestParam(value = "name", required = false) String name,
-    @RequestParam(value = "beginDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date beginDate,
-    @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date endDate,
-    @RequestParam(value = "localities", required = false) List<Long> localities
+      @ApiIgnore Pageable pageable,
+      @PathVariable("idConference") Long idConference,
+      @RequestParam(value = "currentDate") @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date currentDate,
+      @RequestParam(value = "name", required = false) String name,
+      @RequestParam(value = "beginDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date beginDate,
+      @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date endDate,
+      @RequestParam(value = "localities", required = false) List<Long> localities
   ) {
     Integer pageNumber = meetingService.findNumberPageMeeting(
-      currentDate,
-      idConference,
-      name,
-      beginDate,
-      endDate,
-      localities,
-      pageable
+        currentDate,
+        idConference,
+        name,
+        beginDate,
+        endDate,
+        localities,
+        pageable
     );
 
-    return ResponseEntity.status(200).body(new Object(){
+    return ResponseEntity.status(200).body(new Object() {
       final Integer page = pageNumber;
 
       public Integer getPage() {
@@ -69,21 +63,21 @@ public class MeetingController {
   @ApiPageable
   @GetMapping("/{idConference}")
   public ResponseEntity<Page<MeetingDto>> index(
-    @ApiIgnore Pageable pageable,
-    @PathVariable("idConference") Long idConference,
-    @RequestParam(value = "name", required = false) String name,
-    @RequestParam(value = "beginDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date beginDate,
-    @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date endDate,
-    @RequestParam(value = "localities", required = false) List<Long> localities
+      @ApiIgnore Pageable pageable,
+      @PathVariable("idConference") Long idConference,
+      @RequestParam(value = "name", required = false) String name,
+      @RequestParam(value = "beginDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date beginDate,
+      @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date endDate,
+      @RequestParam(value = "localities", required = false) List<Long> localities
   ) {
 
     Page<MeetingDto> meetings = meetingService.findAll(
-      idConference,
-      name,
-      beginDate,
-      endDate,
-      localities,
-      pageable
+        idConference,
+        name,
+        beginDate,
+        endDate,
+        localities,
+        pageable
     );
 
     return ResponseEntity.status(200).body(meetings);
@@ -113,7 +107,7 @@ public class MeetingController {
     Meeting meeting = new Meeting(meetingParamDto, false);
     Meeting saveMeeting = meetingService.save(meeting, meetingParamDto);
 
-    if(saveMeeting != null) {
+    if (saveMeeting != null) {
       MeetingDto response = new MeetingDto(saveMeeting, false);
       return ResponseEntity.status(200).body(response);
     }
@@ -124,12 +118,11 @@ public class MeetingController {
   public ResponseEntity<MeetingDto> update(@PathVariable Long id, @RequestBody MeetingParamDto meetingParamDto) {
     Meeting meeting = meetingService.findWithoutConference(id);
 
-    if(meeting != null) {
+    if (meeting != null) {
       Meeting meetingUpdated = meetingService.update(meeting, meetingParamDto);
       MeetingDto response = new MeetingDto(meetingUpdated, false);
       return ResponseEntity.ok().body(response);
-    }
-    else {
+    } else {
       return ResponseEntity.noContent().build();
     }
   }
@@ -142,18 +135,23 @@ public class MeetingController {
 
   @PostMapping("/checkIn")
   public ResponseEntity<CheckedInAtDto> checkInOnMeeting(@RequestBody CheckInParamDto checkInParamDto) {
-    if(checkInParamDto == null || checkInParamDto.getPersonId() == null
-       || checkInParamDto.getMeetingId() == null) {
+    if (checkInParamDto == null ||
+        checkInParamDto.getPersonId() == null ||
+        checkInParamDto.getMeetingId() == null
+    ) {
       throw new IllegalArgumentException("An object with Person Id and Meeting Id parameters must be informed.");
     }
-    CheckedInAt checkedInAt = meetingService.checkInOnMeeting(checkInParamDto.getPersonId(),
-                                                              checkInParamDto.getMeetingId(),
-                                                              checkInParamDto.getTimeZone()
+
+    CheckedInAt checkedInAt = meetingService.checkInOnMeeting(
+        checkInParamDto.getPersonId(),
+        checkInParamDto.getMeetingId(),
+        checkInParamDto.getTimeZone()
     );
-    if(checkedInAt != null) {
-      CheckedInAtDto checkedInAtDto = new CheckedInAtDto(checkedInAt);
-      return ResponseEntity.ok().body(checkedInAtDto);
+
+    if (checkedInAt != null) {
+      return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
     }
+
     return ResponseEntity.noContent().build();
   }
 
@@ -169,7 +167,7 @@ public class MeetingController {
                                                                         @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
                                                                         @RequestParam(name = "name", required = false) String name, @ApiIgnore Pageable page) {
     Page<PersonMeetingDto> personMeetingDto = personService.findPersonsCheckedInOnMeeting(meetingId, localities,
-                                                                                          name, page
+        name, page
     );
     return ResponseEntity.ok().body(personMeetingDto);
   }
@@ -189,9 +187,11 @@ public class MeetingController {
 
   @ApiPageable
   @GetMapping("/{meetingId}/persons")
-  public ResponseEntity<Page<PersonMeetingDto>> findPersonForMeeting(@PathVariable Long meetingId,
-                                                                     @RequestParam(name = "name", required = false, defaultValue = "") String name, Pageable pageable) {
-
+  public ResponseEntity<Page<PersonMeetingDto>> findPersonForMeeting(
+      @PathVariable Long meetingId,
+      @RequestParam(name = "name", required = false, defaultValue = "") String name,
+      Pageable pageable
+  ) {
     Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable);
     return ResponseEntity.status(200).body(personMeetingDtoPage);
   }
@@ -201,7 +201,7 @@ public class MeetingController {
     Optional<Person> personOpt = personService.findByContactEmail(email);
 
     return personOpt.map(
-      person -> ResponseEntity.status(200).body(new PersonDto(person))
+        person -> ResponseEntity.status(200).body(new PersonDto(person))
     ).orElseGet(() -> ResponseEntity.noContent().build());
   }
 }

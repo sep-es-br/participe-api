@@ -1,5 +1,16 @@
 package br.gov.es.participe.service;
 
+import br.gov.es.participe.controller.dto.LocalityTypeDto;
+import br.gov.es.participe.controller.dto.controlPanel.ControlPanelChartDto;
+import br.gov.es.participe.controller.dto.controlPanel.ControlPanelDto;
+import br.gov.es.participe.controller.dto.controlPanel.HeatMapChartDto;
+import br.gov.es.participe.controller.dto.controlPanel.MicroregionChartQueryDto;
+import br.gov.es.participe.enumerator.ResultTypeControlPanelEnum;
+import br.gov.es.participe.repository.AttendRepository;
+import br.gov.es.participe.repository.ControlPanelRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,350 +18,404 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import br.gov.es.participe.controller.dto.controlPanel.ControlPanelDto;
-import br.gov.es.participe.controller.dto.controlPanel.HeatMapChartDto;
-import br.gov.es.participe.controller.dto.LocalityTypeDto;
-import br.gov.es.participe.controller.dto.controlPanel.ControlPanelChartDto;
-import br.gov.es.participe.controller.dto.controlPanel.MicroregionChartQueryDto;
-import br.gov.es.participe.enumerator.ResultTypeControlPanelEnum;
-import br.gov.es.participe.repository.AttendRepository;
-import br.gov.es.participe.repository.ControlPanelRepository;
-
 @Service
 public class ControlPanelService {
 
-    @Autowired
-    private ControlPanelRepository repository;
+  private final ControlPanelRepository repository;
 
-    @Autowired
-    private CommentService commentService;
+  private final HighlightService highlightService;
 
-    @Autowired
-    private HighlightService highlightService;
+  private final AttendRepository attendRepository;
 
-    @Autowired
-    private AttendRepository attendRepository;
+  private final LocalityTypeService localityTypeService;
 
-    @Autowired
-    private LocalityService localityService;
+  @Autowired
+  public ControlPanelService(
+      ControlPanelRepository repository,
+      HighlightService highlightService,
+      AttendRepository attendRepository,
+      LocalityTypeService localityTypeService
+  ) {
+    this.repository = repository;
+    this.highlightService = highlightService;
+    this.attendRepository = attendRepository;
+    this.localityTypeService = localityTypeService;
+  }
 
-    @Autowired
-    private LocalityTypeService localityTypeService;
+  public ControlPanelDto getInformationsDashboard(
+      Long idConference,
+      ResultTypeControlPanelEnum result,
+      String origin,
+      List<Long> meetings,
+      Long microregionChartAgroup,
+      Long microregionLocalitySelected,
+      Long structureItemSelected,
+      Long structureItemPlanSelected,
+      Boolean stLastLevelLocality,
+      Boolean stLastLevelPlanItem
+  ) {
+    ControlPanelDto dto = new ControlPanelDto();
+    origin = returnOriginConverted(origin);
 
-    public ControlPanelDto getInformationsDashboard(Long idConference, ResultTypeControlPanelEnum result, String origin,
-            List<Long> meetings, Long microregionChartAgroup, Long microregionLocalitySelected,
-            Long structureItemSelected, Long structureItemPlanSelected, Boolean stLastLevelLocality,
-            Boolean stLastLevelPlanItem) {
-        ControlPanelDto dto = new ControlPanelDto();
-        dto.setParticipants(attendRepository.countParticipationByConference(idConference));
-        dto.setCounties(localityService.countLocalitiesParticipation(idConference));
-        dto.setHighlights(highlightService.countHighlightByConference(idConference));
-        dto.setProposals(commentService.countCommentByConference(idConference));
+    dto.setParticipants(attendRepository.countParticipationByConferenceAndType(idConference, origin, meetings));
+    dto.setProposals(attendRepository.countCommentByConferenceAndType(idConference, origin, meetings));
+    dto.setCounties(attendRepository.countLocalityByConferenceAndType(idConference, origin, meetings));
+    dto.setHighlights(highlightService.countHighlightByConference(idConference));
 
-        origin = returnOriginConverted(origin);
+    List<MicroregionChartQueryDto> microregionChartQuery = returnData(
+        idConference,
+        result,
+        microregionChartAgroup,
+        microregionLocalitySelected,
+        structureItemSelected,
+        structureItemPlanSelected,
+        stLastLevelLocality,
+        origin,
+        meetings,
+        stLastLevelPlanItem
+    );
 
-        List<MicroregionChartQueryDto> microregionChartQuery = returnData(idConference, result, microregionChartAgroup,
-                microregionLocalitySelected, structureItemSelected, structureItemPlanSelected, stLastLevelLocality,
-                origin, meetings, stLastLevelPlanItem);
+    dto.setMicroregionChart(returnMicroregionChartDto(result, microregionChartQuery));
 
-        dto.setMicroregionChart(returnMicroregionChartDto(result, microregionChartQuery));
-        dto.setStrategicAreaChart(returnPlanItensChartDto(result, microregionChartQuery, idConference,
-                microregionChartAgroup, microregionLocalitySelected, structureItemSelected, structureItemPlanSelected,
-                stLastLevelLocality, origin, meetings, stLastLevelPlanItem));
-        dto.setHeatMapChart(returnHeatMapDto(result, microregionChartQuery));
-        return dto;
+    dto.setStrategicAreaChart(
+        returnPlanItensChartDto(
+            result,
+            microregionChartQuery,
+            idConference,
+            microregionChartAgroup,
+            microregionLocalitySelected,
+            structureItemSelected,
+            structureItemPlanSelected,
+            stLastLevelLocality,
+            origin,
+            meetings,
+            stLastLevelPlanItem
+        )
+    );
+
+    dto.setHeatMapChart(returnHeatMapDto(result, microregionChartQuery));
+    return dto;
+  }
+
+  private String returnOriginConverted(String origin) {
+    if (origin == null || origin.isEmpty()) {
+      return origin;
     }
 
-    private String returnOriginConverted(String origin) {
-        if (origin == null || origin.isEmpty())
-            return origin;
-
-        if (origin.equals("PRESENTIAL"))
-            return "pre";
-
-        if (origin.equals("REMOTE"))
-            return "com";
-
-        throw new IllegalArgumentException("Invalid origin.");
+    if (origin.equals("PRESENTIAL")) {
+      return "pre";
     }
 
-    public List<LocalityTypeDto> getAllTypeLocality(Long idDomain, Long idTypeLocality) {
-        List<LocalityTypeDto> dto = repository.findDataTypeLocality(idDomain, idTypeLocality);
-        Collections.reverse(dto);
-        dto.add(new LocalityTypeDto(localityTypeService.find(idTypeLocality)));
-        return dto;
+    if (origin.equals("REMOTE")) {
+      return "com";
     }
 
-    private List<ControlPanelChartDto> returnMicroregionChartDto(ResultTypeControlPanelEnum result,
-            List<MicroregionChartQueryDto> microregionChartQuery) {
+    throw new IllegalArgumentException("Invalid origin.");
+  }
 
-        List<ControlPanelChartDto> microregionChartDto = new ArrayList<>();
+  public List<LocalityTypeDto> getAllTypeLocality(Long idDomain, Long idTypeLocality) {
+    List<LocalityTypeDto> dto = repository.findDataTypeLocality(idDomain, idTypeLocality);
+    Collections.reverse(dto);
+    dto.add(new LocalityTypeDto(localityTypeService.find(idTypeLocality)));
+    return dto;
+  }
 
-        if (ResultTypeControlPanelEnum.HIGHLIGHTS.equals(result)) {
-            Map<Long, Long> likesPerType = microregionChartQuery.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityHighlight)));
+  private List<ControlPanelChartDto> returnMicroregionChartDto(ResultTypeControlPanelEnum result,
+                                                               List<MicroregionChartQueryDto> microregionChartQuery) {
 
-            for (Long chave : likesPerType.keySet()) {
-                ControlPanelChartDto microDto = new ControlPanelChartDto();
-                String nameRegion = microregionChartQuery.stream().filter(filter -> filter.getId().equals(chave))
-                        .map(map -> map.getName()).findFirst().orElse("Without Name");
-                microDto.setId(chave);
-                microDto.setDescription(nameRegion);
-                microDto.setQuantity(likesPerType.get(chave).longValue());
-                microregionChartDto.add(microDto);
-            }
-        }
+    List<ControlPanelChartDto> microregionChartDto = new ArrayList<>();
 
-        if (ResultTypeControlPanelEnum.PROPOSALS.equals(result)) {
-            Map<Long, Long> likesPerType = microregionChartQuery.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityComment)));
+    if (ResultTypeControlPanelEnum.HIGHLIGHTS.equals(result)) {
+      Map<Long, Long> likesPerType = microregionChartQuery.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityHighlight)));
 
-            for (Long chave : likesPerType.keySet()) {
-                ControlPanelChartDto microDto = new ControlPanelChartDto();
-                String nameRegion = microregionChartQuery.stream().filter(filter -> filter.getId().equals(chave))
-                        .map(map -> map.getName()).findFirst().orElse("Without Name");
-                microDto.setId(chave);
-                microDto.setDescription(nameRegion);
-                microDto.setQuantity(likesPerType.get(chave).longValue());
-                microregionChartDto.add(microDto);
-            }
-        }
-
-        if (ResultTypeControlPanelEnum.PARTICIPANTS.equals(result)) {
-            Map<Long, Long> likesPerType = microregionChartQuery.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityParticipation)));
-
-            for (Long chave : likesPerType.keySet()) {
-                ControlPanelChartDto microDto = new ControlPanelChartDto();
-                String nameRegion = microregionChartQuery.stream().filter(filter -> filter.getId().equals(chave))
-                        .map(map -> map.getName()).findFirst().orElse("Without Name");
-                microDto.setId(chave);
-                microDto.setDescription(nameRegion);
-                microDto.setQuantity(likesPerType.get(chave).longValue());
-                microregionChartDto.add(microDto);
-            }
-        }
-        return microregionChartDto;
-
+      for (Long chave : likesPerType.keySet()) {
+        ControlPanelChartDto microDto = new ControlPanelChartDto();
+        String nameRegion = microregionChartQuery.stream().filter(filter -> filter.getId().equals(chave))
+            .map(MicroregionChartQueryDto::getName).findFirst().orElse("Without Name");
+        microDto.setId(chave);
+        microDto.setDescription(nameRegion);
+        microDto.setQuantity(likesPerType.get(chave));
+        microregionChartDto.add(microDto);
+      }
     }
 
-    private List<HeatMapChartDto> returnHeatMapDto(ResultTypeControlPanelEnum result,
-            List<MicroregionChartQueryDto> microregionChartQuery) {
+    if (ResultTypeControlPanelEnum.PROPOSALS.equals(result)) {
+      Map<Long, Long> likesPerType = microregionChartQuery.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityComment)));
 
-        List<HeatMapChartDto> microregionChartDto = new ArrayList<>();
-
-        if (ResultTypeControlPanelEnum.HIGHLIGHTS.equals(result)) {
-            Map<Long, Long> likesPerType = microregionChartQuery.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityHighlight)));
-
-            for (Long chave : likesPerType.keySet()) {
-                MicroregionChartQueryDto dto = microregionChartQuery.stream()
-                        .filter(filter -> filter.getId().equals(chave)).findFirst().orElse(null);
-                if (dto == null)
-                    continue;
-                HeatMapChartDto heatMapChartDto = buildHeatMapChartDto(dto, chave, likesPerType.get(chave).longValue());
-                if (heatMapChartDto == null)
-                    continue;
-                microregionChartDto.add(heatMapChartDto);
-            }
-        }
-
-        if (ResultTypeControlPanelEnum.PROPOSALS.equals(result)) {
-            Map<Long, Long> likesPerType = microregionChartQuery.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityComment)));
-
-            for (Long chave : likesPerType.keySet()) {
-                MicroregionChartQueryDto dto = microregionChartQuery.stream()
-                        .filter(filter -> filter.getId().equals(chave)).findFirst().orElse(null);
-                if (dto == null)
-                    continue;
-
-                HeatMapChartDto heatMapChartDto = buildHeatMapChartDto(dto, chave, likesPerType.get(chave).longValue());
-                if (heatMapChartDto == null)
-                    continue;
-                microregionChartDto.add(heatMapChartDto);
-            }
-        }
-
-        if (ResultTypeControlPanelEnum.PARTICIPANTS.equals(result)) {
-            Map<Long, Long> likesPerType = microregionChartQuery.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityParticipation)));
-
-            for (Long chave : likesPerType.keySet()) {
-                MicroregionChartQueryDto dto = microregionChartQuery.stream()
-                        .filter(filter -> filter.getId().equals(chave)).findFirst().orElse(null);
-                if (dto == null)
-                    continue;
-                HeatMapChartDto heatMapChartDto = buildHeatMapChartDto(dto, chave, likesPerType.get(chave).longValue());
-                if (heatMapChartDto == null)
-                    continue;
-                microregionChartDto.add(heatMapChartDto);
-            }
-        }
-        return microregionChartDto;
+      for (Long chave : likesPerType.keySet()) {
+        ControlPanelChartDto microDto = new ControlPanelChartDto();
+        String nameRegion = microregionChartQuery.stream().filter(filter -> filter.getId().equals(chave))
+            .map(MicroregionChartQueryDto::getName).findFirst().orElse("Without Name");
+        microDto.setId(chave);
+        microDto.setDescription(nameRegion);
+        microDto.setQuantity(likesPerType.get(chave));
+        microregionChartDto.add(microDto);
+      }
     }
 
-    private HeatMapChartDto buildHeatMapChartDto(MicroregionChartQueryDto dto, Long chave, Long count) {
-        String latitudeLongitude[] = (dto.getLatitudeLongitude() == null || dto.getLatitudeLongitude().isEmpty())
-                ? new String[0]
-                : dto.getLatitudeLongitude().split(",");
-        if (latitudeLongitude.length <= 0)
-            return null;
+    if (ResultTypeControlPanelEnum.PARTICIPANTS.equals(result)) {
+      Map<Long, Long> likesPerType = microregionChartQuery.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityParticipation)));
 
-        String latitude;
-        String longitude;
+      for (Long chave : likesPerType.keySet()) {
+        ControlPanelChartDto microDto = new ControlPanelChartDto();
+        String nameRegion = microregionChartQuery.stream().filter(filter -> filter.getId().equals(chave))
+            .map(MicroregionChartQueryDto::getName).findFirst().orElse("Without Name");
+        microDto.setId(chave);
+        microDto.setDescription(nameRegion);
+        microDto.setQuantity(likesPerType.get(chave));
+        microregionChartDto.add(microDto);
+      }
+    }
+    return microregionChartDto;
 
-        BigDecimal latitudeConvertido = BigDecimal.ZERO;
-        BigDecimal longitudeConvertido = BigDecimal.ZERO;
+  }
 
-        latitude = (latitudeLongitude.length == 2) ? latitudeLongitude[0] : "0";
-        longitude = (latitudeLongitude.length == 2) ? latitudeLongitude[1] : "0";
+  private List<HeatMapChartDto> returnHeatMapDto(ResultTypeControlPanelEnum result,
+                                                 List<MicroregionChartQueryDto> microregionChartQuery) {
 
-        latitudeConvertido = new BigDecimal(latitude.trim());
-        longitudeConvertido = new BigDecimal(longitude.trim());
+    List<HeatMapChartDto> microregionChartDto = new ArrayList<>();
 
-        return new HeatMapChartDto(latitudeConvertido, longitudeConvertido, count);
+    if (ResultTypeControlPanelEnum.HIGHLIGHTS.equals(result)) {
+      Map<Long, Long> likesPerType = microregionChartQuery.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityHighlight)));
+
+      for (Long chave : likesPerType.keySet()) {
+        MicroregionChartQueryDto dto = microregionChartQuery.stream()
+            .filter(filter -> filter.getId().equals(chave)).findFirst().orElse(null);
+        if (dto == null) {
+          continue;
+        }
+        HeatMapChartDto heatMapChartDto = buildHeatMapChartDto(dto, chave, likesPerType.get(chave));
+        if (heatMapChartDto == null) {
+          continue;
+        }
+        microregionChartDto.add(heatMapChartDto);
+      }
     }
 
-    private List<ControlPanelChartDto> returnPlanItensChartDto(ResultTypeControlPanelEnum result,
-            List<MicroregionChartQueryDto> microregionChartQuery, Long idConference, Long microregionChartAgroup,
-            Long microregionLocalitySelected, Long structureItemSelected, Long structureItemPlanSelected,
-            Boolean stLastLevelLocality, String origin, List<Long> meetings, Boolean stLastLevelPlanItem) {
+    if (ResultTypeControlPanelEnum.PROPOSALS.equals(result)) {
+      Map<Long, Long> likesPerType = microregionChartQuery.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityComment)));
 
-        List<ControlPanelChartDto> microregionChartDto = new ArrayList<>();
-
-        if (ResultTypeControlPanelEnum.HIGHLIGHTS.equals(result)) {
-            Map<Long, Long> likesPerType = microregionChartQuery.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getIdPlanItem,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityHighlight)));
-
-            for (Long chave : likesPerType.keySet()) {
-                ControlPanelChartDto microDto = new ControlPanelChartDto();
-                String name = microregionChartQuery.stream().filter(filter -> filter.getIdPlanItem().equals(chave))
-                        .map(map -> map.getPlanItemName()).findFirst().orElse("Without Name");
-                microDto.setId(chave);
-                microDto.setDescription(name);
-                microDto.setQuantity(likesPerType.get(chave).longValue());
-                microregionChartDto.add(microDto);
-            }
+      for (Long chave : likesPerType.keySet()) {
+        MicroregionChartQueryDto dto = microregionChartQuery.stream()
+            .filter(filter -> filter.getId().equals(chave)).findFirst().orElse(null);
+        if (dto == null) {
+          continue;
         }
 
-        if (ResultTypeControlPanelEnum.PROPOSALS.equals(result)) {
-            Map<Long, Long> likesPerType = microregionChartQuery.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getIdPlanItem,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityComment)));
-
-            for (Long chave : likesPerType.keySet()) {
-                ControlPanelChartDto microDto = new ControlPanelChartDto();
-                String name = microregionChartQuery.stream().filter(filter -> filter.getIdPlanItem().equals(chave))
-                        .map(map -> map.getPlanItemName()).findFirst().orElse("Without Name");
-                microDto.setId(chave);
-                microDto.setDescription(name);
-                microDto.setQuantity(likesPerType.get(chave).longValue());
-                microregionChartDto.add(microDto);
-            }
+        HeatMapChartDto heatMapChartDto = buildHeatMapChartDto(dto, chave, likesPerType.get(chave));
+        if (heatMapChartDto == null) {
+          continue;
         }
-
-        if (ResultTypeControlPanelEnum.PARTICIPANTS.equals(result)) {
-            List<MicroregionChartQueryDto> microregionChartQueryParticipant = new ArrayList<>();
-
-            microregionChartQueryParticipant = returnData(idConference, ResultTypeControlPanelEnum.HIGHLIGHTS,
-                    microregionChartAgroup, microregionLocalitySelected, structureItemSelected,
-                    structureItemPlanSelected, stLastLevelLocality, origin, meetings, stLastLevelPlanItem);
-
-            Map<Long, Long> highlights = microregionChartQueryParticipant.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getIdPlanItem,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityComment)));
-
-            Map<Long, Long> comments = microregionChartQueryParticipant.stream()
-                    .collect(Collectors.groupingBy(MicroregionChartQueryDto::getIdPlanItem,
-                            Collectors.summingLong(MicroregionChartQueryDto::getQuantityHighlight)));
-
-            for (Long chave : highlights.keySet()) {
-                ControlPanelChartDto microDto = new ControlPanelChartDto();
-                String name = microregionChartQueryParticipant.stream()
-                        .filter(filter -> filter.getIdPlanItem().equals(chave)).map(map -> map.getPlanItemName())
-                        .findFirst().orElse("Without Name");
-                Long commentQuantity = comments.get(chave).longValue();
-                Long highlightQuantity = highlights.get(chave).longValue();
-                microDto.setId(chave);
-                microDto.setDescription(name);
-                microDto.setQuantity((commentQuantity + highlightQuantity));
-                microregionChartDto.add(microDto);
-            }
-        }
-        return microregionChartDto;
+        microregionChartDto.add(heatMapChartDto);
+      }
     }
 
-    private List<MicroregionChartQueryDto> returnData(Long idConference, ResultTypeControlPanelEnum result,
-            Long microregionChartAgroup, Long microregionLocalitySelected, Long structureItemSelected,
-            Long structureItemPlanSelected, Boolean stLastLevelLocality, String origin, List<Long> meetings,
-            Boolean stLastLevelPlanItem) {
+    if (ResultTypeControlPanelEnum.PARTICIPANTS.equals(result)) {
+      Map<Long, Long> likesPerType = microregionChartQuery.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getId,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityParticipation)));
 
-        List<MicroregionChartQueryDto> resultadoQuery = returnDataByCenario(idConference, result,
-                microregionChartAgroup, microregionLocalitySelected, structureItemSelected, structureItemPlanSelected,
-                stLastLevelLocality, origin, meetings, stLastLevelPlanItem);
-
-        resultadoQuery.forEach(row -> {
-            if (row.getQuantityComment() == null)
-                row.setQuantityComment(0L);
-            if (row.getQuantityParticipation() == null)
-                row.setQuantityParticipation(0L);
-            if (row.getQuantityHighlight() == null)
-                row.setQuantityHighlight(0L);
-        });
-
-        return resultadoQuery;
-    }
-
-    private List<MicroregionChartQueryDto> returnDataByCenario(Long idConference, ResultTypeControlPanelEnum result,
-            Long microregionChartAgroup, Long microregionLocalitySelected, Long structureItemSelected,
-            Long structureItemPlanSelected, Boolean stLastLevelLocality, String origin, List<Long> meetings,
-            Boolean stLastLevelPlanItem) {
-        if (ResultTypeControlPanelEnum.PARTICIPANTS.equals(result)) {
-            if (microregionLocalitySelected == null)
-                return repository.findDataMicroregionMapDashboardFromIdConferenceParticipationAgroup(idConference,
-                        microregionChartAgroup, meetings);
-
-            return repository.findDataMicroregionMapDashboardFromIdConferenceParticipation(idConference,
-                    microregionLocalitySelected, meetings);
+      for (Long chave : likesPerType.keySet()) {
+        MicroregionChartQueryDto dto = microregionChartQuery.stream()
+            .filter(filter -> filter.getId().equals(chave)).findFirst().orElse(null);
+        if (dto == null) {
+          continue;
         }
-
-        if (microregionLocalitySelected == null && structureItemPlanSelected == null)
-            return repository.findDataCommentHighlightWitoutFilter(idConference, microregionChartAgroup,
-                    structureItemSelected, origin, meetings);
-
-        if (microregionLocalitySelected == null && structureItemPlanSelected != null && !stLastLevelPlanItem)
-            return repository.findDataCommentHighlightStructureItemPlanSelected(idConference, microregionChartAgroup,
-                    structureItemPlanSelected, origin, meetings);
-
-        if (microregionLocalitySelected == null && structureItemPlanSelected != null && stLastLevelPlanItem)
-            return repository.findDataCommentHighlightStructureItemPlanSelectedLastLevel(idConference,
-                    microregionChartAgroup, structureItemPlanSelected, origin, meetings);
-
-        if (microregionLocalitySelected != null && structureItemPlanSelected == null && stLastLevelLocality)
-            return repository.findDataCommentHighlightLocalitySelectedLastLevel(idConference,
-                    microregionLocalitySelected, structureItemSelected, origin, meetings);
-
-        if (microregionLocalitySelected != null && structureItemPlanSelected == null)
-            return repository.findDataCommentHighlightLocalitySelected(idConference, microregionLocalitySelected,
-                    structureItemSelected, origin, meetings);
-
-        if (microregionLocalitySelected != null && structureItemPlanSelected != null && stLastLevelLocality)
-            return repository.findDataCommentHighlightAllFilterLastLevel(idConference, microregionLocalitySelected,
-                    structureItemPlanSelected, origin, meetings);
-
-        return repository.findDataCommentHighlightAllFilter(idConference, microregionLocalitySelected,
-                structureItemPlanSelected, origin, meetings);
+        HeatMapChartDto heatMapChartDto = buildHeatMapChartDto(dto, chave, likesPerType.get(chave));
+        if (heatMapChartDto == null) {
+          continue;
+        }
+        microregionChartDto.add(heatMapChartDto);
+      }
     }
+    return microregionChartDto;
+  }
+
+  private HeatMapChartDto buildHeatMapChartDto(MicroregionChartQueryDto dto, Long chave, Long count) {
+    String[] latitudeLongitude = (dto.getLatitudeLongitude() == null || dto.getLatitudeLongitude().isEmpty())
+        ? new String[0]
+        : dto.getLatitudeLongitude().split(",");
+
+    if (latitudeLongitude.length <= 0) {
+      return null;
+    }
+
+    String latitude = (latitudeLongitude.length == 2) ? latitudeLongitude[0] : "0";
+    String longitude = (latitudeLongitude.length == 2) ? latitudeLongitude[1] : "0";
+
+    BigDecimal latitudeConvertido = new BigDecimal(latitude.trim());
+    BigDecimal longitudeConvertido = new BigDecimal(longitude.trim());
+
+    return new HeatMapChartDto(latitudeConvertido, longitudeConvertido, count);
+  }
+
+  private List<ControlPanelChartDto> returnPlanItensChartDto(ResultTypeControlPanelEnum result,
+                                                             List<MicroregionChartQueryDto> microregionChartQuery, Long idConference, Long microregionChartAgroup,
+                                                             Long microregionLocalitySelected, Long structureItemSelected, Long structureItemPlanSelected,
+                                                             Boolean stLastLevelLocality, String origin, List<Long> meetings, Boolean stLastLevelPlanItem) {
+
+    List<ControlPanelChartDto> microregionChartDto = new ArrayList<>();
+
+    if (ResultTypeControlPanelEnum.HIGHLIGHTS.equals(result)) {
+      Map<Long, Long> likesPerType = microregionChartQuery.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getIdPlanItem,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityHighlight)));
+
+      for (Long chave : likesPerType.keySet()) {
+        ControlPanelChartDto microDto = new ControlPanelChartDto();
+        String name = microregionChartQuery.stream().filter(filter -> filter.getIdPlanItem().equals(chave))
+            .map(MicroregionChartQueryDto::getPlanItemName).findFirst().orElse("Without Name");
+        microDto.setId(chave);
+        microDto.setDescription(name);
+        microDto.setQuantity(likesPerType.get(chave));
+        microregionChartDto.add(microDto);
+      }
+    }
+
+    if (ResultTypeControlPanelEnum.PROPOSALS.equals(result)) {
+      Map<Long, Long> likesPerType = microregionChartQuery.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getIdPlanItem,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityComment)));
+
+      for (Long chave : likesPerType.keySet()) {
+        ControlPanelChartDto microDto = new ControlPanelChartDto();
+        String name = microregionChartQuery.stream().filter(filter -> filter.getIdPlanItem().equals(chave))
+            .map(MicroregionChartQueryDto::getPlanItemName).findFirst().orElse("Without Name");
+        microDto.setId(chave);
+        microDto.setDescription(name);
+        microDto.setQuantity(likesPerType.get(chave));
+        microregionChartDto.add(microDto);
+      }
+    }
+
+    if (ResultTypeControlPanelEnum.PARTICIPANTS.equals(result)) {
+      List<MicroregionChartQueryDto> microregionChartQueryParticipant;
+
+      microregionChartQueryParticipant = returnData(idConference, ResultTypeControlPanelEnum.HIGHLIGHTS,
+          microregionChartAgroup, microregionLocalitySelected, structureItemSelected,
+          structureItemPlanSelected, stLastLevelLocality, origin, meetings, stLastLevelPlanItem);
+
+      Map<Long, Long> highlights = microregionChartQueryParticipant.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getIdPlanItem,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityComment)));
+
+      Map<Long, Long> comments = microregionChartQueryParticipant.stream()
+          .collect(Collectors.groupingBy(MicroregionChartQueryDto::getIdPlanItem,
+              Collectors.summingLong(MicroregionChartQueryDto::getQuantityHighlight)));
+
+      for (Long chave : highlights.keySet()) {
+        ControlPanelChartDto microDto = new ControlPanelChartDto();
+        String name = microregionChartQueryParticipant.stream()
+            .filter(filter -> filter.getIdPlanItem().equals(chave)).map(MicroregionChartQueryDto::getPlanItemName)
+            .findFirst().orElse("Without Name");
+        Long commentQuantity = comments.get(chave);
+        Long highlightQuantity = highlights.get(chave);
+        microDto.setId(chave);
+        microDto.setDescription(name);
+        microDto.setQuantity((commentQuantity + highlightQuantity));
+        microregionChartDto.add(microDto);
+      }
+    }
+    return microregionChartDto;
+  }
+
+  private List<MicroregionChartQueryDto> returnData(
+      Long idConference,
+      ResultTypeControlPanelEnum result,
+      Long microregionChartAgroup,
+      Long microregionLocalitySelected,
+      Long structureItemSelected,
+      Long structureItemPlanSelected,
+      Boolean stLastLevelLocality,
+      String origin,
+      List<Long> meetings,
+      Boolean stLastLevelPlanItem
+  ) {
+
+    List<MicroregionChartQueryDto> resultadoQuery = returnDataByCenario(
+        idConference,
+        result,
+        microregionChartAgroup,
+        microregionLocalitySelected,
+        structureItemSelected,
+        structureItemPlanSelected,
+        stLastLevelLocality,
+        origin,
+        meetings,
+        stLastLevelPlanItem
+    );
+
+    resultadoQuery.forEach(row -> {
+      if (row.getQuantityComment() == null) {
+        row.setQuantityComment(0L);
+      }
+      if (row.getQuantityParticipation() == null) {
+        row.setQuantityParticipation(0L);
+      }
+      if (row.getQuantityHighlight() == null) {
+        row.setQuantityHighlight(0L);
+      }
+    });
+
+    return resultadoQuery;
+  }
+
+  private List<MicroregionChartQueryDto> returnDataByCenario(Long idConference, ResultTypeControlPanelEnum result,
+                                                             Long microregionChartAgroup, Long microregionLocalitySelected, Long structureItemSelected,
+                                                             Long structureItemPlanSelected, Boolean stLastLevelLocality, String origin, List<Long> meetings,
+                                                             Boolean stLastLevelPlanItem) {
+    if (ResultTypeControlPanelEnum.PARTICIPANTS.equals(result)) {
+      if (microregionLocalitySelected == null) {
+        return repository.findDataMicroregionMapDashboardFromIdConferenceParticipationAgroup(idConference,
+            microregionChartAgroup, meetings);
+      }
+
+      return repository.findDataMicroregionMapDashboardFromIdConferenceParticipation(idConference,
+          microregionLocalitySelected, meetings);
+    }
+
+    if (microregionLocalitySelected == null && structureItemPlanSelected == null) {
+      return repository.findDataCommentHighlightWitoutFilter(idConference, microregionChartAgroup,
+          structureItemSelected, origin, meetings);
+    }
+
+    if (microregionLocalitySelected == null && !stLastLevelPlanItem) {
+      return repository.findDataCommentHighlightStructureItemPlanSelected(idConference, microregionChartAgroup,
+          structureItemPlanSelected, origin, meetings);
+    }
+
+    if (microregionLocalitySelected == null) {
+      return repository.findDataCommentHighlightStructureItemPlanSelectedLastLevel(idConference,
+          microregionChartAgroup, structureItemPlanSelected, origin, meetings);
+    }
+
+    if (structureItemPlanSelected == null && stLastLevelLocality) {
+      return repository.findDataCommentHighlightLocalitySelectedLastLevel(idConference,
+          microregionLocalitySelected, structureItemSelected, origin, meetings);
+    }
+
+    if (structureItemPlanSelected == null) {
+      return repository.findDataCommentHighlightLocalitySelected(idConference, microregionLocalitySelected,
+          structureItemSelected, origin, meetings);
+    }
+
+    if (stLastLevelLocality) {
+      return repository.findDataCommentHighlightAllFilterLastLevel(idConference, microregionLocalitySelected,
+          structureItemPlanSelected, origin, meetings);
+    }
+
+    return repository.findDataCommentHighlightAllFilter(idConference, microregionLocalitySelected,
+        structureItemPlanSelected, origin, meetings);
+  }
 
 }
