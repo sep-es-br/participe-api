@@ -7,6 +7,7 @@ import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -183,7 +184,7 @@ public class ConferenceDto {
     }
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-    LocalDateTime localDateTime = beginDate.toInstant().atOffset(ZoneOffset.of("+00:00")).toLocalDateTime();
+    LocalDateTime localDateTime = beginDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
     this.beginDate = localDateTime.format(formatter);
   }
@@ -203,8 +204,7 @@ public class ConferenceDto {
     }
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-    LocalDateTime localDateTime = endDate.toInstant().atOffset(ZoneOffset.of("+00:00")).toLocalDateTime();
-
+    LocalDateTime localDateTime = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     this.endDate = localDateTime.format(formatter);
   }
 

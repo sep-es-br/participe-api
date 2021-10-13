@@ -21,14 +21,6 @@ import java.util.Map;
 @Component
 public class ParticipeUtils {
 
-  public boolean isPosClosure(Date endDate) {
-    return endDate != null && (new Date()).after(endDate);
-  }
-
-  public boolean isPreOpening(Date beginDate) {
-    return beginDate != null && (new Date()).before(beginDate);
-  }
-
   public boolean isActive(Date beginDate, Date endDate) {
     Date today = new Date();
     if (beginDate != null && endDate != null) {
