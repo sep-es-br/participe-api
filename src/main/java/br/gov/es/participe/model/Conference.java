@@ -12,6 +12,7 @@ import org.neo4j.ogm.annotation.typeconversion.DateString;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
@@ -96,46 +97,46 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Conference(ConferenceDto conferenceDto) {
-    if (conferenceDto == null) {
+    if(conferenceDto == null) {
       return;
     }
 
-    setId(conferenceDto.getId());
+    this.setId(conferenceDto.getId());
     this.name = conferenceDto.getName();
     this.description = conferenceDto.getDescription();
-    if (conferenceDto.getPlan() != null && conferenceDto.getPlan().getId() != null) {
+    if(conferenceDto.getPlan() != null && conferenceDto.getPlan().getId() != null) {
       this.plan = new Plan(conferenceDto.getPlan());
     }
 
-    if (conferenceDto.getFileParticipation() != null && conferenceDto.getFileParticipation().getId() != null) {
+    if(conferenceDto.getFileParticipation() != null && conferenceDto.getFileParticipation().getId() != null) {
       this.fileParticipation = new File(conferenceDto.getFileParticipation());
     }
 
-    if (conferenceDto.getFileAuthentication() != null && conferenceDto.getFileAuthentication().getId() != null) {
+    if(conferenceDto.getFileAuthentication() != null && conferenceDto.getFileAuthentication().getId() != null) {
       this.fileAuthentication = new File(conferenceDto.getFileAuthentication());
     }
 
-    if (conferenceDto.getLocalityType() != null && conferenceDto.getLocalityType().getId() != null) {
+    if(conferenceDto.getLocalityType() != null && conferenceDto.getLocalityType().getId() != null) {
       this.localityType = new LocalityType(conferenceDto.getLocalityType());
     }
 
-    if (conferenceDto.getMeeting() != null && !conferenceDto.getMeeting().isEmpty()) {
+    if(conferenceDto.getMeeting() != null && !conferenceDto.getMeeting().isEmpty()) {
       this.meeting = new HashSet<>();
       conferenceDto.getMeeting().forEach(meet -> this.meeting.add(new Meeting(meet)));
     }
 
-    if (conferenceDto.getSelfDeclaration() != null && !conferenceDto.getSelfDeclaration().isEmpty()) {
+    if(conferenceDto.getSelfDeclaration() != null && !conferenceDto.getSelfDeclaration().isEmpty()) {
       this.selfDeclaration = new HashSet<>();
-      conferenceDto.getSelfDeclaration().forEach(self -> selfDeclaration.add(new SelfDeclaration(self)));
+      conferenceDto.getSelfDeclaration().forEach(self -> this.selfDeclaration.add(new SelfDeclaration(self)));
     }
 
-    if (conferenceDto.getModerators() != null && !conferenceDto.getModerators().isEmpty()) {
+    if(conferenceDto.getModerators() != null && !conferenceDto.getModerators().isEmpty()) {
       this.moderators = new HashSet<>();
-      conferenceDto.getModerators().forEach(person -> moderators.add(new Person(person)));
+      conferenceDto.getModerators().forEach(person -> this.moderators.add(new Person(person)));
     }
 
-    setBeginDate(conferenceDto.getBeginDate());
-    setEndDate(conferenceDto.getEndDate());
+    this.setBeginDate(conferenceDto.getBeginDate());
+    this.setEndDate(conferenceDto.getEndDate());
 
     this.titleAuthentication = conferenceDto.getTitleAuthentication();
     this.titleParticipation = conferenceDto.getTitleParticipation();
@@ -146,43 +147,43 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Conference(ConferenceParamDto conferenceParamDto) throws ParseException {
-    if (conferenceParamDto == null) {
+    if(conferenceParamDto == null) {
       return;
     }
 
-    setId(conferenceParamDto.getId());
+    this.setId(conferenceParamDto.getId());
 
-    if (conferenceParamDto.getPlan() != null && conferenceParamDto.getPlan().getId() != null) {
+    if(conferenceParamDto.getPlan() != null && conferenceParamDto.getPlan().getId() != null) {
       this.plan = new Plan(conferenceParamDto.getPlan());
     }
 
-    if (conferenceParamDto.getFileParticipation() != null
-        && conferenceParamDto.getFileParticipation().getId() != null) {
+    if(conferenceParamDto.getFileParticipation() != null
+       && conferenceParamDto.getFileParticipation().getId() != null) {
       this.fileParticipation = new File(conferenceParamDto.getFileParticipation());
     }
 
-    if (conferenceParamDto.getFileAuthentication() != null
-        && conferenceParamDto.getFileAuthentication().getId() != null) {
+    if(conferenceParamDto.getFileAuthentication() != null
+       && conferenceParamDto.getFileAuthentication().getId() != null) {
       this.fileAuthentication = new File(conferenceParamDto.getFileAuthentication());
     }
 
-    if (conferenceParamDto.getLocalityType() != null && conferenceParamDto.getLocalityType().getId() != null) {
+    if(conferenceParamDto.getLocalityType() != null && conferenceParamDto.getLocalityType().getId() != null) {
       this.localityType = new LocalityType(conferenceParamDto.getLocalityType());
     }
 
-    if (conferenceParamDto.getMeeting() != null && !conferenceParamDto.getMeeting().isEmpty()) {
+    if(conferenceParamDto.getMeeting() != null && !conferenceParamDto.getMeeting().isEmpty()) {
       this.meeting = new HashSet<>();
       conferenceParamDto.getMeeting().forEach(meet -> this.meeting.add(new Meeting(meet)));
     }
 
-    if (conferenceParamDto.getSelfDeclaration() != null && !conferenceParamDto.getSelfDeclaration().isEmpty()) {
+    if(conferenceParamDto.getSelfDeclaration() != null && !conferenceParamDto.getSelfDeclaration().isEmpty()) {
       this.selfDeclaration = new HashSet<>();
-      conferenceParamDto.getSelfDeclaration().forEach(self -> selfDeclaration.add(new SelfDeclaration(self)));
+      conferenceParamDto.getSelfDeclaration().forEach(self -> this.selfDeclaration.add(new SelfDeclaration(self)));
     }
 
-    if (conferenceParamDto.getModerators() != null && !conferenceParamDto.getModerators().isEmpty()) {
+    if(conferenceParamDto.getModerators() != null && !conferenceParamDto.getModerators().isEmpty()) {
       this.moderators = new HashSet<>();
-      conferenceParamDto.getModerators().forEach(person -> moderators.add(new Person(person)));
+      conferenceParamDto.getModerators().forEach(person -> this.moderators.add(new Person(person)));
     }
 
     this.loadBasicAttributes(conferenceParamDto);
@@ -191,11 +192,11 @@ public class Conference extends Entity implements Serializable {
   private void loadBasicAttributes(ConferenceParamDto conferenceParamDto) throws ParseException {
     this.description = conferenceParamDto.getDescription();
 
-    setBeginDate(conferenceParamDto.getBeginDate());
-    setEndDate(conferenceParamDto.getEndDate());
+    this.setBeginDate(conferenceParamDto.getBeginDate());
+    this.setEndDate(conferenceParamDto.getEndDate());
 
-    System.out.println(beginDate);
-    System.out.println(endDate);
+    System.out.println(this.beginDate);
+    System.out.println(this.endDate);
 
     System.out.println(ZoneId.systemDefault());
     System.out.println(ZoneId.of("-04:00"));
@@ -213,7 +214,13 @@ public class Conference extends Entity implements Serializable {
     this.modeType = conferenceParamDto.getDisplayMode();
     this.statusType = conferenceParamDto.getDisplayStatusConference();
 
-    updateDisplayMode();
+    this.updateDisplayMode();
+  }
+
+  private void updateDisplayMode() {
+    if(this.modeType != null && this.statusType != null) {
+      this.displayMode = String.format("%s %s", this.modeType.name(), this.statusType.name());
+    }
   }
 
   public void update(ConferenceParamDto conferenceParamDto) throws ParseException {
@@ -221,7 +228,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getDescription() {
-    return description;
+    return this.description;
   }
 
   public void setDescription(String description) {
@@ -229,7 +236,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Plan getPlan() {
-    return plan;
+    return this.plan;
   }
 
   public void setPlan(Plan plan) {
@@ -237,7 +244,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getName() {
-    return name;
+    return this.name;
   }
 
   public void setName(String name) {
@@ -245,7 +252,11 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Date getBeginDate() {
-    return beginDate;
+    if(this.beginDate == null) return null;
+    final LocalDateTime parse = this.beginDate
+      .toInstant()
+      .atZone(ZoneId.systemDefault()).toLocalDateTime();
+    return Date.from(parse.atZone(ZoneId.systemDefault()).toInstant());
   }
 
   public void setBeginDate(Date beginDate) {
@@ -253,11 +264,12 @@ public class Conference extends Entity implements Serializable {
   }
 
   private void setBeginDate(String beginDate) {
-    if (beginDate != null && !beginDate.isEmpty()) {
+    if(beginDate != null && !beginDate.isEmpty()) {
       try {
         this.beginDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(beginDate);
         return;
-      } catch (ParseException e) {
+      }
+      catch(ParseException e) {
         log.throwing(Conference.class.getName(), "setBeginDate", e);
       }
     }
@@ -265,7 +277,11 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Date getEndDate() {
-    return endDate;
+    if(this.endDate == null) return null;
+    final LocalDateTime parse = this.endDate
+      .toInstant()
+      .atZone(ZoneId.systemDefault()).toLocalDateTime();
+    return Date.from(parse.atZone(ZoneId.systemDefault()).toInstant());
   }
 
   public void setEndDate(Date endDate) {
@@ -273,11 +289,12 @@ public class Conference extends Entity implements Serializable {
   }
 
   private void setEndDate(String endDate) {
-    if (endDate != null && !endDate.isEmpty()) {
+    if(endDate != null && !endDate.isEmpty()) {
       try {
         this.endDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(endDate);
         return;
-      } catch (ParseException e) {
+      }
+      catch(ParseException e) {
         log.throwing(Conference.class.getName(), "setEndDate", e);
       }
     }
@@ -285,7 +302,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getTitleAuthentication() {
-    return titleAuthentication;
+    return this.titleAuthentication;
   }
 
   public void setTitleAuthentication(String titleAuthentication) {
@@ -293,7 +310,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getSubtitleAuthentication() {
-    return subtitleAuthentication;
+    return this.subtitleAuthentication;
   }
 
   public void setSubtitleAuthentication(String subtitleAuthentication) {
@@ -301,7 +318,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getTitleParticipation() {
-    return titleParticipation;
+    return this.titleParticipation;
   }
 
   public void setTitleParticipation(String titleParticipation) {
@@ -309,7 +326,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getSubtitleParticipation() {
-    return subtitleParticipation;
+    return this.subtitleParticipation;
   }
 
   public void setSubtitleParticipation(String subtitleParticipation) {
@@ -317,7 +334,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getTitleRegionalization() {
-    return titleRegionalization;
+    return this.titleRegionalization;
   }
 
   public void setTitleRegionalization(String titleRegionalization) {
@@ -325,7 +342,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getSubtitleRegionalization() {
-    return subtitleRegionalization;
+    return this.subtitleRegionalization;
   }
 
   public void setSubtitleRegionalization(String subtitleRegionalization) {
@@ -333,7 +350,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public File getFileParticipation() {
-    return fileParticipation;
+    return this.fileParticipation;
   }
 
   public void setFileParticipation(File fileParticipation) {
@@ -341,7 +358,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public File getFileAuthentication() {
-    return fileAuthentication;
+    return this.fileAuthentication;
   }
 
   public void setFileAuthentication(File fileAuthentication) {
@@ -349,7 +366,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public LocalityType getLocalityType() {
-    return localityType;
+    return this.localityType;
   }
 
   public void setLocalityType(LocalityType localityType) {
@@ -357,7 +374,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Set<Meeting> getMeeting() {
-    return meeting;
+    return this.meeting;
   }
 
   public void setMeeting(Set<Meeting> meeting) {
@@ -365,7 +382,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Set<SelfDeclaration> getSelfDeclaration() {
-    return selfDeclaration;
+    return this.selfDeclaration;
   }
 
   public void setSelfDeclaration(Set<SelfDeclaration> selfDeclaration) {
@@ -373,7 +390,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Boolean getHasAttend() {
-    return hasAttend;
+    return this.hasAttend;
   }
 
   public void setHasAttend(Boolean hasAttend) {
@@ -381,7 +398,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Set<Person> getModerators() {
-    return moderators;
+    return this.moderators;
   }
 
   public void setModerators(Set<Person> moderators) {
@@ -389,7 +406,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getDisplayMode() {
-    return displayMode;
+    return this.displayMode;
   }
 
   public void setDisplayMode(String displayMode) {
@@ -398,14 +415,8 @@ public class Conference extends Entity implements Serializable {
     this.displayMode = displayMode;
   }
 
-  private void updateDisplayMode() {
-    if (modeType != null && statusType != null) {
-      this.displayMode = String.format("%s %s", modeType.name(), statusType.name());
-    }
-  }
-
   public String getPreOpening() {
-    return preOpening;
+    return this.preOpening;
   }
 
   public void setPreOpening(String preOpening) {
@@ -413,7 +424,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getPostClosure() {
-    return postClosure;
+    return this.postClosure;
   }
 
   public void setPostClosure(String postClosure) {
@@ -421,7 +432,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public String getMenuLabel() {
-    return menuLabel;
+    return this.menuLabel;
   }
 
   public void setMenuLabel(String menuLabel) {
@@ -429,7 +440,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Set<Topic> getTopics() {
-    return topics;
+    return this.topics;
   }
 
   public void setTopics(Set<Topic> topics) {
@@ -437,34 +448,25 @@ public class Conference extends Entity implements Serializable {
   }
 
   public PortalServer getServer() {
-    return server;
+    return this.server;
   }
 
   public void setServer(PortalServer server) {
     this.server = server;
   }
 
-  public DisplayModeType getModeType() {
-    if (modeType == null && this.displayMode != null) {
-      modeType = Arrays.stream(DisplayModeType.values())
-          .filter(f -> this.displayMode.contains(f.name()))
-          .findFirst().orElse(null);
-    }
-    return modeType;
-  }
-
   public StatusConferenceType getStatusType() {
-    if (this.displayMode == null) {
-      statusType = StatusConferenceType.OPEN;
-      return statusType;
+    if(this.displayMode == null) {
+      this.statusType = StatusConferenceType.OPEN;
+      return this.statusType;
     }
 
-    if (statusType == null) {
-      statusType = Arrays.stream(StatusConferenceType.values())
-          .filter(f -> this.displayMode.contains(f.name())).findFirst()
-          .orElse(null);
+    if(this.statusType == null) {
+      this.statusType = Arrays.stream(StatusConferenceType.values())
+        .filter(f -> this.displayMode.contains(f.name())).findFirst()
+        .orElse(null);
     }
-    return statusType;
+    return this.statusType;
   }
 
   public void setStatusType(StatusConferenceType statusType) {
@@ -473,8 +475,17 @@ public class Conference extends Entity implements Serializable {
     this.updateDisplayMode();
   }
 
+  public DisplayModeType getModeType() {
+    if(this.modeType == null && this.displayMode != null) {
+      this.modeType = Arrays.stream(DisplayModeType.values())
+        .filter(f -> this.displayMode.contains(f.name()))
+        .findFirst().orElse(null);
+    }
+    return this.modeType;
+  }
+
   public Set<File> getBackgroundImages() {
-    return backgroundImages;
+    return this.backgroundImages;
   }
 
   public void setBackgroundImages(Set<File> backgroundImages) {
@@ -482,7 +493,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public PortalServer getDefaultServer() {
-    return defaultServer;
+    return this.defaultServer;
   }
 
   public void setDefaultServer(PortalServer defaultServer) {
@@ -490,10 +501,10 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Set<StructureItem> getStructureItems() {
-    if (structureItems == null) {
-      structureItems = new HashSet<>();
+    if(this.structureItems == null) {
+      this.structureItems = new HashSet<>();
     }
-    return structureItems;
+    return this.structureItems;
   }
 
   public void setStructureItems(Set<StructureItem> structureItems) {
@@ -501,7 +512,7 @@ public class Conference extends Entity implements Serializable {
   }
 
   public Research getResearch() {
-    return research;
+    return this.research;
   }
 
   public void setResearch(Research research) {

@@ -4,7 +4,9 @@ import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -119,8 +121,7 @@ public class ConferenceParamDto {
   public Date getBeginDate() throws ParseException {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     final LocalDateTime parse = LocalDateTime.parse(beginDate, formatter);
-
-    return Date.from(parse.atOffset(ZoneOffset.of("-04:00")).toInstant());
+    return Date.from(parse.atZone(ZoneId.systemDefault()).toInstant());
   }
 
   public void setBeginDate(String beginDate) {
@@ -147,7 +148,7 @@ public class ConferenceParamDto {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     final LocalDateTime parse = LocalDateTime.parse(endDate, formatter);
 
-    return Date.from(parse.atOffset(ZoneOffset.of(offset)).toInstant());
+    return Date.from(parse.atZone(ZoneId.systemDefault()).toInstant());
   }
 
   public void setEndDate(String endDate) {

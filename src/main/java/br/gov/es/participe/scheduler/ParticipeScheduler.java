@@ -9,16 +9,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class ParticipeScheduler {
 
-  @Autowired
-  private ConferenceService conferenceService;
+  private final ConferenceService conferenceService;
+
+  private final ResearchService researchService;
 
   @Autowired
-  private ResearchService researchService;
+  public ParticipeScheduler(ConferenceService conferenceService, ResearchService researchService) {
+    this.conferenceService = conferenceService;
+    this.researchService = researchService;
+  }
+
 
   @Scheduled(cron = "0 0/1 * * * *")
   public void updateAutomaticConferenceAndResearch() {
-    researchService.updateAutomaticResearchService();
-    conferenceService.updateAutomaticConference();
+    this.researchService.updateAutomaticResearchService();
+    this.conferenceService.updateAutomaticConference();
   }
 
 }
