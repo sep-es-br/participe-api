@@ -42,4 +42,29 @@ public interface HighlightRepository extends Neo4jRepository<Highlight, Long> {
       + " WHERE id(co)={0}  "
       + " RETURN count(h)")
   Integer countHighlightByConference(Long id);
+  
+
+  
+  //marcos 
+  @Query("  MATCH (co:Conference)<-[a:ABOUT]-(h:Highlight) " + 
+	  	 "  WHERE id(co)={0} " + 
+	  	 "  RETURN count(h) ")
+  Integer countHighlightAllOriginsByConference(Long idConference);
+	  
+	  
+	  
+   @Query(" match (h:Highlight)-[:ABOUT]->(co:Conference) " + 
+	  	  "  where id(co) = {0} AND h.from='rem' " + 
+	  	  "  return count (distinct h) ")
+   Integer countHighlightRemoteOriginByConference(Long idConference);
+	  
+	  
+	 
+    @Query(" match (m:Meeting)<-[:WHILE_IN]-(h:Highlight)-[:ABOUT]->(co:Conference) " + 
+		   "  where id(co) = {0} AND h.from='pres' AND (({1} IS NULL) OR (id(m) IN {1}))  " + 
+		   "  return count (distinct h) ")
+	Integer countHighlightPresentialOriginByConference(Long idConference, List<Long> meetings);
+  
+  
+  
 }

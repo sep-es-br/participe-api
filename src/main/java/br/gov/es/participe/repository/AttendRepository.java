@@ -114,4 +114,109 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
           + " OPTIONAL MATCH (at)-[mb:MODERATED_BY]->(m:Person) "
           + " RETURN count(DISTINCT id(at)) ")
   Page<ParticipationDto> findByIdConferenceAndIdPersonAndText(Long idPerson, Long idConference, String text, Pageable pageable);
+  
+  
+//participantes 
+  
+  @Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) "
+	      + " WHERE id(co)={0} RETURN count(DISTINCT p)")
+  Integer countParticipationAllOriginsByConference(Long idConference);
+  
+  
+  
+  @Query(" match (lo:Login)<-[:MADE]-(p)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " + 
+  		" where id(co) = {0} " + 
+  		" AND lo.time > m.beginDate " + 
+  		" AND lo.time < m.endDate " + 
+  		" with collect(lo) as prLogin " + 
+  		" match (p:Person)-[:MADE]->(l:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) " + 
+  		" where id(co) = {0} " + 
+  		" AND NOT l IN prLogin " + 
+  		" return count (distinct p) ")
+  Integer countParticipationRemoteOriginByConference(Long idConference);
+  
+  
+  @Query(" match (p)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " + 
+  		"  where id(co) = {0} AND (({1} IS NULL) OR (id(m) IN {1})) " + 
+  		"  return count(distinct p) ")
+	  Integer countParticipationPresentialOriginByConference(Long idConference, List<Long> meetings );
+	  
+  
+  //destaques
+  
+
+  @Query("  MATCH (co:Conference)<-[a:ABOUT]-(h:Highlight) " + 
+  		"  WHERE id(co)={0} " + 
+  		"  RETURN count(h) ")
+  Integer countHighlightAllOriginsByConference(Long idConference);
+  
+  
+  
+  @Query(" match (h:Highlight)-[:ABOUT]->(co:Conference) " + 
+  		"  where id(co) = {0} AND h.from='rem' " + 
+  		"  return count (distinct h) ")
+	  Integer countHighlightRemoteOriginByConference(Long idConference);
+  
+  
+ 
+  @Query(" match (m:Meeting)<-[:WHILE_IN]-(h:Highlight)-[:ABOUT]->(co:Conference) " + 
+	  		"  where id(co) = {0} AND h.from='pres' AND (({1} IS NULL) OR (id(m) IN {1}))  " + 
+	  		"  return count (distinct h) ")
+		  Integer countHighlightPresentialOriginByConference(Long idConference, List<Long> meetings);
+  
+  
+ //propostas
+  
+
+  @Query(" MATCH (co:Conference)-[a:ABOUT]-(c:Comment) " + 
+  		"  WHERE id(co)={0} AND c.status IN ['pub', 'arq'] " + 
+  		"  RETURN count(c) ")
+  Integer countCommentAllOriginsByConference(Long idConference);
+  
+  
+  
+  @Query(" match (c:Comment)-[:ABOUT]->(co:Conference) " + 
+  		"  where id(co) = {0} AND c.from='rem' and c.status IN ['pub', 'arq'] " + 
+  		"  return count (distinct c) ")
+	  Integer countCommentRemoteOriginByConference(Long idConference);
+  
+  
+ 
+  @Query(" match (m:Meeting)<-[:WHILE_IN]-(c:Comment)-[:ABOUT]->(co:Conference) " + 
+	  		"  where id(co) = {0} AND c.from='pres' and c.status IN ['pub', 'arq'] AND (({1} IS NULL) OR (id(m) IN {1}))  " + 
+	  		"  return count (distinct c) ")
+		  Integer countCommentPresentialOriginByConference(Long idConference, List<Long> meetings);
+  
+
+  
+  
+  
+  
+  
+  
+//locality 
+  
+  @Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference)<-[:TO]-(s:SelfDeclaration)<-[m:MADE]-(p), (s)-[:AS_BEING_FROM]->(loc:Locality) " + 
+  		  " WHERE id(co)={0} RETURN count(DISTINCT loc) ")
+  Integer countLocalityAllOriginsByConference(Long idConference);
+  
+	 		 	 		 		
+  @Query("match (lo:Login)<-[:MADE]-(p)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " + 
+  		" where id(co) = {0} AND lo.time > m.beginDate AND lo.time < m.endDate " + 
+  		" with collect(lo) as prLogin " + 
+  		" match (p:Person)-[:MADE]->(l:Login)-[:TO]->(co:Conference)<-[:TO]-(s:SelfDeclaration)<-[m:MADE]-(p), (s)-[:AS_BEING_FROM]->(loc:Locality) " + 
+  		" where id(co) = {0} AND NOT l IN prLogin " + 
+  		"return count (distinct loc) ")
+  Integer countLocalityRemoteOriginByConference(Long idConference);
+  
+  
+  @Query(" match (l:Locality)<-[:AS_BEING_FROM]-(s:SelfDeclaration)<-[:MADE]-(p)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " + 
+  		"  where id(co) = {0} AND (({1} IS NULL) OR (id(m) IN {1})) " + 
+  		"  return count(distinct l) ")
+	  Integer countLocalityPresentialOriginByConference(Long idConference, List<Long> meetings );
+	  
+  
+  
+  
+  
 }
