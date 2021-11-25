@@ -282,7 +282,7 @@ public class ControlPanelService {
 		    	 planItemChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceHighlightAllPlanItemAgroup(idConference,microregionLocalitySelected,structureItemPlanSelected);		    	 
 		    	 for(int i = 0; i < planItemChartQueryResult.size(); i++) {		    		 		    			    		 
 		    		   ControlPanelChartDto strategicDto = new ControlPanelChartDto();
-		    		   strategicDto.setId(planItemChartQueryResult.get(i).getId());
+		    		   strategicDto.setId(planItemChartQueryResult.get(i).getIdPlanItem());
 		    		   if(planItemChartQueryResult.get(i).getPlanItemName() == null) {
 		    			   strategicDto.setDescription("Without Name");	    			   		    			   
 		    		   }else{
@@ -314,7 +314,7 @@ public class ControlPanelService {
 				planItemChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceHighlightRemotoPlanItemAgroup(idConference,microregionLocalitySelected,structureItemPlanSelected);									
 				for(int i = 0; i < planItemChartQueryResult.size(); i++) {		    		 						    		 
 					ControlPanelChartDto strategicDto = new ControlPanelChartDto();
-					strategicDto.setId(planItemChartQueryResult.get(i).getId());
+					strategicDto.setId(planItemChartQueryResult.get(i).getIdPlanItem());
 					if(planItemChartQueryResult.get(i).getPlanItemName() == null) {
 		    			   strategicDto.setDescription("Without Name");	    			   		    			   
 		    		}else{
@@ -345,7 +345,7 @@ public class ControlPanelService {
 					planItemChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceHighlightPresentePlanItemAgroup(idConference,microregionLocalitySelected,structureItemPlanSelected,meetings);										
 					for(int i = 0; i < planItemChartQueryResult.size(); i++) {		    		 						    		 
 						ControlPanelChartDto strategicDto = new ControlPanelChartDto();
-						strategicDto.setId(planItemChartQueryResult.get(i).getId());
+						strategicDto.setId(planItemChartQueryResult.get(i).getIdPlanItem());
 						if(planItemChartQueryResult.get(i).getPlanItemName() == null) {
 			    			   strategicDto.setDescription("Without Name");	    			   		    			   
 			    		}else{
@@ -380,7 +380,7 @@ public class ControlPanelService {
 		    	 planItemChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceProposalsAllPlanItemAgroup(idConference,microregionLocalitySelected,structureItemPlanSelected);		    	 
 		    	 for(int i = 0; i < planItemChartQueryResult.size(); i++) {		    		 		    			    		 
 		    		   ControlPanelChartDto strategicDto = new ControlPanelChartDto();
-		    		   strategicDto.setId(planItemChartQueryResult.get(i).getId());
+		    		   strategicDto.setId(planItemChartQueryResult.get(i).getIdPlanItem());
 		    		   if(planItemChartQueryResult.get(i).getPlanItemName() == null) {
 		    			   strategicDto.setDescription("Without Name");	    			   		    			   
 		    		   }else{
@@ -411,7 +411,7 @@ public class ControlPanelService {
 				planItemChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceProposalsRemotoPlanItemAgroup(idConference,microregionLocalitySelected,structureItemPlanSelected);									
 				for(int i = 0; i < planItemChartQueryResult.size(); i++) {		    		 						    		 
 					ControlPanelChartDto strategicDto = new ControlPanelChartDto();
-					strategicDto.setId(planItemChartQueryResult.get(i).getId());
+					strategicDto.setId(planItemChartQueryResult.get(i).getIdPlanItem());
 					if(planItemChartQueryResult.get(i).getPlanItemName() == null) {
 		    			   strategicDto.setDescription("Without Name");	    			   		    			   
 		    		}else{
@@ -443,7 +443,7 @@ public class ControlPanelService {
 					planItemChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceProposalsPresentePlanItemAgroup(idConference,microregionLocalitySelected,structureItemPlanSelected,meetings);										
 					for(int i = 0; i < planItemChartQueryResult.size(); i++) {		    		 						    		 
 						ControlPanelChartDto strategicDto = new ControlPanelChartDto();
-						strategicDto.setId(planItemChartQueryResult.get(i).getId());
+						strategicDto.setId(planItemChartQueryResult.get(i).getIdPlanItem());
 						if(planItemChartQueryResult.get(i).getPlanItemName() == null) {
 			    			   strategicDto.setDescription("Without Name");	    			   		    			   
 			    		}else{
