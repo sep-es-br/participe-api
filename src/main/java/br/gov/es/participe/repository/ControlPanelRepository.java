@@ -9,27 +9,66 @@ import java.util.List;
 
 public interface ControlPanelRepository extends Neo4jRepository<Conference, Long> {
 
+	   @Query(
+					
+			" WITH" +
+			" {0} AS Conference_Id," +
+			" {1} AS LocalityTypeGrouping_Id," +
+			" {2} AS SelectedLocality_Id," +
+			" {3} AS SelectedPlanItem_Id" +
 
+			" MATCH" +
+			" (p:Person)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(conf:Conference)" +
+			" ,(sd)-[:AS_BEING_FROM]->(cloc:Locality)" +
+			" ,(p)-[:MADE|:CHECKED_IN_AT]->(n)-[:TO|:OCCURS_IN]->(conf)" +
+			" WHERE" +
+			" ID(conf) = Conference_Id" +
+			" AND NOT n:SelfDeclaration" +
 
-	   @Query(  " WITH {0} AS Conference_Id,{1} AS LocalityTypeGrouping_Id,{2} AS SelectedLocality_Id,{3} AS SelectedPlanItem_Id " +
-		   		" MATCH (p:Person)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(conf:Conference),(sd)-[:AS_BEING_FROM]->(cLoc:Locality) " +
-		   		" ,(p)-[:MADE|:CHECKED_IN_AT]->(n)-[:TO|:OCCURS_IN]->(conf) " +
-		   		" WHERE ID(conf) = Conference_Id AND NOT n:SelfDeclaration " +
-		   		" MATCH(plt:LocalityType)<-[:OF_TYPE]-(loc:Locality)<-[:IS_LOCATED_IN *0..]-(cLoc),(loc)-[:IS_LOCATED_IN]->(pLoc) " +
-		   		" where id(plt) = LocalityTypeGrouping_Id AND (SelectedLocality_Id IS NULL OR id(pLoc) = SelectedLocality_Id) " +
-		   		" OPTIONAL MATCH planned = (p)<-[:MADE_BY|LIKED_BY]-(a:Attend)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES *0..]->(parentPlanItem:PlanItem) " +
-		   		" WHERE id(parentPlanItem) = SelectedPlanItem_Id " +
-		   		" OPTIONAL MATCH (pp:Person) " +
-		   		" WHERE pp in nodes(planned) " +
-		   		" WITH pp,p,loc,SelectedPlanItem_Id " +
-		   		" return id(loc) as id,loc.latitudeLongitude as latitudeLongitude,loc.name as name, " +
-		   		" case SelectedPlanItem_Id " +
-		   		" WHEN NULL THEN count(distinct p) " +
-		   		" ELSE count(distinct pp) " +
-		   		" END as quantityParticipation ")
-	        List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationAllAgroup(
-	             Long idConference, Long microregionChartAgroup,Long microregionLocalitySelected,Long structureItemPlanSelected);
+			" MATCH" +
+			" (cloc)-[:IS_LOCATED_IN *0..]->(loc:Locality)-[:OF_TYPE]->(plt:LocalityType)" +
+			" ,(cloc)-[:OF_TYPE]->(lt:LocalityType)" +
 
+			" WHERE" +
+			" id(plt) = LocalityTypeGrouping_Id OR id(lt) = LocalityTypeGrouping_Id" +
+			" AND" +
+			" (SelectedLocality_Id IS NULL" +
+			" OR id(loc) = SelectedLocality_Id" +
+			" OR id(cloc) = SelectedLocality_Id" +
+			" )" +
+
+			" OPTIONAL MATCH" +
+			" (conf)<-[:ABOUT]-(a:Attend)-[:MADE_BY|LIKED_BY]->(pp:Person)-[:MADE]->(sd)" +
+			" , 	(a)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES *0..]->(parentPlanItem:PlanItem)" +
+
+			" WHERE" +
+			" SelectedPlanItem_Id is null OR" +
+			" (id(planItem) = SelectedPlanItem_Id)" +
+			" OR" +
+			" (id(parentPlanItem) = SelectedPlanItem_Id)" +
+
+			" RETURN" +
+			" CASE LocalityTypeGrouping_Id WHEN id(lt)" +
+			" THEN id(cloc)" +
+			" ELSE id(loc)" +
+			" END as id," +
+
+			" CASE LocalityTypeGrouping_Id WHEN id(lt)" +
+			" THEN cloc.latitudeLongitude" +
+			" ELSE loc.latitudeLongitude" +
+			" END as latitudeLongitude," +
+
+			" CASE LocalityTypeGrouping_Id WHEN id(lt)" +
+			" THEN cloc.name" +
+			" ELSE loc.name" +
+			" END as name," +
+
+			" CASE SelectedPlanItem_Id WHEN NULL" +
+			" THEN count(distinct p)" +
+			" ELSE count(distinct pp)" +
+			" END as quantityParticipation" 
+	   ) List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationAllAgroup(
+			Long idConference, Long microregionChartAgroup,Long microregionLocalitySelected,Long structureItemPlanSelected);
 
 	   @Query( 
 			" WITH" +
@@ -66,28 +105,75 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 
 
-	   @Query(" WITH {0} AS Conference_Id,{1} AS LocalityTypeGrouping_Id,{2} AS SelectedLocality_Id,{3}	AS SelectedPlanItem_Id " +
-	   		  " MATCH (conf:Conference) WHERE id(conf) = Conference_Id " +
-	   		  " OPTIONAL MATCH (me:Meeting)-[:OCCURS_IN]->(conf) " +
-	   		  " OPTIONAL MATCH presentialLogins = (pr:Person)-[:MADE]->(pln:Login)-[:TO]->(conf) " +
-	   		  " WHERE((pr)-[:CHECKED_IN_AT]->(me) AND pln.time >= me.beginDate AND pln.time <= me.endDate) " +
-	   		  " WITH * " +
-	   		  " MATCH(p:Person)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(conf:Conference) " +
-	   		  " ,(sd)-[:AS_BEING_FROM]->(cLoc:Locality) " +
-	   		  " ,(p)-[:MADE]->(ln:Login)-[:TO]->(conf) " +
-	   		  " WHERE(presentialLogins IS NULL) OR (NOT ln IN nodes(presentialLogins)) " +
-	   		  " MATCH(plt:LocalityType)<-[:OF_TYPE]-(loc:Locality)<-[:IS_LOCATED_IN *0..]-(cLoc),(loc)-[:IS_LOCATED_IN]->(pLoc) " +
-	   		  " where id(plt) = LocalityTypeGrouping_Id AND (SelectedLocality_Id IS NULL OR id(pLoc) = SelectedLocality_Id) " +
-	   		  " OPTIONAL MATCH planned = (p)<-[:MADE_BY|LIKED_BY]-(a:Attend)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES *0..]->(parentPlanItem:PlanItem) " +
-	   		  " WHERE id(parentPlanItem) = SelectedPlanItem_Id AND NOT (a)-[:WHILE_IN]->(me) " +
-	   		  " OPTIONAL MATCH (pp:Person) " +
-	   		  " WHERE pp in nodes(planned) " +
-	   		  " WITH pp,p,loc,SelectedPlanItem_Id " +
-	   		  " RETURN id(loc) as id,loc.latitudeLongitude as latitudeLongitude,loc.name as name, " +
-	   		  " case SelectedPlanItem_Id " +
-	   		  " WHEN NULL THEN count(distinct p) " +
-	   		  " ELSE count(distinct pp) " +
-	   		  " END as quantityParticipation ")
+	   @Query(
+			" WITH" +
+			" {0} AS Conference_Id," +
+			" {1} AS LocalityTypeGrouping_Id," +
+			" {2} AS SelectedLocality_Id," +
+			" {3} AS SelectedPlanItem_Id" +
+
+			" MATCH (conf:Conference) WHERE id(conf) = Conference_Id" +
+			" OPTIONAL MATCH" +
+			" (me:Meeting)-[:OCCURS_IN]->(conf)" +
+
+			" with me, conf, LocalityTypeGrouping_Id, SelectedLocality_Id, SelectedPlanItem_Id" +
+
+			" MATCH" +
+			" (p:Person)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(conf)" +
+			" ,(sd)-[:AS_BEING_FROM]->(cloc:Locality)" +
+			" ,(p)-[:MADE]->(ln:Login)-[:TO]->(conf)" +
+
+			" WHERE" +
+			" (NOT (p)-[:CHECKED_IN_AT]->(me))" +
+			" OR" +
+			" ln.time <= me.beginDate" +
+			" OR" +
+			" ln.time >= me.endDate" +
+
+			" with p, conf, LocalityTypeGrouping_Id, SelectedLocality_Id, SelectedPlanItem_Id, sd, cloc" +
+
+			" MATCH" +
+			" (cloc)-[:IS_LOCATED_IN *0..]->(loc:Locality)-[:OF_TYPE]->(plt:LocalityType)" +
+			" ,(cloc)-[:OF_TYPE]->(lt:LocalityType)" +
+			" WHERE" +
+			" id(plt) = LocalityTypeGrouping_Id OR id(lt) = LocalityTypeGrouping_Id" +
+			" AND" +
+			" (SelectedLocality_Id IS NULL" +
+			" OR id(loc) = SelectedLocality_Id" +
+			" OR id(cloc) = SelectedLocality_Id" +
+			" )" +
+
+			" OPTIONAL MATCH" +
+			" (conf)<-[:ABOUT]-(a:Attend)-[:MADE_BY|LIKED_BY]->(pp:Person)-[:MADE]->(sd)" +
+			" , 	(a)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES *0..]->(parentPlanItem:PlanItem)" +
+
+			" WHERE" +
+			" SelectedPlanItem_Id is null OR" +
+			" (id(planItem) = SelectedPlanItem_Id)" +
+			" OR" +
+			" (id(parentPlanItem) = SelectedPlanItem_Id)" +
+
+			" RETURN" +
+			" CASE LocalityTypeGrouping_Id WHEN id(lt)" +
+			" THEN id(cloc)" +
+			" ELSE id(loc)" +
+			" END as id," +
+
+			" CASE LocalityTypeGrouping_Id WHEN id(lt)" +
+			" THEN cloc.latitudeLongitude" +
+			" ELSE loc.latitudeLongitude" +
+			" END as latitudeLongitude," +
+
+			" CASE LocalityTypeGrouping_Id WHEN id(lt)" +
+			" THEN cloc.name" +
+			" ELSE loc.name" +
+			" END as name," +
+
+			" CASE SelectedPlanItem_Id WHEN NULL" +
+			" THEN count(distinct p)" +
+			" ELSE count(distinct pp)" +
+			" END as quantityParticipation"
+	   )
 	        List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationRemotoAgroup(
 	             Long idConference, Long microregionChartAgroupm,Long icroregionLocalitySelected,Long structureItemPlanSelected);
 
@@ -207,42 +293,106 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 
 
-	   @Query(  " WITH {0} AS Conference_Id,{1} AS LocalityTypeGrouping_Id,{2} AS SelectedLocality_Id,{3} AS SelectedPlanItem_Id " +
-	   		    " MATCH (conf:Conference)-[:TARGETS]->(pl:Plan)<-[:COMPOSES]-(parentPlI)<-[:COMPOSES *0..]-(plI:PlanItem)<-[:ABOUT]-(hl:Highlight) " +
-	   		    " ,(hl)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType) " +
-	   		    " WHERE ID(conf) = Conference_Id AND (id(plt) = LocalityTypeGrouping_Id AND (SelectedLocality_Id IS NULL OR id(parentLoc) = SelectedLocality_Id)) " +
-	   		    " AND (SelectedPlanItem_Id IS NULL OR id(plI) = SelectedPlanItem_Id OR id(parentPlI) = SelectedPlanItem_Id) " +
-	   		    " RETURN id(loc) as id,loc.latitudeLongitude as latitudeLongitude,loc.name as name,count(distinct hl) as quantityHighlight ")
+	   @Query(		   
+			" WITH" +
+			" {0} AS Conference_Id," +
+			" {1} AS LocalityTypeGrouping_Id," +
+			" {2} AS SelectedLocality_Id," +
+			" {3} AS SelectedPlanItem_Id" +
+
+			" MATCH" +
+			" (conf:Conference)<-[:ABOUT]-(a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)," +
+			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType)" +
+
+			" WHERE" +
+			" ID(conf) = Conference_Id" +
+			" AND id(plt) = LocalityTypeGrouping_Id" +
+			" AND(SelectedLocality_Id IS NULL" +
+			" OR id(parentLoc) = SelectedLocality_Id" +
+			" OR id(loc) = SelectedLocality_Id)" +
+			" AND(SelectedPlanItem_Id IS NULL" +
+			" OR id(cPI) = SelectedPlanItem_Id" +
+			" OR id(planItem) = SelectedPlanItem_Id)" +
+
+			" RETURN" +
+			" id(parentLoc) as id," +
+			" parentLoc.latitudeLongitude as latitudeLongitude," +
+			" parentLoc.name as name," +
+			" count(distinct a) as quantityHighlight"
+	   )
 	        List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightAllAgroup(
 	             Long idConference, Long microregionChartAgroup,Long icroregionLocalitySelected,Long structureItemPlanSelected);
 
 
 
 
-	   @Query(  " WITH {0} AS Conference_Id,{1} AS LocalityTypeGrouping_Id,{2}	AS SelectedLocality_Id,{3} AS SelectedPlanItem_Id " +
-	   		    " MATCH (conf:Conference)-[:TARGETS]->(pl:Plan)<-[:COMPOSES]-(parentPlI)<-[:COMPOSES *0..]-(plI:PlanItem)<-[:ABOUT]-(hl:Highlight) " +
-	   		    " ,(hl)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType) " +
-	   		    " WHERE ID(conf) = Conference_Id AND hl.from = 'rem'  AND (id(plt) = LocalityTypeGrouping_Id AND (SelectedLocality_Id IS NULL " +
-	   		    " OR id(parentLoc) = SelectedLocality_Id)) AND (SelectedPlanItem_Id IS NULL " +
-	   		    " OR id(plI) = SelectedPlanItem_Id OR id(parentPlI) = SelectedPlanItem_Id) " +
-	   		    " RETURN id(loc) as id,loc.latitudeLongitude as latitudeLongitude,loc.name as name, " +
-	   		    " count(distinct hl) as quantityHighlight ")
+	   @Query(
+			" WITH" +
+			" {0} AS Conference_Id," +
+			" {1} AS LocalityTypeGrouping_Id," +
+			" {2}	AS SelectedLocality_Id," +
+			" {3} AS SelectedPlanItem_Id" +
+
+			" MATCH" +
+			" (conf:Conference)<-[:ABOUT]-(a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)," +
+			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType)" +
+
+			" WHERE" +
+			" ID(conf) = Conference_Id" +
+			" AND a.from = 'rem'" +
+			" AND id(plt) = LocalityTypeGrouping_Id" +
+			" AND(SelectedLocality_Id IS NULL" +
+			" OR id(parentLoc) = SelectedLocality_Id" +
+			" OR id(loc) = SelectedLocality_Id)" +
+			" AND(SelectedPlanItem_Id IS NULL" +
+			" OR id(cPI) = SelectedPlanItem_Id" +
+			" OR id(planItem) = SelectedPlanItem_Id)" +
+
+			" RETURN" +
+			" id(parentLoc) as id," +
+			" parentLoc.latitudeLongitude as latitudeLongitude," +
+			" parentLoc.name as name," +
+			" count(distinct a) as quantityHighlight"
+	   )
 		        List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightRemotoAgroup(
 		             Long idConference, Long microregionChartAgroup,Long icroregionLocalitySelected,Long structureItemPlanSelected);
 
 
 
 
-	   @Query( " WITH {0} AS Conference_Id, {1} AS LocalityTypeGrouping_Id,{2} AS SelectedLocality_Id,{3} AS SelectedPlanItem_Id,{4} AS Meeting_List " +
-	   		   " MATCH (conf:Conference)-[:TARGETS]->(pl:Plan)<-[:COMPOSES]-(parentPlI)<-[:COMPOSES *0..]-(plI:PlanItem)<-[:ABOUT]-(hl:Highlight) " +
-	   		   " ,(hl)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType) " +
-	   		   " ,(conf)<-[:OCCURS_IN]-(me:Meeting)<-[:DURING]-(hl) " +
-	   		   " WHERE ID(conf) = Conference_Id AND (Meeting_List IS NULL OR id(me) IN Meeting_List) " +
-	   		   " AND hl.from = 'pres'  AND (id(plt) = LocalityTypeGrouping_Id AND (SelectedLocality_Id IS NULL " +
-	   		   " OR id(parentLoc) = SelectedLocality_Id)) AND (SelectedPlanItem_Id IS NULL " +
-	   		   " OR id(plI) = SelectedPlanItem_Id OR id(parentPlI) = SelectedPlanItem_Id) " +
-	   		   " RETURN id(loc) as id,loc.latitudeLongitude as latitudeLongitude,loc.name as name, " +
-	   		   " count(distinct hl) as quantityHighlight ")
+	   @Query(
+		   
+" WITH" +
+" {0} AS Conference_Id," +
+" {1} AS LocalityTypeGrouping_Id," +
+" {2} AS SelectedLocality_Id," +
+" {3} AS SelectedPlanItem_Id," +
+" {4} AS Meeting_List" +
+
+" MATCH" +
+" (conf:Conference)<-[:ABOUT]-(a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)" +
+" ,(a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType)" +
+" ,(conf)<-[:OCCURS_IN]-(me:Meeting)<-[:DURING]-(a)" +
+
+" WHERE" +
+" id(conf) = Conference_Id" +
+" AND a.from = 'pres'" +
+" AND (Meeting_List IS NULL OR id(me) IN Meeting_List)" +
+" AND id(plt) = LocalityTypeGrouping_Id" +
+" AND(SelectedLocality_Id IS NULL" +
+" OR id(parentLoc) = SelectedLocality_Id" +
+" OR id(loc) = SelectedLocality_Id)" +
+" AND(SelectedPlanItem_Id IS NULL" +
+" OR id(cPI) = SelectedPlanItem_Id" +
+" OR id(planItem) = SelectedPlanItem_Id)" +
+
+" RETURN" +
+" id(parentLoc) as id," +
+" parentLoc.latitudeLongitude as latitudeLongitude," +
+" parentLoc.name as name," +
+" count(distinct a) as quantityHighlight"
+
+	   )
 		        List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightPresenteAgroup(
 		             Long idConference, Long microregionChartAgroup,Long icroregionLocalitySelected,Long structureItemPlanSelected,List<Long> meetings);
 
@@ -341,10 +491,10 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 	   @Query(
 			" WITH" +
-			" {0} Conference_Id," +
-			" {1} SelectedLocality_Id," +
-			" {2} SelectedPlanItem_Id," +
-			" {3} Meeting_List" +
+			" {0} as Conference_Id," +
+			" {1} as SelectedLocality_Id," +
+			" {2} as SelectedPlanItem_Id," +
+			" {3} as Meeting_List" +
 
 			" MATCH" +
 			" (a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)<-[:OCCURS_IN]-(me:Meeting)," +
@@ -390,14 +540,35 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 
 
-	   @Query(  " WITH {0} AS Conference_Id,{1} AS LocalityTypeGrouping_Id,{2} AS SelectedLocality_Id,{3} AS SelectedPlanItem_Id " +
-	   		    " MATCH (conf:Conference)-[:TARGETS]->(pl:Plan)<-[:COMPOSES]-(parentPlI)<-[:COMPOSES *0..]-(plI:PlanItem)<-[:ABOUT]-(prop:Comment) " +
-	   		    " ,(prop)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType) " +
-	   		    " WHERE ID(conf) = Conference_Id AND (id(plt) = LocalityTypeGrouping_Id AND (SelectedLocality_Id IS NULL " +
-	   		    " OR id(parentLoc) = SelectedLocality_Id)) AND (SelectedPlanItem_Id IS NULL OR id(plI) = SelectedPlanItem_Id " +
-	   		    " OR id(parentPlI) = SelectedPlanItem_Id) " +
-	   		    " RETURN id(loc) as id,loc.latitudeLongitude as latitudeLongitude,loc.name as name, " +
-	   		    " count(distinct prop) as quantityComment ")
+	   @Query(
+		   
+			" WITH" +
+			" {0} AS Conference_Id," +
+			" {1} AS LocalityTypeGrouping_Id," +
+			" {2} AS SelectedLocality_Id," +
+			" {3} AS SelectedPlanItem_Id" +
+
+			" MATCH" +
+			" (conf:Conference)<-[:ABOUT]-(a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)," +
+			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType)" +
+
+			" WHERE" +
+			" ID(conf) = Conference_Id" +
+			" AND id(plt) = LocalityTypeGrouping_Id" +
+			" AND(SelectedLocality_Id IS NULL" +
+			" OR id(parentLoc) = SelectedLocality_Id" +
+			" OR id(loc) = SelectedLocality_Id)" +
+			" AND(SelectedPlanItem_Id IS NULL" +
+			" OR id(cPI) = SelectedPlanItem_Id" +
+			" OR id(planItem) = SelectedPlanItem_Id)" +
+
+			" RETURN" +
+			" id(parentLoc) as id," +
+			" parentLoc.latitudeLongitude as latitudeLongitude," +
+			" parentLoc.name as name," +
+			" count(distinct a) as quantityComment"
+
+	   )
 	        List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsAllAgroup(
 	             Long idConference, Long microregionChartAgroupm,Long icroregionLocalitySelected,Long structureItemPlanSelected);
 
@@ -451,13 +622,34 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 
 
-	   @Query( " WITH {0} AS Conference_Id,{1} AS LocalityTypeGrouping_Id,{2} AS SelectedLocality_Id,{3} AS SelectedPlanItem_Id " +
-	   		   " MATCH (conf:Conference)-[:TARGETS]->(pl:Plan)<-[:COMPOSES]-(parentPlI)<-[:COMPOSES *0..]-(plI:PlanItem)<-[:ABOUT]-(prop:Comment) " +
-	   		   " ,(prop)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType) " +
-	   		   " WHERE ID(conf) = Conference_Id AND prop.from = 'rem'  AND (id(plt) = LocalityTypeGrouping_Id AND (SelectedLocality_Id IS NULL " +
-	   		   " OR id(parentLoc) = SelectedLocality_Id)) AND (SelectedPlanItem_Id IS NULL OR id(plI) = SelectedPlanItem_Id OR id(parentPlI) = SelectedPlanItem_Id) " +
-	   		   " RETURN id(loc) as id, loc.latitudeLongitude as latitudeLongitude, loc.name as name, " +
-	   		   " count(distinct prop) as quantityComment ")
+	   @Query(
+			" WITH" +
+			" {0} AS Conference_Id," +
+			" {1} AS LocalityTypeGrouping_Id," +
+			" {2} AS SelectedLocality_Id," +
+			" {3} AS SelectedPlanItem_Id" +
+
+			" MATCH" +
+			" (conf:Conference)<-[:ABOUT]-(a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)," +
+			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType)" +
+
+			" WHERE" +
+			" ID(conf) = Conference_Id" +
+			" AND a.from = 'rem'" +
+			" AND id(plt) = LocalityTypeGrouping_Id" +
+			" AND(SelectedLocality_Id IS NULL" +
+			" OR id(parentLoc) = SelectedLocality_Id" +
+			" OR id(loc) = SelectedLocality_Id)" +
+			" AND(SelectedPlanItem_Id IS NULL" +
+			" OR id(cPI) = SelectedPlanItem_Id" +
+			" OR id(planItem) = SelectedPlanItem_Id)" +
+
+			" RETURN" +
+			" id(parentLoc) as id," +
+			" parentLoc.latitudeLongitude as latitudeLongitude," +
+			" parentLoc.name as name," +
+			" count(distinct a) as quantityComment"
+	   )
 		        List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsRemotoAgroup(
 		             Long idConference, Long microregionChartAgroupm,Long icroregionLocalitySelected,Long structureItemPlanSelected);
 
@@ -509,15 +701,37 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 
 
-	   @Query( " WITH {0} AS Conference_Id,{1} AS LocalityTypeGrouping_Id,{2} AS SelectedLocality_Id,{3} AS SelectedPlanItem_Id,{4}	AS Meeting_List " +
-	   		   " MATCH (conf:Conference)-[:TARGETS]->(pl:Plan)<-[:COMPOSES]-(parentPlI)<-[:COMPOSES *0..]-(plI:PlanItem)<-[:ABOUT]-(prop:Comment) " +
-	   		   " ,(prop)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType) " +
-	   		   " ,(conf)<-[:OCCURS_IN]-(me:Meeting)<-[:DURING]-(prop) " +
-	   		   " WHERE ID(conf) = Conference_Id AND (Meeting_List IS NULL OR id(me) IN Meeting_List) AND prop.from = 'pres'  " +
-	   		   " AND (id(plt) = LocalityTypeGrouping_Id AND (SelectedLocality_Id IS NULL OR id(parentLoc) = SelectedLocality_Id)) " +
-	           " AND (SelectedPlanItem_Id IS NULL OR id(plI) = SelectedPlanItem_Id OR id(parentPlI) = SelectedPlanItem_Id) " +
-	   		   " RETURN id(loc) as id,loc.latitudeLongitude as latitudeLongitude,loc.name as name, " +
-	   		   " count(distinct prop) as quantityComment ")
+	   @Query(
+			" WITH" +
+			" {0} AS Conference_Id," +
+			" {1} AS LocalityTypeGrouping_Id," +
+			" {2} AS SelectedLocality_Id," +
+			" {3} AS SelectedPlanItem_Id," +
+			" {4} AS Meeting_List" +
+
+			" MATCH" +
+			" (conf:Conference)<-[:ABOUT]-(a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)" +
+			" ,(a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE]->(plt:LocalityType)" +
+			" ,(conf)<-[:OCCURS_IN]-(me:Meeting)<-[:DURING]-(a)" +
+
+			" WHERE" +
+			" ID(conf) = Conference_Id" +
+			" AND a.from = 'pres'" +
+			" AND (Meeting_List IS NULL OR id(me) IN Meeting_List)" +
+			" AND id(plt) = LocalityTypeGrouping_Id" +
+			" AND(SelectedLocality_Id IS NULL" +
+			" OR id(parentLoc) = SelectedLocality_Id" +
+			" OR id(loc) = SelectedLocality_Id)" +
+			" AND(SelectedPlanItem_Id IS NULL" +
+			" OR id(cPI) = SelectedPlanItem_Id" +
+			" OR id(planItem) = SelectedPlanItem_Id)" +
+
+			" RETURN" +
+			" id(parentLoc) as id," +
+			" parentLoc.latitudeLongitude as latitudeLongitude," +
+			" parentLoc.name as name," +
+			" count(distinct a) as quantityComment"
+	   )
 		        List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsPresenteAgroup(
 		             Long idConference, Long microregionChartAgroupm,Long icroregionLocalitySelected,Long structureItemPlanSelected,List<Long> meetings);
 

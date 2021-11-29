@@ -214,7 +214,7 @@ public class ControlPanelService {
 											microregionLocalitySelected,structureItemPlanSelected);									
 				for(int i = 0; i < planItemChartQueryResult.size(); i++) {		    		 						    		 
 					 ControlPanelChartDto strategicDto = new ControlPanelChartDto();
-					strategicDto.setId(planItemChartQueryResult.get(i).getId());
+					strategicDto.setId(planItemChartQueryResult.get(i).getIdPlanItem());
 					if(planItemChartQueryResult.get(i).getPlanItemName() == null) {
 		    			   strategicDto.setDescription("Without Name");	    			   		    			   
 		    		}else{
@@ -246,7 +246,7 @@ public class ControlPanelService {
 											,microregionLocalitySelected,structureItemPlanSelected,meetings);									
 					for(int i = 0; i < planItemChartQueryResult.size(); i++) {		    		 						    		 
 						 ControlPanelChartDto strategicDto = new ControlPanelChartDto();
-						strategicDto.setId(planItemChartQueryResult.get(i).getId());
+						strategicDto.setId(planItemChartQueryResult.get(i).getIdPlanItem());
 						if(planItemChartQueryResult.get(i).getPlanItemName() == null) {
 			    			   strategicDto.setDescription("Without Name");	    			   		    			   
 			    		}else{
