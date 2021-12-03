@@ -320,6 +320,9 @@ public class ConferenceService {
       files.stream().map(File::getId).filter(id -> listFiles.stream().noneMatch(file -> id.equals(file.getId())))
         .forEach(this.fileService::delete);
     }
+    else if (files != null && !files.isEmpty()){
+      files.forEach(file -> fileService.delete(file.getId())); 
+    }
   }
 
   private void loadTopics(Conference conference, ConferenceParamDto param) {

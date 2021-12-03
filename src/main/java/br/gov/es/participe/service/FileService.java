@@ -73,13 +73,20 @@ public class FileService {
 
     public void delete(Long id) {
         br.gov.es.participe.model.File file1 = fileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Imagem id: " + id +" não encontrada."));
-        String caminhoArquivo = applicationProperties.getPathImagens().concat(file1.getUrl());
-        try {
-            Files.delete(Paths.get(caminhoArquivo));
-        } catch (IOException e) {
-            log.error("File not removed", e);
+        
+        String caminhoArquivo = applicationProperties.getPathImagens();
+        if (file1.getUrl() != null) {
+            caminhoArquivo = caminhoArquivo.concat(file1.getUrl());
+            if (Files.exists(Paths.get(caminhoArquivo))) {
+                try {
+                    Files.delete(Paths.get(caminhoArquivo));
+                } catch (IOException e) {
+                    log.error("File not removed", e);
+                }
+            }
         }
-
+        
+        
         fileRepository.delete(file1);
     }
 
