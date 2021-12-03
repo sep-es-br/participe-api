@@ -2,6 +2,7 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.ConferenceDto;
 import br.gov.es.participe.controller.dto.ConferenceParamDto;
+import br.gov.es.participe.controller.dto.FileDto;
 import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -313,8 +314,8 @@ public class Conference extends Entity implements Serializable {
     return this.subtitleAuthentication;
   }
 
-  public void setSubtitleAuthentication(String subtitleAuthentication) {
-    this.subtitleAuthentication = subtitleAuthentication;
+  public void setSubtitleAuthentication(File file) {
+    this.subtitleAuthentication = file;
   }
 
   public String getTitleParticipation() {
@@ -361,8 +362,8 @@ public class Conference extends Entity implements Serializable {
     return this.fileAuthentication;
   }
 
-  public void setFileAuthentication(File fileAuthentication) {
-    this.fileAuthentication = fileAuthentication;
+  public void setFileAuthentication(File file) {
+    this.fileAuthentication = file;
   }
 
   public LocalityType getLocalityType() {
