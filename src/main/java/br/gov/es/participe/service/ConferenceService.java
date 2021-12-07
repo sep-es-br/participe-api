@@ -237,6 +237,7 @@ public class ConferenceService {
 
     conference.setName(param.getName().trim().replaceAll(" +", " "));
 
+    
     this.loadAttributesFromParam(conference, param);
 
     this.conferenceRepository.save(conference);
@@ -251,6 +252,12 @@ public class ConferenceService {
     this.loadExternalLinks(conference, param);
     this.loadBackGroundImages(conference, param);
     this.loadTopics(conference, param);
+    if (param.getFileAuthentication() != null) {
+      conference.setFileAuthentication(this.fileService.find(param.getFileAuthentication().getId()));
+    }
+    if (param.getFileParticipation() != null) {
+      conference.setFileParticipation(this.fileService.find(param.getFileParticipation().getId()));
+    }
   }
 
   private void loadResearch(Conference conference, ConferenceParamDto param) throws ParseException {
@@ -312,6 +319,9 @@ public class ConferenceService {
 
       files.stream().map(File::getId).filter(id -> listFiles.stream().noneMatch(file -> id.equals(file.getId())))
         .forEach(this.fileService::delete);
+    }
+    else if (files != null && !files.isEmpty()){
+      files.forEach(file -> fileService.delete(file.getId())); 
     }
   }
 
@@ -471,13 +481,13 @@ public class ConferenceService {
       throw new IllegalArgumentException("Plan is required");
     }
 
-    if(conference.getFileAuthentication() == null || conference.getFileAuthentication().getId() == null) {
-      throw new IllegalArgumentException("Authentication Image is required");
-    }
+//    if(conference.getFileAuthentication() == null || conference.getFileAuthentication().getId() == null) {
+//      throw new IllegalArgumentException("Authentication Image is required");
+//    }
 
-    if(conference.getFileParticipation() == null || conference.getFileParticipation().getId() == null) {
-      throw new IllegalArgumentException("Participation Image is required");
-    }
+//    if(conference.getFileParticipation() == null || conference.getFileParticipation().getId() == null) {
+//      throw new IllegalArgumentException("Participation Image is required");
+//    }
 
     Conference c = this.conferenceRepository.findByNameIgnoreCase(conference.getName());
     if(c != null) {

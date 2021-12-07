@@ -167,4 +167,17 @@ public class HighlightService {
   public Integer countHighlightByConference(Long id) {
     return highlightRepository.countHighlightByConference(id);
   }
+  
+  public Integer countHighlightAllOriginsByConference(Long id) {
+	    return highlightRepository.countHighlightAllOriginsByConference(id);
+  }
+  
+  public Integer countHighlightRemoteOriginByConference(Long id) {
+	    return highlightRepository.countHighlightRemoteOriginByConference(id);
+  }
+  
+  public Integer countHighlightPresentialOriginByConference(Long id,List<Long> meetings) {
+	    return highlightRepository.countHighlightPresentialOriginByConference(id,meetings);
+}
+  
 }

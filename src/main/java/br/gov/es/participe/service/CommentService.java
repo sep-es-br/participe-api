@@ -178,15 +178,15 @@ public class CommentService {
     comment.setMeeting(meeting);
     comment.setPlanItem(planItem);
     comment.setLocality(locality);
-    if (comment.getClassification() == null || comment.getClassification().isEmpty()) {
-      comment.setClassification("proposal");
+    if (comment.getType() == null || comment.getType().isEmpty()) {
+      comment.setType("prop");
     }
     Date date = new Date();
 
     comment.setTime(date);
 
     Optional<Person> personParticipating = personService
-        .findPersonIfParticipatingOnMeetingPresentially(person.getId(), date);
+        .findPersonIfParticipatingOnMeetingPresentially(person.getId(), date,conference.getId());
 
     if (personParticipating.isPresent()) {
 
@@ -199,9 +199,9 @@ public class CommentService {
           .orElse(null);
 
       comment.setMeeting(meetingPresentially);
-      comment.setType("pre");
+      comment.setFrom("pres");
     } else {
-      comment.setType("com");
+      comment.setFrom("rem");
     }
 
     if (comment.getStatus() == null) {
@@ -212,6 +212,7 @@ public class CommentService {
     }
 
     Comment response = commentRepository.save(comment);
+   
     Highlight highlight = highlightService.find(
         person.getId(),
         planItem.getId(),
@@ -221,14 +222,14 @@ public class CommentService {
 
     if (highlight == null) {
       highlight = new Highlight();
-      highlight.setFrom(from);
+      highlight.setFrom(comment.getFrom());
       highlight.setMeeting(meeting);
       highlight.setPlanItem(planItem);
       highlight.setLocality(locality);
       highlight.setPersonMadeBy(person);
       highlight.setConference(conference);
 
-      highlightService.save(highlight, from);
+      highlightService.save(highlight, comment.getFrom());
     }
     return response;
   }

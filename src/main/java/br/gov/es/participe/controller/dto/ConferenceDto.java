@@ -95,8 +95,15 @@ public class ConferenceDto {
     this.subtitleAuthentication = conference.getSubtitleAuthentication();
     this.subtitleParticipation = conference.getSubtitleParticipation();
     this.subtitleRegionalization = conference.getSubtitleRegionalization();
-    this.fileParticipation = new FileDto(conference.getFileParticipation());
-    this.fileAuthentication = new FileDto(conference.getFileAuthentication());
+    
+    this.fileParticipation = (conference.getFileParticipation() != null)
+      ? new FileDto(conference.getFileParticipation())
+      : null;
+    
+    this.fileAuthentication = (conference.getFileAuthentication() != null) 
+      ? new FileDto(conference.getFileAuthentication())
+      : null;
+    
     this.localityType = new LocalityTypeDto(conference.getLocalityType());
 
     if (conference.getSelfDeclaration() != null && !conference.getSelfDeclaration().isEmpty()) {
