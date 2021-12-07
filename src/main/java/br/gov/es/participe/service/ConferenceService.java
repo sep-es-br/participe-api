@@ -101,7 +101,11 @@ public class ConferenceService {
         backGroundImage != null ? new FileDto(conference.getFileAuthentication()) : null);
 
       String url = uriComponentsBuilder.path("/files/").build().toUri().toString();
-      auth.getFileAuthentication().setUrl(url + conference.getFileAuthentication().getId());
+      
+      if (conference.getFileAuthentication() != null) {
+        auth.getFileAuthentication().setUrl(url + conference.getFileAuthentication().getId());
+      }
+      
       if(backGroundImage != null) {
         auth.getBackgroundImageUrl().setUrl(url + backGroundImage.getId());
       }
