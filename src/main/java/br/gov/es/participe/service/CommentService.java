@@ -443,6 +443,7 @@ public class CommentService {
         set.add(item);
       }
     }
+    Collections.sort(set);
     return set;
   }
 
