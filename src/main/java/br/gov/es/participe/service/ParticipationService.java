@@ -203,7 +203,10 @@ public class ParticipationService {
     header.setAnswerSurvey(self != null && self.getAnswerSurvey());
 
     String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
-    header.setImage(url + conference.getFileParticipation().getId());
+    if (conference.getFileParticipation() != null) {
+      header.setImage(url + conference.getFileParticipation().getId());
+    }
+    
     return header;
   }
 
