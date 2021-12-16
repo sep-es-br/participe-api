@@ -405,20 +405,25 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" {2} AS SelectedPlanItem_Id" +
 
 			" MATCH" +
-			" (a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)," +
-			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
-
+			" (a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)" +
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
-			" AND(" +
+			" AND" +
+			" (" +
 			" SelectedPlanItem_Id IS NULL" +
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
 			" )" +
-			" AND (" +
-			" id(parentLoc) = SelectedLocality_Id OR id(loc) = SelectedLocality_Id OR SelectedLocality_Id IS NULL" +
-			" )" +
 
+			" OPTIONAL MATCH" +
+			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+			" WHERE" +
+			" id(parentLoc) = SelectedLocality_Id" +
+			" OR" +
+			" id(loc) = SelectedLocality_Id" +
+			" OR" +
+			" SelectedLocality_Id IS NULL" +
+	
 			" WITH" +
 			" a," +
 			" planItem," +
@@ -436,7 +441,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" ELSE cPI.name" +
 			" END as planItemName," +
 
-			" count(distinct a) as quantityHighlight"    
+			" count(distinct a) as quantityHighlight"
 		)
 		        List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightAllPlanItemAgroup(
 		             Long idConference,Long microregionLocalitySelected,Long structureItemPlanSelected);
@@ -450,17 +455,19 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" {2} AS SelectedPlanItem_Id" +
 
 			" MATCH" +
-			" (a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)," +
-			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
-
+			" (a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)" +
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
-			" AND	a.from = 'rem'" +
+			" AND a.from = 'rem' " +
 			" AND(" +
 			" SelectedPlanItem_Id IS NULL" +
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
 			" )" +
+
+			" OPTIONAL MATCH" +
+			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+			" WHERE" +
 			" AND (" +
 			" id(parentLoc) = SelectedLocality_Id OR id(loc) = SelectedLocality_Id OR SelectedLocality_Id IS NULL" +
 			" )" +
@@ -497,8 +504,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" {3} as Meeting_List" +
 
 			" MATCH" +
-			" (a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)<-[:OCCURS_IN]-(me:Meeting)," +
-			" (a)-[:AS_BEING_FROM]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+			" (a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)<-[:OCCURS_IN]-(me:Meeting)" +
+
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
 			" AND(" +
@@ -506,15 +513,22 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
 			" )" +
-			" AND (" +
-			" id(parentLoc) = SelectedLocality_Id OR id(loc) = SelectedLocality_Id OR SelectedLocality_Id IS NULL" +
-			" )" +
-			" AND a.from = 'pres'" +
+			" AND a.from = 'pres' " +
 			" AND (" +
 			" Meeting_List IS NULL" +
 			" OR" +
 			" id(me) IN Meeting_List" +
 			" )" +
+
+			" OPTIONAL MATCH" +
+			" (a)-[:AS_BEING_FROM]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+
+			" WHERE" +
+			" id(parentLoc) = SelectedLocality_Id" +
+			" OR" +
+			" id(loc) = SelectedLocality_Id" +
+			" OR" +
+			" SelectedLocality_Id IS NULL" +
 
 			" WITH" +
 			" a," +
@@ -554,6 +568,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
+			" AND (NOT a.status IN ['rem' , 'pen' ])" +
 			" AND id(plt) = LocalityTypeGrouping_Id" +
 			" AND(SelectedLocality_Id IS NULL" +
 			" OR id(parentLoc) = SelectedLocality_Id" +
@@ -582,19 +597,24 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" {2} AS SelectedPlanItem_Id" +
 
 			" MATCH" +
-			" (a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)," +
-			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
-
+			" (a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)" +
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
+			" AND (NOT a.status IN ['rem', 'pen'])" +
 			" AND(" +
-			" SelectedPlanItem_Id IS NULL" +
+			" SelectedPlanItem_Id IS NULL " +
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
 			" )" +
-			" AND (" +
-			" id(parentLoc) = SelectedLocality_Id OR id(loc) = SelectedLocality_Id OR SelectedLocality_Id IS NULL" +
-			" )" +
+
+			" OPTIONAL MATCH" +
+			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+			" WHERE" +
+			" id(parentLoc) = SelectedLocality_Id" +
+			" OR" +
+			" id(loc) = SelectedLocality_Id" +
+			" OR" +
+			" SelectedLocality_Id IS NULL" +
 
 			" WITH" +
 			" a," +
@@ -635,6 +655,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
+			" AND (NOT a.status IN ['rem' , 'pen' ])" +
 			" AND a.from = 'rem'" +
 			" AND id(plt) = LocalityTypeGrouping_Id" +
 			" AND(SelectedLocality_Id IS NULL" +
@@ -661,22 +682,25 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			 "{1} AS SelectedLocality_Id, "+
 			 "{2} AS SelectedPlanItem_Id "+
 
-			 "MATCH "+
-			 "(a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference), "+
-			 "(a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) "+
+			" MATCH" +
+			" (a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)" +
+			" WHERE" +
+			" ID(conf) = Conference_Id" +
+			" AND (NOT a.status IN ['rem', 'pen'])" +
+			" AND	a.from = 'rem' " +
+			" AND(" +
+			" SelectedPlanItem_Id IS NULL" +
+			" OR" +
+			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
+			" )" +
 
-			 "WHERE "+
-			 "ID(conf) = Conference_Id "+
-			 "AND	a.from = 'rem' "+
-			 "AND( "+
-			 "SelectedPlanItem_Id IS NULL "+
-			 "OR "+
-			 "(id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id) "+
-			 ") "+
-			 "AND ( "+
-			 "id(parentLoc) = SelectedLocality_Id OR id(loc) = SelectedLocality_Id OR SelectedLocality_Id IS NULL "+
-			 ") "+
-
+			" OPTIONAL MATCH" +
+			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+			" WHERE" +
+			" id(parentLoc) = SelectedLocality_Id" +
+			" OR id(loc) = SelectedLocality_Id" +
+			" OR SelectedLocality_Id IS NULL " +
+		 
 			 "WITH "+
 			 "a, "+
 			 "planItem, "+
@@ -717,6 +741,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
 			" AND a.from = 'pres'" +
+			" AND (NOT a.status IN ['rem' , 'pen' ])" +
 			" AND (Meeting_List IS NULL OR id(me) IN Meeting_List)" +
 			" AND id(plt) = LocalityTypeGrouping_Id" +
 			" AND(SelectedLocality_Id IS NULL" +
@@ -744,25 +769,29 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" {3} as Meeting_List" +
 
 			" MATCH" +
-			" (a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)<-[:OCCURS_IN]-(me:Meeting)," +
-			" (a)-[:AS_BEING_FROM]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+			" (a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)<-[:OCCURS_IN]-(me:Meeting)" +
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
+			" AND (NOT a.status IN ['rem', 'pen'])" +
 			" AND(" +
 			" SelectedPlanItem_Id IS NULL" +
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
 			" )" +
-			" AND (" +
-			" id(parentLoc) = SelectedLocality_Id OR id(loc) = SelectedLocality_Id OR SelectedLocality_Id IS NULL" +
-			" )" +
-			" AND a.from =  'pres'" +
+			" AND a.from = 'pres' " +
 			" AND (" +
 			" Meeting_List IS NULL" +
 			" OR" +
 			" id(me) IN Meeting_List" +
 			" )" +
 
+			" OPTIONAL MATCH" +
+			" (a)-[:AS_BEING_FROM]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+			" WHERE" +
+			" id(parentLoc) = SelectedLocality_Id" +
+			" OR id(loc) = SelectedLocality_Id" +
+			" OR SelectedLocality_Id IS NULL" +
+			
 			" WITH" +
 			" a," +
 			" planItem," +
