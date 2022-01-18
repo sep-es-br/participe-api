@@ -22,7 +22,7 @@ public class ControlPanelService {
   private final ControlPanelRepository repository;
   private final HighlightService highlightService;
   private final AttendRepository attendRepository;
-  private final LocalityTypeService localityTypeService;   
+  private final LocalityTypeService localityTypeService;
 
   @Autowired
   public ControlPanelService(
@@ -36,7 +36,6 @@ public class ControlPanelService {
     this.attendRepository = attendRepository;
     this.localityTypeService = localityTypeService;
   }
-
 
   private HeatMapChartDto heatChartDto (String latitudeLongitude1, Long count) {
 	  HeatMapChartDto heatDto = new HeatMapChartDto();    	  
@@ -61,17 +60,20 @@ public class ControlPanelService {
  	     }	  	   
    return heatDto;
   }
-  
+
   private String returnOriginConverted(String origin) {
     if (origin == null || origin.isEmpty()) {
       return origin;
     }
+
     if (origin.equals("PRESENTIAL")) {
       return "pres";
     }
+
     if (origin.equals("REMOTE")) {
       return "rem";
     }
+
     throw new IllegalArgumentException("Invalid origin.");
   }
 
@@ -158,7 +160,8 @@ public class ControlPanelService {
 			   	       }	
 			   		   strategicAreaChart.add(strategicDto);		    		 
 		    	 }			    	 
-		     }else if (origin.equals("rem")){		    	 
+		     }else if (origin.equals("rem")){
+		    	 
 		    	microregionChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceParticipationRemotoAgroup(idConference,microregionChartAgroup
 		    								,microregionLocalitySelected,structureItemPlanSelected);   		    	 					    		    	    	  			
 				for (int i = 0; i < microregionChartQueryResult.size(); i++) {		    			 		    		 					
@@ -223,10 +226,9 @@ public class ControlPanelService {
 						strategicAreaChart.add(strategicDto);		    		 
 					}		    	  	 	 
 		 	 }  		    	     	  		    			  	   
-	   }else if(ResultTypeControlPanelEnum.HIGHLIGHTS.equals(result)){      
-	       
+	   }else if(ResultTypeControlPanelEnum.HIGHLIGHTS.equals(result)){         
 		   if(origin == null || origin.isEmpty()){   			    	 
-		    	 microregionChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceHighlightAllAgroup(idConference,microregionChartAgroup
+		      microregionChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceHighlightAllAgroup(idConference,microregionChartAgroup
 		    			                              ,microregionLocalitySelected,structureItemPlanSelected);   		    	 		 		    	  
 		    	  for (int i = 0; i < microregionChartQueryResult.size(); i++) {		    			 		    		 		    		 
 		    		  ControlPanelChartDto microDto = new ControlPanelChartDto();
@@ -256,7 +258,8 @@ public class ControlPanelService {
 			   	       }	
 			   		   strategicAreaChart.add(strategicDto);		    		 
 		    	 }			    	 
-		     }else if (origin.equals("rem")){		    	 
+		     }else if (origin.equals("rem")){
+		    	 
 		    	microregionChartQueryResult= repository.findDataMicroregionMapDashboardFromIdConferenceHighlightRemotoAgroup(idConference,microregionChartAgroup
 		    								,microregionLocalitySelected,structureItemPlanSelected);   		    	 					    		    	    	  			
 				for (int i = 0; i < microregionChartQueryResult.size(); i++) {		    			 		    		 				
@@ -421,5 +424,6 @@ public class ControlPanelService {
 	   dto.setHeatMapChart(heatMapChartDto);
 	   dto.setStrategicAreaChart(strategicAreaChart);	   	   
   return dto;
-	}
+
+  }
 }
