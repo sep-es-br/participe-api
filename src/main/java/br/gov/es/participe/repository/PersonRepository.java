@@ -210,11 +210,11 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
 
   @Query(
       "MATCH (conf: Conference)<-[:OCCURS_IN]-(m:Meeting)<-[cia:CHECKED_IN_AT]-(p:Person) " +
-          "WHERE id(p) = {0} AND  id(conf) = {3} " +
+          "WHERE id(p) = {0} AND  id(conf) = {2} " +
           "AND m.beginDate < {1} AND m.endDate > {1} " +
           "RETURN p"
   )
-  Optional<Person> findPersonIfParticipatingOnMeetingPresentially(Long personId, Date date,Long confereceId);
+  Optional<Person> findPersonIfParticipatingOnMeetingPresentially(Long personId, Date date, Long confereceId);
 
   @Query("MATCH(person:Person)-[authBy:IS_AUTHENTICATED_BY]->(authService:AuthService) " +
       "WHERE id(person) = {0} " +
