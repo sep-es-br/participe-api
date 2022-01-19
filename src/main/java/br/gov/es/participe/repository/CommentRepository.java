@@ -110,7 +110,8 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
       "c.type AS type, p.name AS citizenName, m.name AS moderatorName, mb.time AS moderateTime, mb.finish AS moderated, " +
       "id(m) AS moderatorId, id(loc) AS localityId, loc.name AS localityName, c.from as from, " +
       "id(pi) AS planItemId, pi.name AS planItemName, id(si) AS structureItemId, si.name AS structureItemName, " +
-      "id(piArea) AS areaEstrategicaId, piArea.name AS nameAreaEstrategica ")
+      "id(piArea) AS areaEstrategicaId, piArea.name AS nameAreaEstrategica "+
+      "ORDER BY c.time")
   List<ModerationResultDto> findAllByStatus(
       String[] status,
       String from,
