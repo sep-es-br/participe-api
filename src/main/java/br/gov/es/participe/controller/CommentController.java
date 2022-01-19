@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,11 +27,15 @@ import br.gov.es.participe.util.domain.TokenType;
 
 @RestController
 @CrossOrigin
+@ComponentScan(basePackages = { "br.gov.es.participe.service.CommentService" })
 @RequestMapping(value = "/comments")
 public class CommentController {
 
+	
+	
 	@Autowired
 	private CommentService commentService;
+	
 	
 	@Autowired
 	private TokenService tokenService;
@@ -58,7 +63,7 @@ public class CommentController {
 		Person person = new Person();
 		person.setId(idPerson);
 		comment.setPersonMadeBy(person);
-		CommentDto response = new CommentDto(commentService.save(comment, null, "com", true), false);
+		CommentDto response = new CommentDto(commentService.save(comment, null, true), false);
 		
 		return ResponseEntity.status(200).body(response);
 	}
@@ -66,7 +71,7 @@ public class CommentController {
 	@PostMapping("/fatherPlanItem")
 	public ResponseEntity<CommentDto> storeFatherPlanItemNode(@RequestBody CommentParamDto commentParamDto) {
 		Comment comment = new Comment(commentParamDto);
-		CommentDto response = new CommentDto(commentService.save(comment, null, "com", false), false);
+		CommentDto response = new CommentDto(commentService.save(comment, null, false), false);
 
 		return ResponseEntity.status(200).body(response);
 	}

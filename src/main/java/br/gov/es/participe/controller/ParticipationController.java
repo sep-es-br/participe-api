@@ -109,7 +109,7 @@ public class ParticipationController {
     if (commentParamDto.getText() != null) {
       Comment comment = new Comment(commentParamDto);
       comment.setPersonMadeBy(person);
-      commentService.save(comment, null, "rem", true);
+      commentService.save(comment, null, true);
     } else {
       Highlight highlight = new Highlight();
       Comment comment = new Comment(commentParamDto);
@@ -143,7 +143,7 @@ public class ParticipationController {
 
     Comment comment = new Comment(commentParamDto);
     comment.setPersonMadeBy(person);
-    CommentDto response = new CommentDto(commentService.save(comment, null, "rem", true), true);
+    CommentDto response = new CommentDto(commentService.save(comment, null, true), true);
     response.setTime(null);
     response.setFrom(null);
     response.setType(null);

@@ -1,34 +1,36 @@
 package br.gov.es.participe.util.domain;
 
-public enum CommentTypeType {
-    PROPOSAL("Proposal", "prop"),
-    COMMENT("Comment", "com");
+public enum CommentFromType {
+    
+    PRESENTIAL("Presential", "pres"),
+    REMOTE("Remote", "rem");
 
     public final String completeName;
     public final String leanName;
 
-    private CommentTypeType(String completeName, String leanName) {
+    private CommentFromType(String completeName, String leanName) {
         this.completeName = completeName;
         this.leanName = leanName;
     }
 
     public String getLeanNameByCompleteName(String completeName) {
         if(!(completeName==null || completeName.equals(""))) {
-            for (CommentTypeType e : values()) {
+            for (CommentFromType e : values()) {
                 if(e.completeName.equals(completeName)) {
                     return e.leanName;
                 }
             }
         }
-        return "";
+        return null;
     }
 
     public String getCompleteNameFromLeanName(String leanName) {
-        for (CommentTypeType e : values()) {
+        for (CommentFromType e : values()) {
             if(e.leanName.equals(leanName)) {
                 return e.completeName;
             }
         }
         return "";
     }
+
 }

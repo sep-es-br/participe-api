@@ -7,6 +7,7 @@ public class ModerationFilterDto {
 	private Long conferenceId;
 	private String[] status;
 	private String type;
+	private String from;
 	private String text;
 	private Long[] localityIds;
 	private Long[] planItemIds;
@@ -14,6 +15,9 @@ public class ModerationFilterDto {
 	private Date initialDate;
 	private Date endDate;
 
+
+
+	
 	public Long getIdModerator() {
 		return idModerator;
 	}
@@ -93,5 +97,20 @@ public class ModerationFilterDto {
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
+
+
+    /**
+     * @return String return the from
+     */
+    public String getFrom() {
+        return from;
+    }
+
+    /**
+     * @param from the from to set
+     */
+    public void setFrom(String from) {
+        this.from = from;
+    }
 
 }

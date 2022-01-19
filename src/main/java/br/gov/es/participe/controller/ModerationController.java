@@ -1,25 +1,48 @@
 package br.gov.es.participe.controller;
 
-import br.gov.es.participe.controller.dto.*;
-import br.gov.es.participe.model.Comment;
-import br.gov.es.participe.model.Conference;
-import br.gov.es.participe.model.Locality;
-import br.gov.es.participe.model.Plan;
-import br.gov.es.participe.service.*;
-import br.gov.es.participe.util.domain.CommentStatusType;
-import br.gov.es.participe.util.domain.CommentTypeType;
-import br.gov.es.participe.util.domain.TokenType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import static br.gov.es.participe.util.domain.CommentTypeType.PROPOSAL;
+import static br.gov.es.participe.util.domain.CommentFromType.REMOTE;
+import static br.gov.es.participe.util.domain.CommentStatusType.ALL;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static br.gov.es.participe.util.domain.CommentStatusType.ALL;
-import static br.gov.es.participe.util.domain.CommentTypeType.REMOTE;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import br.gov.es.participe.controller.dto.ConferenceDto;
+import br.gov.es.participe.controller.dto.LeanLocalityResultDto;
+import br.gov.es.participe.controller.dto.LeanPlanItemResultDto;
+import br.gov.es.participe.controller.dto.LocalityDto;
+import br.gov.es.participe.controller.dto.ModerationFilterDto;
+import br.gov.es.participe.controller.dto.ModerationParamDto;
+import br.gov.es.participe.controller.dto.ModerationResultDto;
+import br.gov.es.participe.controller.dto.PlanDto;
+import br.gov.es.participe.model.Comment;
+import br.gov.es.participe.model.Conference;
+import br.gov.es.participe.model.Locality;
+import br.gov.es.participe.model.Plan;
+import br.gov.es.participe.service.CommentService;
+import br.gov.es.participe.service.ConferenceService;
+import br.gov.es.participe.service.LocalityService;
+import br.gov.es.participe.service.PlanItemService;
+import br.gov.es.participe.service.PlanService;
+import br.gov.es.participe.service.TokenService;
+import br.gov.es.participe.util.domain.CommentFromType;
+import br.gov.es.participe.util.domain.CommentStatusType;
+import br.gov.es.participe.util.domain.CommentTypeType;
+import br.gov.es.participe.util.domain.TokenType;
 
 @RestController
 @CrossOrigin
@@ -49,7 +72,7 @@ public class ModerationController {
       @RequestHeader(name = "Authorization") String token,
       @RequestParam Long conferenceId,
       @RequestParam(value = "status", required = false, defaultValue = "") String status,
-      @RequestParam(value = "type", required = false, defaultValue = "") String type,
+      @RequestParam(value = "from", required = false, defaultValue = "") String from,
       @RequestParam(value = "text", required = false, defaultValue = "") String text,
       @RequestParam(value = "localityIds", required = false) Long[] localityIds,
       @RequestParam(value = "planItemIds", required = false) Long[] planItemIds,
@@ -59,13 +82,14 @@ public class ModerationController {
   ) {
     Long[] emptyList = {};
     CommentStatusType commStatus = ALL;
-    CommentTypeType commType = REMOTE;
+    CommentTypeType commType = PROPOSAL;
+    CommentFromType commFrom = REMOTE;
     Long idModerator = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
     ModerationFilterDto moderationFilterDto = new ModerationFilterDto();
     moderationFilterDto.setIdModerator(idModerator);
     moderationFilterDto.setConferenceId(conferenceId);
     moderationFilterDto.setStatus(commStatus.getLeanNameByCompleteName(status));
-    moderationFilterDto.setType(commType.getLeanNameByCompleteName(type));
+    moderationFilterDto.setFrom(commFrom.getLeanNameByCompleteName(from));
     moderationFilterDto.setText(text);
     moderationFilterDto.setLocalityIds(localityIds != null ? localityIds : emptyList);
     moderationFilterDto.setPlanItemIds(planItemIds != null ? planItemIds : emptyList);
@@ -77,6 +101,7 @@ public class ModerationController {
     response.forEach(c -> {
       c.setStatus(commStatus.getCompleteNameFromLeanName(c.getStatus()));
       c.setType(commType.getCompleteNameFromLeanName(c.getType()));
+      c.setFrom(commFrom.getCompleteNameFromLeanName(c.getFrom()));
     });
 
     return ResponseEntity.status(200).body(response);

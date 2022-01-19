@@ -1,63 +1,97 @@
 package br.gov.es.participe.service;
 
-import br.gov.es.participe.controller.dto.*;
-import br.gov.es.participe.model.*;
-import br.gov.es.participe.repository.CommentRepository;
-import br.gov.es.participe.repository.ModeratedByRepository;
-import br.gov.es.participe.util.StringUtils;
-import br.gov.es.participe.util.domain.CommentStatusType;
-import br.gov.es.participe.util.domain.CommentTypeType;
+import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL;
+import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
+import static br.gov.es.participe.util.domain.CommentStatusType.ALL;
+import static br.gov.es.participe.util.domain.CommentTypeType.PROPOSAL;
+import static br.gov.es.participe.util.domain.CommentFromType.REMOTE;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import br.gov.es.participe.controller.dto.ModerationFilterDto;
+import br.gov.es.participe.controller.dto.ModerationParamDto;
+import br.gov.es.participe.controller.dto.ModerationResultDto;
+import br.gov.es.participe.controller.dto.ModerationStructure;
+import br.gov.es.participe.controller.dto.PlanDto;
+import br.gov.es.participe.controller.dto.PlanItemDto;
+import br.gov.es.participe.controller.dto.ProposalDto;
+import br.gov.es.participe.controller.dto.ProposalsDto;
+import br.gov.es.participe.controller.dto.StructureItemDto;
+import br.gov.es.participe.model.CheckedInAt;
+import br.gov.es.participe.model.Comment;
+import br.gov.es.participe.model.Conference;
+import br.gov.es.participe.model.Highlight;
+import br.gov.es.participe.model.Locality;
+import br.gov.es.participe.model.Meeting;
+import br.gov.es.participe.model.ModeratedBy;
+import br.gov.es.participe.model.Person;
+import br.gov.es.participe.model.Plan;
+import br.gov.es.participe.model.PlanItem;
+import br.gov.es.participe.model.SelfDeclaration;
+import br.gov.es.participe.model.StructureItem;
+import br.gov.es.participe.repository.CommentRepository;
+import br.gov.es.participe.repository.ModeratedByRepository;
+import br.gov.es.participe.util.StringUtils;
+import br.gov.es.participe.util.domain.CommentFromType;
+import br.gov.es.participe.util.domain.CommentStatusType;
+import br.gov.es.participe.util.domain.CommentTypeType;
 
-import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL;
-import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
-import static br.gov.es.participe.util.domain.CommentStatusType.ALL;
-import static br.gov.es.participe.util.domain.CommentTypeType.REMOTE;
 
 @Service
 public class CommentService {
 
   private static final String ADMINISTRATOR = "Administrator";
 
+  @Lazy
   @Autowired
   private PersonService personService;
 
   @Autowired
   private CommentRepository commentRepository;
 
+  @Lazy
   @Autowired
   private PlanService planService;
 
+  @Lazy
   @Autowired
   private PlanItemService planItemService;
 
+  @Lazy
   @Autowired
   private MeetingService meetingService;
 
+  @Lazy
   @Autowired
   private HighlightService highlightService;
 
+  @Lazy
   @Autowired
   private LocalityService localityService;
 
+  @Lazy
   @Autowired
   private ConferenceService conferenceService;
 
-  @Autowired
-  private SelfDeclarationService selfDeclarationService;
-
-  @Autowired
-  private LocalityTypeService localityTypeService;
 
   @Autowired
   private ModeratedByRepository moderatedByRepository;
@@ -166,12 +200,12 @@ public class CommentService {
   }
 
   @Transactional
-  public Comment save(Comment comment, Long idPerson, String from, Boolean usePlanItem) {
+  public Comment save(Comment comment, Long idPerson,  Boolean usePlanItem) {
 
     Meeting meeting = loadMeeting(comment);
     Person person = loadPerson(comment, idPerson);
     Locality locality = loadLocality(comment);
-    PlanItem planItem = loadPlanItem(comment, from, usePlanItem);
+    PlanItem planItem = loadPlanItem(comment, usePlanItem);
     Conference conference = loadConference(comment);
 
     comment.setConference(conference);
@@ -258,7 +292,7 @@ public class CommentService {
     return conference;
   }
 
-  private PlanItem loadPlanItem(Comment comment, String from, Boolean usePlanItem) {
+  private PlanItem loadPlanItem(Comment comment, Boolean usePlanItem) {
     PlanItem planItem;
     if (usePlanItem) {
       planItem = planItemService.find(comment.getPlanItem().getId());
@@ -266,9 +300,6 @@ public class CommentService {
       planItem = planItemService.findFatherPlanItem(comment.getPlanItem().getId());
     }
 
-    if (from != null) {
-      comment.setFrom(from);
-    }
     return planItem;
   }
 
@@ -327,7 +358,7 @@ public class CommentService {
     Person moderator = personService.find(moderationFilterDto.getIdModerator());
 
     List<ModerationResultDto> response = commentRepository
-        .findAllByStatus(moderationFilterDto.getStatus(), moderationFilterDto.getType(), moderationFilterDto.getLocalityIds(),
+        .findAllByStatus(moderationFilterDto.getStatus(),  moderationFilterDto.getFrom(),moderationFilterDto.getLocalityIds(),
             moderationFilterDto.getPlanItemIds(), moderationFilterDto.getConferenceId(),
             moderationFilterDto.getStructureItemIds()
         )
@@ -375,7 +406,9 @@ public class CommentService {
     }
 
     response.setStatus(ALL.getCompleteNameFromLeanName(response.getStatus()));
-    response.setType(REMOTE.getCompleteNameFromLeanName(response.getType()));
+    response.setType(PROPOSAL.getCompleteNameFromLeanName(response.getType()));
+    response.setFrom(REMOTE.getCompleteNameFromLeanName(response.getFrom()));
+    
 
     List<ModerationStructure> modStructure = new ArrayList<>();
     List<PlanItem> planItems = new ArrayList<>();
@@ -573,6 +606,16 @@ public class CommentService {
         comment.setType(type.leanName);
       }
     }
+    
+    if (moderationParamDto.getFrom() != null) {
+        CommentFromType from = Arrays.stream(CommentFromType.values()).filter(
+            s -> s.completeName.equals(moderationParamDto.getFrom())).findFirst().orElse(null);
+        if (from != null) {
+          comment.setFrom(from.leanName);
+        }
+    }
+    
+    
 
     return comment;
   }
@@ -597,6 +640,13 @@ public class CommentService {
         s -> s.completeName.equals(moderationParamDto.getType())))) {
       throw new IllegalArgumentException("Invalid type.");
     }
+    
+    if (moderationParamDto.getFrom() != null && (moderationParamDto.getFrom().isEmpty()
+            || Arrays.stream(CommentFromType.values()).noneMatch(
+            s -> s.completeName.equals(moderationParamDto.getFrom())))) {
+          throw new IllegalArgumentException("Invalid from.");
+    }
+    
     if (comment.getClassification() != null &&
         (!comment.getClassification().equalsIgnoreCase("comment") && !comment.getClassification().equalsIgnoreCase("proposal"))) {
       throw new IllegalArgumentException("Invalid classification.");
