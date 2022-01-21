@@ -100,10 +100,10 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
       "OPTIONAL MATCH (pi)<-[]->(pi2:PlanItem) " +
       "OPTIONAL MATCH (c)-[:ABOUT]->(loc:Locality) " +
       "WITH con, c, p, pi, plan, si, pi2, loc " +
-      "WHERE (c.status IN {0} OR NOT {0}) AND (c.from = {1} OR {1} IS NULL)  AND id(con)={4} " +
-      "AND (id(loc) IN {2} OR NOT {2}) " +
-      "AND ((id(pi) IN {4} OR id(pi2) IN {4}) OR NOT {2}) " +
-      "AND (id(si) IN {5} OR NOT {5}) " +
+      "WHERE (c.status IN {0} OR {0} = [] OR {0} is NULL) AND (c.from = {1} OR {1} IS NULL) AND id(con)={4} " +
+      "AND (id(loc) IN {2} OR {2} = [] OR {2} is NULL) " +
+      "AND ((id(pi) IN {3} OR id(pi2) IN {3}) OR {3} = [] OR {3} is NULL) " +
+      "AND (id(si) IN {5} OR {5} = [] OR {5} is NULL) " +
       "OPTIONAL MATCH (c)-[mb:MODERATED_BY]->(m:Person) " +
       "OPTIONAL MATCH (plan)<-[:COMPOSES]-(piArea:PlanItem)-[]-(pi) " +
       "RETURN DISTINCT id(con) AS conferenceId, id(c) AS commentId, c.status AS status, c.text AS text, c.time AS time, " +
