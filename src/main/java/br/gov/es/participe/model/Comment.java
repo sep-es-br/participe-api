@@ -1,6 +1,5 @@
 package br.gov.es.participe.model;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
@@ -11,7 +10,7 @@ import br.gov.es.participe.controller.dto.CommentDto;
 import br.gov.es.participe.controller.dto.CommentParamDto;
 
 @NodeEntity
-public class Comment extends Attend implements Serializable {
+public class Comment extends Attend {
 
 	private String text;
 	private String type;

@@ -79,28 +79,31 @@ public class ProposalsService {
 	public Integer makeLike(Long idPerson, Long idComment) {
 		Comment comment = commentService.findPersonLiked(idComment);
 		Person person = personService.likesComments(idPerson);
+
+		if (comment.getPersonMadeBy().getId() != person.getId()) {
 		
-		if(comment.getPersonLiked() == null) {
-			comment.setPersonLiked(new HashSet<>());
-		}
-		if(person.getComments() == null) {
-			person.setComments(new HashSet<>());
-		}
-		
-		Person findResult = comment.getPersonLiked().stream().filter(personL -> personL.getContactEmail().equals(person.getContactEmail()))
-										 .findFirst()
-										 .orElse(null);
-		if(findResult == null) {
-			person.getComments().add(comment);
-			personService.save(person, true);
-		} else {
-			person.getComments().remove(comment);
-			personService.save(person, true);
-		}
-		
-		comment = commentService.findPersonLiked(idComment);
-		if(comment.getPersonLiked() == null) {
-			comment.setPersonLiked(new HashSet<>());
+			if(comment.getPersonLiked() == null) {
+				comment.setPersonLiked(new HashSet<>());
+			}
+			if(person.getComments() == null) {
+				person.setComments(new HashSet<>());
+			}
+			
+			Person findResult = comment.getPersonLiked().stream().filter(personL -> personL.getContactEmail().equals(person.getContactEmail()))
+											.findFirst()
+											.orElse(null);
+			if(findResult == null) {
+				person.getComments().add(comment);
+				personService.save(person, true);
+			} else {
+				person.getComments().remove(comment);
+				personService.save(person, true);
+			}
+			
+			comment = commentService.findPersonLiked(idComment);
+			if(comment.getPersonLiked() == null) {
+				comment.setPersonLiked(new HashSet<>());
+			}
 		}
 		return comment.getPersonLiked().size();
 	}

@@ -135,6 +135,7 @@ public class CommentService {
         continue;
       }
       proposal.setPersonName(personMadeBy.getName());
+      proposal.setPersonId(personMadeBy.getId());
       if (personLiked == null || personLiked.isEmpty()) {
         proposal.setLikes(null);
       } else {

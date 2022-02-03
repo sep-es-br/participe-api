@@ -7,6 +7,7 @@ public class ProposalDto {
 	private Long commentid;
 	private Boolean isLiked;
 	private String comment;
+	private Long personId;
 	private String personName;
 	private String localityPerson;
 	private String localityName;
@@ -19,6 +20,20 @@ public class ProposalDto {
 	
 	public Long getCommentid() {
 		return commentid;
+	}
+
+	/**
+	 * @return the personId
+	 */
+	public Long getPersonId() {
+		return personId;
+	}
+
+	/**
+	 * @param personId the personId to set
+	 */
+	public void setPersonId(Long personId) {
+		this.personId = personId;
 	}
 
 	public void setCommentid(Long commentid) {

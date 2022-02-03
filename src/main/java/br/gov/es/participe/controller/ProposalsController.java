@@ -64,7 +64,6 @@ public class ProposalsController {
 	public ResponseEntity<Integer> makeLike(@RequestHeader (name="Authorization") String token, @PathVariable Long idComment ){
 		String[] keys = token.split(" ");
 		Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
-		
 		Integer response = proposalsService.makeLike(idPerson, idComment);
 		return ResponseEntity.status(200).body(response);
 	}
