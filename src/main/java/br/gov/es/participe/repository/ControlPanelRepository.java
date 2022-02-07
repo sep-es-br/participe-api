@@ -226,7 +226,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	   @Query( " WITH {0} AS Conference_Id,{1} AS LocalityTypeGrouping_Id,{2} AS SelectedLocality_Id,{3} AS SelectedPlanItem_Id,{4} AS Meeting_List " +
 	   		   " MATCH(p:Person)-[:CHECKED_IN_AT]->(me:Meeting)-[:OCCURS_IN]->(conf:Conference),(p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(conf) " +
 	   		   " ,(sd)-[:AS_BEING_FROM]->(cLoc:Locality) " +
-	   		   " WHERE id(conf) = Conference_Id AND(Meeting_List IS NULL OR id(me) IN Meeting_List) " +
+	   		   " WHERE id(conf) = Conference_Id AND (Meeting_List IS NULL OR id(me) IN Meeting_List) " +
 	   		   " MATCH(plt:LocalityType)<-[:OF_TYPE]-(loc:Locality)<-[:IS_LOCATED_IN *0..]-(cLoc),(loc)-[:IS_LOCATED_IN]->(pLoc) " +
 	   		   " where 	id(plt) = LocalityTypeGrouping_Id AND (SelectedLocality_Id IS NULL OR id(pLoc) = SelectedLocality_Id) " +
 	   		   " OPTIONAL MATCH planned = (p)<-[:MADE_BY|LIKED_BY]-(a:Attend)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES *0..]->(parentPlanItem:PlanItem), " +
@@ -307,10 +307,10 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
 			" AND id(plt) = LocalityTypeGrouping_Id" +
-			" AND(SelectedLocality_Id IS NULL" +
+			" AND (SelectedLocality_Id IS NULL" +
 			" OR id(parentLoc) = SelectedLocality_Id" +
 			" OR id(loc) = SelectedLocality_Id)" +
-			" AND(SelectedPlanItem_Id IS NULL" +
+			" AND (SelectedPlanItem_Id IS NULL" +
 			" OR id(cPI) = SelectedPlanItem_Id" +
 			" OR id(planItem) = SelectedPlanItem_Id)" +
 
@@ -341,10 +341,10 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" ID(conf) = Conference_Id" +
 			" AND a.from = 'rem'" +
 			" AND id(plt) = LocalityTypeGrouping_Id" +
-			" AND(SelectedLocality_Id IS NULL" +
+			" AND (SelectedLocality_Id IS NULL" +
 			" OR id(parentLoc) = SelectedLocality_Id" +
 			" OR id(loc) = SelectedLocality_Id)" +
-			" AND(SelectedPlanItem_Id IS NULL" +
+			" AND (SelectedPlanItem_Id IS NULL" +
 			" OR id(cPI) = SelectedPlanItem_Id" +
 			" OR id(planItem) = SelectedPlanItem_Id)" +
 
@@ -379,10 +379,10 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 " AND a.from = 'pres'" +
 " AND (Meeting_List IS NULL OR id(me) IN Meeting_List)" +
 " AND id(plt) = LocalityTypeGrouping_Id" +
-" AND(SelectedLocality_Id IS NULL" +
+" AND (SelectedLocality_Id IS NULL" +
 " OR id(parentLoc) = SelectedLocality_Id" +
 " OR id(loc) = SelectedLocality_Id)" +
-" AND(SelectedPlanItem_Id IS NULL" +
+" AND (SelectedPlanItem_Id IS NULL" +
 " OR id(cPI) = SelectedPlanItem_Id" +
 " OR id(planItem) = SelectedPlanItem_Id)" +
 
@@ -459,7 +459,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
 			" AND a.from = 'rem' " +
-			" AND(" +
+			" AND (" +
 			" SelectedPlanItem_Id IS NULL" +
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
@@ -468,9 +468,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" OPTIONAL MATCH" +
 			" (a)-[:ABOUT]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
 			" WHERE" +
-			" AND (" +
 			" id(parentLoc) = SelectedLocality_Id OR id(loc) = SelectedLocality_Id OR SelectedLocality_Id IS NULL" +
-			" )" +
 
 			" WITH" +
 			" a," +
@@ -508,7 +506,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
-			" AND(" +
+			" AND (" +
 			" SelectedPlanItem_Id IS NULL" +
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
@@ -570,10 +568,10 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" ID(conf) = Conference_Id" +
 			" AND (NOT a.status IN ['rem' , 'pen' ])" +
 			" AND id(plt) = LocalityTypeGrouping_Id" +
-			" AND(SelectedLocality_Id IS NULL" +
+			" AND (SelectedLocality_Id IS NULL" +
 			" OR id(parentLoc) = SelectedLocality_Id" +
 			" OR id(loc) = SelectedLocality_Id)" +
-			" AND(SelectedPlanItem_Id IS NULL" +
+			" AND (SelectedPlanItem_Id IS NULL" +
 			" OR id(cPI) = SelectedPlanItem_Id" +
 			" OR id(planItem) = SelectedPlanItem_Id)" +
 
@@ -601,7 +599,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
 			" AND (NOT a.status IN ['rem', 'pen'])" +
-			" AND(" +
+			" AND (" +
 			" SelectedPlanItem_Id IS NULL " +
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
@@ -658,10 +656,10 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" AND (NOT a.status IN ['rem' , 'pen' ])" +
 			" AND a.from = 'rem'" +
 			" AND id(plt) = LocalityTypeGrouping_Id" +
-			" AND(SelectedLocality_Id IS NULL" +
+			" AND (SelectedLocality_Id IS NULL" +
 			" OR id(parentLoc) = SelectedLocality_Id" +
 			" OR id(loc) = SelectedLocality_Id)" +
-			" AND(SelectedPlanItem_Id IS NULL" +
+			" AND (SelectedPlanItem_Id IS NULL" +
 			" OR id(cPI) = SelectedPlanItem_Id" +
 			" OR id(planItem) = SelectedPlanItem_Id)" +
 
@@ -688,7 +686,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" ID(conf) = Conference_Id" +
 			" AND (NOT a.status IN ['rem', 'pen'])" +
 			" AND	a.from = 'rem' " +
-			" AND(" +
+			" AND (" +
 			" SelectedPlanItem_Id IS NULL" +
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
@@ -744,10 +742,10 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" AND (NOT a.status IN ['rem' , 'pen' ])" +
 			" AND (Meeting_List IS NULL OR id(me) IN Meeting_List)" +
 			" AND id(plt) = LocalityTypeGrouping_Id" +
-			" AND(SelectedLocality_Id IS NULL" +
+			" AND (SelectedLocality_Id IS NULL" +
 			" OR id(parentLoc) = SelectedLocality_Id" +
 			" OR id(loc) = SelectedLocality_Id)" +
-			" AND(SelectedPlanItem_Id IS NULL" +
+			" AND (SelectedPlanItem_Id IS NULL" +
 			" OR id(cPI) = SelectedPlanItem_Id" +
 			" OR id(planItem) = SelectedPlanItem_Id)" +
 
@@ -773,7 +771,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
 			" AND (NOT a.status IN ['rem', 'pen'])" +
-			" AND(" +
+			" AND (" +
 			" SelectedPlanItem_Id IS NULL" +
 			" OR" +
 			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
