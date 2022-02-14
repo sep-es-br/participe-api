@@ -17,7 +17,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
   String WHERE_FILTER = "WHERE "
       + "id(conference)={0} "
       + "AND comment.status CONTAINS {1} "
-      + "AND (id(parent) IN {4} OR NOT {4}) "
+      + "AND (id(parent) IN {4} OR id(child) IN {4} OR NOT {4}) "
       + "AND (id(locality) IN {3} OR NOT {3}) "
       + "AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment))) ";
   String WHERE_TEXT_FILTER = "WHERE ext.translate(comment.text) CONTAINS ext.translate({2}) "
@@ -49,8 +49,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
   @Query(value =
       "MATCH (comment:Comment)-[:ABOUT]->(conference:Conference), "
           + "(conference)-[target:TARGETS]-(plan:Plan), "
-          + "(comment)-[ab1:ABOUT]->(parent:PlanItem) "
-          + "OPTIONAL MATCH (parent)-[composesChild:COMPOSES*]-(child:PlanItem) "
+          + "(comment)-[ab1:ABOUT]->(child:PlanItem)-[composesChild:COMPOSES*]->(parent:PlanItem) "
           + "OPTIONAL MATCH (comment)-[aboutLocality:ABOUT]->(locality:Locality)-[ofType:OF_TYPE]->(localityType) "
           + "WITH locality, aboutLocality, comment, plan, parent, composesChild, child, ofType, localityType, conference "
           + WHERE_FILTER
@@ -69,8 +68,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
       countQuery =
           "MATCH (comment:Comment)-[:ABOUT]->(conference:Conference), "
               + "(conference)-[target:TARGETS]-(plan:Plan), "
-              + "(comment)-[ab1:ABOUT]->(parent:PlanItem) "
-              + "OPTIONAL MATCH (parent)-[composesChild:COMPOSES*]-(child:PlanItem) "
+              + "(comment)-[ab1:ABOUT]->(child:PlanItem)-[composesChild:COMPOSES*]->(parent:PlanItem) "
               + "OPTIONAL MATCH (comment)-[aboutLocality:ABOUT]->(locality:Locality)-[ofType:OF_TYPE]->(localityType) "
               + "WITH locality, aboutLocality, comment, plan, parent, composesChild, child, ofType, localityType, conference "
               + WHERE_FILTER
