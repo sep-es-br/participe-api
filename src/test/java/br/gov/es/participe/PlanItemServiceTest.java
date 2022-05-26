@@ -67,6 +67,7 @@ class PlanItemServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreatePlanItem() {
         PlanItemParamDto planItemParamDto = createPlanItemParamDto("Test");
 
@@ -76,6 +77,7 @@ class PlanItemServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldUpdatePlanItem() {
         PlanItemParamDto planItemParamDto = createPlanItemParamDto("Test");
         PlanItemDto planItemDto = (PlanItemDto) planItemController.store(planItemParamDto).getBody();
@@ -87,6 +89,7 @@ class PlanItemServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindPlanItem() {
         PlanItemParamDto planItemParamDto = createPlanItemParamDto("Test");
         PlanItemDto planItemDto = (PlanItemDto) planItemController.store(planItemParamDto).getBody();

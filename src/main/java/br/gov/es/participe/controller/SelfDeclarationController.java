@@ -25,25 +25,28 @@ public class SelfDeclarationController {
 
 	@Autowired
 	private SelfDeclarationService selfDeclarationService;
-	
+
 	@GetMapping("/{id}")
+	@SuppressWarnings("rawtypes")
 	public ResponseEntity findAll(@PathVariable Long id) {
 		List<SelfDeclaration> selfDeclaraions = selfDeclarationService.findAllByPerson(id);
 		List<SelfDeclarationDto> response = new ArrayList<>();
-		
+
 		selfDeclaraions.forEach(self -> response.add(new SelfDeclarationDto(self, true)));
-		
+
 		return ResponseEntity.status(200).body(response);
 	}
-	
+
 	@PostMapping
+	@SuppressWarnings("rawtypes")
 	public ResponseEntity store(@RequestBody SelfDeclarationDto selfDeclarationDto) {
 		SelfDeclaration selfDeclaraion = new SelfDeclaration(selfDeclarationDto);
-		SelfDeclarationDto response = new SelfDeclarationDto(selfDeclarationService.save(selfDeclaraion),true);
+		SelfDeclarationDto response = new SelfDeclarationDto(selfDeclarationService.save(selfDeclaraion), true);
 		return ResponseEntity.status(200).body(response);
 	}
-	
+
 	@DeleteMapping("/{id}")
+	@SuppressWarnings("rawtypes")
 	public ResponseEntity delete(@PathVariable Long id) {
 		selfDeclarationService.delete(id);
 		return ResponseEntity.status(200).build();

@@ -59,8 +59,7 @@ public class ParticipationService {
       Long idConference,
       Long idPerson,
       String text,
-      UriComponentsBuilder uriComponentsBuilder
-  ) {
+      UriComponentsBuilder uriComponentsBuilder) {
     Conference conference = conferenceService.find(idConference);
     Plan plan;
     PlanItem planI = null;
@@ -118,7 +117,7 @@ public class ParticipationService {
   }
 
   private List<PlanItemDto> getListPlanItemDto(Set<PlanItem> planItems, String text, Long idPerson, Long idConference,
-                                               Long idLocality) {
+      Long idLocality) {
     List<PlanItemDto> itens = new ArrayList<>();
     if (planItems != null) {
       if (!planItems.isEmpty() && text != null && !text.isEmpty()) {
@@ -158,7 +157,7 @@ public class ParticipationService {
     return (planItem.getName() != null
         && !planItem.getName().isEmpty() && stringUtils.compareIfAContainsB(planItem.getName(), text))
         || (planItem.getDescription() != null && !planItem.getDescription().isEmpty()
-        && stringUtils.compareIfAContainsB(planItem.getDescription(), text));
+            && stringUtils.compareIfAContainsB(planItem.getDescription(), text));
   }
 
   public PlanItemDto generatePlanItemDtoFront(PlanItem planItem, Long idPerson, Long idConference, Long idLocality) {
@@ -186,8 +185,7 @@ public class ParticipationService {
         idPerson,
         planItem.getId(),
         idConference,
-        idLocality
-    );
+        idLocality);
     planItemDto.setVotes(high != null && !high.isEmpty());
     return planItemDto;
   }
@@ -196,7 +194,8 @@ public class ParticipationService {
     PortalHeader header = new PortalHeader();
     Conference conference = conferenceService.find(id);
     SelfDeclaration self = selfDeclarationService.findByPersonAndConference(idPerson, id);
-    researchService.findByIdConference(id).ifPresent(research -> header.setResearch(new ResearchConfigurationDto(research)));
+    researchService.findByIdConference(id)
+        .ifPresent(research -> header.setResearch(new ResearchConfigurationDto(research)));
 
     header.setTitle(conference.getTitleParticipation());
     header.setSubtitle(conference.getSubtitleParticipation());
@@ -206,7 +205,7 @@ public class ParticipationService {
     if (conference.getFileParticipation() != null) {
       header.setImage(url + conference.getFileParticipation().getId());
     }
-    
+
     return header;
   }
 
@@ -238,9 +237,9 @@ public class ParticipationService {
   public ParticipationsDto findAll(Long idPerson, String text, Long idConference, Pageable pageable) {
     ParticipationsDto dto = new ParticipationsDto();
     Plan plan = planService.findByConferenceWithPlanItem(idConference);
-    Page<ParticipationDto> participations = attendRepository.findByIdConferenceAndIdPersonAndText(idPerson, idConference, text,
-        pageable
-    );
+    Page<ParticipationDto> participations = attendRepository.findByIdConferenceAndIdPersonAndText(idPerson,
+        idConference, text,
+        pageable);
     for (ParticipationDto participation : participations) {
       PlanItem planItem = getPlanItemDto(plan.getItems(), participation.getPlanItem().getId());
 
@@ -321,6 +320,7 @@ public class ParticipationService {
     selfDeclarationService.save(self);
   }
 
+  @SuppressWarnings("unused")
   private void verifyPersonConsistence(Long idPerson, SelfDeclaration self) {
     if (self.getPerson() == null) {
       Person person = personService.find(idPerson);

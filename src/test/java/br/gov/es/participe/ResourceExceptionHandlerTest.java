@@ -1,7 +1,7 @@
 package br.gov.es.participe;
 
 import java.io.IOException;
-import java.util.Objects;
+//import java.util.Objects;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,8 @@ public class ResourceExceptionHandlerTest {
 
     @Test
     public void sholdHandlerException() {
-        ResponseEntity<MessageDto> responseEntity = resourceExceptionHandler.handleException(new Exception("Exception Error"), null);
+        ResponseEntity<MessageDto> responseEntity = resourceExceptionHandler
+                .handleException(new Exception("Exception Error"), null);
         Assert.assertNotNull(responseEntity);
         MessageDto dto = responseEntity.getBody();
         Assert.assertNotNull(dto);
@@ -30,7 +31,8 @@ public class ResourceExceptionHandlerTest {
 
     @Test
     public void sholdHandlerIllegalArgumentException() {
-        ResponseEntity<MessageDto> responseEntity = resourceExceptionHandler.handleException(new IllegalArgumentException("IllegalArgumentException Error"), null);
+        ResponseEntity<MessageDto> responseEntity = resourceExceptionHandler
+                .handleException(new IllegalArgumentException("IllegalArgumentException Error"), null);
         Assert.assertNotNull(responseEntity);
         MessageDto dto = responseEntity.getBody();
         Assert.assertNotNull(dto);
@@ -40,7 +42,8 @@ public class ResourceExceptionHandlerTest {
 
     @Test
     public void sholdHandlerIOException() {
-        ResponseEntity<MessageDto> responseEntity = resourceExceptionHandler.handleException(new IOException("IOException Error"), null);
+        ResponseEntity<MessageDto> responseEntity = resourceExceptionHandler
+                .handleException(new IOException("IOException Error"), null);
         Assert.assertNotNull(responseEntity);
         MessageDto dto = responseEntity.getBody();
         Assert.assertNotNull(dto);
@@ -50,7 +53,8 @@ public class ResourceExceptionHandlerTest {
 
     @Test
     public void sholdHandlerRuntimeException() {
-        ResponseEntity<MessageDto> responseEntity = resourceExceptionHandler.handleException(new RuntimeException("RuntimeException Error"), null);
+        ResponseEntity<MessageDto> responseEntity = resourceExceptionHandler
+                .handleException(new RuntimeException("RuntimeException Error"), null);
         MessageDto msg = new MessageDto();
         msg.setCode(500);
         msg.setMessage("RuntimeException Error");
@@ -62,8 +66,5 @@ public class ResourceExceptionHandlerTest {
         Assert.assertEquals(msg.getMessage(), dto.getMessage());
 
     }
-
-
-
 
 }

@@ -506,6 +506,7 @@ public class ConferenceService {
     }
   }
 
+  @SuppressWarnings("unused")
   private void clearAttributes(Conference conference) {
     if(conference.getId() != null) {
       if(conference.getPlan() != null && conference.getPlan().getId() != null) {

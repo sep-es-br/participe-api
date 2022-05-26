@@ -39,8 +39,6 @@ class StructureServiceTest extends BaseTest {
     @Autowired
     private StructureItemRepository structureItemRepository;
 
-
-
     @TestConfiguration
     static class Config {
 
@@ -62,6 +60,7 @@ class StructureServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateStructure() {
         StructureParamDto structureParamDto = createStructureParamDto("Test");
 
@@ -71,6 +70,7 @@ class StructureServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldUpdateStructure() {
         StructureParamDto structureParamDto = createStructureParamDto("Test");
         StructureDto structureDto = (StructureDto) structureController.store(structureParamDto).getBody();
@@ -86,6 +86,7 @@ class StructureServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindStructure() {
         StructureParamDto structureParamDto = createStructureParamDto("Test");
         StructureDto structureDto = (StructureDto) structureController.store(structureParamDto).getBody();

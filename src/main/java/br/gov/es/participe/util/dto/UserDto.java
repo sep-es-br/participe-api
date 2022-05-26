@@ -53,6 +53,7 @@ public class UserDto {
         this.imageUrl = imageUrl;
     }
 
+    @SuppressWarnings({ "unchecked" })
     public void setImageUrl(User user) {
         if (user.getCover() != null) {
             setImageUrl(user.getCover().getSource());
@@ -77,8 +78,10 @@ public class UserDto {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UserDto)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof UserDto))
+            return false;
         UserDto userDto = (UserDto) o;
         return Objects.equals(firstName, userDto.firstName) &&
                 Objects.equals(lastName, userDto.lastName) &&

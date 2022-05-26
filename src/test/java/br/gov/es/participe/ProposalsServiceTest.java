@@ -86,6 +86,7 @@ class ProposalsServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldListProposal() {
     	Person person = getPerson();
     	String token = "Bearer " + tokenService.generateToken(person, TokenType.AUTHENTICATION);
@@ -110,6 +111,7 @@ class ProposalsServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldGetFilters() {
         CommentParamDto commentParamDto = createCommentParamDto("teste", null);
 
@@ -118,6 +120,7 @@ class ProposalsServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldMakelike() {
     	Person person = getPerson();
     	String token = "Bearer " + tokenService.generateToken(person, TokenType.AUTHENTICATION);
@@ -130,6 +133,7 @@ class ProposalsServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldListMultipleProposals() {
         Person person = getPerson();
         String token = "Bearer " + tokenService.generateToken(person, TokenType.AUTHENTICATION);

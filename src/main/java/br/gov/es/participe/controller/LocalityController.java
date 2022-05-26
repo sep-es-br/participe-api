@@ -24,13 +24,14 @@ public class LocalityController {
 
     @Autowired
     private LocalityService localityService;
-    
+
     @Autowired
     private ConferenceService conferenceService;
 
+    @SuppressWarnings("rawtypes")
     @GetMapping
     public ResponseEntity index(@RequestParam(value = "query", required = false) String query,
-                                @RequestParam(value = "type", required = false) Long type) {
+            @RequestParam(value = "type", required = false) Long type) {
         List<Locality> localities;
         if (query != null && !query.isEmpty() && type != null) {
             localities = localityService.search(query, type);
@@ -44,6 +45,7 @@ public class LocalityController {
         return ResponseEntity.status(200).body(response);
     }
 
+    @SuppressWarnings("rawtypes")
     @GetMapping("/domain/{id}")
     public ResponseEntity findByDomain(@PathVariable Long id) {
         List<Locality> localities = localityService.findByDomain(id);
@@ -53,52 +55,55 @@ public class LocalityController {
 
         return ResponseEntity.status(200).body(response);
     }
-    
+
+    @SuppressWarnings("rawtypes")
     @GetMapping("/conference/{id}")
     public ResponseEntity findByIdConference(@PathVariable Long id) {
-    	List<Locality> localities = localityService.findByIdConference(id);
-    	
-    	List<LocalityDto> localitiesDto = new ArrayList<>();
-    	localities.forEach(locality -> {
-    		LocalityDto dto = new LocalityDto(locality, null, true, false);
-    		if(dto.getChildren() != null && !dto.getChildren().isEmpty()) {
+        List<Locality> localities = localityService.findByIdConference(id);
+
+        List<LocalityDto> localitiesDto = new ArrayList<>();
+        localities.forEach(locality -> {
+            LocalityDto dto = new LocalityDto(locality, null, true, false);
+            if (dto.getChildren() != null && !dto.getChildren().isEmpty()) {
                 StringUtils stringUtils = new StringUtils();
-    			dto.getChildren().sort(Comparator.comparing(c -> stringUtils.replaceSpecialCharacters(c.getName())));
-    			dto.setMapSplit(new ArrayList<>());
-    			dto.getChildren().forEach(loc -> {
-    				String name = loc.getName().trim().toLowerCase();
-    				name = Normalizer.normalize(name, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
-    				name = name.replace(" ", "-");
-    				dto.getMapSplit().add(name);
-    			});
-    		}
-    		localitiesDto.add(dto);
-		});
-    	
-    	CardScreenDto response = new CardScreenDto();
-    	conferenceService.generateCardScreen(response, id);
-    	
-    	response.setLocalities(localitiesDto);
-    	
-    	return ResponseEntity.status(200).body(response);
+                dto.getChildren().sort(Comparator.comparing(c -> stringUtils.replaceSpecialCharacters(c.getName())));
+                dto.setMapSplit(new ArrayList<>());
+                dto.getChildren().forEach(loc -> {
+                    String name = loc.getName().trim().toLowerCase();
+                    name = Normalizer.normalize(name, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+                    name = name.replace(" ", "-");
+                    dto.getMapSplit().add(name);
+                });
+            }
+            localitiesDto.add(dto);
+        });
+
+        CardScreenDto response = new CardScreenDto();
+        conferenceService.generateCardScreen(response, id);
+
+        response.setLocalities(localitiesDto);
+
+        return ResponseEntity.status(200).body(response);
     }
 
+    @SuppressWarnings("rawtypes")
     @GetMapping("/complement/{idConference}")
     public ResponseEntity findLocalitiesToComplement(@PathVariable Long idConference) {
-    	List<Locality> localities = localityService.findLocalitiesToComplement(idConference, true);
-    	List<LocalityDto> localitiesDto = new ArrayList<>();
-    	localities.forEach(locality -> localitiesDto.add(new LocalityDto(locality, null, true, false)));
-    	
-    	ComplementLocalityDto response = new ComplementLocalityDto();
-    	response.setLocalities(localitiesDto);
-    	if(!localities.isEmpty()) {
+        List<Locality> localities = localityService.findLocalitiesToComplement(idConference, true);
+        List<LocalityDto> localitiesDto = new ArrayList<>();
+        localities.forEach(locality -> localitiesDto.add(new LocalityDto(locality, null, true, false)));
+
+        ComplementLocalityDto response = new ComplementLocalityDto();
+        response.setLocalities(localitiesDto);
+        if (!localities.isEmpty()) {
             Locality type = localityService.find(localities.get(0).getId());
             response.setNameType(type.getType().getName());
         }
-    	return ResponseEntity.status(200).body(response);
+        return ResponseEntity.status(200).body(response);
     }
 
     @PostMapping
+    @SuppressWarnings("rawtypes")
     public ResponseEntity store(@RequestBody LocalityParamDto localityParamDto) {
         Locality locality = new Locality(localityParamDto);
         LocalityDto response = new LocalityDto(localityService.create(locality), null, true, true);
@@ -106,18 +111,21 @@ public class LocalityController {
     }
 
     @GetMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity show(@PathVariable Long id) {
         LocalityDto response = new LocalityDto(localityService.find(id), null, true, true);
         return ResponseEntity.status(200).body(response);
     }
 
     @PutMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity update(@PathVariable Long id, @RequestBody LocalityParamDto localityParamDto) {
         LocalityDto response = new LocalityDto(localityService.update(id, localityParamDto), null, true, true);
         return ResponseEntity.status(200).body(response);
     }
 
     @DeleteMapping("/{idLocality}/domain/{idDomain}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity destroy(@PathVariable Long idLocality, @PathVariable Long idDomain) {
         localityService.delete(idLocality, idDomain);
         return ResponseEntity.status(200).build();

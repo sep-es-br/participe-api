@@ -39,8 +39,7 @@ public class MeetingController {
       @RequestParam(value = "name", required = false) String name,
       @RequestParam(value = "beginDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date beginDate,
       @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date endDate,
-      @RequestParam(value = "localities", required = false) List<Long> localities
-  ) {
+      @RequestParam(value = "localities", required = false) List<Long> localities) {
     Integer pageNumber = meetingService.findNumberPageMeeting(
         currentDate,
         idConference,
@@ -48,12 +47,12 @@ public class MeetingController {
         beginDate,
         endDate,
         localities,
-        pageable
-    );
+        pageable);
 
     return ResponseEntity.status(200).body(new Object() {
       final Integer page = pageNumber;
 
+      @SuppressWarnings("unused")
       public Integer getPage() {
         return page;
       }
@@ -68,8 +67,7 @@ public class MeetingController {
       @RequestParam(value = "name", required = false) String name,
       @RequestParam(value = "beginDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date beginDate,
       @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date endDate,
-      @RequestParam(value = "localities", required = false) List<Long> localities
-  ) {
+      @RequestParam(value = "localities", required = false) List<Long> localities) {
 
     Page<MeetingDto> meetings = meetingService.findAll(
         idConference,
@@ -77,8 +75,7 @@ public class MeetingController {
         beginDate,
         endDate,
         localities,
-        pageable
-    );
+        pageable);
 
     return ResponseEntity.status(200).body(meetings);
   }
@@ -137,16 +134,14 @@ public class MeetingController {
   public ResponseEntity<CheckedInAtDto> checkInOnMeeting(@RequestBody CheckInParamDto checkInParamDto) {
     if (checkInParamDto == null ||
         checkInParamDto.getPersonId() == null ||
-        checkInParamDto.getMeetingId() == null
-    ) {
+        checkInParamDto.getMeetingId() == null) {
       throw new IllegalArgumentException("An object with Person Id and Meeting Id parameters must be informed.");
     }
 
     CheckedInAt checkedInAt = meetingService.checkInOnMeeting(
         checkInParamDto.getPersonId(),
         checkInParamDto.getMeetingId(),
-        checkInParamDto.getTimeZone()
-    );
+        checkInParamDto.getTimeZone());
 
     if (checkedInAt != null) {
       return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
@@ -164,11 +159,10 @@ public class MeetingController {
   @ApiPageable
   @GetMapping("/{meetingId}/participants")
   public ResponseEntity<Page<PersonMeetingDto>> findMeetingParticipants(@PathVariable Long meetingId,
-                                                                        @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
-                                                                        @RequestParam(name = "name", required = false) String name, @ApiIgnore Pageable page) {
+      @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
+      @RequestParam(name = "name", required = false) String name, @ApiIgnore Pageable page) {
     Page<PersonMeetingDto> personMeetingDto = personService.findPersonsCheckedInOnMeeting(meetingId, localities,
-        name, page
-    );
+        name, page);
     return ResponseEntity.ok().body(personMeetingDto);
   }
 
@@ -180,7 +174,7 @@ public class MeetingController {
 
   @DeleteMapping("/{meetingId}/remove-participation/{personId}")
   public ResponseEntity<Boolean> removeMeetingParticipation(@PathVariable Long personId,
-                                                            @PathVariable Long meetingId) {
+      @PathVariable Long meetingId) {
     Boolean response = meetingService.deleteParticipation(personId, meetingId);
     return ResponseEntity.ok().body(response);
   }
@@ -190,8 +184,7 @@ public class MeetingController {
   public ResponseEntity<Page<PersonMeetingDto>> findPersonForMeeting(
       @PathVariable Long meetingId,
       @RequestParam(name = "name", required = false, defaultValue = "") String name,
-      Pageable pageable
-  ) {
+      Pageable pageable) {
     Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable);
     return ResponseEntity.status(200).body(personMeetingDtoPage);
   }
@@ -201,7 +194,7 @@ public class MeetingController {
     Optional<Person> personOpt = personService.findByContactEmail(email);
 
     return personOpt.map(
-        person -> ResponseEntity.status(200).body(new PersonDto(person))
-    ).orElseGet(() -> ResponseEntity.noContent().build());
+        person -> ResponseEntity.status(200).body(new PersonDto(person)))
+        .orElseGet(() -> ResponseEntity.noContent().build());
   }
 }

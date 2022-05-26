@@ -1,6 +1,6 @@
 package br.gov.es.participe.service;
 
-import br.gov.es.participe.controller.dto.*;
+//import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
 import org.springframework.beans.factory.annotation.*;

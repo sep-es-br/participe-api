@@ -20,7 +20,7 @@ class LocalityTypeServiceTest extends BaseTest {
 
     @Autowired
     private LocalityTypeController localityTypeController;
-    
+
     @Autowired
     private LocalityTypeRepository localityTypeRepository;
 
@@ -39,6 +39,7 @@ class LocalityTypeServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldListAllLocalityTypes() {
         ResponseEntity response = localityTypeController.index();
         Assert.assertEquals(200, response.getStatusCodeValue());

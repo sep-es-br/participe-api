@@ -33,18 +33,20 @@ public class FileController {
     public ResponseEntity<UrlResource> getImagem(@PathVariable(value = "id") Long idImagem) throws IOException {
         UrlResource imagem = fileService.getFile(idImagem);
         return ResponseEntity.status(HttpStatus.OK)
-                             .contentType(MediaTypeFactory
-                              .getMediaType(imagem)
-                              .orElse(MediaType.APPLICATION_OCTET_STREAM))
-                             .body(imagem);
+                .contentType(MediaTypeFactory
+                        .getMediaType(imagem)
+                        .orElse(MediaType.APPLICATION_OCTET_STREAM))
+                .body(imagem);
     }
 
+    @SuppressWarnings("rawtypes")
     @PostMapping("/upload")
     public ResponseEntity upload(@RequestParam("file") MultipartFile file) throws IOException {
         FileDto fileDto = fileService.save(file);
         return ResponseEntity.status(HttpStatus.OK).body(fileDto);
     }
 
+    @SuppressWarnings("rawtypes")
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable(value = "id") Long idLocalidade) {
         fileService.delete(idLocalidade);

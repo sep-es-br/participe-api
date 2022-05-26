@@ -29,38 +29,43 @@ public class CitizenController {
 
   @ApiPageable
   @GetMapping
-  public ResponseEntity<Page<PersonKeepCitizenDto>> listCitizen(@RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                @RequestParam(value = "email", required = false, defaultValue = "") String email,
-                                                                @RequestParam(value = "autentication", required = false, defaultValue = "") String autentication,
-                                                                @RequestParam(value = "status", required = false, defaultValue = "") Boolean active,
-                                                                @RequestParam(value = "locality", required = false, defaultValue = "") List<Long> locality,
-                                                                @RequestParam(value = "conferenceId", required = false) Long conferenceId,
-                                                                @ApiIgnore Pageable page) {
+  public ResponseEntity<Page<PersonKeepCitizenDto>> listCitizen(
+      @RequestParam(value = "name", required = false, defaultValue = "") String name,
+      @RequestParam(value = "email", required = false, defaultValue = "") String email,
+      @RequestParam(value = "autentication", required = false, defaultValue = "") String autentication,
+      @RequestParam(value = "status", required = false, defaultValue = "") Boolean active,
+      @RequestParam(value = "locality", required = false, defaultValue = "") List<Long> locality,
+      @RequestParam(value = "conferenceId", required = false) Long conferenceId,
+      @ApiIgnore Pageable page) {
     Page<PersonKeepCitizenDto> list = personService
         .listKeepCitizen(name, email, autentication, active, locality, conferenceId, page);
     return ResponseEntity.status(200).body(list);
   }
 
   @GetMapping("/{personId}")
-  public ResponseEntity<PersonKeepCitizenDto> getCitizenById(@PathVariable Long personId, @RequestParam Long conferenceId) {
+  public ResponseEntity<PersonKeepCitizenDto> getCitizenById(@PathVariable Long personId,
+      @RequestParam Long conferenceId) {
     PersonKeepCitizenDto citizen = personService.findCitizenById(personId, conferenceId);
     return ResponseEntity.status(200).body(citizen);
   }
 
+  @SuppressWarnings({ "rawtypes" })
   @PostMapping
   public ResponseEntity store(@RequestBody PersonParamDto personParam) {
     return personService.storePerson(personParam, false);
   }
 
+  @SuppressWarnings({ "rawtypes" })
   @DeleteMapping("/{id}")
   public ResponseEntity destroy(@PathVariable Long id) {
     personService.delete(id);
     return ResponseEntity.status(200).build();
   }
 
+  @SuppressWarnings({ "rawtypes" })
   @PutMapping("/{id}")
   public ResponseEntity update(@RequestHeader(name = "Authorization") String token, @PathVariable Long id,
-                               @RequestBody PersonParamDto personParam) {
+      @RequestBody PersonParamDto personParam) {
     personParam.setId(id);
     return personService.updatePerson(personParam, false);
   }

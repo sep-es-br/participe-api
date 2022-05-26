@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+//import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Testcontainers
@@ -72,6 +72,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateMeeting() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         ResponseEntity response = meetingController.store(meetingParamDto);
@@ -79,6 +80,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindMeeting() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         meetingController.store(meetingParamDto);
@@ -89,6 +91,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindDashboard() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         meetingController.store(meetingParamDto);
@@ -98,6 +101,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldUpdateMeeting() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         ResponseEntity<MeetingDto> meetingEntity = meetingController.store(meetingParamDto);
@@ -117,6 +121,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldUpdateMeetingInformingReceptionist() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         ResponseEntity<MeetingDto> meetingEntity = meetingController.store(meetingParamDto);
@@ -140,6 +145,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldDeleteMeeting() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         ResponseEntity<MeetingDto> meetingEntity = meetingController.store(meetingParamDto);
@@ -149,6 +155,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void shouldStoreParticipationOnMeeting() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         PersonParamDto personParamDto = getPersonParamDto();
@@ -163,6 +170,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({ "unused", "unchecked" })
     public void shouldNotAllowDuplicateParticipations() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         PersonParamDto personParamDto = getPersonParamDto();
@@ -180,6 +188,7 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings(value = "unchecked")
     public void shouldNotDeleteMeetingWithPeopleParticipating() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         PersonParamDto personParamDto = getPersonParamDto();
@@ -197,11 +206,13 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindMeetingParticipants() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
-        PersonParamDto personParamDto = getPersonParamDto();
+        // PersonParamDto personParamDto = getPersonParamDto();
 
-        ResponseEntity<PersonDto> personEntity = personController.store(personParamDto);
+        // ResponseEntity<PersonDto> personEntity =
+        // personController.store(personParamDto);
         ResponseEntity<MeetingDto> meetingEntity = meetingController.store(meetingParamDto);
 
         ResponseEntity<Page<PersonMeetingDto>> emptyResponse = meetingController
@@ -209,9 +220,11 @@ class MeetingServiceTest extends BaseTest {
                         new ArrayList<Long>(), "", PageRequest.of(0, 30));
         Assert.assertEquals(0, emptyResponse.getBody().getTotalElements());
 
-        CheckInParamDto checkinParamDto = new CheckInParamDto(personEntity.getBody().getId(),
-                meetingEntity.getBody().getId());
-        ResponseEntity checkedInEntity = meetingController.checkInOnMeeting(checkinParamDto);
+        // CheckInParamDto checkinParamDto = new
+        // CheckInParamDto(personEntity.getBody().getId(),
+        // meetingEntity.getBody().getId());
+        // ResponseEntity checkedInEntity =
+        // meetingController.checkInOnMeeting(checkinParamDto);
 
         ResponseEntity responseOk = meetingController.findMeetingParticipants(meetingEntity.getBody().getId(),
                 new ArrayList<Long>(), "", PageRequest.of(0, 30));
@@ -219,26 +232,31 @@ class MeetingServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindNumberOfParticipants() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
-        PersonParamDto personParamDto = getPersonParamDto();
+        // PersonParamDto personParamDto = getPersonParamDto();
 
-        ResponseEntity<PersonDto> personEntity = personController.store(personParamDto);
+        // ResponseEntity<PersonDto> personEntity =
+        // personController.store(personParamDto);
         ResponseEntity<MeetingDto> meetingEntity = meetingController.store(meetingParamDto);
 
         ResponseEntity<Long> emptyResponse = meetingController
                 .findMeetingParticipantsNumber(meetingEntity.getBody().getId());
         Assert.assertEquals(200, emptyResponse.getStatusCodeValue());
 
-        CheckInParamDto checkinParamDto = new CheckInParamDto(personEntity.getBody().getId(),
-                meetingEntity.getBody().getId());
-        ResponseEntity checkedInEntity = meetingController.checkInOnMeeting(checkinParamDto);
+        // CheckInParamDto checkinParamDto = new
+        // CheckInParamDto(personEntity.getBody().getId(),
+        // meetingEntity.getBody().getId());
+        // ResponseEntity checkedInEntity =
+        // meetingController.checkInOnMeeting(checkinParamDto);
 
         ResponseEntity responseOk = meetingController.findMeetingParticipantsNumber(meetingEntity.getBody().getId());
         Assert.assertEquals(200, responseOk.getStatusCodeValue());
     }
 
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void removeParticipation() throws ParseException {
         MeetingParamDto meetingParamDto = getMeetingParamDto();
         PersonParamDto personParamDto = getPersonParamDto();
@@ -246,11 +264,14 @@ class MeetingServiceTest extends BaseTest {
         ResponseEntity<PersonDto> personEntity = personController.store(personParamDto);
         ResponseEntity<MeetingDto> meetingEntity = meetingController.store(meetingParamDto);
 
-        CheckInParamDto checkinParamDto = new CheckInParamDto(personEntity.getBody().getId(),
-                meetingEntity.getBody().getId());
-        ResponseEntity checkedInEntity = meetingController.checkInOnMeeting(checkinParamDto);
+        // CheckInParamDto checkinParamDto = new
+        // CheckInParamDto(personEntity.getBody().getId(),
+        // meetingEntity.getBody().getId());
+        // ResponseEntity checkedInEntity =
+        // meetingController.checkInOnMeeting(checkinParamDto);
 
-        ResponseEntity response = meetingController.removeMeetingParticipation(personEntity.getBody().getId(), meetingEntity.getBody().getId());
+        ResponseEntity response = meetingController.removeMeetingParticipation(personEntity.getBody().getId(),
+                meetingEntity.getBody().getId());
         Assert.assertEquals(200, response.getStatusCodeValue());
     }
 
@@ -291,7 +312,8 @@ class MeetingServiceTest extends BaseTest {
         meetingParamDto.setBeginDate(beginDate);
         meetingParamDto.setEndDate(endDate);
 
-        //Date endDate = new SimpleDateFormat("dd/MM/yyyy").format(this.dateFromNow(-1));
+        // Date endDate = new
+        // SimpleDateFormat("dd/MM/yyyy").format(this.dateFromNow(-1));
         return meetingParamDto;
     }
 

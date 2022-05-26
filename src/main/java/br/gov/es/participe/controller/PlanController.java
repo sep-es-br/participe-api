@@ -21,6 +21,7 @@ public class PlanController {
     private PlanService planService;
 
     @GetMapping
+    @SuppressWarnings("rawtypes")
     public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
         List<Plan> plans = planService.findAll(query);
         List<PlanDto> response = new ArrayList<>();
@@ -31,6 +32,7 @@ public class PlanController {
     }
 
     @PostMapping
+    @SuppressWarnings("rawtypes")
     public ResponseEntity store(@RequestBody PlanParamDto planParamDto) {
         Plan plan = new Plan(planParamDto);
         PlanDto response = new PlanDto(planService.save(plan), true);
@@ -38,12 +40,14 @@ public class PlanController {
     }
 
     @GetMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity show(@PathVariable Long id) {
         PlanDto response = new PlanDto(planService.find(id), true);
         return ResponseEntity.status(200).body(response);
     }
 
     @PutMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity update(@PathVariable Long id, @RequestBody PlanParamDto planParamDto) {
         planParamDto.setId(id);
         Plan plan = new Plan(planParamDto);
@@ -52,6 +56,7 @@ public class PlanController {
     }
 
     @DeleteMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity destroy(@PathVariable Long id) {
         planService.delete(id);
         return ResponseEntity.status(200).build();

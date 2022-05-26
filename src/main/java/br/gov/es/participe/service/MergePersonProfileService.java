@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@SuppressWarnings("unused")
 public class MergePersonProfileService {
 
   private final PersonService personService;
@@ -41,17 +42,16 @@ public class MergePersonProfileService {
 
   @Autowired
   public MergePersonProfileService(
-    PersonRepository personRepository,
-    PersonService personService,
-    SelfDeclarationRepository selfDeclarationRepository,
-    LoginRepository loginRepository,
-    AttendRepository attendRepository,
-    AuthServiceRepository authServiceRepository,
-    CheckedInAtRepository checkedInAtRepository,
-    CommentRepository commentRepository,
-    IsAuthenticatedByRepository isAuthenticatedByRepository,
-    MeetingRepository meetingRepository
-  ) {
+      PersonRepository personRepository,
+      PersonService personService,
+      SelfDeclarationRepository selfDeclarationRepository,
+      LoginRepository loginRepository,
+      AttendRepository attendRepository,
+      AuthServiceRepository authServiceRepository,
+      CheckedInAtRepository checkedInAtRepository,
+      CommentRepository commentRepository,
+      IsAuthenticatedByRepository isAuthenticatedByRepository,
+      MeetingRepository meetingRepository) {
     this.personRepository = personRepository;
     this.personService = personService;
     this.loginRepository = loginRepository;
@@ -88,9 +88,11 @@ public class MergePersonProfileService {
 
     List<Comment> commentLikedByToMerge = this.commentRepository.findAllCommentsLikedByPerson(personIdToRemove);
 
-    if(commentLikedByToMerge.isEmpty()) return;
+    if (commentLikedByToMerge.isEmpty())
+      return;
 
-    List<Comment> commentLikedByToMergeUpdate = this.commentRepository.findAllCommentsLikedByPerson(personToUpdate.getId());
+    List<Comment> commentLikedByToMergeUpdate = this.commentRepository
+        .findAllCommentsLikedByPerson(personToUpdate.getId());
 
     commentLikedByToMerge.forEach(comment -> comment.getPersonLiked().add(personToUpdate));
 
@@ -103,7 +105,8 @@ public class MergePersonProfileService {
   private void mergeLogin(Long personIdToRemove, Person personToUpdate) {
     List<Login> loginToMerge = loginRepository.findAllByPerson(personIdToRemove);
 
-    if(loginToMerge.isEmpty()) return;
+    if (loginToMerge.isEmpty())
+      return;
 
     loginToMerge.forEach(login -> login.setPerson(personToUpdate));
 
@@ -113,43 +116,47 @@ public class MergePersonProfileService {
   private List<CheckedInAt> mergeCheckedInMeeting(Long personIdToRemove, Person person) {
     List<CheckedInAt> checkedInAtToMerge = this.meetingRepository.findAllPersonCheckedIn(personIdToRemove);
 
-    if(checkedInAtToMerge.isEmpty()) return Collections.emptyList();
+    if (checkedInAtToMerge.isEmpty())
+      return Collections.emptyList();
 
     List<CheckedInAt> checkedInAtRelationshipUpdated = checkedInAtToMerge
-      .stream()
-      .map(checkedInAt -> {
-        CheckedInAt newCheckedInAt = new CheckedInAt();
-        newCheckedInAt.setTime(checkedInAt.getTime());
-        newCheckedInAt.setMeeting(checkedInAt.getMeeting());
-        newCheckedInAt.setPerson(person);
-        return newCheckedInAt;
-      }).collect(Collectors.toList());
+        .stream()
+        .map(checkedInAt -> {
+          CheckedInAt newCheckedInAt = new CheckedInAt();
+          newCheckedInAt.setTime(checkedInAt.getTime());
+          newCheckedInAt.setMeeting(checkedInAt.getMeeting());
+          newCheckedInAt.setPerson(person);
+          return newCheckedInAt;
+        }).collect(Collectors.toList());
 
     return checkedInAtRelationshipUpdated;
   }
 
   private List<IsAuthenticatedBy> mergeIsAuthenticatedBy(Long personIdToRemove, Person person) {
-    List<IsAuthenticatedBy> authenticatedByToMerge = this.isAuthenticatedByRepository.findAllByIdPerson(personIdToRemove);
+    List<IsAuthenticatedBy> authenticatedByToMerge = this.isAuthenticatedByRepository
+        .findAllByIdPerson(personIdToRemove);
 
-    if(authenticatedByToMerge.isEmpty()) return Collections.emptyList();
+    if (authenticatedByToMerge.isEmpty())
+      return Collections.emptyList();
 
-    List<IsAuthenticatedBy> authenticatedByToUpdate = this.isAuthenticatedByRepository.findAllByIdPerson(person.getId());
+    List<IsAuthenticatedBy> authenticatedByToUpdate = this.isAuthenticatedByRepository
+        .findAllByIdPerson(person.getId());
 
     List<IsAuthenticatedBy> authenticatedByRelationshipUpdated = authenticatedByToMerge
-      .stream()
-      .filter(isAuthenticatedBy -> {
-        boolean notHaveTheseAuthType = authenticatedByToUpdate
-          .stream()
-          .map(IsAuthenticatedBy::getName)
-          .noneMatch(name -> name.equalsIgnoreCase(isAuthenticatedBy.getName()));
-        return notHaveTheseAuthType;
-      })
-      .map(authenticatedBy -> {
-        IsAuthenticatedBy newAuthenticatedBy = authenticatedBy.copyWithoutRelationshipOf();
-        newAuthenticatedBy.setPerson(person);
-        newAuthenticatedBy.setAuthService(authenticatedBy.getAuthService());
-        return newAuthenticatedBy;
-      }).collect(Collectors.toList());
+        .stream()
+        .filter(isAuthenticatedBy -> {
+          boolean notHaveTheseAuthType = authenticatedByToUpdate
+              .stream()
+              .map(IsAuthenticatedBy::getName)
+              .noneMatch(name -> name.equalsIgnoreCase(isAuthenticatedBy.getName()));
+          return notHaveTheseAuthType;
+        })
+        .map(authenticatedBy -> {
+          IsAuthenticatedBy newAuthenticatedBy = authenticatedBy.copyWithoutRelationshipOf();
+          newAuthenticatedBy.setPerson(person);
+          newAuthenticatedBy.setAuthService(authenticatedBy.getAuthService());
+          return newAuthenticatedBy;
+        }).collect(Collectors.toList());
 
     return authenticatedByRelationshipUpdated;
   }
@@ -157,7 +164,8 @@ public class MergePersonProfileService {
   private void mergeSelfDeclaration(Long personIdToRemove, Person person) {
     List<SelfDeclaration> selfDeclarationsToMerge = selfDeclarationRepository.findAllByIdPerson(personIdToRemove);
 
-    if(selfDeclarationsToMerge.isEmpty()) return;
+    if (selfDeclarationsToMerge.isEmpty())
+      return;
 
     List<SelfDeclaration> selfDeclarationsUpdate = selfDeclarationRepository.findAllByIdPerson(person.getId());
 
@@ -172,7 +180,8 @@ public class MergePersonProfileService {
   private void mergeAttends(Long personIdToRemove, Person personToUpdate) {
     List<Attend> attendsToMerge = this.attendRepository.findAllAttendByIdPerson(personIdToRemove);
 
-    if(attendsToMerge.isEmpty()) return;
+    if (attendsToMerge.isEmpty())
+      return;
 
     List<Attend> attendsToUpdate = this.attendRepository.findAllAttendByIdPerson(personToUpdate.getId());
 

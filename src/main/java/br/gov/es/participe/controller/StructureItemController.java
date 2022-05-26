@@ -20,6 +20,7 @@ public class StructureItemController {
     private StructureItemService structureItemService;
 
     @GetMapping
+    @SuppressWarnings("rawtypes")
     public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
         List<StructureItem> structureItems;
         if (query != null && !query.isEmpty()) {
@@ -35,6 +36,7 @@ public class StructureItemController {
     }
 
     @GetMapping("list")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity listByStructure(@RequestParam(value = "id") Long idStructure) {
         List<StructureItem> structureItems = structureItemService.findByStructure(idStructure);
         List<StructureItemDto> response = null;
@@ -45,6 +47,7 @@ public class StructureItemController {
     }
 
     @PostMapping
+    @SuppressWarnings("rawtypes")
     public ResponseEntity store(@RequestBody StructureItemDto structureItemDto) {
         StructureItem structureItem = new StructureItem(structureItemDto);
         StructureItemDto response = new StructureItemDto(structureItemService.create(structureItem), null, true, true);
@@ -52,18 +55,22 @@ public class StructureItemController {
     }
 
     @GetMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity show(@PathVariable Long id) {
         StructureItemDto response = new StructureItemDto(structureItemService.find(id), null, true, true);
         return ResponseEntity.status(200).body(response);
     }
 
     @PutMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity update(@PathVariable Long id, @RequestBody StructureItemDto structureItemDto) {
-        StructureItemDto response = new StructureItemDto(structureItemService.update(id, structureItemDto), null, true, true);
+        StructureItemDto response = new StructureItemDto(structureItemService.update(id, structureItemDto), null, true,
+                true);
         return ResponseEntity.status(200).body(response);
     }
 
     @DeleteMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity destroy(@PathVariable Long id) {
         structureItemService.delete(id);
         return ResponseEntity.status(200).build();

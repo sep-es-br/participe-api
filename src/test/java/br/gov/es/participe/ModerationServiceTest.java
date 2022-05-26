@@ -28,7 +28,7 @@ import java.util.Set;
 @Testcontainers
 @SpringBootTest
 class ModerationServiceTest extends BaseTest {
-	
+
     @Autowired
     private ModerationController moderationController;
 
@@ -37,7 +37,7 @@ class ModerationServiceTest extends BaseTest {
 
     @Autowired
     private CommentRepository commentRepository;
-    
+
     @Autowired
     private TokenService tokenService;
 
@@ -92,12 +92,12 @@ class ModerationServiceTest extends BaseTest {
         commentController.store(token, ids.getCommentParamDto());
 
         ResponseEntity<List<ModerationResultDto>> response = moderationController
-                .findAllCommentsByStatus(token,1L, "", "","", null,
+                .findAllCommentsByStatus(token, 1L, "", "", "", null,
                         null, null, null, null);
         Assert.assertEquals(200, response.getStatusCodeValue());
 
         ResponseEntity<List<ModerationResultDto>> response2 = moderationController
-                .findAllCommentsByStatus(token,ids.getCommentParamDto().getConference(), "", "",
+                .findAllCommentsByStatus(token, ids.getCommentParamDto().getConference(), "", "",
                         "", null, null, null, null, null);
         Assert.assertEquals(200, response2.getStatusCodeValue());
 
@@ -127,7 +127,7 @@ class ModerationServiceTest extends BaseTest {
 
     @Test
     public void shouldFailToFindModerationWithWrongId() {
-        ResponseEntity<ModerationResultDto> response = moderationController.findModerationResultById(42L,42L);
+        ResponseEntity<ModerationResultDto> response = moderationController.findModerationResultById(42L, 42L);
         Assert.assertEquals(200, response.getStatusCodeValue());
     }
 
@@ -243,6 +243,7 @@ class ModerationServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("unused")
     public void shouldFindConferences() throws IOException {
         Person personAdm = getPersonWithRole("Administrator");
         String tokenAdm = "Bearer " + tokenService.generateToken(personAdm, TokenType.AUTHENTICATION);
@@ -319,7 +320,7 @@ class ModerationServiceTest extends BaseTest {
         planItem3.setPlan(plan);
         planItem3 = planItemRepository.save(planItem3);
 
-        Locality locality =  localityRepository.save(new Locality());
+        Locality locality = localityRepository.save(new Locality());
         CommentParamDto commentParamDto = new CommentParamDto();
         commentParamDto.setPlanItem(planItem3.getId());
         commentParamDto.setConference(conference.getId());
@@ -329,7 +330,8 @@ class ModerationServiceTest extends BaseTest {
         commentParamDto.setType("pre");
         commentParamDto.setClassification("proposal");
 
-        IdsDto ids = new IdsDto(conference.getId(), plan.getId(), structure.getId(), planItem3.getId(), commentParamDto);
+        IdsDto ids = new IdsDto(conference.getId(), plan.getId(), structure.getId(), planItem3.getId(),
+                commentParamDto);
         return ids;
     }
 
@@ -345,7 +347,7 @@ class ModerationServiceTest extends BaseTest {
 
     private Person getPersonWithRole(String role) {
         Person person = null;
-        if(role.contains("Administrator")) {
+        if (role.contains("Administrator")) {
             person = personRepository.findById(2L).orElse(null);
             if (person == null) {
                 person = new Person();
@@ -355,7 +357,7 @@ class ModerationServiceTest extends BaseTest {
                 person.setRoles(roles);
                 person = personRepository.save(person);
             }
-        } else if(role.contains("Moderator")) {
+        } else if (role.contains("Moderator")) {
             person = personRepository.findById(3L).orElse(null);
             if (person == null) {
                 person = new Person();
@@ -380,7 +382,7 @@ class ModerationServiceTest extends BaseTest {
         }
 
         public IdsDto(Long conferenceId, Long planId, Long structureId, Long planItemId,
-                      CommentParamDto commentParamDto) {
+                CommentParamDto commentParamDto) {
             this.conferenceId = conferenceId;
             this.planId = planId;
             this.structureId = structureId;

@@ -53,6 +53,7 @@ class FileServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateFile() throws IOException {
         MultipartFile file = createFileParamDto();
 

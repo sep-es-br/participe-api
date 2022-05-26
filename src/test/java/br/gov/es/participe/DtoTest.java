@@ -1,16 +1,16 @@
 package br.gov.es.participe;
 
-import java.util.ArrayList;
-import java.util.Date;
+//import java.util.ArrayList;
+//import java.util.Date;
 import java.util.HashSet;
-import java.util.Random;
+//import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import br.gov.es.participe.controller.dto.ConferenceDto;
-import br.gov.es.participe.controller.dto.ConferenceParamDto;
+//import br.gov.es.participe.controller.dto.ConferenceDto;
+//import br.gov.es.participe.controller.dto.ConferenceParamDto;
 import br.gov.es.participe.controller.dto.DomainParamDto;
 import br.gov.es.participe.controller.dto.FileDto;
 import br.gov.es.participe.controller.dto.LocalityParamDto;
@@ -19,10 +19,10 @@ import br.gov.es.participe.controller.dto.PlanItemDto;
 import br.gov.es.participe.controller.dto.PlanItemParamDto;
 import br.gov.es.participe.controller.dto.PlanParamDto;
 import br.gov.es.participe.controller.dto.StructureDto;
-import br.gov.es.participe.controller.dto.StructureItemDto;
+//import br.gov.es.participe.controller.dto.StructureItemDto;
 import br.gov.es.participe.controller.dto.StructureItemParamDto;
 import br.gov.es.participe.controller.dto.StructureParamDto;
-import br.gov.es.participe.model.Conference;
+//import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.model.File;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Plan;

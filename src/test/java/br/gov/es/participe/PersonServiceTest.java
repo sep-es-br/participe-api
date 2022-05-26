@@ -63,6 +63,7 @@ class PersonServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreatePerson() {
         PersonParamDto personParamDto = getPersonParamDto();
         ResponseEntity response = personController.store(personParamDto);
@@ -70,6 +71,7 @@ class PersonServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldValidatePerson() {
         ResponseEntity response1 = personController.validate(EMAIL, "12345678901", null);
         Assert.assertEquals(200, response1.getStatusCodeValue());
@@ -82,6 +84,7 @@ class PersonServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void shouldDeletePerson() {
         PersonParamDto personParamDto = getPersonParamDto();
         ResponseEntity<PersonDto> personResponse = personController.store(personParamDto);
@@ -92,6 +95,7 @@ class PersonServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldComplementPerson() {
         PersonParamDto personParamDto = getPersonParamDto();
         personController.store(personParamDto);
@@ -101,6 +105,7 @@ class PersonServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void shouldUpdatePerson() {
         PersonParamDto personParamDto = getPersonParamDto();
         ResponseEntity<PersonDto> personResponse = personController.store(personParamDto);

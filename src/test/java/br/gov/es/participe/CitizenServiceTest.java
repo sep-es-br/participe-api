@@ -88,6 +88,7 @@ class CitizenServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateCitizen() {
         PersonParamDto personParamDto = getPersonParamDto();
         ResponseEntity response = citizenController.store(personParamDto);
@@ -95,6 +96,7 @@ class CitizenServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateCitizenWithCpf() {
         PersonParamDto personParamDto = getPersonParamDto();
         personParamDto.setCpf("12345678912");
@@ -104,6 +106,7 @@ class CitizenServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void shouldDeleteCitizen() {
         PersonParamDto personParamDto = getPersonParamDto();
         ResponseEntity<PersonDto> personResponse = citizenController.store(personParamDto);
@@ -114,6 +117,7 @@ class CitizenServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void shouldUpdateCitizen() {
         PersonParamDto personParamDto = getPersonParamDto();
         ResponseEntity<PersonDto> personResponse = citizenController.store(personParamDto);
@@ -127,6 +131,7 @@ class CitizenServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void shouldUpdateCitizenWithCpf() {
         PersonParamDto personParamDto = getPersonParamDto();
         personParamDto.setCpf("12345678912");
@@ -147,12 +152,12 @@ class CitizenServiceTest extends BaseTest {
         PersonParamDto personParamDto = getPersonParamDto();
         citizenController.store(personParamDto);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () ->
-                citizenController.listCitizen("", "", "", null,
-                new ArrayList<>(), null, PageRequest.of(0,30)));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> citizenController.listCitizen("", "", "", null,
+                new ArrayList<>(), null, PageRequest.of(0, 30)));
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldListCitizen() {
         Conference conference = getConference();
         Locality locality = getLocality();
@@ -163,11 +168,12 @@ class CitizenServiceTest extends BaseTest {
         citizenController.store(personParamDto2);
 
         ResponseEntity response = citizenController.listCitizen("", "", "", null,
-                new ArrayList<>(), conference.getId(), PageRequest.of(0,30));
+                new ArrayList<>(), conference.getId(), PageRequest.of(0, 30));
         Assert.assertEquals(200, response.getStatusCodeValue());
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldListCitizenById() {
         Conference conference = getConference();
         Locality locality = getLocality();
@@ -182,6 +188,7 @@ class CitizenServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldGetLocalities() {
         Long conferenceId = createTestBase();
 
@@ -230,7 +237,9 @@ class CitizenServiceTest extends BaseTest {
         return localityRepository.save(new Locality());
     }
 
-    private PersonParamDto getPersonParamDtoWithLoginInformation(int uniqueEmailValue, Conference conference, Locality locality) {
+    @SuppressWarnings({"unchecked"})
+    private PersonParamDto getPersonParamDtoWithLoginInformation(int uniqueEmailValue, Conference conference,
+            Locality locality) {
         ConferenceDto conferenceDto = new ConferenceDto();
         conferenceDto.setId(conference.getId());
         LocalityDto localityDto = new LocalityDto();
@@ -243,14 +252,14 @@ class CitizenServiceTest extends BaseTest {
         PersonParamDto personParamDto = new PersonParamDto();
         personParamDto.setName("pessoa1");
         personParamDto.setLogin("p1");
-        if(uniqueEmailValue == 1) {
+        if (uniqueEmailValue == 1) {
             personParamDto.setContactEmail(EMAIL1);
             personParamDto.setConfirmEmail(EMAIL1);
         } else {
             personParamDto.setContactEmail(EMAIL2);
             personParamDto.setConfirmEmail(EMAIL2);
         }
-        personParamDto.setCpf("1234567"+uniqueEmailValue+"8901");
+        personParamDto.setCpf("1234567" + uniqueEmailValue + "8901");
         personParamDto.setTelephone("991191199");
         personParamDto.setPassword("senha123");
         personParamDto.setConfirmPassword("senha123");

@@ -30,6 +30,7 @@ public class DomainController {
     private DomainService domainService;
 
     @GetMapping
+    @SuppressWarnings({ "rawtypes" })
     public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
         List<Domain> domains = domainService.findAll(query);
         List<DomainDto> response = new ArrayList<>();
@@ -40,6 +41,7 @@ public class DomainController {
     }
 
     @PostMapping
+    @SuppressWarnings({ "rawtypes" })
     public ResponseEntity store(@RequestBody DomainParamDto domainParamDto) {
         Domain domain = new Domain(domainParamDto);
         DomainDto response = new DomainDto(domainService.save(domain), true);
@@ -47,20 +49,23 @@ public class DomainController {
     }
 
     @GetMapping("/{id}")
+    @SuppressWarnings({ "rawtypes" })
     public ResponseEntity show(@PathVariable Long id) {
         DomainDto response = new DomainDto(domainService.find(id), true);
         return ResponseEntity.status(200).body(response);
     }
 
     @PutMapping("/{id}")
+    @SuppressWarnings({ "rawtypes" })
     public ResponseEntity update(@PathVariable Long id, @RequestBody DomainParamDto domainUpdateDto) {
         domainUpdateDto.setId(id);
-            Domain domain = new Domain(domainUpdateDto);
+        Domain domain = new Domain(domainUpdateDto);
         DomainDto response = new DomainDto(domainService.save(domain), true);
         return ResponseEntity.status(200).body(response);
     }
 
     @DeleteMapping("/{id}")
+    @SuppressWarnings({ "rawtypes" })
     public ResponseEntity destroy(@PathVariable Long id) {
         domainService.delete(id);
         return ResponseEntity.status(200).build();

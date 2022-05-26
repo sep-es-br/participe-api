@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-import br.gov.es.participe.model.*;
+//import br.gov.es.participe.model.*;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
@@ -34,7 +34,8 @@ public class FileService {
 
     @Transactional(readOnly = true)
     public FileDto findById(Long id) {
-        br.gov.es.participe.model.File file = fileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Imagem não encontrada."));
+        br.gov.es.participe.model.File file = fileRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Imagem não encontrada."));
         return new FileDto(file);
     }
 
@@ -61,7 +62,7 @@ public class FileService {
         return new FileDto(pl);
     }
 
-    private void saveOnDisc(byte [] dados, String nomeArquivo) throws IOException {
+    private void saveOnDisc(byte[] dados, String nomeArquivo) throws IOException {
         String caminhoArquivo = applicationProperties.getPathImagens().concat(nomeArquivo);
         File file = Files.createFile(Paths.get(caminhoArquivo)).toFile();
 
@@ -72,8 +73,9 @@ public class FileService {
     }
 
     public void delete(Long id) {
-        br.gov.es.participe.model.File file1 = fileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Imagem id: " + id +" não encontrada."));
-        
+        br.gov.es.participe.model.File file1 = fileRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Imagem id: " + id + " não encontrada."));
+
         String caminhoArquivo = applicationProperties.getPathImagens();
         if (file1.getUrl() != null) {
             caminhoArquivo = caminhoArquivo.concat(file1.getUrl());
@@ -85,8 +87,7 @@ public class FileService {
                 }
             }
         }
-        
-        
+
         fileRepository.delete(file1);
     }
 

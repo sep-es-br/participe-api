@@ -27,6 +27,7 @@ public class PersonController {
   private PersonService personService;
 
   @GetMapping
+  @SuppressWarnings("rawtypes")
   public ResponseEntity index() {
     List<Person> persons = personService.findAll();
 
@@ -38,22 +39,24 @@ public class PersonController {
   }
 
   @GetMapping("/validate")
+  @SuppressWarnings("rawtypes")
   public ResponseEntity validate(
       @RequestParam(value = "email", required = false, defaultValue = "") String email,
       @RequestParam(value = "cpf", required = false, defaultValue = "") String cpf,
-      @RequestParam(value = "id", required = false) Long id
-  ) {
+      @RequestParam(value = "id", required = false) Long id) {
     return ResponseEntity
         .status(200)
         .body(personService.validate(email, cpf, SERVER));
   }
 
   @PostMapping
+  @SuppressWarnings("rawtypes")
   public ResponseEntity store(@RequestBody PersonParamDto personParam) {
     return personService.storePerson(personParam, false);
   }
 
   @PostMapping("/complement")
+  @SuppressWarnings("rawtypes")
   public ResponseEntity complement(@RequestBody PersonParamDto personParam) {
 
     if (personParam.getSelfDeclaration() == null) {
@@ -63,8 +66,7 @@ public class PersonController {
     SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaration());
     Person person = personService.complement(
         new Person(personParam),
-        self
-    );
+        self);
 
     PersonDto response = new PersonDto(person);
     response.setSelfDeclaretion(new SelfDeclarationDto(self, false));
@@ -72,20 +74,23 @@ public class PersonController {
   }
 
   @DeleteMapping("/delete/{id}")
+  @SuppressWarnings("rawtypes")
   public ResponseEntity destroy(@PathVariable Long id) {
     personService.delete(id);
     return ResponseEntity.status(200).build();
   }
 
   @PutMapping("/{personId}")
+  @SuppressWarnings("rawtypes")
   public ResponseEntity update(@RequestHeader(name = "Authorization") String token,
-                               @RequestBody PersonParamDto personParam,
-                               @PathVariable(name = "personId") Long personId) {
+      @RequestBody PersonParamDto personParam,
+      @PathVariable(name = "personId") Long personId) {
     personParam.setId(personId);
     return personService.updatePerson(token, personParam, false);
   }
 
   @PostMapping("/forgot-password")
+  @SuppressWarnings("rawtypes")
   public ResponseEntity forgotPassword(@RequestBody ForgotPasswordDto forgotPassword) {
     Boolean isSend = personService.forgotPassword(forgotPassword.getEmail(), forgotPassword.getConference(), SERVER);
     MessageDto msg = new MessageDto();

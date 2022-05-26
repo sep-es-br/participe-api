@@ -4,15 +4,16 @@ import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+//import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+//import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
+@SuppressWarnings({ "unused" })
 public class ConferenceParamDto {
 
   private static final String formatDate = "dd/MM/yyyy HH:mm:ss";
@@ -330,7 +331,6 @@ public class ConferenceParamDto {
   public void setResearchConfiguration(ResearchConfigurationParamDto researchConfiguration) {
     this.researchConfiguration = researchConfiguration;
   }
-
 
   public DisplayModeType getDisplayMode() {
     return displayMode;

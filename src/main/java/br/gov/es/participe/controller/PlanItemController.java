@@ -31,6 +31,7 @@ public class PlanItemController {
     private PlanItemService planItemService;
 
     @GetMapping
+    @SuppressWarnings("rawtypes")
     public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
         List<PlanItem> planItems;
         if (query != null && !query.isEmpty()) {
@@ -46,6 +47,7 @@ public class PlanItemController {
     }
 
     @PostMapping
+    @SuppressWarnings("rawtypes")
     public ResponseEntity store(@RequestBody PlanItemParamDto planItemParamDto) {
         PlanItem planItem = new PlanItem(planItemParamDto);
         planItem = planItemService.save(planItem);
@@ -54,12 +56,14 @@ public class PlanItemController {
     }
 
     @GetMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity show(@PathVariable Long id) {
         PlanItemDto response = new PlanItemDto(planItemService.find(id), null, true);
         return ResponseEntity.status(200).body(response);
     }
 
     @PutMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity update(@PathVariable Long id, @RequestBody PlanItemParamDto planItemParamDto) {
         PlanItem planItem = new PlanItem(planItemParamDto);
         PlanItemDto response = new PlanItemDto(planItemService.save(planItem), null, true);
@@ -67,6 +71,7 @@ public class PlanItemController {
     }
 
     @DeleteMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity destroy(@PathVariable Long id) {
         planItemService.delete(id);
         return ResponseEntity.status(200).build();

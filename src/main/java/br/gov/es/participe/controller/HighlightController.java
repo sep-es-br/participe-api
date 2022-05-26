@@ -22,21 +22,24 @@ public class HighlightController {
 
 	@Autowired
 	private HighlightService highlightService;
-	
+
+	@SuppressWarnings("rawtypes")
 	@PostMapping
 	public ResponseEntity store(@RequestBody HighlightParamDto highlightParamDto) {
 		Highlight highlight = new Highlight(highlightParamDto);
-		
+
 		HighlightDto response = new HighlightDto(highlightService.save(highlight, "rem"));
 		return ResponseEntity.status(200).body(response);
 	}
-	
+
+	@SuppressWarnings("rawtypes")
 	@DeleteMapping("/deleteAll/{id}")
 	public ResponseEntity deleteAll(@PathVariable Long id) {
 		highlightService.deleteAllByIdPerson(id);
 		return ResponseEntity.status(200).build();
 	}
 
+	@SuppressWarnings("rawtypes")
 	@DeleteMapping
 	public ResponseEntity delete(@RequestBody HighlightParamDto highlightParamDto) {
 		boolean response = highlightService.delete(new Highlight(highlightParamDto));

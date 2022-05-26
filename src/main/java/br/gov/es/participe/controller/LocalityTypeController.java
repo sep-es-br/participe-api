@@ -22,6 +22,7 @@ public class LocalityTypeController {
     private LocalityTypeService localityTypeService;
 
     @GetMapping
+    @SuppressWarnings("rawtypes")
     public ResponseEntity index() {
         List<LocalityType> localityTypes = localityTypeService.findAll();
         List<LocalityTypeDto> response = new ArrayList<>();

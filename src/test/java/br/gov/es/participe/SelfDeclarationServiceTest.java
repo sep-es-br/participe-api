@@ -60,6 +60,7 @@ class SelfDeclarationServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateSelfDeclaration() {
         SelfDeclarationDto selfdeclarationDto = createSelfDeclarationParamDto("Test");
 
@@ -68,9 +69,11 @@ class SelfDeclarationServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void shouldListAllSelfDeclarations() {
         SelfDeclarationDto selfdeclarationDto = createSelfDeclarationParamDto("Test");
-        ResponseEntity<SelfDeclarationDto> selfDeclarationDtoResponseEntity = selfdeclarationController.store(selfdeclarationDto);
+        ResponseEntity<SelfDeclarationDto> selfDeclarationDtoResponseEntity = selfdeclarationController
+                .store(selfdeclarationDto);
         SelfDeclarationDto selfDeclarationDto = selfDeclarationDtoResponseEntity.getBody();
 
         ResponseEntity response = selfdeclarationController.findAll(selfDeclarationDto.getId());
@@ -78,10 +81,12 @@ class SelfDeclarationServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void shouldDeleteSelfDeclaration() {
         SelfDeclarationDto selfdeclarationParamDto = createSelfDeclarationParamDto("Test");
-        
-        ResponseEntity<SelfDeclarationDto> selfdeclarationDto = selfdeclarationController.store(selfdeclarationParamDto);
+
+        ResponseEntity<SelfDeclarationDto> selfdeclarationDto = selfdeclarationController
+                .store(selfdeclarationParamDto);
         SelfDeclarationDto selfDto = selfdeclarationDto.getBody();
 
         ResponseEntity response = selfdeclarationController.delete(selfDto.getId());

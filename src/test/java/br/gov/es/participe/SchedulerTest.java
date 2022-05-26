@@ -1,6 +1,5 @@
 package br.gov.es.participe;
 
-
 import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.repository.AttendRepository;
 import br.gov.es.participe.repository.ConferenceRepository;
@@ -67,7 +66,7 @@ class SchedulerTest {
   @InjectMocks
   private ConferenceService service;
   private Conference conference;
-  private LocalDateTime now;
+  // private LocalDateTime now;
 
   @BeforeEach
   void setUp() {

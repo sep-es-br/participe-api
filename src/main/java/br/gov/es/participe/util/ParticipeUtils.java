@@ -33,15 +33,16 @@ public class ParticipeUtils {
     return true;
   }
 
-
   public String getServerBaseUrl(HttpServletRequest request) {
     if (request.getServerPort() > 0 && request.getServerPort() != 443) {
-      return String.format("%s://%s:%d/participe", request.getScheme(), request.getServerName(), request.getServerPort());
+      return String.format("%s://%s:%d/participe", request.getScheme(), request.getServerName(),
+          request.getServerPort());
     } else {
       return String.format("%s://%s/participe", request.getScheme(), request.getServerName());
     }
   }
 
+  @SuppressWarnings({ "rawtypes" })
   public RestTemplate htmlRestTemplate() {
     RestTemplate restTemplate = new RestTemplate();
     HttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(Charset.forName("UTF-8"));

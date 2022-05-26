@@ -54,6 +54,7 @@ class StructureItemServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldListAllStructureItemsController() {
         ResponseEntity  response = structureItemController.index(null);
         Assert.assertEquals(200, response.getStatusCodeValue());
@@ -66,6 +67,7 @@ class StructureItemServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateStructureItem() {
         StructureItemDto structureItemParamDto = createStructureItemDto("Test");
 
@@ -75,6 +77,7 @@ class StructureItemServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldUpdateStructureItem() {
         StructureItemDto structureItemParamDto = createStructureItemDto("Test");
         StructureItemDto structureItemDto = (StructureItemDto) structureItemController.store(structureItemParamDto).getBody();
@@ -86,6 +89,7 @@ class StructureItemServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindStructureItem() {
         StructureItemDto structureItemParamDto = createStructureItemDto("Test");
         StructureItemDto structureItemDto = (StructureItemDto) structureItemController.store(structureItemParamDto).getBody();

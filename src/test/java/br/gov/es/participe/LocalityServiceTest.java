@@ -63,12 +63,14 @@ class LocalityServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldListGetLocalitys() {
         ResponseEntity response = localityController.index(null, null);
         Assert.assertEquals(200, response.getStatusCodeValue());
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateLocality() {
         LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, getLocalityTypeTest("Coutry"));
 
@@ -78,9 +80,10 @@ class LocalityServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateLocalityWhenDomainHasLocalities() {
         LocalityType localityType = getLocalityTypeTest("Coutry");
-        LocalityParamDto localityParamDto = createLocalityParamDto("Test",null, localityType);
+        LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, localityType);
         localityController.store(localityParamDto);
 
         Optional<Domain> domainOpt = domainRepository.findById(localityParamDto.getDomain().getId());
@@ -97,7 +100,7 @@ class LocalityServiceTest extends BaseTest {
     @Test
     public void shouldTryToCreateLocalityWhenThereIsHierarchy() {
         LocalityType localityType = getLocalityTypeTest("Country");
-        LocalityParamDto localityParamDto = createLocalityParamDto("Test",null, localityType);
+        LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, localityType);
         localityController.store(localityParamDto);
 
         Optional<Domain> domainOpt = domainRepository.findById(localityParamDto.getDomain().getId());
@@ -107,7 +110,8 @@ class LocalityServiceTest extends BaseTest {
         localityController.store(localityParamDto2);
 
         LocalityType localityType2 = getLocalityTypeTest("Municipio");
-        LocalityParamDto localityParamDto3 = createFreeLocalityParamDto("IcanSeeTheValkyriesAlready", domain, localityType2);
+        LocalityParamDto localityParamDto3 = createFreeLocalityParamDto("IcanSeeTheValkyriesAlready", domain,
+                localityType2);
         LocalityParamDto localityParamDto4 = createFreeLocalityParamDto("Glorious", domain, localityType2);
 
         localityParamDto3.setParent(localityParamDto);
@@ -117,6 +121,7 @@ class LocalityServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateLocalityCheckingIfExist() {
         LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, getLocalityTypeTest("Coutry"));
         localityController.store(localityParamDto);
@@ -125,6 +130,7 @@ class LocalityServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldUpdateLocality() {
         LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, getLocalityTypeTest("Coutry"));
         Locality localityParam = new Locality(localityParamDto);
@@ -138,6 +144,7 @@ class LocalityServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindLocality() {
         LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, getLocalityTypeTest("Coutry"));
         LocalityDto localityDto = (LocalityDto) localityController.store(localityParamDto).getBody();
@@ -161,12 +168,13 @@ class LocalityServiceTest extends BaseTest {
         LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, getLocalityTypeTest("Coutry"));
         LocalityDto localityDto = (LocalityDto) localityController.store(localityParamDto).getBody();
 
-        localityController.destroy(localityDto.getId(),localityDto.getDomains().get(0).getId());
+        localityController.destroy(localityDto.getId(), localityDto.getDomains().get(0).getId());
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> localityController.show(localityDto.getId()));
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindLocaitiesByDomain() {
         LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, getLocalityTypeTest("Coutry"));
         localityController.store(localityParamDto);
@@ -176,10 +184,12 @@ class LocalityServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindLocalitiesByConference() {
         LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, getLocalityTypeTest("Coutry"));
-        ResponseEntity<LocalityDto> localityDtoResponseEntity = localityController.store(localityParamDto);
-        LocalityDto localityDto = localityDtoResponseEntity.getBody();
+        // ResponseEntity<LocalityDto> localityDtoResponseEntity =
+        // localityController.store(localityParamDto);
+        // LocalityDto localityDto = localityDtoResponseEntity.getBody();
 
         Long conferenceId = getNewConferenceId(new Domain(localityParamDto.getDomain()));
 
@@ -188,10 +198,12 @@ class LocalityServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindLocalitiesToComplement() {
         LocalityParamDto localityParamDto = createLocalityParamDto("Test", null, getLocalityTypeTest("Coutry"));
-        ResponseEntity<LocalityDto> localityDtoResponseEntity = localityController.store(localityParamDto);
-        LocalityDto localityDto = localityDtoResponseEntity.getBody();
+        // ResponseEntity<LocalityDto> localityDtoResponseEntity =
+        // localityController.store(localityParamDto);
+        // LocalityDto localityDto = localityDtoResponseEntity.getBody();
 
         Long conferenceId = getNewConferenceId(new Domain(localityParamDto.getDomain()));
 
@@ -203,7 +215,7 @@ class LocalityServiceTest extends BaseTest {
         LocalityParamDto localityParamDto = new LocalityParamDto();
         localityParamDto.setName(name);
 
-        if(domain == null) {
+        if (domain == null) {
             domain = domainRepository.save(new Domain("Test Domain"));
         }
         DomainParamDto domainParamDto = new DomainParamDto();

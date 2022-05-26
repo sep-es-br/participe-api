@@ -46,8 +46,6 @@ class PlanServiceTest extends BaseTest {
     @Autowired
     private StructureRepository structureRepository;
 
-
-
     @TestConfiguration
     static class Config {
 
@@ -69,6 +67,7 @@ class PlanServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreatePlan() {
         PlanParamDto planParamDto = createPlanParamDto("Test");
 
@@ -78,6 +77,7 @@ class PlanServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldUpdatePlan() {
         PlanParamDto planParamDto = createPlanParamDto("Test");
         PlanDto planDto = (PlanDto) planController.store(planParamDto).getBody();
@@ -89,6 +89,7 @@ class PlanServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindPlan() {
         PlanParamDto planParamDto = createPlanParamDto("Test");
         PlanDto planDto = (PlanDto) planController.store(planParamDto).getBody();
@@ -134,8 +135,5 @@ class PlanServiceTest extends BaseTest {
 
         return planParamDto;
     }
-
-
-
 
 }

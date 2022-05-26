@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@SuppressWarnings({ "unused" })
 public class PersonService {
 
   private static final String PERSON_ERROR_NOT_FOUND = "person.error.not-found";
@@ -141,16 +142,14 @@ public class PersonService {
     }
 
     createRelationshipWithAuthService(
-        new RelationshipAuthServiceAuxiliaryDto
-            .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
             .password(user.getPassword())
             .server(server)
             .serverId(person.getId().toString())
             .conferenceId(conferenceId)
             .resetPassword(false)
             .makeLogin(true)
-            .build()
-    );
+            .build());
 
     return signInDto;
   }
@@ -170,18 +169,19 @@ public class PersonService {
   }
 
   @Transactional
-  public Person createRelationshipWithAuthService(RelationshipAuthServiceAuxiliaryDto relationshipAuthServiceAuxiliaryDto) {
+  public Person createRelationshipWithAuthService(
+      RelationshipAuthServiceAuxiliaryDto relationshipAuthServiceAuxiliaryDto) {
     return createRelationshipWithAuthService(relationshipAuthServiceAuxiliaryDto, true);
   }
 
-  public Person createRelationshipWithAuthServiceWithoutPersist(RelationshipAuthServiceAuxiliaryDto relationshipAuthServiceAuxiliaryDto) {
+  public Person createRelationshipWithAuthServiceWithoutPersist(
+      RelationshipAuthServiceAuxiliaryDto relationshipAuthServiceAuxiliaryDto) {
     return createRelationshipWithAuthService(relationshipAuthServiceAuxiliaryDto, false);
   }
 
   private Person createRelationshipWithAuthService(
       RelationshipAuthServiceAuxiliaryDto relationshipAuthServiceAuxiliaryDto,
-      Boolean persistRelationship
-  ) {
+      Boolean persistRelationship) {
     Person person = relationshipAuthServiceAuxiliaryDto.getPerson();
     Long conferenceId = relationshipAuthServiceAuxiliaryDto.getConferenceId();
     String server = relationshipAuthServiceAuxiliaryDto.getServer();
@@ -230,14 +230,13 @@ public class PersonService {
           conference,
           password,
           authService,
-          typeAuthentication
-      );
+          typeAuthentication);
     } else {
       if (authService.getNumberOfAccesses() == null) {
         authService.setNumberOfAccesses(0);
       }
-      authService.setNumberOfAccesses(makeLogin ? authService.getNumberOfAccesses() + 1 :
-          authService.getNumberOfAccesses());
+      authService
+          .setNumberOfAccesses(makeLogin ? authService.getNumberOfAccesses() + 1 : authService.getNumberOfAccesses());
       if (persistRelationship) {
         authServiceRepository.save(authService);
       }
@@ -247,8 +246,7 @@ public class PersonService {
           serverId,
           password,
           conferenceId,
-          typeAuthentication
-      );
+          typeAuthentication);
     }
 
     this.verifyResetPasswordCondition(
@@ -256,8 +254,7 @@ public class PersonService {
         newAuthService,
         person,
         conference,
-        authenticatedBy
-    );
+        authenticatedBy);
 
     this.verifyMakeLoginCondition(person, makeLogin, authService, conferenceId);
 
@@ -268,7 +265,7 @@ public class PersonService {
   }
 
   private void verifyResetPasswordCondition(Boolean resetPassword, Boolean newAuthService, Person person,
-                                            Conference conference, IsAuthenticatedBy authenticatedBy) {
+      Conference conference, IsAuthenticatedBy authenticatedBy) {
     if (resetPassword && !newAuthService) {
       resetPassword(person, conference, authenticatedBy);
     }
@@ -295,29 +292,25 @@ public class PersonService {
       Conference conference,
       String password,
       AuthService authService,
-      String typeAuthentication
-  ) {
+      String typeAuthentication) {
     IsAuthenticatedBy authenticatedBy;
     if (server.equalsIgnoreCase(PARTICIPE)) {
       if (typeAuthentication != null && typeAuthentication.equals("cpf")) {
         authenticatedBy = new IsAuthenticatedBy(PARTICIPE, "participeCpf", password,
-            false, null, person, authService
-        );
+            false, null, person, authService);
       } else {
         Date passwordTime = expirationTime((long) 24);
 
         password = generateTemporaryPassword();
 
         authenticatedBy = new IsAuthenticatedBy(PARTICIPE, "participeEmail", password, true,
-            passwordTime, person, authService
-        );
+            passwordTime, person, authService);
 
         sendConfirmationEmail(person, conference, password);
       }
     } else {
       authenticatedBy = new IsAuthenticatedBy(server, "oauth", null, false, null, person,
-          authService
-      );
+          authService);
     }
     return authenticatedBy;
   }
@@ -358,8 +351,7 @@ public class PersonService {
       String server,
       String password,
       Long conferenceId,
-      String typeAuthentication
-  ) {
+      String typeAuthentication) {
     if (authenticatedBy.getPassword() != null && !authenticatedBy.getPassword().equals(password)) {
       authenticatedBy.setPassword(password);
     }
@@ -442,7 +434,8 @@ public class PersonService {
 
     SelfDeclaration selfDeclaration = this.selfDeclarationService.findByPersonAndConference(personId, conferenceId);
 
-    final Boolean receiveInformational = Optional.ofNullable(selfDeclaration).map(SelfDeclaration::getReceiveInformational).orElse(null);
+    final Boolean receiveInformational = Optional.ofNullable(selfDeclaration)
+        .map(SelfDeclaration::getReceiveInformational).orElse(null);
     PersonKeepCitizenDto personCitizen = getPersonKeepCitizenDto(person, receiveInformational);
 
     personCitizen.setAutentication(loginAccessDtos);
@@ -476,8 +469,7 @@ public class PersonService {
     personCitizen.setEmail(person.getContactEmail());
     personCitizen.setTelephone(person.getTelephone());
     personCitizen.setReceiveInformational(
-        receiveInformational != null ? receiveInformational : true
-    );
+        receiveInformational != null ? receiveInformational : true);
     personCitizen.setTypeAuthentication("mail");
     if (person.getCpf() != null && person.getContactEmail() != null
         && person.getContactEmail().startsWith(person.getCpf())) {
@@ -581,21 +573,19 @@ public class PersonService {
 
   @Transactional
   public Page<PersonKeepCitizenDto> listKeepCitizen(String name, String email, String authentication, Boolean active,
-                                                    List<Long> locality, Long conferenceId, Pageable page) {
+      List<Long> locality, Long conferenceId, Pageable page) {
     if (conferenceId == null) {
       throw new IllegalArgumentException(PERSON_ERROR_CONFERENCE_NOT_SPECIFIED);
     }
 
     Page<PersonKeepCitizenDto> response = personRepository
         .findPersonKeepCitizen(name, email, authentication,
-            active, locality, page
-        );
+            active, locality, page);
 
     response.forEach(element -> {
       List<LoginAccessDto> loginAccessDtos = personRepository.findAccessByPerson(
           conferenceId,
-          element.getId()
-      );
+          element.getId());
       if (loginAccessDtos == null || loginAccessDtos.isEmpty()) {
         loginAccessDtos = new ArrayList<>();
         loginAccessDtos.add(new LoginAccessDto(SERVER, 0L));
@@ -620,7 +610,8 @@ public class PersonService {
   }
 
   public ResponseEntity<?> storePerson(PersonParamDto personParam, Boolean makeLogin) {
-    final boolean emailsIncompativeis = (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null) &&
+    final boolean emailsIncompativeis = (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null)
+        &&
         !personParam.getContactEmail().equals(personParam.getConfirmEmail());
 
     if (emailsIncompativeis) {
@@ -671,10 +662,12 @@ public class PersonService {
     SelfDeclaration selfDeclaration;
 
     if (selfDeclarationOptional.isPresent()) {
-      selfDeclaration = this.selfDeclarationService.updateLocality(selfDeclarationOptional.get(), paramSelfDeclaration.getLocality());
+      selfDeclaration = this.selfDeclarationService.updateLocality(selfDeclarationOptional.get(),
+          paramSelfDeclaration.getLocality());
     } else {
       selfDeclaration = new SelfDeclaration(conference, paramSelfDeclaration.getLocality(), id);
-      selfDeclaration.setReceiveInformational(personParam.isReceiveInformational() != null && personParam.isReceiveInformational());
+      selfDeclaration.setReceiveInformational(
+          personParam.isReceiveInformational() != null && personParam.isReceiveInformational());
       selfDeclaration.setAnswerSurvey(false);
       selfDeclaration = this.selfDeclarationService.save(selfDeclaration);
     }
@@ -682,8 +675,7 @@ public class PersonService {
     Objects.requireNonNull(selfDeclaration.getId(), "Failed to create or update self declaration");
 
     this.createRelationshipWithAuthService(
-        new RelationshipAuthServiceAuxiliaryDto
-            .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
             .password(personParam.getPassword())
             .server(SERVER)
             .serverId(id.toString())
@@ -691,8 +683,7 @@ public class PersonService {
             .resetPassword(false)
             .makeLogin(makeLogin)
             .typeAuthentication(personParam.getTypeAuthentication())
-            .build()
-    );
+            .build());
     return person;
   }
 
@@ -719,8 +710,7 @@ public class PersonService {
     final boolean cpfAlreadyStored = personParam.getTypeAuthentication() != null
         && personParam.getTypeAuthentication().equals("cpf");
     if (!person.getContactEmail().equals(personParam.getContactEmail()) &&
-        !this.validate(personParam.getContactEmail(), null, SERVER)
-    ) {
+        !this.validate(personParam.getContactEmail(), null, SERVER)) {
       MessageDto msg = new MessageDto();
 
       if (cpfAlreadyStored) {
@@ -757,8 +747,7 @@ public class PersonService {
       conferenceSdCreation.setId(personParam.getSelfDeclaration().getConference());
       localitySdCreation.setId(personParam.getSelfDeclaration().getLocality());
       SelfDeclaration selfDeclaration = new SelfDeclaration(conferenceSdCreation,
-          localitySdCreation, personSdCreation
-      );
+          localitySdCreation, personSdCreation);
       selfDeclaration.setReceiveInformational(personParam.isReceiveInformational());
       selfDeclaration.setAnswerSurvey(false);
       sd = selfDeclarationService.save(selfDeclaration);
@@ -766,8 +755,7 @@ public class PersonService {
       sd.setReceiveInformational(personParam.isReceiveInformational());
       sd = selfDeclarationService.updateLocality(
           sd,
-          personParam.getSelfDeclaration().getLocality()
-      );
+          personParam.getSelfDeclaration().getLocality());
     } else {
       sd.setReceiveInformational(personParam.isReceiveInformational());
       sd = this.selfDeclarationService.save(sd);
@@ -775,12 +763,10 @@ public class PersonService {
 
     PersonDto response = new PersonDto(
         person,
-        sd.getReceiveInformational()
-    );
+        sd.getReceiveInformational());
 
     this.createRelationshipWithAuthService(
-        new RelationshipAuthServiceAuxiliaryDto
-            .RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
             .password(personParam.getPassword())
             .server(SERVER)
             .serverId(person.getId().toString())
@@ -788,8 +774,7 @@ public class PersonService {
             .resetPassword(personParam.isResetPassword())
             .makeLogin(makeLogin)
             .typeAuthentication(personParam.getTypeAuthentication())
-            .build()
-    );
+            .build());
 
     return ResponseEntity.status(200).body(response);
   }
@@ -825,7 +810,8 @@ public class PersonService {
     if (personParam.getPassword() == null || size < 6 || !personParam.getPassword().matches(VALID_CHARACTERS)) {
       throw new IllegalArgumentException(PERSON_ERROR_PASS_LACKING_CHARACTERS);
     }
-    if (personParam.getConfirmPassword() == null || !personParam.getPassword().equals(personParam.getConfirmPassword())) {
+    if (personParam.getConfirmPassword() == null
+        || !personParam.getPassword().equals(personParam.getConfirmPassword())) {
       throw new IllegalArgumentException(PERSON_ERROR_PASS_NOT_MATCHING);
     }
   }
@@ -840,17 +826,17 @@ public class PersonService {
         Person person = this.find(idPerson);
         PersonDto response = new PersonDto(person);
 
-        this.createRelationshipWithAuthService(new RelationshipAuthServiceAuxiliaryDto
-            .RelationshipAuthServiceAuxiliaryDtoBuilder(
-            person)
-            .password(personParam.getPassword())
-            .server(SERVER)
-            .serverId(idPerson.toString())
-            .resetPassword(false)
-            .makeLogin(makeLogin)
-            .typeAuthentication(
-                personParam.getTypeAuthentication())
-            .build());
+        this.createRelationshipWithAuthService(
+            new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(
+                person)
+                .password(personParam.getPassword())
+                .server(SERVER)
+                .serverId(idPerson.toString())
+                .resetPassword(false)
+                .makeLogin(makeLogin)
+                .typeAuthentication(
+                    personParam.getTypeAuthentication())
+                .build());
 
         return ResponseEntity.status(200).body(response);
       }
@@ -875,7 +861,8 @@ public class PersonService {
     personMeetingDtoPage.forEach(element -> {
       element.setAuthTypeCpf(element.getEmail().endsWith("@cpf"));
 
-      LocalityRegionalizableDto localityInfo = personRepository.findMostRecentLocality(element.getPersonId(), meetingId);
+      LocalityRegionalizableDto localityInfo = personRepository.findMostRecentLocality(element.getPersonId(),
+          meetingId);
 
       if (localityInfo == null) {
         localityInfo = personRepository.findLocalityIfThereIsNoLogin(element.getPersonId(), meetingId);
@@ -893,27 +880,24 @@ public class PersonService {
   }
 
   public Page<PersonMeetingDto> findPersonsCheckedInOnMeeting(Long meetingId, List<Long> localities, String name,
-                                                              Pageable pageable) {
+      Pageable pageable) {
     if (meetingId == null) {
       throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
     }
 
     Page<PersonMeetingDto> personMeetingDtoPage = personRepository.findPersonsCheckedInOnMeeting(
         meetingId,
-        localities, name, pageable
-    );
+        localities, name, pageable);
 
     personMeetingDtoPage.forEach(element -> {
       LocalityRegionalizableDto localityInfo;
       localityInfo = personRepository.findMostRecentLocality(
           element.getPersonId(),
-          meetingId
-      );
+          meetingId);
       if (localityInfo == null) {
         localityInfo = personRepository.findLocalityIfThereIsNoLogin(
             element.getPersonId(),
-            meetingId
-        );
+            meetingId);
       }
       if (localityInfo != null) {
         element.setLocality(localityInfo.getLocality());
@@ -930,7 +914,7 @@ public class PersonService {
     return personRepository.findPeopleQuantityOnMeeting(meetingId);
   }
 
-  public Optional<Person> findPersonIfParticipatingOnMeetingPresentially(Long personId, Date date,Long conferenceId) {
-    return personRepository.findPersonIfParticipatingOnMeetingPresentially(personId, date,conferenceId);
+  public Optional<Person> findPersonIfParticipatingOnMeetingPresentially(Long personId, Date date, Long conferenceId) {
+    return personRepository.findPersonIfParticipatingOnMeetingPresentially(personId, date, conferenceId);
   }
 }

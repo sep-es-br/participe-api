@@ -23,7 +23,7 @@ import br.gov.es.participe.repository.PlanItemRepository;
 @Testcontainers
 @SpringBootTest
 class HighlightServiceTest extends BaseTest {
-	
+
     @Autowired
     private HighlightController highlightController;
 
@@ -32,13 +32,13 @@ class HighlightServiceTest extends BaseTest {
 
     @Autowired
     private PersonRepository personRepository;
-    
+
     @Autowired
     private LocalityRepository localityRepository;
-    
+
     @Autowired
     private ConferenceRepository conferenceRepository;
-    
+
     @Autowired
     private PlanItemRepository planItemRepository;
 
@@ -61,6 +61,7 @@ class HighlightServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateHighlight() {
         HighlightParamDto highlightParamDto = createHighlightParamDto("Test");
         ResponseEntity response = highlightController.store(highlightParamDto);
@@ -68,8 +69,9 @@ class HighlightServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void shouldDeleteHighlight() {
-    	HighlightParamDto highlightParamDto = createHighlightParamDto("test");
+        HighlightParamDto highlightParamDto = createHighlightParamDto("test");
         ResponseEntity<HighlightDto> highlightDto = highlightController.store(highlightParamDto);
         HighlightDto selfDto = highlightDto.getBody();
 
@@ -87,11 +89,12 @@ class HighlightServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings({ "unchecked" })
     public void shouldDeleteHighlightByPersonId() {
-    	HighlightParamDto highlightParamDto = createHighlightParamDto("Test");
+        HighlightParamDto highlightParamDto = createHighlightParamDto("Test");
         Person person = this.getPerson();
 
-    	highlightParamDto.setPersonMadeBy(new PersonDto(person));
+        highlightParamDto.setPersonMadeBy(new PersonDto(person));
         highlightController.store(highlightParamDto).getBody();
 
         ResponseEntity<Void> response = highlightController.deleteAll(person.getId());
@@ -99,7 +102,7 @@ class HighlightServiceTest extends BaseTest {
     }
 
     private HighlightParamDto createHighlightParamDto(String text) {
-        Locality locality =  localityRepository.save(new Locality());
+        Locality locality = localityRepository.save(new Locality());
         Conference conference = conferenceRepository.save(new Conference());
 
         PlanItem planItemParent = planItemRepository.save(new PlanItem());
@@ -118,14 +121,14 @@ class HighlightServiceTest extends BaseTest {
         highlightParamDto.setLocality(new LocalityDto(locality));
         return highlightParamDto;
     }
-    
+
     private Person getPerson() {
-    	Person person = personRepository.findById(1L).orElse(null);
-    	if (person == null) {
-    		person = new Person();
-    		person.setName("Person Teste");
-    		person = personRepository.save(person);
-    	}
-    	return person;
+        Person person = personRepository.findById(1L).orElse(null);
+        if (person == null) {
+            person = new Person();
+            person.setName("Person Teste");
+            person = personRepository.save(person);
+        }
+        return person;
     }
 }

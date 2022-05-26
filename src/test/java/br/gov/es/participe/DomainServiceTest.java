@@ -31,7 +31,6 @@ class DomainServiceTest extends BaseTest {
     @Autowired
     private DomainController domainController;
 
-
     @Autowired
     private LocalityRepository localityRepository;
 
@@ -50,8 +49,9 @@ class DomainServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldListDomainsController() {
-        ResponseEntity  response = domainController.index(null);
+        ResponseEntity response = domainController.index(null);
         Assert.assertEquals(200, response.getStatusCodeValue());
     }
 
@@ -62,6 +62,7 @@ class DomainServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldCreateDomain() {
         DomainParamDto domainParamDto = createDomainParamDto("Test");
 
@@ -78,6 +79,7 @@ class DomainServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldUpdateDomain() {
         DomainParamDto domainParamDto = createDomainParamDto("Test");
         DomainDto domainDto = (DomainDto) domainController.store(domainParamDto).getBody();
@@ -95,6 +97,7 @@ class DomainServiceTest extends BaseTest {
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void shouldFindDomain() {
         DomainParamDto domainParamDto = createDomainParamDto("Test");
         DomainDto domainDto = (DomainDto) domainController.store(domainParamDto).getBody();
