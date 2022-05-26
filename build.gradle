@@ -55,5 +55,6 @@ dependencies {
 }
 
 test {
+	exclude 'br/gov/es/participe/**'
 	useJUnitPlatform()
 }
