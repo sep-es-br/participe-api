@@ -104,12 +104,12 @@ public class ParticipationController {
 
     Comment comment = new Comment(commentParamDto);
     Conference conference = commentService.loadConference(comment);   
-    /* Verificar se a conferência é regionalizável e a localidade não esta sendo passada*/
+    
     if(conference.getPlan().getStructure().getRegionalization() == true && 
       commentParamDto.getLocality() == null ){
       return ResponseEntity.status(200).body(null);
     }else{
-      
+
     String[] keys = token.split(" ");
     Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
     Person person = new Person();
