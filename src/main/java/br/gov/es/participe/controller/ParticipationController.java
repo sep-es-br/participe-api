@@ -100,14 +100,17 @@ public class ParticipationController {
 
   @PostMapping("/highlights")
   public ResponseEntity<PlanItemDto> createComment(@RequestHeader(name = "Authorization") String token,
-                                                   @RequestBody CommentParamDto commentParamDto) {
+                                                   @RequestBody CommentParamDto commentParamDto) throws Exception{
 
     Comment comment = new Comment(commentParamDto);
     Conference conference = commentService.loadConference(comment);   
     
     if(conference.getPlan().getStructure().getRegionalization() == true && 
       commentParamDto.getLocality() == null ){
-      return ResponseEntity.status(200).body(null);
+
+        throw new Exception("Esta participação não foi regionalizada. Favor retornar e selecionar a região.");
+
+     // return ResponseEntity.status(200).body(null);
     }else{
 
     String[] keys = token.split(" ");
