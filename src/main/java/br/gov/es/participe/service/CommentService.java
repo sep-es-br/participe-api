@@ -285,7 +285,7 @@ public class CommentService {
     return meeting;
   }
 
-  private Conference loadConference(Comment comment) {
+  public Conference loadConference(Comment comment) {
     Conference conference = null;
     if (comment.getConference() != null && comment.getConference().getId() != null) {
       conference = conferenceService.find(comment.getConference().getId());

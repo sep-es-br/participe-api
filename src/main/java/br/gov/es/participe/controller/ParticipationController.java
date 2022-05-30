@@ -2,6 +2,7 @@ package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.Comment;
+import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.model.Highlight;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
@@ -100,6 +101,15 @@ public class ParticipationController {
   @PostMapping("/highlights")
   public ResponseEntity<PlanItemDto> createComment(@RequestHeader(name = "Authorization") String token,
                                                    @RequestBody CommentParamDto commentParamDto) {
+
+    Comment comment = new Comment(commentParamDto);
+    Conference conference = commentService.loadConference(comment);   
+    /* Verificar se a conferência é regionalizável e a localidade não esta sendo passada*/
+    if(conference.getPlan().getStructure().getRegionalization() == true && 
+      commentParamDto.getLocality() == null ){
+      return ResponseEntity.status(200).body(null);
+    }else{
+      
     String[] keys = token.split(" ");
     Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
     Person person = new Person();
@@ -107,12 +117,12 @@ public class ParticipationController {
 
     PlanItemDto response;
     if (commentParamDto.getText() != null) {
-      Comment comment = new Comment(commentParamDto);
+     // Comment comment = new Comment(commentParamDto);
       comment.setPersonMadeBy(person);
       commentService.save(comment, null, true);
     } else {
       Highlight highlight = new Highlight();
-      Comment comment = new Comment(commentParamDto);
+      //Comment comment = new Comment(commentParamDto);
       highlight.setLocality(comment.getLocality());
       highlight.setPlanItem(comment.getPlanItem());
       highlight.setPersonMadeBy(person);
@@ -132,6 +142,7 @@ public class ParticipationController {
     response.setStructureItem(null);
 
     return ResponseEntity.status(200).body(response);
+  }
   }
 
   @PostMapping("/alternative-proposal")
