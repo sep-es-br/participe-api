@@ -17,6 +17,7 @@ public interface PlanItemRepository extends Neo4jRepository<PlanItem, Long> {
          + "WHERE id(con)={0} "
          + "OPTIONAL MATCH list=(plan)<-[comp2:COMPOSES]-(pi2:PlanItem) "
          + "WITH con, trg, ob, stt, comp, si, plan, comp2, pi2 "
+         + "order by pi2.name asc "
          + "RETURN id(con) AS conferenceId, con.description AS conferenceDescription, "
          + "id(si) AS structureItemId, si.name AS structureItemName, "
          + "collect({planItemId: id(pi2), planItemName: pi2.name}) AS planItems"
