@@ -489,7 +489,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" MATCH" +
 			" (a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)<-[:OCCURS_IN]-(me:Meeting),"
 			+
-			" (a)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+			" (me)<-[:DURING]-(a)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)" +
+	
 
 			" WHERE" +
 			" ID(conf) = Conference_Id" +

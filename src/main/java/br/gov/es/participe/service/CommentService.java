@@ -258,7 +258,7 @@ public class CommentService {
     if (highlight == null) {
       highlight = new Highlight();
       highlight.setFrom(comment.getFrom());
-      highlight.setMeeting(meeting);
+      highlight.setMeeting(comment.getMeeting());
       highlight.setPlanItem(planItem);
       highlight.setLocality(locality);
       highlight.setPersonMadeBy(person);

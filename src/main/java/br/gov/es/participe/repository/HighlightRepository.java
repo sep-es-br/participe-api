@@ -60,7 +60,7 @@ public interface HighlightRepository extends Neo4jRepository<Highlight, Long> {
 	  
 	  
 	 
-    @Query(" match (m:Meeting)<-[:WHILE_IN]-(h:Highlight)-[:ABOUT]->(co:Conference) " + 
+    @Query(" match (m:Meeting)<-[:DURING]-(h:Highlight)-[:ABOUT]->(co:Conference) " + 
 		   "  where id(co) = {0} AND h.from='pres' AND (({1} IS NULL) OR (id(m) IN {1}))  " + 
 		   "  return count (distinct h) ")
 	Integer countHighlightPresentialOriginByConference(Long idConference, List<Long> meetings);

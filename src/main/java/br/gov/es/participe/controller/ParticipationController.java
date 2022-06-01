@@ -2,12 +2,17 @@ package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.Comment;
+import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.model.Highlight;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.service.*;
 import br.gov.es.participe.util.domain.TokenType;
+import br.gov.es.participe.model.CheckedInAt;
+import java.util.Date;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,10 +36,17 @@ public class ParticipationController {
   private CommentService commentService;
 
   @Autowired
+  private PersonService personService;
+
+  @Autowired
   private HighlightService highlightService;
 
   @Autowired
   private PlanItemService planItemService;
+
+  @Autowired
+  private MeetingService meetingService;
+
 
   @GetMapping("/{idConference}")
   public ResponseEntity<ParticipationsDto> getParticipation(@RequestHeader(name = "Authorization") String token,
@@ -130,7 +142,29 @@ public class ParticipationController {
       highlight.setPlanItem(comment.getPlanItem());
       highlight.setPersonMadeBy(person);
       highlight.setConference(comment.getConference());
-      highlightService.save(highlight, "rem");
+
+      Date date = new Date();
+
+      Optional<Person> personParticipating = personService
+      .findPersonIfParticipatingOnMeetingPresentially(person.getId(), date,conference.getId());
+
+      if (personParticipating.isPresent()) {
+
+        Meeting  meetingPresentially = this.meetingService
+            .findCheckedInMeetingsByPerson(personParticipating.get().getId())
+            .stream()
+            .map(CheckedInAt::getMeeting)
+            .filter(m -> highlightService.isTodayInMeetingPeriod(date, m) && highlightService.isPresentialMeeting(m))
+            .findFirst()
+            .orElse(null);
+
+        highlight.setMeeting(meetingPresentially);
+        highlight.setFrom("pres");
+      } else {
+        highlight.setFrom("rem");
+      }
+
+      highlightService.save(highlight, highlight.getFrom());
     }
 
     PlanItem planItem = planItemService.find(commentParamDto.getPlanItem());

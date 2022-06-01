@@ -1,5 +1,7 @@
 package br.gov.es.participe.service;
 
+import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL;
+import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.model.Highlight;
@@ -88,6 +90,17 @@ public class HighlightService {
     }
     return highlightBD;
   }
+
+  
+  public boolean isPresentialMeeting(Meeting m) {
+    return PRESENCIAL.equals(m.getTypeMeetingEnum()) || PRESENCIAL_VIRTUAL.equals(m.getTypeMeetingEnum());
+  }
+
+  public boolean isTodayInMeetingPeriod(Date date, Meeting m) {
+    return date.after(m.getBeginDate()) && date.before(m.getEndDate());
+  }
+
+
 
   private Highlight createHighlight(Highlight highlight, String from, PlanItem planItem, Person person) {
     Meeting meeting = null;

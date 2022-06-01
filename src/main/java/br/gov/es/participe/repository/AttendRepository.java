@@ -124,7 +124,7 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
   
   
   
-  @Query(" match (lo:Login)<-[:MADE]-(p)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " + 
+  @Query(" match (lo:Login)<-[:MADE]-(p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
   		" where id(co) = {0} " + 
   		" AND lo.time > m.beginDate " + 
   		" AND lo.time < m.endDate " + 
@@ -136,7 +136,7 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
   Integer countParticipationRemoteOriginByConference(Long idConference);
   
   
-  @Query(" match (p)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " + 
+  @Query(" match (p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
   		"  where id(co) = {0} AND (({1} IS NULL) OR (id(m) IN {1})) " + 
   		"  return count(distinct p) ")
 	  Integer countParticipationPresentialOriginByConference(Long idConference, List<Long> meetings );
@@ -159,7 +159,7 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
   
   
  
-  @Query(" match (m:Meeting)<-[:WHILE_IN]-(h:Highlight)-[:ABOUT]->(co:Conference) " + 
+  @Query(" match (m:Meeting)<-[:DURING]-(h:Highlight)-[:ABOUT]->(co:Conference) " + 
 	  		"  where id(co) = {0} AND h.from='pres' AND (({1} IS NULL) OR (id(m) IN {1}))  " + 
 	  		"  return count (distinct h) ")
 		  Integer countHighlightPresentialOriginByConference(Long idConference, List<Long> meetings);
@@ -182,17 +182,12 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
   
   
  
-  @Query(" match (m:Meeting)<-[:WHILE_IN]-(c:Comment)-[:ABOUT]->(co:Conference) " + 
+  @Query(" match (m:Meeting)<-[:DURING]-(c:Comment)-[:ABOUT]->(co:Conference) " + 
 	  		"  where id(co) = {0} AND c.from='pres' and c.status IN ['pub', 'arq'] AND (({1} IS NULL) OR (id(m) IN {1}))  " + 
 	  		"  return count (distinct c) ")
 		  Integer countCommentPresentialOriginByConference(Long idConference, List<Long> meetings);
   
 
-  
-  
-  
-  
-  
   
 //locality 
   
@@ -201,7 +196,7 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
   Integer countLocalityAllOriginsByConference(Long idConference);
   
 	 		 	 		 		
-  @Query("match (lo:Login)<-[:MADE]-(p)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " + 
+  @Query("match (lo:Login)<-[:MADE]-(p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
   		" where id(co) = {0} AND lo.time > m.beginDate AND lo.time < m.endDate " + 
   		" with collect(lo) as prLogin " + 
   		" match (p:Person)-[:MADE]->(l:Login)-[:TO]->(co:Conference)<-[:TO]-(s:SelfDeclaration)<-[m:MADE]-(p), (s)-[:AS_BEING_FROM]->(loc:Locality) " + 
@@ -210,7 +205,7 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
   Integer countLocalityRemoteOriginByConference(Long idConference);
   
   
-  @Query(" match (l:Locality)<-[:AS_BEING_FROM]-(s:SelfDeclaration)<-[:MADE]-(p)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " + 
+  @Query(" match (l:Locality)<-[:AS_BEING_FROM]-(s:SelfDeclaration)<-[:MADE]-(p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
   		"  where id(co) = {0} AND (({1} IS NULL) OR (id(m) IN {1})) " + 
   		"  return count(distinct l) ")
 	  Integer countLocalityPresentialOriginByConference(Long idConference, List<Long> meetings );
