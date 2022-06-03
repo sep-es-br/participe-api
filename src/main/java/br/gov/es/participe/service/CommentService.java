@@ -528,6 +528,9 @@ public class CommentService {
 
   @Transactional
   public Comment update(Comment comment, ModerationParamDto moderationParamDto, Long idModerator) {
+    if (comment == null) {
+      throw new IllegalArgumentException("No comment found for given id.");
+    }
     Long prevPlanItemID = (comment.getPlanItem() == null) ? -1 : comment.getPlanItem().getId();
     Long prevLocalityID = (comment.getLocality() == null) ? -1 : comment.getLocality().getId();
     String prevStatus = (comment.getStatus() == null) ? "" : comment.getStatus();
@@ -547,10 +550,7 @@ public class CommentService {
             moderator.getId())) {
       throw new IllegalArgumentException("moderation.error.moderator");
     }
-    if (comment == null) {
-      throw new IllegalArgumentException("No comment found for given id.");
-    }
-
+    
     validateComment(moderationParamDto, comment);
     loadComment(comment, moderationParamDto);
     Locality locality = null;
