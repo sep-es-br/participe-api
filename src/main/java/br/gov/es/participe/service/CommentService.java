@@ -55,7 +55,6 @@ import br.gov.es.participe.util.domain.CommentFromType;
 import br.gov.es.participe.util.domain.CommentStatusType;
 import br.gov.es.participe.util.domain.CommentTypeType;
 
-
 @Service
 public class CommentService {
 
@@ -92,7 +91,6 @@ public class CommentService {
   @Autowired
   private ConferenceService conferenceService;
 
-
   @Autowired
   private ModeratedByRepository moderatedByRepository;
 
@@ -106,11 +104,13 @@ public class CommentService {
     return comments;
   }
 
-  public ProposalsDto listProposal(Long idConference, Long idPerson, Integer pageNumber, String text, String status, Long[] localityIds, Long[] planItemIds) {
+  public ProposalsDto listProposal(Long idConference, Long idPerson, Integer pageNumber, String text, String status,
+      Long[] localityIds, Long[] planItemIds) {
     List<ProposalDto> proposals = new ArrayList<>();
     ProposalsDto screen = new ProposalsDto();
     Plan plan = planService.findByConferenceWithPlanItem(idConference);
-    Page<Comment> comments = findAllCommentsByConference(idConference, pageNumber, text, status, localityIds, planItemIds);
+    Page<Comment> comments = findAllCommentsByConference(idConference, pageNumber, text, status, localityIds,
+        planItemIds);
 
     screen.setTotalPages(comments.getTotalPages());
 
@@ -143,13 +143,15 @@ public class CommentService {
         setIsLiked(proposal, personLiked, idPerson);
       }
 
-      SelfDeclaration selfDeclaration = comment.getPersonMadeBy().getSelfDeclaretions() != null ? comment.getPersonMadeBy()
-          .getSelfDeclaretions()
-          .stream()
-          .filter(self -> self != null && self.getConference() != null)
-          .filter(self -> self.getConference().getId().equals(idConference))
-          .findFirst()
-          .orElse(null) : null;
+      SelfDeclaration selfDeclaration = comment.getPersonMadeBy().getSelfDeclaretions() != null
+          ? comment.getPersonMadeBy()
+              .getSelfDeclaretions()
+              .stream()
+              .filter(self -> self != null && self.getConference() != null)
+              .filter(self -> self.getConference().getId().equals(idConference))
+              .findFirst()
+              .orElse(null)
+          : null;
       if (selfDeclaration != null && selfDeclaration.getLocality() != null) {
         proposal.setLocalityPerson(selfDeclaration.getLocality().getName());
       }
@@ -185,7 +187,8 @@ public class CommentService {
   }
 
   private void listPlanItem(PlanItem planItem, List<PlanItemDto> items) {
-    if (planItem == null) return;
+    if (planItem == null)
+      return;
 
     PlanItemDto plani = new PlanItemDto(planItem, true);
 
@@ -201,7 +204,7 @@ public class CommentService {
   }
 
   @Transactional
-  public Comment save(Comment comment, Long idPerson,  Boolean usePlanItem) {
+  public Comment save(Comment comment, Long idPerson, Boolean usePlanItem) {
 
     Meeting meeting = loadMeeting(comment);
     Person person = loadPerson(comment, idPerson);
@@ -221,7 +224,7 @@ public class CommentService {
     comment.setTime(date);
 
     Optional<Person> personParticipating = personService
-        .findPersonIfParticipatingOnMeetingPresentially(person.getId(), date,conference.getId());
+        .findPersonIfParticipatingOnMeetingPresentially(person.getId(), date, conference.getId());
 
     if (personParticipating.isPresent()) {
 
@@ -247,13 +250,12 @@ public class CommentService {
     }
 
     Comment response = commentRepository.save(comment);
-   
+
     Highlight highlight = highlightService.find(
         person.getId(),
         planItem.getId(),
         comment.getConference().getId(),
-        locality != null ? locality.getId() : null
-    );
+        locality != null ? locality.getId() : null);
 
     if (highlight == null) {
       highlight = new Highlight();
@@ -339,10 +341,12 @@ public class CommentService {
   }
 
   public List<Comment> find(Long idPerson, Long idPlanItem, Long idConference, Long idLocality) {
-    return commentRepository.findByIdPersonAndIdPlanItemAndIdConferenceAndIdLocality(idPerson, idPlanItem, idConference, idLocality);
+    return commentRepository.findByIdPersonAndIdPlanItemAndIdConferenceAndIdLocality(idPerson, idPlanItem, idConference,
+        idLocality);
   }
 
-  public Page<Comment> findAllCommentsByConference(Long idConference, Integer pageNumber, String text, String status, Long[] localityIds, Long[] planItemIds) {
+  public Page<Comment> findAllCommentsByConference(Long idConference, Integer pageNumber, String text, String status,
+      Long[] localityIds, Long[] planItemIds) {
     Pageable page = PageRequest.of(pageNumber, 30);
     return commentRepository.findAllCommentsByConference(idConference, status, text, localityIds, planItemIds, page);
   }
@@ -359,10 +363,10 @@ public class CommentService {
     Person moderator = personService.find(moderationFilterDto.getIdModerator());
 
     List<ModerationResultDto> response = commentRepository
-        .findAllByStatus(moderationFilterDto.getStatus(),  moderationFilterDto.getFrom(),moderationFilterDto.getLocalityIds(),
+        .findAllByStatus(moderationFilterDto.getStatus(), moderationFilterDto.getFrom(),
+            moderationFilterDto.getLocalityIds(),
             moderationFilterDto.getPlanItemIds(), moderationFilterDto.getConferenceId(),
-            moderationFilterDto.getStructureItemIds()
-        )
+            moderationFilterDto.getStructureItemIds())
         .stream()
         .filter(comentario -> {
           Date date;
@@ -409,7 +413,6 @@ public class CommentService {
     response.setStatus(ALL.getCompleteNameFromLeanName(response.getStatus()));
     response.setType(PROPOSAL.getCompleteNameFromLeanName(response.getType()));
     response.setFrom(REMOTE.getCompleteNameFromLeanName(response.getFrom()));
-    
 
     List<ModerationStructure> modStructure = new ArrayList<>();
     List<PlanItem> planItems = new ArrayList<>();
@@ -525,14 +528,23 @@ public class CommentService {
 
   @Transactional
   public Comment update(Comment comment, ModerationParamDto moderationParamDto, Long idModerator) {
+    Long prevPlanItemID = (comment.getPlanItem() == null) ? -1 : comment.getPlanItem().getId();
+    Long prevLocalityID = (comment.getLocality() == null) ? -1 : comment.getLocality().getId();
+    String prevStatus = (comment.getStatus() == null) ? "" : comment.getStatus();
+    CommentStatusType moderationParamStatus = null;
+    if (moderationParamDto.getStatus() != null) {
+      moderationParamStatus = Arrays.stream(CommentStatusType.values()).filter(
+          s -> s.completeName.equals(moderationParamDto.getStatus())).findFirst().orElse(null);
+    }
     Person moderator = personService.find(idModerator);
     ModeratedBy moderatedBy = moderatedByRepository.findByComment(comment);
     if (moderatedBy == null) {
       moderatedBy = new ModeratedBy(true, new Date(), comment, moderator);
     }
     final boolean adm = moderator.getRoles() != null && moderator.getRoles().contains(ADMINISTRATOR);
-    if (!adm && (moderatedBy.getFinish() != null && !moderatedBy.getFinish()) && !moderatedBy.getPerson().getId().equals(
-        moderator.getId())) {
+    if (!adm && (moderatedBy.getFinish() != null && !moderatedBy.getFinish())
+        && !moderatedBy.getPerson().getId().equals(
+            moderator.getId())) {
       throw new IllegalArgumentException("moderation.error.moderator");
     }
     if (comment == null) {
@@ -562,15 +574,35 @@ public class CommentService {
     moderatedBy.setFinish(true);
     moderatedByRepository.save(moderatedBy);
 
-    if (comment.getStatus().equals("rem")) {
-      Highlight highlight = highlightService.find(
-          comment.getPersonMadeBy().getId(),
-          comment.getPlanItem().getId(),
-          comment.getConference().getId(),
-          comment.getLocality().getId()
-      );
+    if ((moderationParamDto.getLocality() != null && prevLocalityID != moderationParamDto.getLocality())
+        || (moderationParamDto.getPlanItem() != null && prevPlanItemID != moderationParamDto.getPlanItem())
+        || (moderationParamStatus != null && prevStatus != moderationParamStatus.leanName)) {
 
-      highlightService.deleteById(highlight.getId());
+      // Try to remove previous highlight
+      Highlight highlightDB = highlightService.find(
+          comment.getPersonMadeBy().getId(),
+          prevPlanItemID,
+          comment.getConference().getId(),
+          prevLocalityID);
+
+      if (highlightDB != null) {
+        highlightService.removeHighlight(highlightDB);
+      }
+
+      // If this comment is not going to or staying in trash
+      if (!comment.getStatus().equals("rem")) {
+        // Try to remove previous highlight
+        Highlight newHighlight = new Highlight();
+        newHighlight.setConference(comment.getConference());
+        newHighlight.setFrom(comment.getFrom());
+        newHighlight.setLocality(comment.getLocality());
+        newHighlight.setMeeting(comment.getMeeting());
+        newHighlight.setPersonMadeBy(comment.getPersonMadeBy());
+        newHighlight.setPlanItem(comment.getPlanItem());
+        newHighlight.setTime(new Date());
+        highlightService.save(newHighlight, newHighlight.getFrom());
+      }
+
     }
 
     return commentRepository.save(comment);
@@ -607,16 +639,14 @@ public class CommentService {
         comment.setType(type.leanName);
       }
     }
-    
+
     if (moderationParamDto.getFrom() != null) {
-        CommentFromType from = Arrays.stream(CommentFromType.values()).filter(
-            s -> s.completeName.equals(moderationParamDto.getFrom())).findFirst().orElse(null);
-        if (from != null) {
-          comment.setFrom(from.leanName);
-        }
+      CommentFromType from = Arrays.stream(CommentFromType.values()).filter(
+          s -> s.completeName.equals(moderationParamDto.getFrom())).findFirst().orElse(null);
+      if (from != null) {
+        comment.setFrom(from.leanName);
+      }
     }
-    
-    
 
     return comment;
   }
@@ -632,24 +662,25 @@ public class CommentService {
 
     if (moderationParamDto.getStatus() != null && (moderationParamDto.getStatus().isEmpty()
         || Arrays.stream(CommentStatusType.values()).noneMatch(
-        s -> s.completeName.equals(moderationParamDto.getStatus())))) {
+            s -> s.completeName.equals(moderationParamDto.getStatus())))) {
       throw new IllegalArgumentException("Invalid status.");
     }
 
     if (moderationParamDto.getType() != null && (moderationParamDto.getType().isEmpty()
         || Arrays.stream(CommentTypeType.values()).noneMatch(
-        s -> s.completeName.equals(moderationParamDto.getType())))) {
+            s -> s.completeName.equals(moderationParamDto.getType())))) {
       throw new IllegalArgumentException("Invalid type.");
     }
-    
+
     if (moderationParamDto.getFrom() != null && (moderationParamDto.getFrom().isEmpty()
-            || Arrays.stream(CommentFromType.values()).noneMatch(
+        || Arrays.stream(CommentFromType.values()).noneMatch(
             s -> s.completeName.equals(moderationParamDto.getFrom())))) {
-          throw new IllegalArgumentException("Invalid from.");
+      throw new IllegalArgumentException("Invalid from.");
     }
-    
+
     if (comment.getClassification() != null &&
-        (!comment.getClassification().equalsIgnoreCase("comment") && !comment.getClassification().equalsIgnoreCase("proposal"))) {
+        (!comment.getClassification().equalsIgnoreCase("comment")
+            && !comment.getClassification().equalsIgnoreCase("proposal"))) {
       throw new IllegalArgumentException("Invalid classification.");
     }
   }
