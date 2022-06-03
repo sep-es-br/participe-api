@@ -36,14 +36,13 @@ public class HighlightService {
 
   @Autowired
   public HighlightService(
-    HighlightRepository highlightRepository,
-    PersonService personService,
-    PlanItemService planItemService,
-    MeetingService meetingService,
-    CommentService commentService,
-    LocalityService localityService,
-    ConferenceService conferenceService
-  ) {
+      HighlightRepository highlightRepository,
+      PersonService personService,
+      PlanItemService planItemService,
+      MeetingService meetingService,
+      CommentService commentService,
+      LocalityService localityService,
+      ConferenceService conferenceService) {
     this.highlightRepository = highlightRepository;
     this.personService = personService;
     this.planItemService = planItemService;
@@ -55,40 +54,39 @@ public class HighlightService {
 
   public Highlight save(Highlight highlight, String from) {
 
-    PlanItem planItem = planItemService.find(highlight.getPlanItem().getId());
+    PlanItem planItem = this.planItemService.find(highlight.getPlanItem().getId());
 
-    Person person = personService.find(highlight.getPersonMadeBy().getId());
+    Person person = this.personService.find(highlight.getPersonMadeBy().getId());
 
-    Highlight highlightBD = highlightRepository.findByIdPersonAndIdPlanItem(
-      person.getId(),
-      planItem.getId(),
-      highlight.getConference().getId(),
-      highlight.getLocality() != null ? highlight.getLocality().getId() : null
-    );
+    Highlight highlightBD = this.highlightRepository.findByIdPersonAndIdPlanItem(
+        person.getId(),
+        planItem.getId(),
+        highlight.getConference().getId(),
+        highlight.getLocality() != null ? highlight.getLocality().getId() : null);
 
-    if(highlightBD == null) {
-      return createHighlight(highlight, from, planItem, person);
-    }
-    else {
-      return removeHighlight(highlight, highlightBD);
+    if (highlightBD == null) {
+      return this.createHighlight(highlight, from, planItem, person);
+    } else {
+      return this.removeHighlight(highlight);
     }
   }
 
-  private Highlight removeHighlight(Highlight highlight, Highlight highlightBD) {
+  public Highlight removeHighlight(Highlight highlight) {
     Long idLocality = highlight.getLocality() != null ? highlight.getLocality().getId() : null;
 
-    List<Comment> comment = commentService.find(
-      highlightBD.getPersonMadeBy().getId(),
-      highlightBD.getPlanItem().getId(),
-      highlight.getConference().getId(),
-      idLocality
-    );
+    List<Comment> commentLst = this.commentService.find(
+        highlight.getPersonMadeBy().getId(),
+        highlight.getPlanItem().getId(),
+        highlight.getConference().getId(),
+        idLocality);
 
-    if(comment == null || comment.isEmpty()) {
-      highlightRepository.delete(highlightBD);
+    // If there is no valid comments for that highlight, delete it.
+    if (commentLst == null || commentLst.isEmpty()) {
+      highlightRepository.delete(highlight);
       return null;
     }
-    return highlightBD;
+
+    return highlight;
   }
 
   
@@ -104,19 +102,19 @@ public class HighlightService {
 
   private Highlight createHighlight(Highlight highlight, String from, PlanItem planItem, Person person) {
     Meeting meeting = null;
-    if(highlight.getMeeting() != null) {
-      meeting = meetingService.find(highlight.getMeeting().getId());
+    if (highlight.getMeeting() != null) {
+      meeting = this.meetingService.find(highlight.getMeeting().getId());
     }
 
     Locality locality = null;
 
-    if(highlight.getLocality() != null) {
-      locality = localityService.find(highlight.getLocality().getId());
+    if (highlight.getLocality() != null) {
+      locality = this.localityService.find(highlight.getLocality().getId());
     }
 
     Conference conference = null;
-    if(highlight.getConference() != null) {
-      conference = conferenceService.find(highlight.getConference().getId());
+    if (highlight.getConference() != null) {
+      conference = this.conferenceService.find(highlight.getConference().getId());
     }
 
     highlight.setConference(conference);
@@ -127,7 +125,7 @@ public class HighlightService {
     highlight.setPersonMadeBy(person);
     highlight.setTime(new Date());
 
-    highlight = highlightRepository.save(highlight);
+    highlight = this.highlightRepository.save(highlight);
     return highlight;
   }
 
@@ -135,7 +133,7 @@ public class HighlightService {
   public void deleteAllByIdPerson(Long id) {
     List<Highlight> highlights = highlightRepository.findByIdPerson(id);
 
-    for(Highlight highlight : highlights) {
+    for (Highlight highlight : highlights) {
       highlightRepository.delete(highlight);
     }
   }
@@ -144,15 +142,13 @@ public class HighlightService {
     this.highlightRepository.deleteById(highlightId);
   }
 
-
   @Transactional
   public boolean delete(Highlight highlight) {
-    List<Comment> comment = commentService.find(highlight.getPersonMadeBy().getId(),
-                                                highlight.getPlanItem().getId(), highlight.getConference().getId(),
-                                                highlight.getLocality().getId()
-    );
+    List<Comment> comment = this.commentService.find(highlight.getPersonMadeBy().getId(),
+        highlight.getPlanItem().getId(), highlight.getConference().getId(),
+        highlight.getLocality().getId());
 
-    if(comment == null || comment.isEmpty()) {
+    if (comment == null || comment.isEmpty()) {
       highlightRepository.delete(highlight);
       return true;
     }
@@ -160,37 +156,43 @@ public class HighlightService {
   }
 
   public Highlight find(Long idPerson, Long idPlanItem, Long idConference, Long idLocality) {
-    return highlightRepository.findByIdPersonAndIdPlanItem(
-      idPerson,
-      idPlanItem,
-      idConference,
-      idLocality
-    );
+    Highlight hlReturn = highlightRepository.findByIdPersonAndIdPlanItem(
+        idPerson,
+        idPlanItem,
+        idConference,
+        idLocality);
+
+    if (hlReturn != null) {
+      hlReturn.setConference(conferenceService.find(idConference));
+      hlReturn.setPlanItem(planItemService.find(idPlanItem));
+      hlReturn.setLocality(localityService.find(idLocality));
+      hlReturn.setPersonMadeBy(personService.find(idPerson));
+    }
+    return hlReturn;
   }
 
   public List<Highlight> findAll(Long idPerson, Long idPlanItem, Long idConference, Long idLocality) {
     return highlightRepository.findAllByIdPersonAndIdPlanItemAndIdConferenceAndIdLocality(
-      idPerson,
-      idPlanItem,
-      idConference,
-      idLocality
-    );
+        idPerson,
+        idPlanItem,
+        idConference,
+        idLocality);
   }
 
   public Integer countHighlightByConference(Long id) {
     return highlightRepository.countHighlightByConference(id);
   }
-  
+
   public Integer countHighlightAllOriginsByConference(Long id) {
-	    return highlightRepository.countHighlightAllOriginsByConference(id);
+    return highlightRepository.countHighlightAllOriginsByConference(id);
   }
-  
+
   public Integer countHighlightRemoteOriginByConference(Long id) {
-	    return highlightRepository.countHighlightRemoteOriginByConference(id);
+    return highlightRepository.countHighlightRemoteOriginByConference(id);
   }
-  
-  public Integer countHighlightPresentialOriginByConference(Long id,List<Long> meetings) {
-	    return highlightRepository.countHighlightPresentialOriginByConference(id,meetings);
-}
-  
+
+  public Integer countHighlightPresentialOriginByConference(Long id, List<Long> meetings) {
+    return highlightRepository.countHighlightPresentialOriginByConference(id, meetings);
+  }
+
 }
