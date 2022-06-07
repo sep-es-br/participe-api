@@ -58,8 +58,6 @@ public class HighlightService {
 
     Person person = this.personService.find(highlight.getPersonMadeBy().getId());
 
-    //Highlight highlightBD =new Highlight();
-
     Highlight highlightBD = this.highlightRepository.findByIdPersonAndIdPlanItem(
         person.getId(),
         planItem.getId(),
@@ -69,8 +67,9 @@ public class HighlightService {
     if (highlightBD == null) {
       return this.createHighlight(highlight, from, planItem, person);
     } else {
-      //highlightBD.setConference(highlight.getConference());
-      return this.removeHighlight(highlight);
+      highlightBD.setConference(highlight.getConference());
+      highlightBD.setLocality(highlight.getLocality());
+      return this.removeHighlight(highlightBD);
     }
   }
 
@@ -85,7 +84,7 @@ public class HighlightService {
 
     // If there is no valid comments for that highlight, delete it.
     if (commentLst == null || commentLst.isEmpty()) {
-      highlightRepository.delete(highlight);
+      highlightRepository.deleteById(highlight.getId());
       return null;
     }
 
