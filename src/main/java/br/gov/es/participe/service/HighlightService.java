@@ -58,9 +58,9 @@ public class HighlightService {
 
     Person person = this.personService.find(highlight.getPersonMadeBy().getId());
 
-    Highlight highlightBD =new Highlight();
+    //Highlight highlightBD =new Highlight();
 
-    highlightBD = this.highlightRepository.findByIdPersonAndIdPlanItem(
+    Highlight highlightBD = this.highlightRepository.findByIdPersonAndIdPlanItem(
         person.getId(),
         planItem.getId(),
         highlight.getConference().getId(),
@@ -69,8 +69,8 @@ public class HighlightService {
     if (highlightBD == null) {
       return this.createHighlight(highlight, from, planItem, person);
     } else {
-      highlightBD.setConference(highlight.getConference());
-      return this.removeHighlight(highlightBD);
+      //highlightBD.setConference(highlight.getConference());
+      return this.removeHighlight(highlight);
     }
   }
 
