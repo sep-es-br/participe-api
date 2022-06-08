@@ -528,11 +528,16 @@ public class CommentService {
 
   @Transactional
   public Comment update(Comment comment, ModerationParamDto moderationParamDto, Long idModerator) {
+    
     if (comment == null) {
       throw new IllegalArgumentException("No comment found for given id.");
     }
+
+    Conference conferenceDB =conferenceService.find(comment.getConference().getId());
+
     Long prevPlanItemID = (comment.getPlanItem() == null) ? -1 : comment.getPlanItem().getId();
     Long prevLocalityID = (comment.getLocality() == null) ? -1 : comment.getLocality().getId();
+    
     String prevStatus = (comment.getStatus() == null) ? "" : comment.getStatus();
     CommentStatusType moderationParamStatus = null;
     if (moderationParamDto.getStatus() != null) {
@@ -604,7 +609,7 @@ public class CommentService {
       }
 
     }
-
+    comment.setConference(conferenceDB);
     return commentRepository.save(comment);
   }
 
