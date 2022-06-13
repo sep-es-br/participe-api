@@ -43,9 +43,17 @@ public interface LocalityRepository extends Neo4jRepository<Locality, Long> {
       + " RETURN l")
   List<Locality> findLocalitiesToComplement(Long idConference);
 
-  @Query("MATCH (l:Locality)<-[a:AS_BEING_FROM]-(s:SelfDeclaration)-[t:TO]->(c:Conference) " +
-      "WHERE id(c)= {0} RETURN count(DISTINCT l)")
+  //@Query("MATCH (l:Locality)<-[a:AS_BEING_FROM]-(s:SelfDeclaration)-[t:TO]->(c:Conference) " +
+   //   "WHERE id(c)= {0} RETURN count(DISTINCT l)")
+  //Integer countLocalitiesParticipation(Long idConference);
+
+
+  @Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference)<-[:TO]-(s:SelfDeclaration)<-[m:MADE]-(p), (s)-[:AS_BEING_FROM]->(loc:Locality) " + 
+         " WHERE id(co)={0} RETURN count(DISTINCT loc) ")
   Integer countLocalitiesParticipation(Long idConference);
+
+
+
 
   @Query("MATCH (l:Locality) DETACH DELETE l")
   void deleteAll();
