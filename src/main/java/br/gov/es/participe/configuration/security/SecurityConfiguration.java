@@ -17,7 +17,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
-    
+
     @Autowired
     private TokenService tokenService;
 
@@ -26,11 +26,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         httpSecurity
                 .cors().and().csrf().disable()
                 .authorizeRequests()
-                //.antMatchers(HttpMethod.GET, "/plans").hasRole("Administrator") 
+                // .antMatchers(HttpMethod.GET, "/plans").hasRole("Administrator")
                 .antMatchers("/plans").hasRole("Administrator")
                 .antMatchers("/structures").hasRole("Administrator")
+                .antMatchers("/citizen").hasRole("Administrator")
+                .antMatchers("/domain").hasRole("Administrator")
                 .antMatchers("/signout").permitAll()
-                .antMatchers("/person").permitAll()
+                // .antMatchers("/person").permitAll()
                 .antMatchers("/files/**").permitAll()
                 .antMatchers("/signin/acesso-cidadao")
                 .authenticated().and().oauth2Login()
@@ -39,9 +41,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/oauth2/authorization"));
         httpSecurity.addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class);
     }
-    
+
     @Bean
     public SecurityFilter securityFilter() {
-    	return new SecurityFilter(tokenService);
+        return new SecurityFilter(tokenService);
     }
 }
