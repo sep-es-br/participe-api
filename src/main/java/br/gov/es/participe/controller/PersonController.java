@@ -35,7 +35,7 @@ public class PersonController {
 
     persons.forEach(person -> response.add(new PersonDto(person)));
 
-    return ResponseEntity.status(200).body(response);
+    return ResponseEntity.status(200).body(null);
   }
 
   @GetMapping("/validate")
