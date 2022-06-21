@@ -71,7 +71,12 @@ public class ConferenceController {
   }
 
   @PostMapping
-  public ResponseEntity<ConferenceDto> store(@RequestBody ConferenceParamDto conferenceParamDto) throws ParseException {
+  public ResponseEntity<ConferenceDto> store(
+      @RequestHeader("Authorization") String token,
+      @RequestBody ConferenceParamDto conferenceParamDto) throws ParseException {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Conference conference = new Conference(conferenceParamDto);
     ConferenceDto response = new ConferenceDto(conferenceService.save(conference, conferenceParamDto));
     return ResponseEntity.status(200).body(response);
@@ -85,14 +90,25 @@ public class ConferenceController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ConferenceDto> update(@PathVariable Long id, @RequestBody ConferenceParamDto conferenceDto)
+  public ResponseEntity<ConferenceDto> update(
+      @RequestHeader("Authorization") String token,
+      @PathVariable Long id,
+      @RequestBody ConferenceParamDto conferenceDto)
       throws ParseException {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     ConferenceDto response = conferenceService.update(id, conferenceDto);
     return ResponseEntity.status(200).body(response);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Boolean> destroy(@PathVariable Long id) {
+  public ResponseEntity<Boolean> destroy(
+      @RequestHeader("Authorization") String token,
+      @PathVariable Long id) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Boolean response = conferenceService.delete(id);
     return ResponseEntity.status(200).body(response);
   }
