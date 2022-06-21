@@ -56,7 +56,7 @@ public class CitizenController {
       @PathVariable Long personId,
       @RequestParam Long conferenceId) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       PersonKeepCitizenDto citizen = personService.findCitizenById(personId, conferenceId);
       return ResponseEntity.status(200).body(citizen);
     } else {
@@ -70,7 +70,7 @@ public class CitizenController {
       @RequestHeader("Authorization") String token,
       @RequestBody PersonParamDto personParam) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       return personService.storePerson(personParam, false);
     } else {
       return ResponseEntity.status(401).body(null);
@@ -98,7 +98,7 @@ public class CitizenController {
       @PathVariable Long id,
       @RequestBody PersonParamDto personParam) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       personParam.setId(id);
       return personService.updatePerson(personParam, false);
     } else {
@@ -112,7 +112,7 @@ public class CitizenController {
       @PathVariable(name = "idConferences", required = false) Long idConferences,
       @RequestParam(name = "name", required = false, defaultValue = "") String name) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       LocalityCitizenSelectDto localityCitizenSelectDto = localityService.getLocalitiesToDisplay(idConferences, name);
       return ResponseEntity.status(200).body(localityCitizenSelectDto);
     } else {
