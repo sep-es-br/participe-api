@@ -37,7 +37,7 @@ public class SelfDeclarationController {
 			@RequestHeader(name = "Authorization") String token,
 			@PathVariable Long id) {
 
-		if ((id == personService.getPerson(token).getId())
+		if ((id.equals(personService.getPerson(token).getId()))
 				|| (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))) {
 			List<SelfDeclaration> selfDeclaraions = selfDeclarationService.findAllByPerson(id);
 			List<SelfDeclarationDto> response = new ArrayList<>();
@@ -56,7 +56,7 @@ public class SelfDeclarationController {
 			@RequestHeader(name = "Authorization") String token,
 			@RequestBody SelfDeclarationDto selfDeclarationDto) {
 
-		if ((selfDeclarationDto.getPerson().getId() == personService.getPerson(token).getId())
+		if ((selfDeclarationDto.getPerson().getId().equals(personService.getPerson(token).getId()))
 				|| (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))) {
 			SelfDeclaration selfDeclaraion = new SelfDeclaration(selfDeclarationDto);
 			SelfDeclarationDto response = new SelfDeclarationDto(selfDeclarationService.save(selfDeclaraion), true);
@@ -72,7 +72,7 @@ public class SelfDeclarationController {
 			@RequestHeader(name = "Authorization") String token,
 			@PathVariable Long id) {
 
-		if ((id == personService.getPerson(token).getId())
+		if ((id.equals(personService.getPerson(token).getId()))
 				|| (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))) {
 			selfDeclarationService.delete(id);
 			return ResponseEntity.status(200).build();

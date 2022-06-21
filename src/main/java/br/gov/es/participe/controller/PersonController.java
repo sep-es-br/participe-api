@@ -64,7 +64,7 @@ public class PersonController {
       @RequestHeader(name = "Authorization") String token,
       @RequestBody PersonParamDto personParam) {
 
-    if (personService.getPerson(token).getId() == personParam.getId()) {
+    if (personService.getPerson(token).getId().equals(personParam.getId())) {
 
       if (personParam.getSelfDeclaration() == null) {
         throw new IllegalArgumentException("Self Declaration is required");
@@ -107,7 +107,7 @@ public class PersonController {
       @PathVariable(name = "personId") Long personId) {
 
     if ((personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))
-        || (personService.getPerson(token).getId() == personParam.getId())) {
+        || (personService.getPerson(token).getId().equals(personParam.getId()))) {
       personParam.setId(personId);
       return personService.updatePerson(token, personParam, false);
     } else {

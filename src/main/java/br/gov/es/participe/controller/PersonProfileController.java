@@ -52,7 +52,7 @@ public class PersonProfileController {
       @PathVariable Long personId,
       @Param("conferenceId") Long conferenceId) {
 
-    if ((personService.getPerson(token).getId() == personId)
+    if ((personService.getPerson(token).getId().equals(personId))
         || (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))) {
       PersonProfileSearchDto person = personProfileService.findById(personId, conferenceId);
       return ResponseEntity.ok(person);
@@ -67,7 +67,7 @@ public class PersonProfileController {
       @PathVariable Long personIdToMerge) {
 
     Long idPerson = personService.getPerson(token).getId();
-    if ((idPerson == personIdToMerge)
+    if ((idPerson.equals(personIdToMerge))
         || (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))) {
       PersonParamDto person = this.mergePersonProfileService.merge(personIdToMerge, idPerson);
       return ResponseEntity.ok(person);
@@ -82,7 +82,7 @@ public class PersonProfileController {
       @PathVariable Long personId,
       @RequestBody PersonProfileUpdateDto personDto) {
 
-    if ((personId == personService.getPerson(token).getId())
+    if ((personId.equals(personService.getPerson(token).getId()))
         || (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))) {
       personDto.setId(personId);
       PersonProfileSearchDto person = personProfileService.updatePersonProfile(personDto);
@@ -96,7 +96,7 @@ public class PersonProfileController {
   public ResponseEntity<List<PersonProfileEmailsDto>> findPersonEmails(
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long personId) {
-    if ((personId == personService.getPerson(token).getId())
+    if ((personId.equals(personService.getPerson(token).getId()))
         || (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))) {
       List<PersonProfileEmailsDto> emails = personProfileService.findPersonEmail(personId);
       return ResponseEntity.ok(emails);
