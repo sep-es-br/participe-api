@@ -194,7 +194,7 @@ public class MeetingController {
     return ResponseEntity.ok().body(participantsQuantity);
   }
 
-  @DeleteMapping("/{meetingId}/remove-participation/{personId}")=
+  @DeleteMapping("/{meetingId}/remove-participation/{personId}")
   public ResponseEntity<Boolean> removeMeetingParticipation(
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long personId,
