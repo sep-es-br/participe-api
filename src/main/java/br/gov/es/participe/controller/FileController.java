@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import br.gov.es.participe.controller.dto.FileDto;
 import br.gov.es.participe.service.FileService;
+import br.gov.es.participe.service.PersonService;
 
 @RestController
 @CrossOrigin
@@ -28,6 +30,9 @@ public class FileController {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private PersonService personService;
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<UrlResource> getImagem(@PathVariable(value = "id") Long idImagem) throws IOException {
@@ -41,14 +46,24 @@ public class FileController {
 
     @SuppressWarnings("rawtypes")
     @PostMapping("/upload")
-    public ResponseEntity upload(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity upload(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         FileDto fileDto = fileService.save(file);
         return ResponseEntity.status(HttpStatus.OK).body(fileDto);
     }
 
     @SuppressWarnings("rawtypes")
     @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable(value = "id") Long idLocalidade) {
+    public ResponseEntity delete(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable(value = "id") Long idLocalidade) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         fileService.delete(idLocalidade);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

@@ -3,6 +3,7 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.PlanDto;
 import br.gov.es.participe.controller.dto.PlanParamDto;
 import br.gov.es.participe.model.Plan;
+import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.PlanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -20,6 +21,9 @@ public class PlanController {
     @Autowired
     private PlanService planService;
 
+    @Autowired
+    private PersonService personService;
+
     @GetMapping
     @SuppressWarnings("rawtypes")
     public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
@@ -33,7 +37,12 @@ public class PlanController {
 
     @PostMapping
     @SuppressWarnings("rawtypes")
-    public ResponseEntity store(@RequestBody PlanParamDto planParamDto) {
+    public ResponseEntity store(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestBody PlanParamDto planParamDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         Plan plan = new Plan(planParamDto);
         PlanDto response = new PlanDto(planService.save(plan), true);
         return ResponseEntity.status(200).body(response);
@@ -48,7 +57,13 @@ public class PlanController {
 
     @PutMapping("/{id}")
     @SuppressWarnings("rawtypes")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody PlanParamDto planParamDto) {
+    public ResponseEntity update(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id,
+            @RequestBody PlanParamDto planParamDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         planParamDto.setId(id);
         Plan plan = new Plan(planParamDto);
         PlanDto response = new PlanDto(planService.save(plan), true);
@@ -57,7 +72,12 @@ public class PlanController {
 
     @DeleteMapping("/{id}")
     @SuppressWarnings("rawtypes")
-    public ResponseEntity destroy(@PathVariable Long id) {
+    public ResponseEntity destroy(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         planService.delete(id);
         return ResponseEntity.status(200).build();
     }

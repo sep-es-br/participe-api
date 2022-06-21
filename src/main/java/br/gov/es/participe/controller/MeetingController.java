@@ -100,7 +100,13 @@ public class MeetingController {
   }
 
   @PostMapping
-  public ResponseEntity<MeetingDto> store(@RequestBody MeetingParamDto meetingParamDto) {
+  public ResponseEntity<MeetingDto> store(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestBody MeetingParamDto meetingParamDto) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Meeting meeting = new Meeting(meetingParamDto, false);
     Meeting saveMeeting = meetingService.save(meeting, meetingParamDto);
 
@@ -112,7 +118,13 @@ public class MeetingController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<MeetingDto> update(@PathVariable Long id, @RequestBody MeetingParamDto meetingParamDto) {
+  public ResponseEntity<MeetingDto> update(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long id,
+      @RequestBody MeetingParamDto meetingParamDto) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Meeting meeting = meetingService.findWithoutConference(id);
 
     if (meeting != null) {
@@ -125,13 +137,23 @@ public class MeetingController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Boolean> destroy(@PathVariable Long id) {
+  public ResponseEntity<Boolean> destroy(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long id) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Boolean response = meetingService.delete(id);
     return ResponseEntity.status(200).body(response);
   }
 
   @PostMapping("/checkIn")
-  public ResponseEntity<CheckedInAtDto> checkInOnMeeting(@RequestBody CheckInParamDto checkInParamDto) {
+  public ResponseEntity<CheckedInAtDto> checkInOnMeeting(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestBody CheckInParamDto checkInParamDto) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Receptionist" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     if (checkInParamDto == null ||
         checkInParamDto.getPersonId() == null ||
         checkInParamDto.getMeetingId() == null) {
@@ -173,8 +195,13 @@ public class MeetingController {
   }
 
   @DeleteMapping("/{meetingId}/remove-participation/{personId}")
-  public ResponseEntity<Boolean> removeMeetingParticipation(@PathVariable Long personId,
+  public ResponseEntity<Boolean> removeMeetingParticipation(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long personId,
       @PathVariable Long meetingId) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Receptionist" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Boolean response = meetingService.deleteParticipation(personId, meetingId);
     return ResponseEntity.ok().body(response);
   }
@@ -182,15 +209,24 @@ public class MeetingController {
   @ApiPageable
   @GetMapping("/{meetingId}/persons")
   public ResponseEntity<Page<PersonMeetingDto>> findPersonForMeeting(
+      @RequestHeader(name = "Authorization") String token,
       @PathVariable Long meetingId,
       @RequestParam(name = "name", required = false, defaultValue = "") String name,
       Pageable pageable) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Receptionist" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable);
     return ResponseEntity.status(200).body(personMeetingDtoPage);
   }
 
   @GetMapping("/receptionistByEmail")
-  public ResponseEntity<PersonDto> findReceptionistByEmail(@RequestParam("email") String email) {
+  public ResponseEntity<PersonDto> findReceptionistByEmail(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestParam("email") String email) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Optional<Person> personOpt = personService.findByContactEmail(email);
 
     return personOpt.map(

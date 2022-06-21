@@ -36,6 +36,7 @@ import br.gov.es.participe.model.Plan;
 import br.gov.es.participe.service.CommentService;
 import br.gov.es.participe.service.ConferenceService;
 import br.gov.es.participe.service.LocalityService;
+import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.PlanItemService;
 import br.gov.es.participe.service.PlanService;
 import br.gov.es.participe.service.TokenService;
@@ -67,6 +68,9 @@ public class ModerationController {
   @Autowired
   private PlanItemService planItemService;
 
+  @Autowired
+  private PersonService personService;
+
   @GetMapping
   public ResponseEntity<List<ModerationResultDto>> findAllCommentsByStatus(
       @RequestHeader(name = "Authorization") String token,
@@ -78,8 +82,12 @@ public class ModerationController {
       @RequestParam(value = "planItemIds", required = false) Long[] planItemIds,
       @RequestParam(value = "structureItemIds", required = false) Long[] structureItemIds,
       @RequestParam(value = "initalDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") Date initialDate,
-      @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") Date endDate
-  ) {
+      @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") Date endDate) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
+
     Long[] emptyList = {};
     CommentStatusType commStatus = ALL;
     CommentTypeType commType = PROPOSAL;
@@ -108,8 +116,14 @@ public class ModerationController {
   }
 
   @GetMapping("/{idComment}")
-  public ResponseEntity<ModerationResultDto> findModerationResultById(@PathVariable Long idComment,
-                                                                      @RequestParam Long conferenceId) {
+  public ResponseEntity<ModerationResultDto> findModerationResultById(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long idComment,
+      @RequestParam Long conferenceId) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     ModerationResultDto response = commentService
         .findModerationResultById(idComment, conferenceId);
     if (response == null) {
@@ -119,7 +133,13 @@ public class ModerationController {
   }
 
   @GetMapping("/treeView/{idComment}")
-  public ResponseEntity<PlanDto> findPlanByCommentId(@PathVariable Long idComment) {
+  public ResponseEntity<PlanDto> findPlanByCommentId(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long idComment) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     PlanDto response = commentService
         .findTreeViewByCommentId(idComment);
     return ResponseEntity.status(200).body(response);
@@ -127,35 +147,52 @@ public class ModerationController {
 
   @PutMapping("/{id}")
   public ResponseEntity<ModerationResultDto> update(@PathVariable Long id,
-                                                    @RequestHeader(name = "Authorization") String token,
-                                                    @RequestBody ModerationParamDto moderationParamDto) {
+      @RequestHeader(name = "Authorization") String token,
+      @RequestBody ModerationParamDto moderationParamDto) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     if (moderationParamDto == null) {
       return ResponseEntity.status(400).body(null);
     }
     Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
     Comment comment = commentService.find(id);
     commentService.update(comment, moderationParamDto, idPerson);
-    ModerationResultDto moderation = commentService.findModerationResultById(comment.getId(), comment.getConference().getId());
+    ModerationResultDto moderation = commentService.findModerationResultById(comment.getId(),
+        comment.getConference().getId());
     return ResponseEntity.status(200).body(moderation);
   }
 
   @PutMapping("/begin/{id}")
-  public ResponseEntity<ModerationResultDto> begin(@PathVariable Long id,
-                                                   @RequestHeader(name = "Authorization") String token) {
+  public ResponseEntity<ModerationResultDto> begin(
+      @PathVariable Long id,
+      @RequestHeader(name = "Authorization") String token) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
     Comment comment = commentService.find(id);
     commentService.begin(comment, idPerson);
-    ModerationResultDto moderation = commentService.findModerationResultById(comment.getId(), comment.getConference().getId());
+    ModerationResultDto moderation = commentService.findModerationResultById(comment.getId(),
+        comment.getConference().getId());
     return ResponseEntity.status(200).body(moderation);
   }
 
   @PutMapping("/end/{id}")
-  public ResponseEntity<ModerationResultDto> end(@PathVariable Long id,
-                                                 @RequestHeader(name = "Authorization") String token) {
+  public ResponseEntity<ModerationResultDto> end(
+      @PathVariable Long id,
+      @RequestHeader(name = "Authorization") String token) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
     Comment comment = commentService.find(id);
     commentService.end(comment, idPerson);
-    ModerationResultDto moderation = commentService.findModerationResultById(comment.getId(), comment.getConference().getId());
+    ModerationResultDto moderation = commentService.findModerationResultById(comment.getId(),
+        comment.getConference().getId());
     return ResponseEntity.status(200).body(moderation);
   }
 
@@ -163,13 +200,24 @@ public class ModerationController {
   public ResponseEntity<List<ConferenceDto>> findConferencesActives(
       @RequestHeader(name = "Authorization") String token,
       @RequestParam(name = "activeConferences", required = false, defaultValue = "false") Boolean activeConferences) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
     List<ConferenceDto> conferences = conferenceService.findAllActives(idPerson, activeConferences);
     return ResponseEntity.status(200).body(conferences);
   }
 
   @GetMapping("/localities/conference/{id}")
-  public ResponseEntity<LeanLocalityResultDto> findLocByIdConference(@PathVariable Long id) {
+  public ResponseEntity<LeanLocalityResultDto> findLocByIdConference(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long id) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
+
     List<Locality> localities = localityService.findByIdConference(id);
 
     List<LocalityDto> localitiesDto = new ArrayList<>();
@@ -191,7 +239,13 @@ public class ModerationController {
   }
 
   @GetMapping("plan-items/conference/{id}")
-  public ResponseEntity<LeanPlanItemResultDto> findPlanItemsByConference(@PathVariable Long id) {
+  public ResponseEntity<LeanPlanItemResultDto> findPlanItemsByConference(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long id) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+      return ResponseEntity.status(401).body(null);
+    }
     LeanPlanItemResultDto response = planItemService.findPlanItemsByConference(id);
     return ResponseEntity.status(200).body(response);
   }

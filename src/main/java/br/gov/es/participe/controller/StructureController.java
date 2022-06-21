@@ -3,6 +3,7 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.StructureDto;
 import br.gov.es.participe.controller.dto.StructureParamDto;
 import br.gov.es.participe.model.Structure;
+import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.StructureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,9 @@ public class StructureController {
     @Autowired
     private StructureService structureService;
 
+    @Autowired
+    private PersonService personService;
+
     @GetMapping
     @SuppressWarnings("rawtypes")
     public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
@@ -32,7 +36,12 @@ public class StructureController {
 
     @PostMapping
     @SuppressWarnings("rawtypes")
-    public ResponseEntity store(@RequestBody StructureParamDto structureParamDto) {
+    public ResponseEntity store(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestBody StructureParamDto structureParamDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         Structure structure = new Structure(structureParamDto);
         StructureDto response = new StructureDto(structureService.save(structure), true);
         return ResponseEntity.status(200).body(response);
@@ -46,17 +55,25 @@ public class StructureController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StructureDto> update(@PathVariable Long id,
+    public ResponseEntity<StructureDto> update(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id,
             @RequestBody StructureParamDto structureParamDto) {
-        // structureParamDto.setId(id);
-        // Structure structure = new Structure(structureParamDto);
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         StructureDto response = new StructureDto(structureService.update(structureParamDto, id), true);
         return ResponseEntity.status(200).body(response);
     }
 
     @DeleteMapping("/{id}")
     @SuppressWarnings("rawtypes")
-    public ResponseEntity destroy(@PathVariable Long id) {
+    public ResponseEntity destroy(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         structureService.delete(id);
         return ResponseEntity.status(200).build();
     }

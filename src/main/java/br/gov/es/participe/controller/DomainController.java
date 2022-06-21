@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,7 @@ import br.gov.es.participe.controller.dto.DomainDto;
 import br.gov.es.participe.controller.dto.DomainParamDto;
 import br.gov.es.participe.model.Domain;
 import br.gov.es.participe.service.DomainService;
+import br.gov.es.participe.service.PersonService;
 
 @RestController
 @CrossOrigin
@@ -29,9 +31,14 @@ public class DomainController {
     @Autowired
     private DomainService domainService;
 
+    @Autowired
+    private PersonService personService;
+
     @GetMapping
     @SuppressWarnings({ "rawtypes" })
-    public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
+    public ResponseEntity index(
+            @RequestParam(value = "query", required = false) String query) {
+
         List<Domain> domains = domainService.findAll(query);
         List<DomainDto> response = new ArrayList<>();
 
@@ -42,7 +49,12 @@ public class DomainController {
 
     @PostMapping
     @SuppressWarnings({ "rawtypes" })
-    public ResponseEntity store(@RequestBody DomainParamDto domainParamDto) {
+    public ResponseEntity store(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestBody DomainParamDto domainParamDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         Domain domain = new Domain(domainParamDto);
         DomainDto response = new DomainDto(domainService.save(domain), true);
         return ResponseEntity.status(200).body(response);
@@ -57,7 +69,12 @@ public class DomainController {
 
     @PutMapping("/{id}")
     @SuppressWarnings({ "rawtypes" })
-    public ResponseEntity update(@PathVariable Long id, @RequestBody DomainParamDto domainUpdateDto) {
+    public ResponseEntity update(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id, @RequestBody DomainParamDto domainUpdateDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         domainUpdateDto.setId(id);
         Domain domain = new Domain(domainUpdateDto);
         DomainDto response = new DomainDto(domainService.save(domain), true);
@@ -66,7 +83,12 @@ public class DomainController {
 
     @DeleteMapping("/{id}")
     @SuppressWarnings({ "rawtypes" })
-    public ResponseEntity destroy(@PathVariable Long id) {
+    public ResponseEntity destroy(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         domainService.delete(id);
         return ResponseEntity.status(200).build();
     }

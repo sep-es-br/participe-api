@@ -917,4 +917,20 @@ public class PersonService {
   public Optional<Person> findPersonIfParticipatingOnMeetingPresentially(Long personId, Date date, Long conferenceId) {
     return personRepository.findPersonIfParticipatingOnMeetingPresentially(personId, date, conferenceId);
   }
+
+  public Boolean hasOneOfTheRoles(String token, String[] roles) {
+    Person person = this.getPerson(token);
+    Boolean ret = false;
+    for (int i = 0; i < roles.length; i++) {
+      ret |= (person.getRoles() != null && person.getRoles().contains(roles[i]));
+    }
+    return ret;
+  }
+
+  public Person getPerson(String token) {
+    String[] keys = token.split(" ");
+    Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
+    return this.find(idPerson);
+  }
+
 }

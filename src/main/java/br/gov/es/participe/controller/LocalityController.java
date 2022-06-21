@@ -7,6 +7,7 @@ import br.gov.es.participe.controller.dto.LocalityParamDto;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.service.ConferenceService;
 import br.gov.es.participe.service.LocalityService;
+import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,9 @@ public class LocalityController {
 
     @Autowired
     private ConferenceService conferenceService;
+
+    @Autowired
+    private PersonService personService;
 
     @SuppressWarnings("rawtypes")
     @GetMapping
@@ -104,7 +108,12 @@ public class LocalityController {
 
     @PostMapping
     @SuppressWarnings("rawtypes")
-    public ResponseEntity store(@RequestBody LocalityParamDto localityParamDto) {
+    public ResponseEntity store(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestBody LocalityParamDto localityParamDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         Locality locality = new Locality(localityParamDto);
         LocalityDto response = new LocalityDto(localityService.create(locality), null, true, true);
         return ResponseEntity.status(200).body(response);
@@ -119,14 +128,26 @@ public class LocalityController {
 
     @PutMapping("/{id}")
     @SuppressWarnings("rawtypes")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody LocalityParamDto localityParamDto) {
+    public ResponseEntity update(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id,
+            @RequestBody LocalityParamDto localityParamDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         LocalityDto response = new LocalityDto(localityService.update(id, localityParamDto), null, true, true);
         return ResponseEntity.status(200).body(response);
     }
 
     @DeleteMapping("/{idLocality}/domain/{idDomain}")
     @SuppressWarnings("rawtypes")
-    public ResponseEntity destroy(@PathVariable Long idLocality, @PathVariable Long idDomain) {
+    public ResponseEntity destroy(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long idLocality,
+            @PathVariable Long idDomain) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         localityService.delete(idLocality, idDomain);
         return ResponseEntity.status(200).build();
     }

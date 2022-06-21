@@ -28,14 +28,16 @@ public class PersonController {
 
   @GetMapping
   @SuppressWarnings("rawtypes")
-  public ResponseEntity index() {
-    List<Person> persons = personService.findAll();
-
-    List<PersonDto> response = new ArrayList<>();
-
-    persons.forEach(person -> response.add(new PersonDto(person)));
-
-    return ResponseEntity.status(200).body(null);
+  public ResponseEntity index(
+      @RequestHeader(name = "Authorization") String token) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      List<Person> people = personService.findAll();
+      List<PersonDto> response = new ArrayList<>();
+      people.forEach(person -> response.add(new PersonDto(person)));
+      return ResponseEntity.status(200).body(response);
+    } else {
+      return ResponseEntity.status(401).body(null);
+    }
   }
 
   @GetMapping("/validate")
@@ -51,42 +53,66 @@ public class PersonController {
 
   @PostMapping
   @SuppressWarnings("rawtypes")
-  public ResponseEntity store(@RequestBody PersonParamDto personParam) {
+  public ResponseEntity store(
+      @RequestBody PersonParamDto personParam) {
     return personService.storePerson(personParam, false);
   }
 
   @PostMapping("/complement")
   @SuppressWarnings("rawtypes")
-  public ResponseEntity complement(@RequestBody PersonParamDto personParam) {
+  public ResponseEntity complement(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestBody PersonParamDto personParam) {
 
-    if (personParam.getSelfDeclaration() == null) {
-      throw new IllegalArgumentException("Self Declaration is required");
+    if (personService.getPerson(token).getId() == personParam.getId()) {
+
+      if (personParam.getSelfDeclaration() == null) {
+        throw new IllegalArgumentException("Self Declaration is required");
+      }
+
+      SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaration());
+      Person person = personService.complement(
+          new Person(personParam),
+          self);
+
+      PersonDto response = new PersonDto(person);
+      response.setSelfDeclaretion(new SelfDeclarationDto(self, false));
+      return ResponseEntity.status(200).body(response);
+    } else {
+      return ResponseEntity.status(401).body(null);
     }
 
-    SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaration());
-    Person person = personService.complement(
-        new Person(personParam),
-        self);
-
-    PersonDto response = new PersonDto(person);
-    response.setSelfDeclaretion(new SelfDeclarationDto(self, false));
-    return ResponseEntity.status(200).body(response);
   }
 
   @DeleteMapping("/delete/{id}")
   @SuppressWarnings("rawtypes")
-  public ResponseEntity destroy(@PathVariable Long id) {
-    personService.delete(id);
-    return ResponseEntity.status(200).build();
+  public ResponseEntity destroy(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long id) {
+
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      personService.delete(id);
+      return ResponseEntity.status(200).build();
+    } else {
+      return ResponseEntity.status(401).body(null);
+    }
+
   }
 
   @PutMapping("/{personId}")
   @SuppressWarnings("rawtypes")
-  public ResponseEntity update(@RequestHeader(name = "Authorization") String token,
+  public ResponseEntity update(
+      @RequestHeader(name = "Authorization") String token,
       @RequestBody PersonParamDto personParam,
       @PathVariable(name = "personId") Long personId) {
-    personParam.setId(personId);
-    return personService.updatePerson(token, personParam, false);
+
+    if ((personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))
+        || (personService.getPerson(token).getId() == personParam.getId())) {
+      personParam.setId(personId);
+      return personService.updatePerson(token, personParam, false);
+    } else {
+      return ResponseEntity.status(401).body(null);
+    }
   }
 
   @PostMapping("/forgot-password")
@@ -101,7 +127,7 @@ public class PersonController {
       return ResponseEntity.status(200).body(msg);
     }
     msg.setMessage(
-        "Hummm... Não encontramos esse e-mail em nossos registros. Talvez você tenha se cadastrado com outro endereço ou utilizado o Acesso Cidadão, Google ou redes sociais");
+        "Hummm... Não encontramos esse e-mail em nossos registros. Talvez você tenha se cadastrado com outro endereço ou utilizado o Acesso Cidadão, Google ou Facebook");
     msg.setCode(403);
     return ResponseEntity.status(403).body(msg);
   }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.gov.es.participe.controller.dto.PlanItemDto;
 import br.gov.es.participe.controller.dto.PlanItemParamDto;
 import br.gov.es.participe.model.PlanItem;
+import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.PlanItemService;
 
 @RestController
@@ -29,6 +31,9 @@ public class PlanItemController {
 
     @Autowired
     private PlanItemService planItemService;
+
+    @Autowired
+    private PersonService personService;
 
     @GetMapping
     @SuppressWarnings("rawtypes")
@@ -48,7 +53,12 @@ public class PlanItemController {
 
     @PostMapping
     @SuppressWarnings("rawtypes")
-    public ResponseEntity store(@RequestBody PlanItemParamDto planItemParamDto) {
+    public ResponseEntity store(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestBody PlanItemParamDto planItemParamDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         PlanItem planItem = new PlanItem(planItemParamDto);
         planItem = planItemService.save(planItem);
         PlanItemDto response = new PlanItemDto(planItem, null, false);
@@ -64,7 +74,13 @@ public class PlanItemController {
 
     @PutMapping("/{id}")
     @SuppressWarnings("rawtypes")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody PlanItemParamDto planItemParamDto) {
+    public ResponseEntity update(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id,
+            @RequestBody PlanItemParamDto planItemParamDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         PlanItem planItem = new PlanItem(planItemParamDto);
         PlanItemDto response = new PlanItemDto(planItemService.save(planItem), null, true);
         return ResponseEntity.status(200).body(response);
@@ -72,7 +88,12 @@ public class PlanItemController {
 
     @DeleteMapping("/{id}")
     @SuppressWarnings("rawtypes")
-    public ResponseEntity destroy(@PathVariable Long id) {
+    public ResponseEntity destroy(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         planItemService.delete(id);
         return ResponseEntity.status(200).build();
     }

@@ -3,6 +3,8 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.LocalityTypeDto;
 import br.gov.es.participe.model.LocalityType;
 import br.gov.es.participe.service.LocalityTypeService;
+import br.gov.es.participe.service.PersonService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;

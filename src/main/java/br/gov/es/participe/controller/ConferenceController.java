@@ -43,11 +43,11 @@ public class ConferenceController {
   private TokenService tokenService;
 
   @GetMapping
-  public ResponseEntity<List<ConferenceDto>> index(@RequestParam(value = "name", required = false, defaultValue = "") String name
-      , @RequestParam(value = "plan", required = false) Long plan
-      , @RequestParam(value = "month", required = false) Integer month
-      , @RequestParam(value = "year", required = false) Integer year
-  ) {
+  public ResponseEntity<List<ConferenceDto>> index(
+      @RequestParam(value = "name", required = false, defaultValue = "") String name,
+      @RequestParam(value = "plan", required = false) Long plan,
+      @RequestParam(value = "month", required = false) Integer month,
+      @RequestParam(value = "year", required = false) Integer year) {
     List<Conference> conferences = conferenceService.findAll(name, plan, month, year);
     List<ConferenceDto> response = new ArrayList<>();
 
@@ -57,14 +57,16 @@ public class ConferenceController {
   }
 
   @GetMapping("/validateDefaultConference")
-  public ResponseEntity<ConferenceNameDto> validateDefaultConference(@RequestParam String serverName, @RequestParam(value = "id", required = false) Long idConference) {
+  public ResponseEntity<ConferenceNameDto> validateDefaultConference(@RequestParam String serverName,
+      @RequestParam(value = "id", required = false) Long idConference) {
     String name = conferenceService.validateDefaultConference(serverName.replace("'", ""), idConference);
     return ResponseEntity.status(200).body(name != null ? new ConferenceNameDto(name) : null);
   }
 
   @GetMapping("/validate")
-  public ResponseEntity<Boolean> validate(@RequestParam(value = "name", required = false, defaultValue = "") String name
-      , @RequestParam(value = "id", required = false) Long id) {
+  public ResponseEntity<Boolean> validate(
+      @RequestParam(value = "name", required = false, defaultValue = "") String name,
+      @RequestParam(value = "id", required = false) Long id) {
     return ResponseEntity.status(200).body(conferenceService.validate(name, id));
   }
 
@@ -83,7 +85,8 @@ public class ConferenceController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ConferenceDto> update(@PathVariable Long id, @RequestBody ConferenceParamDto conferenceDto) throws ParseException {
+  public ResponseEntity<ConferenceDto> update(@PathVariable Long id, @RequestBody ConferenceParamDto conferenceDto)
+      throws ParseException {
     ConferenceDto response = conferenceService.update(id, conferenceDto);
     return ResponseEntity.status(200).body(response);
   }
@@ -95,7 +98,8 @@ public class ConferenceController {
   }
 
   @GetMapping("/AuthenticationScreen/{id}")
-  public ResponseEntity<AuthenticationScreenDto> getAuthenticationScreen(@PathVariable Long id, UriComponentsBuilder uriComponentsBuilder) {
+  public ResponseEntity<AuthenticationScreenDto> getAuthenticationScreen(@PathVariable Long id,
+      UriComponentsBuilder uriComponentsBuilder) {
     AuthenticationScreenDto auth = new AuthenticationScreenDto();
     conferenceService.generateAuthenticationScreen(id, auth, uriComponentsBuilder);
     return ResponseEntity.status(200).body(auth);
@@ -117,8 +121,7 @@ public class ConferenceController {
   public ResponseEntity<List<PersonDto>> moderators(
       @RequestHeader("Authorization") String token,
       @RequestParam(value = "name", required = false, defaultValue = "") String name,
-      @RequestParam(value = "email", required = false, defaultValue = "") String email
-  ) throws IOException {
+      @RequestParam(value = "email", required = false, defaultValue = "") String email) throws IOException {
     List<PersonDto> moderators = acessoCidadaoService.listPersonsByPerfil(ProfileType.MODERATOR, name, email);
     return ResponseEntity.status(200).body(moderators);
   }
@@ -126,8 +129,7 @@ public class ConferenceController {
   @GetMapping("/{id}/moderators")
   public ResponseEntity<List<PersonDto>> moderators(
       @RequestHeader("Authorization") String token,
-      @PathVariable Long id
-  ) {
+      @PathVariable Long id) {
     List<PersonDto> moderators = conferenceService.findModeratorsByConferenceId(id);
     return ResponseEntity.status(200).body(moderators);
   }
@@ -136,8 +138,7 @@ public class ConferenceController {
   public ResponseEntity<List<PersonDto>> receptionists(
       @RequestHeader("Authorization") String token,
       @RequestParam(value = "name", required = false, defaultValue = "") String name,
-      @RequestParam(value = "email", required = false, defaultValue = "") String email
-  ) throws IOException {
+      @RequestParam(value = "email", required = false, defaultValue = "") String email) throws IOException {
     List<PersonDto> receptionists = acessoCidadaoService.listPersonsByPerfil(ProfileType.RECEPCIONIST, name, email);
     return ResponseEntity.status(200).body(receptionists);
   }
@@ -162,7 +163,7 @@ public class ConferenceController {
 
   @GetMapping("/with-meetings")
   public ResponseEntity<List<ConferenceDto>> findConferencesWithMeeting(@RequestHeader("Authorization") String token,
-                                                                        @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") Date date) {
+      @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") Date date) {
     String[] keys = token.split(" ");
     Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
     Person person = personService.find(idPerson);
@@ -189,19 +190,21 @@ public class ConferenceController {
   @GetMapping("/with-presential-meetings")
   public ResponseEntity<List<ConferenceDto>> findPresentialConferencesWithMeeting(
       @RequestHeader("Authorization") String token,
-      @RequestParam(value = "date", required = false)
-      @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date date
-  ) {
-    String[] keys = token.split(" ");
-    Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
-    Person person = personService.find(idPerson);
-    boolean adm = person.getRoles() != null && person.getRoles().contains("Administrator");
+      @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date date) {
+
+    /*
+     * String[] keys = token.split(" ");
+     * Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
+     * Person person = personService.find(idPerson);
+     * boolean adm = person.getRoles() != null &&
+     * person.getRoles().contains("Administrator");
+     */
 
     List<Conference> conferences;
-    if (adm) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
       conferences = conferenceService.findAllWithPresentialMeetings(null, null);
     } else {
-      conferences = conferenceService.findAllWithPresentialMeetings(date, person.getId());
+      conferences = conferenceService.findAllWithPresentialMeetings(date, personService.getPerson(token).getId());
     }
 
     List<ConferenceDto> response = new ArrayList<>();
@@ -217,9 +220,10 @@ public class ConferenceController {
   }
 
   @GetMapping("/{id}/regionalization")
-  public ResponseEntity<ConferenceRegionalizationDto> conferenceContainsRegionalizationStructure(@PathVariable("id") Long idConference) {
-    ConferenceRegionalizationDto isRegionalization =
-        conferenceService.conferenceContainsRegionalizationStructure(idConference);
+  public ResponseEntity<ConferenceRegionalizationDto> conferenceContainsRegionalizationStructure(
+      @PathVariable("id") Long idConference) {
+    ConferenceRegionalizationDto isRegionalization = conferenceService
+        .conferenceContainsRegionalizationStructure(idConference);
 
     return ResponseEntity.ok(isRegionalization);
   }

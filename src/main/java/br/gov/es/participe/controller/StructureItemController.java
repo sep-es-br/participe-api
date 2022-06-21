@@ -2,6 +2,7 @@ package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.StructureItemDto;
 import br.gov.es.participe.model.StructureItem;
+import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.StructureItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,9 @@ public class StructureItemController {
 
     @Autowired
     private StructureItemService structureItemService;
+
+    @Autowired
+    private PersonService personService;
 
     @GetMapping
     @SuppressWarnings("rawtypes")
@@ -48,7 +52,12 @@ public class StructureItemController {
 
     @PostMapping
     @SuppressWarnings("rawtypes")
-    public ResponseEntity store(@RequestBody StructureItemDto structureItemDto) {
+    public ResponseEntity store(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestBody StructureItemDto structureItemDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         StructureItem structureItem = new StructureItem(structureItemDto);
         StructureItemDto response = new StructureItemDto(structureItemService.create(structureItem), null, true, true);
         return ResponseEntity.status(200).body(response);
@@ -63,7 +72,13 @@ public class StructureItemController {
 
     @PutMapping("/{id}")
     @SuppressWarnings("rawtypes")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody StructureItemDto structureItemDto) {
+    public ResponseEntity update(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id,
+            @RequestBody StructureItemDto structureItemDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         StructureItemDto response = new StructureItemDto(structureItemService.update(id, structureItemDto), null, true,
                 true);
         return ResponseEntity.status(200).body(response);
@@ -71,7 +86,12 @@ public class StructureItemController {
 
     @DeleteMapping("/{id}")
     @SuppressWarnings("rawtypes")
-    public ResponseEntity destroy(@PathVariable Long id) {
+    public ResponseEntity destroy(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         structureItemService.delete(id);
         return ResponseEntity.status(200).build();
     }
