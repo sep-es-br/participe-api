@@ -151,7 +151,7 @@ public class MeetingController {
   public ResponseEntity<CheckedInAtDto> checkInOnMeeting(
       @RequestHeader(name = "Authorization") String token,
       @RequestBody CheckInParamDto checkInParamDto) {
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Receptionist" })) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       return ResponseEntity.status(401).body(null);
     }
     if (checkInParamDto == null ||
@@ -194,12 +194,12 @@ public class MeetingController {
     return ResponseEntity.ok().body(participantsQuantity);
   }
 
-  @DeleteMapping("/{meetingId}/remove-participation/{personId}")
+  @DeleteMapping("/{meetingId}/remove-participation/{personId}")=
   public ResponseEntity<Boolean> removeMeetingParticipation(
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long personId,
       @PathVariable Long meetingId) {
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Receptionist" })) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       return ResponseEntity.status(401).body(null);
     }
     Boolean response = meetingService.deleteParticipation(personId, meetingId);
@@ -213,15 +213,15 @@ public class MeetingController {
       @PathVariable Long meetingId,
       @RequestParam(name = "name", required = false, defaultValue = "") String name,
       Pageable pageable) {
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Receptionist" })) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       return ResponseEntity.status(401).body(null);
     }
     Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable);
     return ResponseEntity.status(200).body(personMeetingDtoPage);
   }
 
-  @GetMapping("/receptionistByEmail")
-  public ResponseEntity<PersonDto> findReceptionistByEmail(
+  @GetMapping("/ReceptionistByEmail")
+  public ResponseEntity<PersonDto> findRecepcionistByEmail(
       @RequestHeader(name = "Authorization") String token,
       @RequestParam("email") String email) {
     if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
