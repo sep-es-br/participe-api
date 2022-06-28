@@ -216,10 +216,10 @@ public class ConferenceController {
      * person.getRoles().contains("Administrator");
      */
 
-    List<Conference> conferences;
+    List<Conference> conferences = new ArrayList<Conference>();
     if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
       conferences = conferenceService.findAllWithPresentialMeetings(null, null);
-    } else {
+    } else if (personService.hasOneOfTheRoles(token, new String[] { "Recepcionist" })) {
       conferences = conferenceService.findAllWithPresentialMeetings(date, personService.getPerson(token).getId());
     }
 

@@ -220,7 +220,7 @@ public class MeetingController {
     return ResponseEntity.status(200).body(personMeetingDtoPage);
   }
 
-  @GetMapping("/ReceptionistByEmail")
+  @GetMapping("/receptionistByEmail")
   public ResponseEntity<PersonDto> findRecepcionistByEmail(
       @RequestHeader(name = "Authorization") String token,
       @RequestParam("email") String email) {
