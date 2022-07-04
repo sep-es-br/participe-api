@@ -22,6 +22,7 @@ import br.gov.es.participe.controller.dto.CommentParamDto;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.service.CommentService;
+import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.TokenService;
 import br.gov.es.participe.util.domain.TokenType;
 
@@ -31,32 +32,35 @@ import br.gov.es.participe.util.domain.TokenType;
 @RequestMapping(value = "/comments")
 public class CommentController {
 
-	
-	
 	@Autowired
 	private CommentService commentService;
-	
-	
+
 	@Autowired
 	private TokenService tokenService;
-	
+
+	@Autowired
+	private PersonService personService;
+
 	@GetMapping
 	public ResponseEntity<List<CommentDto>> index(
+			@RequestHeader(name = "Authorization") String token,
 			@RequestParam(value = "idPerson", required = false, defaultValue = "") Long idPerson,
-			@RequestParam(value = "idConference", required = false) Long idConference
-	) {
+			@RequestParam(value = "idConference", required = false) Long idConference) {
+		if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+			return ResponseEntity.status(401).body(null);
+		}
 		List<Comment> comments = commentService.findAll(idPerson, idConference);
-		List<CommentDto> response = new ArrayList<>();		
+		List<CommentDto> response = new ArrayList<>();
 		comments.forEach(comment -> response.add(new CommentDto(comment, false)));
-	
+
 		return ResponseEntity.status(200).body(response);
 	}
 
 	@PostMapping
 	public ResponseEntity<CommentDto> store(
-			@RequestHeader (name="Authorization") String token,
-			@RequestBody CommentParamDto commentParamDto
-	) {
+			@RequestHeader(name = "Authorization") String token,
+			@RequestBody CommentParamDto commentParamDto) {
+
 		String[] chave = token.split(" ");
 		Long idPerson = tokenService.getPersonId(chave[1], TokenType.AUTHENTICATION);
 		Comment comment = new Comment(commentParamDto);
@@ -64,12 +68,17 @@ public class CommentController {
 		person.setId(idPerson);
 		comment.setPersonMadeBy(person);
 		CommentDto response = new CommentDto(commentService.save(comment, null, true), false);
-		
+
 		return ResponseEntity.status(200).body(response);
 	}
 
 	@PostMapping("/fatherPlanItem")
-	public ResponseEntity<CommentDto> storeFatherPlanItemNode(@RequestBody CommentParamDto commentParamDto) {
+	public ResponseEntity<CommentDto> storeFatherPlanItemNode(
+			@RequestHeader("Authorization") String token,
+			@RequestBody CommentParamDto commentParamDto) {
+		if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+			return ResponseEntity.status(401).body(null);
+		}
 		Comment comment = new Comment(commentParamDto);
 		CommentDto response = new CommentDto(commentService.save(comment, null, false), false);
 
@@ -77,7 +86,12 @@ public class CommentController {
 	}
 
 	@DeleteMapping("/deleteAll/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<Void> delete(
+			@RequestHeader("Authorization") String token,
+			@PathVariable Long id) {
+		if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+			return ResponseEntity.status(401).body(null);
+		}
 		commentService.deleteAllByIdPerson(id);
 		return ResponseEntity.status(200).build();
 	}
