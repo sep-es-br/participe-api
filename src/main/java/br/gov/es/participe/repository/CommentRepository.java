@@ -27,8 +27,8 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
       + "OR listPi3 IS NOT NULL "
       + "AND any(piIte IN listPi3 WHERE ext.translate(piIte.name) CONTAINS ext.translate({2})) ";
 
-  @Query("MATCH  (p:Person)<-[a:MADE_BY]-(c:Comment)"
-      + " OPTIONAL MATCH (conf:Conference)-[ab:ABOUT]-(c)"
+  @Query("MATCH (p:Person)<-[a:MADE_BY]-(c:Comment)"
+      + " MATCH (conf:Conference)-[ab:ABOUT]-(c)"
       + " WHERE id(p)={0} AND (id(conf) = {1} OR {1} IS NULL )"
       + " RETURN c")
   List<Comment> findByIdPerson(Long idPerson, Long idConference);

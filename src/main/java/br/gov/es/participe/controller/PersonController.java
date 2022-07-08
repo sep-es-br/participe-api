@@ -112,7 +112,7 @@ public class PersonController {
     }
 
   }
-
+/* 
   @DeleteMapping("/delete/{id}")
   @SuppressWarnings("rawtypes")
   public ResponseEntity destroy(
@@ -127,7 +127,7 @@ public class PersonController {
     }
 
   }
-
+*/
   @PutMapping("/{personId}")
   @SuppressWarnings("rawtypes")
   public ResponseEntity update(

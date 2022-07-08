@@ -136,6 +136,7 @@ public class MeetingController {
     }
   }
 
+  /* 
   @DeleteMapping("/{id}")
   public ResponseEntity<Boolean> destroy(
       @RequestHeader(name = "Authorization") String token,
@@ -146,7 +147,7 @@ public class MeetingController {
     Boolean response = meetingService.delete(id);
     return ResponseEntity.status(200).body(response);
   }
-
+*/
   @PostMapping("/checkIn")
   public ResponseEntity<CheckedInAtDto> checkInOnMeeting(
       @RequestHeader(name = "Authorization") String token,
@@ -194,6 +195,7 @@ public class MeetingController {
     return ResponseEntity.ok().body(participantsQuantity);
   }
 
+  /* 
   @DeleteMapping("/{meetingId}/remove-participation/{personId}")
   public ResponseEntity<Boolean> removeMeetingParticipation(
       @RequestHeader(name = "Authorization") String token,
@@ -205,7 +207,7 @@ public class MeetingController {
     Boolean response = meetingService.deleteParticipation(personId, meetingId);
     return ResponseEntity.ok().body(response);
   }
-
+*/
   @ApiPageable
   @GetMapping("/{meetingId}/persons")
   public ResponseEntity<Page<PersonMeetingDto>> findPersonForMeeting(

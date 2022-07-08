@@ -77,6 +77,7 @@ public class CitizenController {
     }
   }
 
+  /* 
   @SuppressWarnings({ "rawtypes" })
   @DeleteMapping("/{id}")
   public ResponseEntity destroy(
@@ -90,7 +91,7 @@ public class CitizenController {
       return ResponseEntity.status(401).body(null);
     }
   }
-
+*/
   @SuppressWarnings({ "rawtypes" })
   @PutMapping("/{id}")
   public ResponseEntity update(

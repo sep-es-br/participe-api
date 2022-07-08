@@ -55,7 +55,7 @@ public class FileController {
         FileDto fileDto = fileService.save(file);
         return ResponseEntity.status(HttpStatus.OK).body(fileDto);
     }
-
+/* 
     @SuppressWarnings("rawtypes")
     @DeleteMapping("/{id}")
     public ResponseEntity delete(
@@ -67,5 +67,5 @@ public class FileController {
         fileService.delete(idLocalidade);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
+*/
 }

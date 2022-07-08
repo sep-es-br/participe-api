@@ -975,7 +975,7 @@ public class PersonService {
     Person person = this.getPerson(token);
     Boolean ret = false;
     for (int i = 0; i < roles.length; i++) {
-      ret |= (person.getRoles() != null && person.getRoles().contains(roles[i]));
+      ret |= (person.getRoles() != null && !person.getRoles().isEmpty() && person.getRoles().contains(roles[i]));
     }
     return ret;
   }

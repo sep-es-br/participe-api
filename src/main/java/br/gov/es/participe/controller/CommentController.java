@@ -85,6 +85,8 @@ public class CommentController {
 		return ResponseEntity.status(200).body(response);
 	}
 
+ /* 
+
 	@DeleteMapping("/deleteAll/{id}")
 	public ResponseEntity<Void> delete(
 			@RequestHeader("Authorization") String token,
@@ -95,4 +97,6 @@ public class CommentController {
 		commentService.deleteAllByIdPerson(id);
 		return ResponseEntity.status(200).build();
 	}
+
+*/	
 }
