@@ -6,6 +6,7 @@ import java.util.Set;
 
 public class PersonDto {
 
+  private String sub;
   private Long id;
   private String name;
   private String contactEmail;
@@ -50,6 +51,16 @@ public class PersonDto {
   public void setName(String name) {
     this.name = name;
   }
+
+
+  public String getSub() {
+    return sub;
+  }
+
+  public void setSub(String sub) {
+    this.sub = sub;
+  }
+
 
   public String getContactEmail() {
     return contactEmail;

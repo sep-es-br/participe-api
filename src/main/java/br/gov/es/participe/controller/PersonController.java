@@ -13,8 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin
@@ -39,6 +41,33 @@ public class PersonController {
       return ResponseEntity.status(401).body(null);
     }
   }
+
+
+  @PostMapping("/operator")
+  @SuppressWarnings("rawtypes")
+  public ResponseEntity operator(
+  @RequestHeader(name = "Authorization") String token,
+  @RequestParam(value = "profile", required = false, defaultValue = "") String profile  , 
+  @RequestBody PersonParamDto personParam) throws IOException
+  {
+    if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator" })))
+    {
+      return ResponseEntity.status(401).body(null);   
+    }
+    if(!profile.equalsIgnoreCase("Administrator")&& 
+       !profile.equalsIgnoreCase("Moderator") && 
+       !profile.equalsIgnoreCase("Recepcionist")) {
+      return ResponseEntity.status(404).body(null);   
+    }
+    Optional<Person> person=  personService.findByContactEmail(personParam.getContactEmail());
+    if (!person.isPresent()) {
+      return personService.storePersonOperator(personParam, profile);
+    }else{   
+      return ResponseEntity.status(200).body(person);
+    }
+  } 
+      
+
 
   @GetMapping("/validate")
   @SuppressWarnings("rawtypes")
@@ -131,4 +160,9 @@ public class PersonController {
     msg.setCode(403);
     return ResponseEntity.status(403).body(msg);
   }
+
+
+
+
+
 }

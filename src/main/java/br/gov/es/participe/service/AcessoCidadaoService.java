@@ -225,6 +225,7 @@ public class AcessoCidadaoService {
             if(element instanceof JSONObject) {
               JSONObject obj = (JSONObject) element;
               PersonDto person = new PersonDto();
+              person.setSub(obj.getString("Sub"));
               person.setName(obj.getString("Nome"));
               person.setContactEmail(obj.getString("Email"));
               personList.add(person);

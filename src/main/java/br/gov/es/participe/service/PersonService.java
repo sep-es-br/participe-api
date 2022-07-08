@@ -3,6 +3,7 @@ package br.gov.es.participe.service;
 import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
+import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
 import br.gov.es.participe.util.dto.MessageDto;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -36,6 +38,8 @@ public class PersonService {
   private static final String PERSON_ERROR_MEETING_ID_NOT_SPECIFIED = "person.error.meeting-id-not-specified";
   private static final String PARTICIPE = "Participe";
   private static final String SERVER = "Participe";
+  private static final String ACESSOCIDADAO = "AcessoCidadao";
+  private static final String OAUTH = "oauth";
   private static final String TITLE = "title";
   private static final String SUBTITLE = "subtitle";
   private static final String NAME = "name";
@@ -69,6 +73,10 @@ public class PersonService {
 
   @Autowired
   private TokenService tokenService;
+
+  
+  @Autowired
+  private AcessoCidadaoService acessoCidadaoService;
 
   public Boolean forgotPassword(String email, Long conferenceId, String server) {
     Optional<Person> person = this.havePersonWithLoginEmail(email, server, null);
@@ -608,6 +616,51 @@ public class PersonService {
 
     return response;
   }
+
+  public ResponseEntity<?> storePersonOperator(PersonParamDto personParam, String profile) throws IOException {
+    final boolean emailsIncompativeis = (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null)
+        &&
+        !personParam.getContactEmail().equals(personParam.getConfirmEmail());
+
+    if (emailsIncompativeis) {
+      MessageDto msg = new MessageDto();
+
+      msg.setMessage("E-mails Incompatíveis");
+      msg.setCode(422);
+
+      return ResponseEntity.status(422).body(msg);
+    }
+
+    ProfileType profileType=(profile.equalsIgnoreCase("Administrator"))? 
+     ProfileType.ADMINISTRATOR:(profile.equalsIgnoreCase("Moderator"))? 
+     ProfileType.MODERATOR:(profile.equalsIgnoreCase("Recepcionist"))?
+     ProfileType.RECEPCIONIST:null;  
+   
+    List<PersonDto> personList =  acessoCidadaoService.listPersonsByPerfil(profileType, "", personParam.getContactEmail());
+
+    if( personList == null || personList.size() == 0) {
+
+      return ResponseEntity.status(422).body(null);
+
+    }
+
+    Person person = this.save(new Person(personParam, false), false);
+
+    this.createRelationshipWithAuthService(
+      new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+          .password(null)
+          .server(ACESSOCIDADAO)
+          .serverId(personList.get(0).getSub())
+          .conferenceId(null)
+          .resetPassword(false)
+          .makeLogin(false)
+          .typeAuthentication(OAUTH)
+          .build());
+
+    return ResponseEntity.status(200).body(new PersonDto(person));
+ 
+  }
+
 
   public ResponseEntity<?> storePerson(PersonParamDto personParam, Boolean makeLogin) {
     final boolean emailsIncompativeis = (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null)
