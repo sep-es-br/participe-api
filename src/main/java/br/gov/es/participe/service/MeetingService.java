@@ -2,6 +2,7 @@ package br.gov.es.participe.service;
 
 import br.gov.es.participe.controller.dto.MeetingDto;
 import br.gov.es.participe.controller.dto.MeetingParamDto;
+import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.model.Channel;
 import br.gov.es.participe.model.CheckedInAt;
@@ -337,6 +338,9 @@ public class MeetingService {
             newRec.setWelcomesMeetings(new HashSet<Meeting>());
           }
           newRec.getWelcomesMeetings().add(meetingUpdate);
+          Person p = personService.find(newRec.getId());
+          p.setWelcomesMeetings(newRec.getWelcomesMeetings());
+          personService.save(p, true);
           if (meetingUpdate.getReceptionists() == null) {
             meetingUpdate.setReceptionists(new HashSet<Person>());
           }
