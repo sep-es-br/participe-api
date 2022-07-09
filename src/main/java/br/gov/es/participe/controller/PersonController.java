@@ -42,32 +42,35 @@ public class PersonController {
     }
   }
 
-
   @PostMapping("/operator")
   @SuppressWarnings("rawtypes")
   public ResponseEntity operator(
-  @RequestHeader(name = "Authorization") String token,
-  @RequestParam(value = "profile", required = false, defaultValue = "") String profile  , 
-  @RequestBody PersonParamDto personParam) throws IOException
-  {
-    if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator" })))
-    {
-      return ResponseEntity.status(401).body(null);   
+      @RequestHeader(name = "Authorization") String token,
+      @RequestParam(value = "profile", required = false, defaultValue = "") String profile,
+      @RequestBody PersonParamDto personParam) throws IOException {
+    if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))) {
+      return ResponseEntity.status(401).body(null);
     }
-    if(!profile.equalsIgnoreCase("Administrator")&& 
-       !profile.equalsIgnoreCase("Moderator") && 
-       !profile.equalsIgnoreCase("Recepcionist")) {
-      return ResponseEntity.status(404).body(null);   
+    if (!profile.equalsIgnoreCase("Administrator") &&
+        !profile.equalsIgnoreCase("Moderator") &&
+        !profile.equalsIgnoreCase("Recepcionist")) {
+      return ResponseEntity.status(404).body(null);
     }
-    Optional<Person> person=  personService.findByContactEmail(personParam.getContactEmail());
+    Optional<Person> person = personService.findByContactEmail(personParam.getContactEmail());
     if (!person.isPresent()) {
-      return personService.storePersonOperator(personParam, profile);
-    }else{   
+      Person addedPerson = personService.storePersonOperator(personParam, profile);
+      if (addedPerson == null) {
+        MessageDto msg = new MessageDto();
+        msg.setMessage("Impossível adicionar o usuário");
+        msg.setCode(422);
+        return ResponseEntity.status(422).body(msg);
+      } else {
+        return ResponseEntity.status(200).body(addedPerson);
+      }
+    } else {
       return ResponseEntity.status(200).body(person);
     }
-  } 
-      
-
+  }
 
   @GetMapping("/validate")
   @SuppressWarnings("rawtypes")
@@ -112,22 +115,27 @@ public class PersonController {
     }
 
   }
-/* 
-  @DeleteMapping("/delete/{id}")
-  @SuppressWarnings("rawtypes")
-  public ResponseEntity destroy(
-      @RequestHeader(name = "Authorization") String token,
-      @PathVariable Long id) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
-      personService.delete(id);
-      return ResponseEntity.status(200).build();
-    } else {
-      return ResponseEntity.status(401).body(null);
-    }
-
-  }
-*/
+  /*
+   * @DeleteMapping("/delete/{id}")
+   * 
+   * @SuppressWarnings("rawtypes")
+   * public ResponseEntity destroy(
+   * 
+   * @RequestHeader(name = "Authorization") String token,
+   * 
+   * @PathVariable Long id) {
+   * 
+   * if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))
+   * {
+   * personService.delete(id);
+   * return ResponseEntity.status(200).build();
+   * } else {
+   * return ResponseEntity.status(401).body(null);
+   * }
+   * 
+   * }
+   */
   @PutMapping("/{personId}")
   @SuppressWarnings("rawtypes")
   public ResponseEntity update(
@@ -160,9 +168,5 @@ public class PersonController {
     msg.setCode(403);
     return ResponseEntity.status(403).body(msg);
   }
-
-
-
-
 
 }

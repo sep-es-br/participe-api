@@ -74,7 +74,6 @@ public class PersonService {
   @Autowired
   private TokenService tokenService;
 
-  
   @Autowired
   private AcessoCidadaoService acessoCidadaoService;
 
@@ -617,7 +616,7 @@ public class PersonService {
     return response;
   }
 
-  public ResponseEntity<?> storePersonOperator(PersonParamDto personParam, String profile) throws IOException {
+  public Person storePersonOperator(PersonParamDto personParam, String profile) throws IOException {
     final boolean emailsIncompativeis = (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null)
         &&
         !personParam.getContactEmail().equals(personParam.getConfirmEmail());
@@ -628,39 +627,38 @@ public class PersonService {
       msg.setMessage("E-mails Incompatíveis");
       msg.setCode(422);
 
-      return ResponseEntity.status(422).body(msg);
+      return null;
     }
 
-    ProfileType profileType=(profile.equalsIgnoreCase("Administrator"))? 
-     ProfileType.ADMINISTRATOR:(profile.equalsIgnoreCase("Moderator"))? 
-     ProfileType.MODERATOR:(profile.equalsIgnoreCase("Recepcionist"))?
-     ProfileType.RECEPCIONIST:null;  
-   
-    List<PersonDto> personList =  acessoCidadaoService.listPersonsByPerfil(profileType, "", personParam.getContactEmail());
+    ProfileType profileType = (profile.equalsIgnoreCase("Administrator")) ? ProfileType.ADMINISTRATOR
+        : (profile.equalsIgnoreCase("Moderator")) ? ProfileType.MODERATOR
+            : (profile.equalsIgnoreCase("Recepcionist")) ? ProfileType.RECEPCIONIST : null;
 
-    if( personList == null || personList.size() == 0) {
+    List<PersonDto> personList = acessoCidadaoService.listPersonsByPerfil(profileType, "",
+        personParam.getContactEmail());
 
-      return ResponseEntity.status(422).body(null);
+    if (personList == null || personList.size() == 0) {
+
+      return null;
 
     }
 
     Person person = this.save(new Person(personParam, false), false);
 
     this.createRelationshipWithAuthService(
-      new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
-          .password(null)
-          .server(ACESSOCIDADAO)
-          .serverId(personList.get(0).getSub())
-          .conferenceId(null)
-          .resetPassword(false)
-          .makeLogin(false)
-          .typeAuthentication(OAUTH)
-          .build());
+        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+            .password(null)
+            .server(ACESSOCIDADAO)
+            .serverId(personList.get(0).getSub())
+            .conferenceId(null)
+            .resetPassword(false)
+            .makeLogin(false)
+            .typeAuthentication(OAUTH)
+            .build());
 
-    return ResponseEntity.status(200).body(new PersonDto(person));
- 
+    return person;
+
   }
-
 
   public ResponseEntity<?> storePerson(PersonParamDto personParam, Boolean makeLogin) {
     final boolean emailsIncompativeis = (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null)
