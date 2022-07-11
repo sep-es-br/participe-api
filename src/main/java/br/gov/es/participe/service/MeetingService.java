@@ -340,13 +340,15 @@ public class MeetingService {
           if (!newRec.getWelcomesMeetings().contains(meetingUpdate)) {
             newRec.getWelcomesMeetings().add(meetingUpdate);
           }
-          Person p = personService.find(newRec.getId());
-          p.setWelcomesMeetings(newRec.getWelcomesMeetings());
-          personService.save(p, true);
+          //Person p = personService.find(newRec.getId());
+       //   p.setWelcomesMeetings(newRec.getWelcomesMeetings());
+          personService.save(newRec, true);
           if (meetingUpdate.getReceptionists() == null) {
             meetingUpdate.setReceptionists(new HashSet<Person>());
           }
-          meetingUpdate.getReceptionists().add(newRec);
+          Set<Person> newRecList = meetingUpdate.getReceptionists();
+          newRecList.add(newRec);
+          meetingUpdate.setReceptionists(newRecList);
         }
       });
     }

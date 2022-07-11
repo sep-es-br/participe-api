@@ -209,12 +209,12 @@ public class ConferenceController {
       @RequestHeader("Authorization") String token,
       @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date date) {
 
-    /*
-     * String[] keys = token.split(" ");
-     * Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
-     * Person person = personService.find(idPerson);
-     * boolean adm = person.getRoles() != null &&
-     * person.getRoles().contains("Administrator");
+    /* 
+      String[] keys = token.split(" ");
+      Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
+      Person person = personService.find(idPerson);
+      boolean adm = person.getRoles() != null &&
+      person.getRoles().contains("Administrator");
      */
 
     List<Conference> conferences = new ArrayList<Conference>();

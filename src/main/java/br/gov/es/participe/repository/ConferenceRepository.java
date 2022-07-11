@@ -65,7 +65,7 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         "AND (meeting.typeMeetingEnum IS NOT NULL AND meeting.typeMeetingEnum <> 'VIRTUAL') " +
                         "MATCH (meeting)-[tpa:TAKES_PLACE_AT]->(locality:Locality)  " +
                         "WHERE {0} IS NULL OR ( {0} >= meeting.beginDate AND {0} <= meeting.endDate) " +
-                        "MATCH (person:Person)-[:IS_RECEPTIONIST_OF]->(meeting) " +
+                        "MATCH (person:Person)-[:IS_RECEPTIONIST_OF *0..]->(meeting) " +
                         "WHERE ({1} IS NULL) OR ({1} IS NOT NULL AND id(person)={1}) " +
                         "RETURN conference, occurs_in, meeting, tpa, locality, person " +
                         "ORDER BY conference.name ")
