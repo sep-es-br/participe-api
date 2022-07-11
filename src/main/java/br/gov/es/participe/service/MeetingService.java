@@ -337,7 +337,9 @@ public class MeetingService {
           if (newRec.getWelcomesMeetings() == null) {
             newRec.setWelcomesMeetings(new HashSet<Meeting>());
           }
-          newRec.getWelcomesMeetings().add(meetingUpdate);
+          if (!newRec.getWelcomesMeetings().contains(meetingUpdate)) {
+            newRec.getWelcomesMeetings().add(meetingUpdate);
+          }
           Person p = personService.find(newRec.getId());
           p.setWelcomesMeetings(newRec.getWelcomesMeetings());
           personService.save(p, true);
