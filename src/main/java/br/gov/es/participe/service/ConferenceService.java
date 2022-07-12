@@ -230,7 +230,7 @@ public class ConferenceService {
     // clearAttributes(conference);
     this.loadAttributes(conference);
 
-    if(param.getModerators() != null && !param.getModerators().isEmpty()) {
+    if(param.getModerators() != null) {
       HashSet<Person> moderators = new HashSet<>();
       param.getModerators().forEach(p -> {
         Optional<Person> find = this.personService.findByLoginEmail(p.getContactEmail());
