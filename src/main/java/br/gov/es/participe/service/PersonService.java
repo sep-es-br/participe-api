@@ -77,6 +77,9 @@ public class PersonService {
   @Autowired
   private AcessoCidadaoService acessoCidadaoService;
 
+ 
+  
+
   public Boolean forgotPassword(String email, Long conferenceId, String server) {
     Optional<Person> person = this.havePersonWithLoginEmail(email, server, null);
 
@@ -660,7 +663,15 @@ public class PersonService {
 
   }
 
-  public ResponseEntity<?> storePerson(PersonParamDto personParam, Boolean makeLogin) {
+  public ResponseEntity<?> storePerson(PersonParamDto personParam,Boolean makeLogin) {
+   
+    if (personParam.getId() == null ){
+      Optional <Person> person1 = findByContactEmail(personParam.getContactEmail());
+      if(person1.isPresent()){
+        throw new IllegalArgumentException("Usuário já cadastrado");
+      }
+    }
+    
     final boolean emailsIncompativeis = (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null)
         &&
         !personParam.getContactEmail().equals(personParam.getConfirmEmail());
@@ -678,6 +689,7 @@ public class PersonService {
     Boolean typeAuthenticationCpf = storePersonValidation(personParam);
 
     if (notHaveParticipeLoginInThisConference) {
+
       Person person = createParticipeLogin(personParam, makeLogin, typeAuthenticationCpf);
       return ResponseEntity.status(200).body(new PersonDto(person));
     }
@@ -694,6 +706,7 @@ public class PersonService {
 
     return ResponseEntity.status(400).body(msg);
   }
+
 
   private Person createParticipeLogin(PersonParamDto personParam, Boolean makeLogin, Boolean typeAuthenticationCpf) {
     Person person = this.save(new Person(personParam, typeAuthenticationCpf), false);
