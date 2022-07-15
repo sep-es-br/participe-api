@@ -214,6 +214,12 @@ public class ConferenceService {
 
   @Transactional
   public ConferenceDto update(Long conferenceId, ConferenceParamDto conferenceParamDto) throws ParseException {
+    
+     
+    if (conferenceParamDto.getName()== null)  {
+      throw new IllegalArgumentException("Update: Conference object is null");
+    }
+    
     Conference conferenceStored = this.conferenceRepository.findById(conferenceId)
       .orElseThrow(() -> new IllegalStateException("This conference not exist."));
 
@@ -228,7 +234,7 @@ public class ConferenceService {
   public Conference save(Conference conference, ConferenceParamDto param) throws ParseException {
     
     if (param.getName()== null)  {
-      throw new IllegalArgumentException("Conference object is null");
+      throw new IllegalArgumentException("Create: Conference object is null");
     }
     
     this.validateConference(param);

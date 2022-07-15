@@ -74,7 +74,7 @@ public class LocalityService {
     public Locality create(Locality locality) {
        
         if (locality.getName()== null ||locality.getLatitudeLongitude()== null ) {
-            throw new IllegalArgumentException("Locality object is null");
+            throw new IllegalArgumentException("Create:Locality object is null");
         }
        
         if (isInvalidTypeLevel(locality)) {
@@ -103,12 +103,17 @@ public class LocalityService {
         if (locality.getName() != null && !locality.getName().isEmpty()) {
             locality.setName(locality.getName().trim().replaceAll("\\s+", " "));
         }
-        
+
         return localityRepository.save(locality);
     }
 
     @Transactional
     public Locality update(Long id, LocalityParamDto dto) {
+        
+        if (dto.getName()== null ||dto.getLatitudeLongitude()== null ) {
+            throw new IllegalArgumentException("Update: Locality object is null");
+        }
+        
         Locality locality = find(id);
         String name = dto.getName();
 
