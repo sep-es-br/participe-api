@@ -72,6 +72,11 @@ public class LocalityService {
 
     @Transactional
     public Locality create(Locality locality) {
+       
+        if (locality.getName()== null ||locality.getLatitudeLongitude()== null ) {
+            throw new IllegalArgumentException("Locality object is null");
+        }
+       
         if (isInvalidTypeLevel(locality)) {
             throw new IllegalArgumentException("domain.error.locality.invalid-type-level");
         }
@@ -98,6 +103,7 @@ public class LocalityService {
         if (locality.getName() != null && !locality.getName().isEmpty()) {
             locality.setName(locality.getName().trim().replaceAll("\\s+", " "));
         }
+        
         return localityRepository.save(locality);
     }
 

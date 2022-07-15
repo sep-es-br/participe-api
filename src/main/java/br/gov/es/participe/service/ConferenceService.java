@@ -226,6 +226,11 @@ public class ConferenceService {
 
   @Transactional
   public Conference save(Conference conference, ConferenceParamDto param) throws ParseException {
+    
+    if (param.getName()== null)  {
+      throw new IllegalArgumentException("Conference object is null");
+    }
+    
     this.validateConference(param);
     // clearAttributes(conference);
     this.loadAttributes(conference);
