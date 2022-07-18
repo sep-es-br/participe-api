@@ -29,6 +29,13 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
       + " RETURN p ")
   Optional<Person> findByContactEmail(String email);
 
+  @Query("MATCH (p:Person) "
+      + " WHERE p.cpf={0} "
+      + " RETURN p ")
+  Optional<Person> findByCpf(String cpf);
+
+
+
   @Query("MATCH (person:Person)-[authBy:IS_AUTHENTICATED_BY]->(authService:AuthService) " +
       "WHERE authBy.email={0} " +
       "RETURN person"

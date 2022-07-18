@@ -545,8 +545,12 @@ public class PersonService {
     return personRepository.findPersonLikedByIdComment(idComment);
   }
 
-  public Optional<Person> findByContactEmail(String email) {
+  public Optional <Person> findByContactEmail(String email) {
     return personRepository.findByContactEmail(email);
+  }
+
+  public Optional <Person> findByCpf(String cpf) {
+    return personRepository.findByCpf(cpf);
   }
 
   public Optional<Person> findByLoginEmail(String email) {
@@ -666,9 +670,21 @@ public class PersonService {
   public ResponseEntity<?> storePerson(PersonParamDto personParam,Boolean makeLogin) {
    
     if (personParam.getId() == null ){
-      Optional <Person> person1 = findByContactEmail(personParam.getContactEmail());
-      if(person1.isPresent()){
-        throw new IllegalArgumentException("Usuário já cadastrado");
+      if(personParam.getCpf() != null){
+       Optional <Person> personCpf = findByCpf(personParam.getCpf());
+        if(personCpf.isPresent()){
+          String nome= "Usuário já cadastrado com CPF: "+personCpf.get().getName();
+          throw new IllegalArgumentException(nome);
+        }
+      }
+
+      if(personParam.getContactEmail() != null){
+       Optional <Person> personEmail = findByContactEmail(personParam.getContactEmail());
+       
+        if(personEmail.isPresent()){
+          String nome= "Usuário já cadastrado com e-mail: "+personEmail.get().getName();
+          throw new IllegalArgumentException(nome);
+        }
       }
     }
     
