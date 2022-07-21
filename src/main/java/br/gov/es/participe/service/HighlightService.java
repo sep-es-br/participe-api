@@ -51,7 +51,9 @@ public class HighlightService {
     this.localityService = localityService;
     this.conferenceService = conferenceService;
   }
+ 
 
+  
   public Highlight save(Highlight highlight, String from) {
 
     if(highlight.getConference() == null){
@@ -108,7 +110,7 @@ public class HighlightService {
   }
 
 
-
+  @Transactional
   private Highlight createHighlight(Highlight highlight, String from, PlanItem planItem, Person person) {
     Meeting meeting = null;
     if (highlight.getMeeting() != null) {
