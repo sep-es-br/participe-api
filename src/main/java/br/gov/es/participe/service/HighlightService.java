@@ -54,6 +54,13 @@ public class HighlightService {
 
   public Highlight save(Highlight highlight, String from) {
 
+    if(highlight.getConference() == null){
+      throw new IllegalArgumentException("conference cannot be null:highlight");
+    }
+    if(highlight.getLocality() == null){
+      throw new IllegalArgumentException("Locality cannot be null:highlight");
+    }
+
     PlanItem planItem = this.planItemService.find(highlight.getPlanItem().getId());
 
     Person person = this.personService.find(highlight.getPersonMadeBy().getId());

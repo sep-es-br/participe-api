@@ -206,6 +206,13 @@ public class CommentService {
   @Transactional
   public Comment save(Comment comment, Long idPerson, Boolean usePlanItem) {
 
+    if(comment.getConference() == null){
+      throw new IllegalArgumentException("Conference cannot be null:comment");
+    }
+    if(comment.getLocality() == null){
+      throw new IllegalArgumentException("Locality cannot be null:comment");
+    }
+    
     Meeting meeting = loadMeeting(comment);
     Person person = loadPerson(comment, idPerson);
     Locality locality = loadLocality(comment);
