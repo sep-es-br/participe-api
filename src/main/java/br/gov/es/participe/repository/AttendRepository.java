@@ -123,11 +123,23 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
   
 //participantes 
   
+/* 
   @Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) "
 	      + " WHERE id(co)={0} RETURN count(DISTINCT p)")
   Integer countParticipationAllOriginsByConference(Long idConference);
+  */
   
-  
+@Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) "+ 
+       " where id(co)={0} "+
+       " WITH collect(p) AS personLogin "+
+       " match (p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) "+  
+       " where id(co)={0} "+
+       " WITH collect(p) AS personCkeckedIn, personLogin "+
+       " WITH apoc.coll.toSet(personCkeckedIn + personLogin) AS person "+
+       " UNWIND person AS p "+
+       " RETURN count(DISTINCT p.contactEmail) as c ")
+Integer countParticipationAllOriginsByConference(Long idConference);
+
   
   @Query(" match (lo:Login)<-[:MADE]-(p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
   		" where id(co) = {0} " + 
