@@ -6,6 +6,7 @@ import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.repository.ChannelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +21,7 @@ public class ChannelService {
   public ChannelService(ChannelRepository channelRepository) {
     this.channelRepository = channelRepository;
   }
-
+  @Transactional
   public Set<Channel> saveChannelsMeeting(List<ChannelDto> channelsDto, Meeting meeting) {
     Set<Channel> storedChannels = meeting.getChannels();
     storedChannels.removeIf(
@@ -53,7 +54,7 @@ public class ChannelService {
 
     return storedChannels;
   }
-
+  @Transactional
   public Channel save(Channel channel) {
     return channelRepository.save(channel);
   }

@@ -347,6 +347,7 @@ public class PersonService {
     }
   }
 
+  @Transactional
   private void createLogin(Person person, AuthService authService, Long conferenceId) {
     if (conferenceId != null) {
       Conference conference = conferenceService.find(conferenceId);

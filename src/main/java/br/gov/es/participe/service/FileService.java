@@ -72,6 +72,7 @@ public class FileService {
         }
     }
 
+    @Transactional
     public void delete(Long id) {
         br.gov.es.participe.model.File file1 = fileRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Imagem id: " + id + " não encontrada."));

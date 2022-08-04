@@ -53,7 +53,7 @@ public class HighlightService {
   }
  
 
-  
+  @Transactional
   public Highlight save(Highlight highlight, String from) {
 
     if(highlight.getConference() == null){

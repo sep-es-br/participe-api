@@ -120,6 +120,7 @@ public class PlanItemService {
         loadAttend(planItem);
     }
 
+    @Transactional
     private void loadLocalities(PlanItem planItem) {
         Set<Long> ids = planItem.getLocalitiesIds();
         if (planItem.getId() != null) {

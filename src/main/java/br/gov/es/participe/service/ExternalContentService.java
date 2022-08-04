@@ -4,6 +4,7 @@ import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -20,7 +21,7 @@ public class ExternalContentService {
     public List<ExternalContent> findExternalContentsByUrls(List<String> urls) {
         return externalContentRepository.findExternalContentsByUrls(urls);
     }
-
+    @Transactional
     public void saveAll(List<ExternalContent> externalContentsToSave) {
         externalContentRepository.saveAll(externalContentsToSave);
     }

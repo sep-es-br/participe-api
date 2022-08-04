@@ -59,6 +59,7 @@ public class StructureService {
     structureToSave.setName(newName);
   }
 
+  @Transactional
   public Structure update(StructureParamDto dto, Long id) {
     Structure structureToUpdate = this.structureRepository
       .findById(id)

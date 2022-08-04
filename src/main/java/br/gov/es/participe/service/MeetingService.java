@@ -271,7 +271,8 @@ public class MeetingService {
 
     return meetingRepository.save(meeting);
   }
-
+  
+  @Transactional
   private void updateRelationships(Meeting meeting, MeetingParamDto meetingParamDto) {
     Meeting meetingUpdate = findWithoutConference(meeting.getId());
     if (meetingUpdate.getConference() == null

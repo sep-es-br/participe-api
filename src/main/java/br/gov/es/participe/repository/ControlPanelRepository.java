@@ -19,11 +19,12 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 			" MATCH" +
 			" (p:Person)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(conf:Conference)" +
-			" ,(sd)-[:AS_BEING_FROM]->(cloc:Locality)" +
+			" ,(sd)-[:AS_BEING_FROM]->(cloc:Locality) " +
 			" ,(p)-[:MADE|:CHECKED_IN_AT]->(n)-[:TO|:OCCURS_IN]->(conf)" +
 			" WHERE" +
 			" ID(conf) = Conference_Id" +
 			" AND NOT n:SelfDeclaration" +
+			" AND NOT id(sd)= 26903 "+
 
 			" MATCH" +
 			" (cloc)-[:IS_LOCATED_IN *0..]->(loc:Locality)-[:OF_TYPE]->(plt:LocalityType)" +
@@ -78,7 +79,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" MATCH" +
 			" (p:Person)<-[:MADE_BY|:LIKED_BY]-(a:Attend)-[:ABOUT]->(cPI:PlanItem)," +
 			" (cPI)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)," +
-			" (p)-[:MADE]->(sd:SelfDeclaration)-[:AS_BEING_FROM]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)"
+			" (p)-[:MADE]->(sd:SelfDeclaration)-[:AS_BEING_FROM]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) "
 			+
 			" WHERE" +
 			" ID(conf) = Conference_Id" +

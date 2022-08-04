@@ -84,6 +84,7 @@ public class MergePersonProfileService {
     return new PersonParamDto(personToUpdate);
   }
 
+  @Transactional
   private void mergeCommentsLikedBy(Long personIdToRemove, Person personToUpdate) {
 
     List<Comment> commentLikedByToMerge = this.commentRepository.findAllCommentsLikedByPerson(personIdToRemove);
@@ -102,6 +103,7 @@ public class MergePersonProfileService {
 
   }
 
+  @Transactional
   private void mergeLogin(Long personIdToRemove, Person personToUpdate) {
     List<Login> loginToMerge = loginRepository.findAllByPerson(personIdToRemove);
 
@@ -161,6 +163,7 @@ public class MergePersonProfileService {
     return authenticatedByRelationshipUpdated;
   }
 
+  @Transactional
   private void mergeSelfDeclaration(Long personIdToRemove, Person person) {
     List<SelfDeclaration> selfDeclarationsToMerge = selfDeclarationRepository.findAllByIdPerson(personIdToRemove);
 
@@ -176,7 +179,8 @@ public class MergePersonProfileService {
     this.selfDeclarationRepository.saveAll(selfDeclarationsUpdate);
 
   }
-
+  
+  @Transactional
   private void mergeAttends(Long personIdToRemove, Person personToUpdate) {
     List<Attend> attendsToMerge = this.attendRepository.findAllAttendByIdPerson(personIdToRemove);
 

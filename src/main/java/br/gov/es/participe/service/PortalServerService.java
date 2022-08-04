@@ -4,6 +4,7 @@ import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -17,6 +18,7 @@ public class PortalServerService {
         return portalServerRepository.findByUrl(url);
     }
 
+    @Transactional
     public PortalServer save(PortalServer portalServer) {
         return portalServerRepository.save(portalServer);
     }

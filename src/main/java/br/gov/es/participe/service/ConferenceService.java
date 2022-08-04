@@ -517,7 +517,7 @@ public class ConferenceService {
     }
   }
 
-  @SuppressWarnings("unused")
+  @Transactional
   private void clearAttributes(Conference conference) {
     if(conference.getId() != null) {
       if(conference.getPlan() != null && conference.getPlan().getId() != null) {
@@ -642,6 +642,7 @@ public class ConferenceService {
     return new ConferenceRegionalizationDto(regionalization);
   }
 
+  @Transactional
   public void updateAutomaticConference() {
     List<Conference> conferences = this.conferenceRepository.findAllAutomatic();
     if(conferences != null) {
