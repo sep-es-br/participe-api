@@ -6,84 +6,85 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface AttendRepository extends Neo4jRepository<Attend, Long> {
 
   @Query("MATCH(a:Attend)-[m:MADE_BY]->(p:Person) "
-      + "WHERE id(p)={0} "
+      + "WHERE id(p)=$id "
       + "RETURN m, a, p")
-  List<Attend> findAllAttendByIdPerson(Long id);
+  List<Attend> findAllAttendByIdPerson( @Param("id") Long id);
 
  // @Query(" MATCH (c:Conference)<-[t:TO]-(self:SelfDeclaration)<-[m:MADE]-(p:Person) "
   //    + " WHERE id(c)={0} RETURN count(DISTINCT p)")
   //Integer countParticipationByConference(Long idConference);
 
   @Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) "
-       + " WHERE id(co)={0} RETURN count(DISTINCT p)")
-  Integer countParticipationByConference(Long idConference);
+       + " WHERE id(co)=$idConference RETURN count(DISTINCT p)")
+  Integer countParticipationByConference( @Param("idConference") Long idConference);
 
-
-  @Query("MATCH (conf:Conference)<-[:TO]-(s:SelfDeclaration)<-[:MADE]-(p:Person) " +
-      "OPTIONAL MATCH (conf)<-[:ABOUT]-(c:Comment)-[:MADE_BY]->(p) " +
-      "OPTIONAL MATCH (conf)<-[:ABOUT]-(h:Highlight)-[:MADE_BY]->(p) " +
-      "OPTIONAL MATCH (conf)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p) " +
-      "WITH conf, p, c, h, m " +
-      "WHERE id(conf)={0} " +
-      "AND ( " +
+  @Query(" MATCH (conf:Conference)<-[:TO]-(s:SelfDeclaration)<-[:MADE]-(p:Person) " +
+      " OPTIONAL MATCH (conf)<-[:ABOUT]-(c:Comment)-[:MADE_BY]->(p) " +
+      " OPTIONAL MATCH (conf)<-[:ABOUT]-(h:Highlight)-[:MADE_BY]->(p) " +
+      " OPTIONAL MATCH (conf)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p) " +
+      " WITH conf, p, c, h, m " +
+      " WHERE id(conf)=$idConference " +
+      " AND ( " +
       " (c IS NOT NULL AND c.status='pub') " +
       " OR h IS NOT NULL " +
       " OR m IS NOT NULL " +
-      ") " +
-      "AND (({1} IS NULL) OR (c IS NULL OR c.type={1})) " +
-      "AND ( " +
-      " (({1} IS NULL OR {1}='pre') AND (m IS NULL OR (m.typeMeetingEnum='PRESENCIAL' OR m.typeMeetingEnum='PRESENCIAL_VIRTUAL'))) OR " +
-      " (({1} IS NULL OR {1}<>'pre') AND (m IS NULL OR (m.typeMeetingEnum<>'PRESENCIAL' AND m.typeMeetingEnum<>'PRESENCIAL_VIRTUAL'))) " +
-      ") " +
-      "AND ({1}<>'pre' OR m IS NULL OR {2} IS NULL OR id(m) IN {2}) " +
-      "RETURN count(DISTINCT p)")
-  Integer countParticipationByConferenceAndType(Long idConference, String type, List<Long> meetings);
+      " ) " +
+      " AND (($type IS NULL) OR (c IS NULL OR c.type=$type)) " +
+      " AND ( " +
+      " (($type IS NULL OR $type='pre') AND (m IS NULL OR (m.typeMeetingEnum='PRESENCIAL' OR m.typeMeetingEnum='PRESENCIAL_VIRTUAL'))) OR " +
+      " (($type IS NULL OR $type<>'pre') AND (m IS NULL OR (m.typeMeetingEnum<>'PRESENCIAL' AND m.typeMeetingEnum<>'PRESENCIAL_VIRTUAL'))) " +
+      " ) " +
+      " AND ($type <>'pre' OR m IS NULL OR $meetings IS NULL OR id(m) IN $meetings) " +
+      " RETURN count(DISTINCT p) ")
+  Integer countParticipationByConferenceAndType(@Param("idConference")Long idConference, @Param("type")String type, @Param("meetings")List<Long> meetings);
 
   @Query("MATCH (conf:Conference)<-[:TO]-(s:SelfDeclaration)<-[:MADE]-(p:Person) " +
-      "OPTIONAL MATCH (conf)<-[:ABOUT]-(c:Comment)-[:MADE_BY]->(p) " +
-      "OPTIONAL MATCH (conf)<-[:ABOUT]-(h:Highlight)-[:MADE_BY]->(p) " +
-      "OPTIONAL MATCH (conf)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p) " +
-      "WITH conf, p, c, h, m " +
-      "WHERE id(conf)={0} " +
-      "AND ( " +
-      " (c IS NOT NULL AND c.status='pub') " +
-      " OR h IS NOT NULL " +
-      " OR m IS NOT NULL " +
-      ") " +
-      "AND (({1} IS NULL) OR (c IS NULL OR c.type={1})) " +
-      "AND ( " +
-      " (({1} IS NULL OR {1}='pre') AND (m IS NULL OR (m.typeMeetingEnum='PRESENCIAL' OR m.typeMeetingEnum='PRESENCIAL_VIRTUAL'))) OR " +
-      " (({1} IS NULL OR {1}<>'pre') AND (m IS NULL OR (m.typeMeetingEnum<>'PRESENCIAL' AND m.typeMeetingEnum<>'PRESENCIAL_VIRTUAL'))) " +
-      ") " +
-      "AND ({1}<>'pre' OR m IS NULL OR {2} IS NULL OR id(m) IN {2}) " +
-      "RETURN count(DISTINCT c)")
-  Integer countCommentByConferenceAndType(Long idConference, String type, List<Long> meetings);
+  "OPTIONAL MATCH (conf)<-[:ABOUT]-(c:Comment)-[:MADE_BY]->(p) " +
+  "OPTIONAL MATCH (conf)<-[:ABOUT]-(h:Highlight)-[:MADE_BY]->(p) " +
+  "OPTIONAL MATCH (conf)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p) " +
+  "WITH conf, p, c, h, m " +
+  "WHERE id(conf)=$idConference " +
+  "AND ( " +
+  " (c IS NOT NULL AND c.status='pub') " +
+  " OR h IS NOT NULL " +
+  " OR m IS NOT NULL " +
+  ") " +
+  "AND (($type IS NULL) OR (c IS NULL OR c.type=$type)) " +
+  "AND ( " +
+  " (($type IS NULL OR $type='pre') AND (m IS NULL OR (m.typeMeetingEnum='PRESENCIAL' OR m.typeMeetingEnum='PRESENCIAL_VIRTUAL'))) OR " +
+  " (($type IS NULL OR $type<>'pre') AND (m IS NULL OR (m.typeMeetingEnum<>'PRESENCIAL' AND m.typeMeetingEnum<>'PRESENCIAL_VIRTUAL'))) " +
+  ") " +
+  "AND ($type<>'pre' OR m IS NULL OR $meetings IS NULL OR id(m) IN $meetings) " +
+  "RETURN count(DISTINCT c)")
+Integer countCommentByConferenceAndType(@Param("idConference")Long idConference, @Param("type")String type, @Param("meetings") List<Long> meetings);
+
 
   @Query("MATCH (l:Locality)<-[:AS_BEING_FROM]-(s:SelfDeclaration)-[:TO]->(conf:Conference), (s)<-[:MADE]-(p:Person) " +
-      "OPTIONAL MATCH (conf)<-[:ABOUT]-(c:Comment)-[:MADE_BY]->(p) " +
-      "OPTIONAL MATCH (conf)<-[:ABOUT]-(h:Highlight)-[:MADE_BY]->(p) " +
-      "OPTIONAL MATCH (conf)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p) " +
-      "WITH l, s, conf, p, c, h, m " +
-      "WHERE id(conf)={0} " +
-      "AND ( " +
-      " (c IS NOT NULL AND c.status='pub') " +
-      " OR h IS NOT NULL " +
-      " OR m IS NOT NULL " +
-      ") " +
-      "AND (({1} IS NULL) OR (c IS NULL OR c.type={1})) " +
-      "AND ( " +
-      " (({1} IS NULL OR {1}='pre') AND (m IS NULL OR (m.typeMeetingEnum='PRESENCIAL' OR m.typeMeetingEnum='PRESENCIAL_VIRTUAL'))) OR " +
-      " (({1} IS NULL OR {1}<>'pre') AND (m IS NULL OR (m.typeMeetingEnum<>'PRESENCIAL' AND m.typeMeetingEnum<>'PRESENCIAL_VIRTUAL'))) " +
-      ") " +
-      "AND ({1}<>'pre' OR m IS NULL OR {2} IS NULL OR id(m) IN {2}) " +
-      "RETURN count(DISTINCT l)")
-  Integer countLocalityByConferenceAndType(Long idConference, String type, List<Long> meetings);
+  "OPTIONAL MATCH (conf)<-[:ABOUT]-(c:Comment)-[:MADE_BY]->(p) " +
+  "OPTIONAL MATCH (conf)<-[:ABOUT]-(h:Highlight)-[:MADE_BY]->(p) " +
+  "OPTIONAL MATCH (conf)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p) " +
+  "WITH l, s, conf, p, c, h, m " +
+  "WHERE id(conf)=$idConference " +
+  "AND ( " +
+  " (c IS NOT NULL AND c.status='pub') " +
+  " OR h IS NOT NULL " +
+  " OR m IS NOT NULL " +
+  ") " +
+  "AND (($type IS NULL) OR (c IS NULL OR c.type=$type)) " +
+  "AND ( " +
+  " (($type IS NULL OR $type='pre') AND (m IS NULL OR (m.typeMeetingEnum='PRESENCIAL' OR m.typeMeetingEnum='PRESENCIAL_VIRTUAL'))) OR " +
+  " (($type IS NULL OR $type<>'pre') AND (m IS NULL OR (m.typeMeetingEnum<>'PRESENCIAL' AND m.typeMeetingEnum<>'PRESENCIAL_VIRTUAL'))) " +
+  ") " +
+  "AND ($type<>'pre' OR m IS NULL OR $meetings IS NULL OR id(m) IN $meetings) " +
+  "RETURN count(DISTINCT l)")
+Integer countLocalityByConferenceAndType(@Param("idConference")Long idConference, @Param("type")String type, @Param("meetings") List<Long> meetings);
 
   @Query(value = "MATCH (p:Person)<-[a:MADE_BY]-(at:Attend)-[ab:ABOUT]->(conf:Conference)"
       + " MATCH (at)-[ap:ABOUT]->(pi:PlanItem) "
@@ -118,7 +119,8 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
 
           + " OPTIONAL MATCH (at)-[mb:MODERATED_BY]->(m:Person) "
           + " RETURN count(DISTINCT id(at)) ")
-  Page<ParticipationDto> findByIdConferenceAndIdPersonAndText(Long idPerson, Long idConference, String text, Pageable pageable);
+  Page<ParticipationDto> findByIdConferenceAndIdPersonAndText( @Param("idPerson")  Long idPerson, @Param("idConference") Long idConference,
+                                                               @Param("text") String text,   @Param("pageable") Pageable pageable);
   
   
 //participantes 
