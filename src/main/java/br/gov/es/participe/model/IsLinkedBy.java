@@ -1,8 +1,8 @@
 package br.gov.es.participe.model;
 
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
+import br.gov.es.participe.util.interfaces.RelationshipEntity;
+import br.gov.es.participe.util.interfaces.StartNode;
+import br.gov.es.participe.util.interfaces.EndNode;
 
 import java.io.Serializable;
 

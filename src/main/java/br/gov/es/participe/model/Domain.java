@@ -2,23 +2,22 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.DomainDto;
 import br.gov.es.participe.controller.dto.DomainParamDto;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
+import org.springframework.data.neo4j.core.schema.Node;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
-@NodeEntity
+@Node
 public class Domain extends Entity implements Serializable {
 
     private String name;
 
-    @Relationship(type = "IS_LOCATED_IN", direction = Relationship.INCOMING)
+    @Relationship(type = "IS_LOCATED_IN", direction = Relationship.Direction.INCOMING)
     private Set<Locality> localities;
 
-    @Relationship(type = "APPLIES_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "APPLIES_TO", direction = Relationship.Direction.INCOMING)
     private Set<Plan> plans;
 
     public Domain() {

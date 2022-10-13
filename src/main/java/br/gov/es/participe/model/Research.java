@@ -2,16 +2,15 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.ResearchDisplayStatusType;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.Transient;
-import org.neo4j.ogm.annotation.typeconversion.DateString;
-
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.support.DateString;
+import org.springframework.data.neo4j.core.schema.Relationship;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
+import br.gov.es.participe.util.interfaces.Transient;
 
-@NodeEntity
+@Node
 public class Research extends Entity implements Serializable {
 
     @DateString

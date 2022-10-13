@@ -1,12 +1,11 @@
 package br.gov.es.participe.model;
 
 import java.io.Serializable;
-
-import org.neo4j.ogm.annotation.*;
-
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
 import br.gov.es.participe.controller.dto.FileDto;
 
-@NodeEntity
+@Node
 public class File extends Entity implements Serializable {
 
     private String mimeType;
@@ -17,7 +16,7 @@ public class File extends Entity implements Serializable {
 
     private String subtype;
 
-    @Relationship(type = "IS_BACKGROUND_IMAGE_OF", direction = Relationship.OUTGOING)
+    @Relationship(type = "IS_BACKGROUND_IMAGE_OF", direction = Relationship.Direction.OUTGOING)
     private Conference conferenceBackGround;
 
     public String getUrl() {

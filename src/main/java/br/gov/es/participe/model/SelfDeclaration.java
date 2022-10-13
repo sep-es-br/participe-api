@@ -2,7 +2,7 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationParamDto;
-import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -15,7 +15,7 @@ public class SelfDeclaration extends Entity implements Serializable {
   @Relationship(type = "AS_BEING_FROM")
   private Locality locality;
 
-  @Relationship(type = "MADE", direction = Relationship.INCOMING)
+  @Relationship(type = "MADE", direction = Relationship.Direction.INCOMING)
   private Person person;
 
   private Boolean answerSurvey;

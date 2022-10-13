@@ -4,22 +4,21 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Node;
 
 import br.gov.es.participe.controller.dto.StructureDto;
 import br.gov.es.participe.controller.dto.StructureParamDto;
 
-@NodeEntity
+@Node
 public class Structure extends Entity implements Serializable {
 
     private String name;
 
-    @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
+    @Relationship(type = "COMPOSES", direction = Relationship.Direction.INCOMING)
     private Set<StructureItem> items;
 
-    @Relationship(type = "OBEYS", direction = Relationship.INCOMING)
+    @Relationship(type = "OBEYS", direction = Relationship.Direction.INCOMING)
     private Set<Plan> plans;
 
     private Boolean regionalization;

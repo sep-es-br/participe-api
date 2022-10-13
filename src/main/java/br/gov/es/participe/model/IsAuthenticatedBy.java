@@ -1,10 +1,10 @@
 package br.gov.es.participe.model;
 
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.Property;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
-import org.neo4j.ogm.annotation.typeconversion.DateLong;
+import br.gov.es.participe.util.interfaces.EndNode;
+import br.gov.es.participe.util.interfaces.StartNode;
+import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.support.DateLong;
+import br.gov.es.participe.util.interfaces.RelationshipEntity;
 
 import java.util.Date;
 

@@ -2,9 +2,9 @@ package br.gov.es.participe.model;
 
 import java.io.Serializable;
 
-import org.neo4j.ogm.annotation.NodeEntity;
+import org.springframework.data.neo4j.core.schema.Node;
 
-@NodeEntity
+@Node
 public class Channel extends Entity implements Serializable {
 
     private String name;

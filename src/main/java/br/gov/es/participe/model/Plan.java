@@ -1,16 +1,14 @@
 package br.gov.es.participe.model;
 
 import java.io.Serializable;
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Node;
 import java.util.Collections;
 import java.util.Set;
-
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
 import br.gov.es.participe.controller.dto.PlanDto;
 import br.gov.es.participe.controller.dto.PlanParamDto;
 
-@NodeEntity
+@Node
 public class Plan extends Entity implements Serializable {
 
     private String name;
@@ -21,7 +19,7 @@ public class Plan extends Entity implements Serializable {
     @Relationship(type = "APPLIES_TO")
     private Domain domain;
 
-    @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
+    @Relationship(type = "COMPOSES", direction = Relationship.Direction.INCOMING)
     private Set<PlanItem> items;
     
     @Relationship(type = "REGIONALIZABLE")

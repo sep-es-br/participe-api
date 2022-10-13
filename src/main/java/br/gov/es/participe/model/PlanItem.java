@@ -2,16 +2,15 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.PlanItemDto;
 import br.gov.es.participe.controller.dto.PlanItemParamDto;
+import br.gov.es.participe.util.interfaces.Transient;
 
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.Transient;
-
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Node;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-@NodeEntity
+@Node
 public class PlanItem extends Entity implements Serializable {
 
     private String name;
@@ -27,16 +26,16 @@ public class PlanItem extends Entity implements Serializable {
     @Relationship(type = "FEATURES")
     private File file;
 
-    @Relationship(type = "APPLIES_TO", direction = Relationship.INCOMING)
+    @Relationship(type = "APPLIES_TO", direction = Relationship.Direction.INCOMING)
     private Set<Locality> localities;
 
     @Relationship(type = "COMPOSES")
     private PlanItem parent;
 
-    @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
+    @Relationship(type = "COMPOSES", direction = Relationship.Direction.INCOMING)
     private Set<PlanItem> children;
     
-    @Relationship(type = "ABOUT", direction = Relationship.INCOMING)
+    @Relationship(type = "ABOUT", direction = Relationship.Direction.INCOMING)
     private Set<Attend> attends;
     
     @Transient

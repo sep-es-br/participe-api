@@ -1,11 +1,11 @@
 package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.HighlightParamDto;
-import org.neo4j.ogm.annotation.NodeEntity;
+import org.springframework.data.neo4j.core.schema.Node;
 
 import java.util.Date;
 
-@NodeEntity
+@Node
 public class Highlight extends Attend {
 
   public Highlight() {

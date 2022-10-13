@@ -269,7 +269,7 @@ public class PersonService {
     this.verifyMakeLoginCondition(person, makeLogin, authService, conferenceId);
 
     if (persistRelationship) {
-      isAuthenticatedByRepository.save(authenticatedBy, 0);
+      isAuthenticatedByRepository.save(authenticatedBy);
     }
     return person;
   }

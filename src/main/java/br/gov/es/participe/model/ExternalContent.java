@@ -1,11 +1,11 @@
 package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.*;
-import org.neo4j.ogm.annotation.NodeEntity;
+import org.springframework.data.neo4j.core.schema.Node;
 
 import java.io.Serializable;
 
-@NodeEntity
+@Node
 public class ExternalContent extends Entity implements Serializable {
     private String url;
 

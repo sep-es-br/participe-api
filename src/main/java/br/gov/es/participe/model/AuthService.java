@@ -1,13 +1,11 @@
 package br.gov.es.participe.model;
 
 import java.io.Serializable;
-
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Node;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@NodeEntity
+@Node
 public class AuthService extends Entity implements Serializable {
 
     private String server;
@@ -17,7 +15,7 @@ public class AuthService extends Entity implements Serializable {
     private Integer numberOfAccesses;
     
     @JsonIgnore
-    @Relationship(type = "IS_AUTHENTICATED_BY", direction = Relationship.INCOMING)
+    @Relationship(type = "IS_AUTHENTICATED_BY", direction = Relationship.Direction.INCOMING)
     private Person person;
 
     public String getServer() {

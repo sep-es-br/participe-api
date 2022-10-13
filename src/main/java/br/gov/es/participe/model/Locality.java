@@ -2,15 +2,14 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.LocalityDto;
 import br.gov.es.participe.controller.dto.LocalityParamDto;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
+import org.springframework.data.neo4j.core.schema.Node;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
-@NodeEntity
+@Node
 public class Locality extends Entity implements Serializable {
 
   private String name;
@@ -25,19 +24,19 @@ public class Locality extends Entity implements Serializable {
   @Relationship(type = "IS_LOCATED_IN")
   private Set<Locality> parents;
 
-  @Relationship(type = "IS_LOCATED_IN", direction = Relationship.INCOMING)
+  @Relationship(type = "IS_LOCATED_IN", direction = Relationship.Direction.INCOMING)
   private Set<Locality> children;
 
-  @Relationship(type = "TAKES_PLACE-AT", direction = Relationship.INCOMING)
+  @Relationship(type = "TAKES_PLACE-AT", direction = Relationship.Direction.INCOMING)
   private Set<Meeting> meetingPlace;
 
-  @Relationship(type = "COVERS", direction = Relationship.INCOMING)
+  @Relationship(type = "COVERS", direction = Relationship.Direction.INCOMING)
   private Set<Meeting> meetingCovers;
 
-  @Relationship(type = "AS_BEING_FROM", direction = Relationship.INCOMING)
+  @Relationship(type = "AS_BEING_FROM", direction = Relationship.Direction.INCOMING)
   private Set<SelfDeclaration> selfDeclaration;
 
-  @Relationship(type = "ABOUT", direction = Relationship.INCOMING)
+  @Relationship(type = "ABOUT", direction = Relationship.Direction.INCOMING)
   private Set<Attend> attends;
 
   public Locality() {

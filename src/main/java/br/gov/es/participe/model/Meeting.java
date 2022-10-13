@@ -3,16 +3,16 @@ package br.gov.es.participe.model;
 import br.gov.es.participe.controller.dto.MeetingDto;
 import br.gov.es.participe.controller.dto.MeetingParamDto;
 import br.gov.es.participe.enumerator.TypeMeetingEnum;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.typeconversion.DateString;
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.support.DateString;
+import org.springframework.data.neo4j.core.schema.Node;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@NodeEntity
+@Node
 public class Meeting extends Entity implements Serializable {
 
   private String name;
@@ -41,16 +41,16 @@ public class Meeting extends Entity implements Serializable {
   @Relationship(type = "DURING")
   private Set<Attend> attends;
 
-  @Relationship(type = "IS_RECEPTIONIST_OF", direction = Relationship.INCOMING)
+  @Relationship(type = "IS_RECEPTIONIST_OF", direction = Relationship.Direction.INCOMING)
   private Set<Person> receptionists;
 
-  @Relationship(type = "IS_CHANNEL_OF", direction = Relationship.INCOMING)
+  @Relationship(type = "IS_CHANNEL_OF", direction = Relationship.Direction.INCOMING)
   private Set<Channel> channels;
 
-  @Relationship(type = "CHECKED_IN_AT", direction = Relationship.INCOMING)
+  @Relationship(type = "CHECKED_IN_AT", direction = Relationship.Direction.INCOMING)
   private Set<Person> participants;
 
-  @Relationship(type = "IS_PLAN_ITEM_OF", direction = Relationship.INCOMING)
+  @Relationship(type = "IS_PLAN_ITEM_OF", direction = Relationship.Direction.INCOMING)
   private Set<PlanItem> planItems;
 
   public Meeting() {

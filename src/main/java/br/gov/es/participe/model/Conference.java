@@ -4,11 +4,8 @@ import br.gov.es.participe.controller.dto.ConferenceDto;
 import br.gov.es.participe.controller.dto.ConferenceParamDto;
 import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.Transient;
-import org.neo4j.ogm.annotation.typeconversion.DateString;
-
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.support.DateString;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,8 +16,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+import org.springframework.data.neo4j.core.schema.Relationship;
+import br.gov.es.participe.util.interfaces.Transient;
 
-@NodeEntity
+@Node
 public class Conference extends Entity implements Serializable {
 
   static Logger log = Logger.getLogger(Conference.class.getName());
@@ -60,19 +59,19 @@ public class Conference extends Entity implements Serializable {
   @Relationship(type = "LOCALIZES_CITIZEN_BY")
   private LocalityType localityType;
 
-  @Relationship(type = "IS_DEFAULT", direction = Relationship.UNDIRECTED)
+  @Relationship(type = "IS_DEFAULT")
   private PortalServer defaultServer;
 
-  @Relationship(type = "HOSTS", direction = Relationship.INCOMING)
+  @Relationship(type = "HOSTS", direction = Relationship.Direction.INCOMING)
   private PortalServer server;
 
   @Relationship(type = "APPLIES_TO")
   private Research research;
 
-  @Relationship(type = "OCCURS_IN", direction = Relationship.INCOMING)
+  @Relationship(type = "OCCURS_IN", direction = Relationship.Direction.INCOMING)
   private Set<Meeting> meeting;
 
-  @Relationship(type = "MADE", direction = Relationship.INCOMING)
+  @Relationship(type = "MADE", direction = Relationship.Direction.INCOMING)
   private Set<SelfDeclaration> selfDeclaration;
 
   @Relationship(type = "MODERATORS")

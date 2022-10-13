@@ -1,15 +1,14 @@
 package br.gov.es.participe.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
-
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
 import br.gov.es.participe.controller.dto.CommentDto;
 import br.gov.es.participe.controller.dto.CommentParamDto;
 
-@NodeEntity
+@Node
 public class Comment extends Attend {
 
 	private String text;

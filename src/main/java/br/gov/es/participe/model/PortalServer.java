@@ -1,17 +1,16 @@
 package br.gov.es.participe.model;
 
-import org.neo4j.ogm.annotation.*;
-
+import org.springframework.data.neo4j.core.schema.Relationship;
 import java.io.*;
 import java.util.*;
 
 public class PortalServer extends Entity implements Serializable {
     private String url;
 
-    @Relationship(type = "HOSTS", direction = Relationship.OUTGOING)
+    @Relationship(type = "HOSTS", direction = Relationship.Direction.OUTGOING)
     private Set<Conference> conferences;
 
-    @Relationship(type = "IS_DEFAULT", direction = Relationship.UNDIRECTED)
+    @Relationship(type = "IS_DEFAULT")
     private Conference conference;
 
     public PortalServer() {}

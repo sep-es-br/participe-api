@@ -1,17 +1,17 @@
 package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.*;
-import org.neo4j.ogm.annotation.*;
-
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Node;
 import java.io.*;
 
-@NodeEntity
+@Node
 public class Topic extends Entity implements Serializable {
     private Integer step;
     private String title;
     private String text;
 
-    @Relationship(type = "GUIDES_HOW_TO_PARTICIPATE_IN", direction = Relationship.OUTGOING)
+    @Relationship(type = "GUIDES_HOW_TO_PARTICIPATE_IN", direction = Relationship.Direction.OUTGOING)
     private Conference conferenceTopic;
 
     public Topic () {}

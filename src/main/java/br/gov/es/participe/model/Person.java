@@ -2,16 +2,15 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
-@NodeEntity
+@Node
 public class Person extends Entity implements UserDetails {
 
   private String name;
@@ -27,6 +26,7 @@ public class Person extends Entity implements UserDetails {
   private String accessToken;
 
   private Boolean active;
+ 
 
   @Relationship(type = "IS_AUTHENTICATED_BY")
   private Set<AuthService> authServices;
@@ -34,10 +34,10 @@ public class Person extends Entity implements UserDetails {
   @Relationship(type = "MADE")
   private Set<SelfDeclaration> selfDeclaretions;
 
-  @Relationship(type = "LIKED_BY", direction = Relationship.INCOMING)
+  @Relationship(type = "LIKED_BY", direction = Relationship.Direction.INCOMING)
   private Set<Comment> comments;
 
-  @Relationship(type = "MADE_BY", direction = Relationship.INCOMING)
+  @Relationship(type = "MADE_BY", direction = Relationship.Direction.INCOMING)
   private Set<Attend> attends;
 
   @Relationship(type = "MODERATED_BY")

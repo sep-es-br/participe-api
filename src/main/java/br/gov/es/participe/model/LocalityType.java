@@ -1,20 +1,19 @@
 package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.LocalityTypeDto;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Node;
 import java.io.Serializable;
 import java.util.Set;
 
-@NodeEntity
+@Node
 public class LocalityType extends Entity implements Serializable {
     private String name;
 
-    @Relationship(type = "OF_TYPE", direction = Relationship.INCOMING)
+    @Relationship(type = "OF_TYPE", direction = Relationship.Direction.INCOMING)
     private Set<Locality> localities;
     
-    @Relationship(type = "REGIONALIZABLE", direction = Relationship.INCOMING)
+    @Relationship(type = "REGIONALIZABLE", direction = Relationship.Direction.INCOMING)
     private Set<Plan> plans;
 
     public LocalityType(){

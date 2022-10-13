@@ -2,15 +2,15 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.StructureItemDto;
 import br.gov.es.participe.controller.dto.StructureItemParamDto;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Node;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@NodeEntity
+@Node
 public class StructureItem extends Entity implements Serializable {
 
     private String name;
@@ -29,10 +29,10 @@ public class StructureItem extends Entity implements Serializable {
     @Relationship(type = "COMPOSES")
     private StructureItem parent;
 
-    @Relationship(type = "COMPOSES", direction = Relationship.INCOMING)
+    @Relationship(type = "COMPOSES", direction = Relationship.Direction.INCOMING)
     private Set<StructureItem> children;
 
-    @Relationship(type = "OBEYS", direction = Relationship.INCOMING)
+    @Relationship(type = "OBEYS", direction = Relationship.Direction.INCOMING)
     private Set<PlanItem> planItems;
 
     public StructureItem() {
