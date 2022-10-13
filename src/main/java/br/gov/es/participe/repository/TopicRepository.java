@@ -17,5 +17,5 @@ public interface TopicRepository extends Neo4jRepository<Topic, Long> {
     @Query("MATCH (c:Conference)<-[r:GUIDES_HOW_TO_PARTICIPATE_IN]-(t:Topic) " +
             " WHERE id(c)=$idConference " +
             " DELETE r, t")
-    Long deleteAllByConference( @Param("idConference" Long idConference);
+    Long deleteAllByConference( @Param("idConference") Long idConference);
 }
