@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.Date;
@@ -14,19 +15,19 @@ import java.util.Optional;
 
 public interface MeetingRepository extends Neo4jRepository<Meeting, Long> {
 
-  String MEETING_FILTER = "ID(conference) = {0} " +
-                          "AND (ext.translate(meeting.name) CONTAINS ext.translate({1}) OR {1} IS NULL) " +
-                          "AND (ID(locality) IN {4} OR {4} IS NULL) " +
-                          "AND ((datetime(meeting.beginDate) >= datetime({2}) OR {2} IS NULL) OR " +
-                          "(datetime(meeting.endDate) >= datetime({2}) OR {2} IS NULL)) " +
-                          "AND ( (datetime(meeting.beginDate) <= datetime({3}) OR {3} IS NULL) OR " +
-                          "(datetime(meeting.endDate) <= datetime({3}) OR {3} IS NULL)) ";
+  String MEETING_FILTER = "ID(conference) = $idConference " +
+                          "AND (ext.translate(meeting.name) CONTAINS ext.translate($name) OR $name IS NULL) " +
+                          "AND (ID(locality) IN $localities OR $localities IS NULL) " +
+                          "AND ((datetime(meeting.beginDate) >= datetime($beginDate) OR $beginDate IS NULL) OR " +
+                          "(datetime(meeting.endDate) >= datetime($beginDate) OR $beginDate IS NULL)) " +
+                          "AND ( (datetime(meeting.beginDate) <= datetime($endDate) OR $endDate IS NULL) OR " +
+                          "(datetime(meeting.endDate) <= datetime($endDate) OR $endDate IS NULL)) ";
 
-  @Query(" MATCH (m:Meeting)-[oc:OCCURS_IN]->(c:Conference) " + " WHERE id(c) = {0} " + " RETURN m, oc, c" + " , ["
+  @Query(" MATCH (m:Meeting)-[oc:OCCURS_IN]->(c:Conference) " + " WHERE id(c) = $idConference " + " RETURN m, oc, c" + " , ["
          + " 		[(m)-[tp:TAKES_PLACE_AT]->(lp:Locality) | [tp, lp] ],"
          + "	 	[(m)-[co:COVERS]-(lc:Locality) | [co, lc] ],"
          + "		[(m)<-[ir:IS_RECEPTIONIST_OF]-(recep:Person) | [ir, recep] ]" + " ] " + "ORDER BY m.beginDate")
-  Collection<Meeting> findAll(Long idConference);
+  Collection<Meeting> findAll( @Param("idConference") Long idConference);
 
   @Query(
     value =
@@ -52,20 +53,20 @@ public interface MeetingRepository extends Neo4jRepository<Meeting, Long> {
       "RETURN COUNT(DISTINCT meeting)"
   )
   Page<Meeting> findAll(
-    Long idConference,
-    String name,
-    Date beginDate,
-    Date endDate,
-    List<Long> localities,
-    Pageable pageable
+       @Param("idConference") Long idConference,
+       @Param("name") String name,
+       @Param("beginDate") Date beginDate,
+       @Param("endDate") Date endDate,
+       @Param("localities") List<Long> localities,
+       Pageable pageable
   );
 
-  @Query(" MATCH (m:Meeting)-[oc:OCCURS_IN]->(c:Conference) " + " WHERE id(c) = {0} " + " RETURN m " + " , ["
+  @Query(" MATCH (m:Meeting)-[oc:OCCURS_IN]->(c:Conference) " + " WHERE id(c) = $idConference " + " RETURN m " + " , ["
          + " 		[(m)-[tp:TAKES_PLACE_AT]->(lp:Locality) | [tp, lp] ],"
          + "	 	[(m)-[co:COVERS]-(lc:Locality) | [co, lc] ]" + " ] " + "ORDER BY m.beginDate")
-  Collection<Meeting> findAllDashboard(Long idConference);
+  Collection<Meeting> findAllDashboard( @Param("idConference") Long idConference);
 
-  @Query("MATCH (m:Meeting) WHERE id(m) = {0} WITH m RETURN m, ["
+  @Query("MATCH (m:Meeting) WHERE id(m) = $id WITH m RETURN m, ["
          + "		[(m)-[tp:TAKES_PLACE_AT]-(lp:Locality) | [tp,lp]],"
          + "		[(m)-[isChannelOf:IS_CHANNEL_OF]-(channel:Channel) | [isChannelOf, channel]],"
          + "		[(m)-[itemPlanOf:IS_PLAN_ITEM_OF]-(planItem:PlanItem) | [itemPlanOf, planItem]],"
@@ -73,17 +74,17 @@ public interface MeetingRepository extends Neo4jRepository<Meeting, Long> {
          + "		[(m)<-[ir:IS_RECEPTIONIST_OF]-(recep:Person) | [ir, recep] ]"
          + " ]"
   )
-  Optional<Meeting> findMeetingWithoutConference(Long id);
+  Optional<Meeting> findMeetingWithoutConference( @Param("id") Long id);
 
-  @Query("MATCH (m:Meeting)-[oc:OCCURS_IN]->(c:Conference) " + " WHERE id(m) = {0} " + " RETURN m, oc, c " + " , ["
+  @Query("MATCH (m:Meeting)-[oc:OCCURS_IN]->(c:Conference) " + " WHERE id(m) = $id " + " RETURN m, oc, c " + " , ["
          + "		[(m)-[tp:TAKES_PLACE_AT]-(lp:Locality) | [tp,lp]],"
          + "		[(m)-[co:COVERS]-(lc:Locality) | [co, lc]],"
          + "		[(m)<-[ir:IS_RECEPTIONIST_OF]-(recep:Person) | [ir, recep] ]" + " ]")
-  Optional<Meeting> findMeetingWithRelationshipsById(Long id);
+  Optional<Meeting> findMeetingWithRelationshipsById( @Param("id") Long id);
 
   @Query("MATCH (person:Person)-[checkedIn:CHECKED_IN_AT]->(meeting:Meeting) " +
-         "WHERE id(person)={0} " +
+         "WHERE id(person)=$personId " +
          "RETURN person, checkedIn, meeting"
   )
-  List<CheckedInAt> findAllPersonCheckedIn(Long personId);
+  List<CheckedInAt> findAllPersonCheckedIn( @Param("personId") Long personId);
 }

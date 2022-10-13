@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.query.Param;
 
 import br.gov.es.participe.model.Structure;
 
@@ -17,7 +18,7 @@ public interface StructureRepository extends Neo4jRepository<Structure, Long> {
     Collection<Structure> findAll();
 
     @Query("MATCH () "
-            + " OPTIONAL MATCH (structure:Structure) WHERE ext.translate(structure.name) CONTAINS ext.translate({0}) "
+            + " OPTIONAL MATCH (structure:Structure) WHERE ext.translate(structure.name) CONTAINS ext.translate($name) "
             + " OPTIONAL MATCH (structureItem:StructureItem)-[c:COMPOSES*]->(parentStructure:Structure) WHERE ext.translate(structureItem.name) CONTAINS ext.translate({0}) "
             + " OPTIONAL MATCH (structureItem)-[c2:COMPOSES]->(parentStructure:Structure) "
             + " OPTIONAL MATCH (structureItem)<-[c3:COMPOSES*]-(child:StructureItem) "
@@ -28,13 +29,13 @@ public interface StructureRepository extends Neo4jRepository<Structure, Long> {
             + "     ,[ (parentStructure)<-[c5:COMPOSES*]-(si2:StructureItem)<-[c6:COMPOSES*]-(structureItem) | [ c5, si2, c6 ] ] "
             + " ] "
     )
-    Collection<Structure> findByName(String name);
+    Collection<Structure> findByName( @Param("name") String name);
 
     @Query("MATCH (s:Structure) DETACH DELETE s")
     void deleteAll();
 
     @Query("MATCH (structure:Structure)<-[ob:OBEYS]-(plan:Plan)<-[tgt:TARGETS]-(conference:Conference) " +
-             "WHERE ID(conference) = {0}" +
+             "WHERE ID(conference) = $conferenceId" +
              "RETURN COALESCE(structure.regionalization, false)")
-    Optional<Boolean> conferenceContainsRegionalizationStructure(Long conferenceId);
+    Optional<Boolean> conferenceContainsRegionalizationStructure( @Param("conferenceId")Long conferenceId);
 }
