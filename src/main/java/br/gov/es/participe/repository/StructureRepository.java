@@ -1,9 +1,9 @@
 package br.gov.es.participe.repository;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.neo4j.annotation.Query;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -15,7 +15,7 @@ public interface StructureRepository extends Neo4jRepository<Structure, Long> {
             " [ (s)<-[p_o1:OBEYS]-(p:Plan) | [ p_o1, p ] ]," +
             " [ (si)<-[btl:COMPOSES*]-(sim:StructureItem) | [btl, sim] ]  " +
             "] ORDER BY s.name")
-    Collection<Structure> findAll();
+    List<Structure> findAll();
 
     @Query("MATCH () "
             + " OPTIONAL MATCH (structure:Structure) WHERE ext.translate(structure.name) CONTAINS ext.translate($name) "
@@ -29,7 +29,7 @@ public interface StructureRepository extends Neo4jRepository<Structure, Long> {
             + "     ,[ (parentStructure)<-[c5:COMPOSES*]-(si2:StructureItem)<-[c6:COMPOSES*]-(structureItem) | [ c5, si2, c6 ] ] "
             + " ] "
     )
-    Collection<Structure> findByName( @Param("name") String name);
+    List<Structure> findByName( @Param("name") String name);
 
     @Query("MATCH (s:Structure) DETACH DELETE s")
     void deleteAll();

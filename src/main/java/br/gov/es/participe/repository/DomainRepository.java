@@ -1,11 +1,11 @@
 package br.gov.es.participe.repository;
 
 import br.gov.es.participe.model.Domain;
-import org.springframework.data.neo4j.annotation.Query;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface DomainRepository extends Neo4jRepository<Domain, Long> {
 
@@ -13,7 +13,7 @@ public interface DomainRepository extends Neo4jRepository<Domain, Long> {
             " [ (l)<-[btl:IS_LOCATED_IN]-(lc:Locality) | [btl, lc] ], " +
             " [ (l)-[btl:IS_LOCATED_IN]->(lc:Locality) | [btl, lc] ] " +
             " ] ORDER BY d.name")
-    Collection<Domain> findAll();
+    List<Domain> findAll();
 
     @Query("MATCH (d:Domain) WHERE ID(d) = $id OPTIONAL MATCH (d)<-[bt:IS_LOCATED_IN]-(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) RETURN d, bt, l, ot, lt, [ " +
             " [ (l)<-[btl:IS_LOCATED_IN]-(lc:Locality) | [btl, lc] ], " +
@@ -32,7 +32,7 @@ public interface DomainRepository extends Neo4jRepository<Domain, Long> {
             + "     ,[ (l2)-[ot2:OF_TYPE]-(lt2:LocalityType) | [ ot2, lt2 ] ] "
             + " ] "
     )
-    Collection<Domain> findByName( @Param("name") String name);
+    List<Domain> findByName( @Param("name") String name);
 
     @Query("MATCH (d:Domain) DETACH DELETE d")
     void deleteAll();

@@ -13,9 +13,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class SecurityFilter extends OncePerRequestFilter {
 
+    @Autowired
     private TokenService tokenService;
 
     public SecurityFilter(TokenService tokenService) {

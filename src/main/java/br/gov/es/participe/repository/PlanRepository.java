@@ -1,11 +1,10 @@
 package br.gov.es.participe.repository;
 
 import br.gov.es.participe.model.Plan;
-import org.springframework.data.neo4j.annotation.Query;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface PlanRepository extends Neo4jRepository<Plan, Long> {
@@ -18,7 +17,7 @@ public interface PlanRepository extends Neo4jRepository<Plan, Long> {
                " [ (i)-[bts:OBEYS]->(st:StructureItem)| [bts, st] ], " +
                " [ (i)<-[bti:COMPOSES*]-(pi:PlanItem)-[bts:OBEYS]-(st:StructureItem)| [bti, pi,bts, st] ] " +
                "]")
-    Collection<Plan> findAll();
+    List<Plan> findAll();
     
     @Query(" MATCH (p:Plan)-[t:TARGETS]-(c:Conference) "
     		+" WHERE id(c)=$id "

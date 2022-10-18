@@ -1,9 +1,9 @@
 package br.gov.es.participe.repository;
 
 import br.gov.es.participe.model.*;
-import org.springframework.data.neo4j.annotation.*;
-import org.springframework.data.neo4j.repository.*;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.neo4j.repository.*;
 
 import java.util.*;
 

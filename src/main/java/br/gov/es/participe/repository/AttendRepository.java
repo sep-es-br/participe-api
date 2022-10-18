@@ -4,8 +4,8 @@ import br.gov.es.participe.controller.dto.ParticipationDto;
 import br.gov.es.participe.model.Attend;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -16,10 +16,6 @@ public interface AttendRepository extends Neo4jRepository<Attend, Long> {
       + "WHERE id(p)=$id "
       + "RETURN m, a, p")
   List<Attend> findAllAttendByIdPerson( @Param("id") Long id);
-
- // @Query(" MATCH (c:Conference)<-[t:TO]-(self:SelfDeclaration)<-[m:MADE]-(p:Person) "
-  //    + " WHERE id(c)={0} RETURN count(DISTINCT p)")
-  //Integer countParticipationByConference(Long idConference);
 
   @Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) "
        + " WHERE id(co)=$idConference RETURN count(DISTINCT p)")

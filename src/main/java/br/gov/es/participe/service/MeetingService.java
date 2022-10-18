@@ -2,7 +2,7 @@ package br.gov.es.participe.service;
 
 import br.gov.es.participe.controller.dto.MeetingDto;
 import br.gov.es.participe.controller.dto.MeetingParamDto;
-import br.gov.es.participe.controller.dto.PersonParamDto;
+//import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.model.Channel;
 import br.gov.es.participe.model.CheckedInAt;

@@ -9,8 +9,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import br.gov.es.participe.service.TokenService;
 
@@ -23,6 +25,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private TokenService tokenService;
+
+
+
+
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -78,6 +84,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/oauth2/authorization"));
         httpSecurity.addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class);
     }
+
+   
 
     @Bean
     public SecurityFilter securityFilter() {

@@ -3,7 +3,7 @@ package br.gov.es.participe.repository;
 import br.gov.es.participe.controller.dto.LocalityTypeDto;
 import br.gov.es.participe.controller.dto.controlPanel.MicroregionChartQueryDto;
 import br.gov.es.participe.model.Conference;
-import org.springframework.data.neo4j.annotation.Query;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 import java.util.List;

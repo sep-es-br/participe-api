@@ -2,7 +2,7 @@ package br.gov.es.participe.controller.dto;
 
 import java.util.List;
 
-import org.springframework.data.neo4j.annotation.QueryResult;
+import br.gov.es.participe.util.interfaces.QueryResult;
 
 @QueryResult
 public class ModerationResultDto {

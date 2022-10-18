@@ -4,7 +4,7 @@ import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.Person;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.neo4j.annotation.Query;
+import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import java.util.Date;
 import java.util.List;
@@ -20,7 +20,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
       + " OPTIONAL MATCH (p)-[i:IS_AUTHENTICATED_BY]->(at:AuthService)"
       + " RETURN p, m, s, i, at "
       + " , ["
-      + " 		[(s)-[a:AS_BEING_FROM]-(l:Locality) | [a,l] ],"
+      + " 		[(s)-[a:AS_BEING_FROM]-(l:Locality) | [a,l] ], "
       + " 		[(s)-[t:TO]-(c:Conference) | [t,c] ]"
       + " ]")
   Person findRelationships(@Param("id")Long id);

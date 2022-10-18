@@ -19,7 +19,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
-@Service
+
+@Service("facebookProperties")
 @PropertySource(name = "social", value = "classpath:/social-cfg.properties")
 public class FacebookService {
 

@@ -1,6 +1,6 @@
 package br.gov.es.participe.controller.dto.controlPanel;
 
-import org.springframework.data.neo4j.annotation.QueryResult;
+import br.gov.es.participe.util.interfaces.QueryResult;
 
 @QueryResult
 public class MicroregionChartQueryDto {

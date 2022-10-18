@@ -5,7 +5,7 @@ import br.gov.es.participe.controller.dto.PersonKeepCitizenDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.PersonService;
-import br.gov.es.participe.util.dto.MessageDto;
+//import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.interfaces.ApiPageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

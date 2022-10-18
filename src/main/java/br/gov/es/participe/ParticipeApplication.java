@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.scheduling.annotation.*;
-
+import org.springframework.context.annotation.ComponentScan;
 import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
@@ -19,7 +19,9 @@ import java.util.TimeZone;
 		SecurityAutoConfiguration.class,
 		UserDetailsServiceAutoConfiguration.class
 })
+
 @EnableScheduling
+@ComponentScan("package.br.gov.es.participe")
 public class ParticipeApplication {
 
 	@Value("${app.default-timezone}")

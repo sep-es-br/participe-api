@@ -3,7 +3,7 @@ package br.gov.es.participe.controller.dto;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.data.neo4j.annotation.QueryResult;
+import br.gov.es.participe.util.interfaces.QueryResult;
 
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.LocalityType;
