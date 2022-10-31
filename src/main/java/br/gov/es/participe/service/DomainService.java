@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -72,7 +73,7 @@ public class DomainService {
     public void delete(Long id) {
         Domain domain = find(id);
 
-        List<Plan> plans = planService.findByDomain(domain.getId());
+        Collection<Plan> plans = planService.findByDomain(domain.getId());
 
         if (plans != null && !plans.isEmpty()) {
             throw new IllegalArgumentException("This domain is in use by a plan");

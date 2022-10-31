@@ -4,6 +4,7 @@ import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.model.Person;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.Date;
@@ -13,10 +14,10 @@ import java.util.Optional;
 public interface ConferenceRepository extends Neo4jRepository<Conference, Long> {
 
         @Query("MATCH (n:Conference)-[cp:TARGETS]->(p:Plan) "
-                        + " WHERE ext.translate(n.name) CONTAINS ext.translate({0}) "
-                        + " AND (id(p) = {1} OR {1} IS NULL) "
-                        + " AND ((datetime(n.beginDate).year = {3} OR {3} IS NULL) OR (datetime(n.endDate).year = {3} OR {3} IS NULL))"
-                        + " AND ((datetime(n.beginDate).month = {2} OR {2} IS NULL) OR (datetime(n.endDate).month = {2} OR {2} IS NULL))"
+                        + " WHERE n.name CONTAINS ($name) "
+                        + " AND (id(p) = $plan OR $plan IS NULL) "
+                        + " AND ((datetime(n.beginDate).year = $year OR $year IS NULL) OR (datetime(n.endDate).year = $year OR $year IS NULL))"
+                        + " AND ((datetime(n.beginDate).month = $month OR $month IS NULL) OR (datetime(n.endDate).month = $month OR $month IS NULL))"
                         + " RETURN n,cp,p "
                         + ", [ "
                         + "		[(n)-[fep:FEATURES_PARTICIPATION_IMAGE]-(fp:File) | [fep, fp]], "
@@ -24,55 +25,55 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         + "		[(p)-[r:REGIONALIZABLE]-(lt:LocalityType) | [r, lt]], "
                         + "		[(n)-[lo:LOCALIZES_CITIZEN_BY]-(l:LocalityType) | [lo, l]] "
                         + " ] ORDER BY n.beginDate")
-        Collection<Conference> findAllByQuery(String name, Long plan, Integer month, Integer year);
+        Collection<Conference> findAllByQuery( @Param("name") String name, @Param("plan") Long plan, @Param("month") Integer month, @Param("year") Integer year);
 
         @Query("MATCH (n:Conference) "
-                        + " WHERE NOT {1} OR (datetime(n.beginDate) <= datetime({0}) "
-                        + " AND datetime(n.endDate) >= datetime({0})) "
+                        + " WHERE NOT $active OR (datetime(n.beginDate) <= datetime($date) "
+                        + " AND datetime(n.endDate) >= datetime($date)) "
                         + " RETURN n, [(n)-[md:MODERATORS]->(p:Person) |[n, md, p] ] "
                         + " ORDER BY n.beginDate")
-        Collection<Conference> findAllActives(Date date, Boolean active);
+        Collection<Conference> findAllActives( @Param("date") Date date,  @Param("active") Boolean active);
 
-        Conference findByNameIgnoreCase(String name);
+        Conference findByNameIgnoreCase( @Param("name") String name);
 
         @Query("MATCH (c:Conference)-[md:MODERATORS]->(p:Person) " +
-                        "WHERE id(c) = {0} " +
+                        "WHERE id(c) = $id " +
                         "RETURN p")
-        Collection<Person> findModeratorsById(Long id);
+        Collection<Person> findModeratorsById( @Param("id") Long id);
 
         @Query("MATCH (c:Conference) DETACH DELETE c")
         void deleteAll();
 
         @Query("MATCH (c:Conference)<-[t:TO]-(s:SelfDeclaration) "
-                        + "WHERE id(c) = {0} "
+                        + "WHERE id(c) = $id "
                         + "RETURN count(s)")
-        Integer countSelfDeclarationById(Long id);
+        Integer countSelfDeclarationById( @Param("id") Long id);
 
-        @Query("MATCH (c:Conference)-[:TARGETS]->(p:Plan) WHERE id(p)={0} RETURN c;")
-        List<Conference> findByPlan(Long id);
+        @Query("MATCH (c:Conference)-[:TARGETS]->(p:Plan) WHERE id(p)=$id RETURN c;")
+        List<Conference> findByPlan( @Param("id") Long id);
 
         @Query("MATCH (n:Conference)<-[oi:OCCURS_IN]-(m:Meeting) "
                         + "OPTIONAL MATCH (m)<-[rel]-(p:Person) "
                         + "OPTIONAL MATCH (m)-[tpa:TAKES_PLACE_AT]->(l:Locality) "
-                        + "WHERE {0} IS NULL OR (n.beginDate <= {0} AND n.endDate >= {0}) AND "
-                        + "({1} IS NULL) OR ({1} IS NOT NULL AND id(p)={1}) "
+                        + "WHERE $date IS NULL OR (n.beginDate <= $date AND n.endDate >= $date) AND "
+                        + "($idPerson IS NULL) OR ($idPerson IS NOT NULL AND id(p)=$idPerson) "
                         + "RETURN n,oi,m,tpa,l "
                         + "ORDER BY n.beginDate")
-        Collection<Conference> findAllWithMeeting(Date date, Long idPerson);
+        Collection<Conference> findAllWithMeeting( @Param("date") Date date, @Param("idPerson") Long idPerson);
 
         @Query("MATCH (conference:Conference)<-[occurs_in:OCCURS_IN]-(meeting:Meeting) " +
                         "WHERE conference.displayMode CONTAINS 'OPEN' " +
                         "AND (meeting.typeMeetingEnum IS NOT NULL AND meeting.typeMeetingEnum <> 'VIRTUAL') " +
                         "MATCH (meeting)-[tpa:TAKES_PLACE_AT]->(locality:Locality)  " +
-                        "WHERE {0} IS NULL OR ( {0} >= meeting.beginDate AND {0} <= meeting.endDate) " +
+                        "WHERE $date IS NULL OR ( $date >= meeting.beginDate AND $date <= meeting.endDate) " +
                         "MATCH (person:Person)-[:IS_RECEPTIONIST_OF *0..]->(meeting) " +
-                        "WHERE ({1} IS NULL) OR ({1} IS NOT NULL AND id(person)={1}) " +
+                        "WHERE ($idPerson IS NULL) OR ($idPerson IS NOT NULL AND id(person)=$idPerson) " +
                         "RETURN conference, occurs_in, meeting, tpa, locality, person " +
                         "ORDER BY conference.name ")
-        Collection<Conference> findAllWithPresentialMeeting(Date date, Long idPerson);
+        Collection<Conference> findAllWithPresentialMeeting( @Param("date") Date date, @Param("idPerson") Long idPerson);
 
         @Query("MATCH (n: Conference ) " +
-                        "WHERE id(n) = {0} " +
+                        "WHERE id(n) = $id " +
                         "WITH n RETURN n," +
                         "[ " +
                         "[ (n)-[r_f1: FEATURES_PARTICIPATION_IMAGE ]->(f1: File ) | [ r_f1, f1 ] ]" +
@@ -91,14 +92,14 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         ", [ (n)-[r_m1: MODERATORS ]->(p1: Person ) | [ r_m1, p1 ] ]" +
                         ", [ (n)<-[r_m1: MADE ]-(s1: SelfDeclaration ) | [ r_m1, s1 ] ] " +
                         "]")
-        Optional<Conference> findByIdFull(Long id);
+        Optional<Conference> findByIdFull( @Param("id") Long id);
 
         @Query("MATCH (c:Conference) WHERE c.displayMode STARTS WITH 'AUTOMATIC' RETURN c")
         List<Conference> findAllAutomatic();
 
-        @Query("MATCH (c:Conference) WHERE id(c) = {0} RETURN c.postClosure")
-        String findPostClosureByIdConference(Long id);
+        @Query("MATCH (c:Conference) WHERE id(c) = $id RETURN c.postClosure")
+        String findPostClosureByIdConference( @Param("id") Long id);
 
-        @Query("MATCH (c:Conference) WHERE ({1} IS NULL OR id(c) = {1}) AND c.name = {0} RETURN c")
-        Conference validateName(String name, Long id);
+        @Query("MATCH (c:Conference) WHERE ($id IS NULL OR id(c) = $id) AND c.name = $name RETURN c")
+        Conference validateName( @Param("name") String name, @Param("id")  Long id);
 }
