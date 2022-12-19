@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -92,7 +93,7 @@ public class ParticipationController {
     PortalHeader header = participationService.header(idPerson, idConference, uriComponentsBuilder);
     return ResponseEntity.status(200).body(header);
   }
-
+ 
   @PostMapping("/portal-header/{idConference}/selfdeclarations/decline")
   public ResponseEntity<PortalHeader> setSurvey(
       @RequestHeader(name = "Authorization") String token,
@@ -109,7 +110,8 @@ public class ParticipationController {
 
     return ResponseEntity.ok(header);
   }
-
+  
+  @Transactional
   @PostMapping("/highlights")
   public ResponseEntity<PlanItemDto> createComment(@RequestHeader(name = "Authorization") String token,
                                                    @RequestBody CommentParamDto commentParamDto) throws Exception{
@@ -182,6 +184,8 @@ public class ParticipationController {
   }
   }
 
+
+  @Transactional
   @PostMapping("/alternative-proposal")
   public ResponseEntity<CommentDto> alternativeProposal(@RequestHeader(name = "Authorization") String token, @RequestBody CommentParamDto commentParamDto) {
     String[] keys = token.split(" ");

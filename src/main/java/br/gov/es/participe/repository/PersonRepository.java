@@ -85,7 +85,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
         " AND ($active IS NULL OR coalesce(p.active,true) = $active) " +
         " AND (aut.name IS NULL OR aut.name CONTAINS ($authentication)) " +
         " AND (id(loc) IN $locality OR NOT $locality) " +
-        " RETURN DISTINCT id(p) AS id, lower(p.name) AS name, p.contactEmail AS email, coalesce(p.active,true) AS active "
+        " RETURN DISTINCT id(p) AS id, toLower(p.name) AS name, p.contactEmail AS email, coalesce(p.active,true) AS active "
         , countQuery =
         " MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
             "MATCH (s)-[:TO]->(c:Conference) " +
@@ -94,7 +94,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             " AND ($active IS NULL OR coalesce(p.active,true) = $active) " +
             " AND (aut.name IS NULL OR aut.name CONTAINS ($authentication)) " +
             " AND (id(loc) IN $locality OR NOT $locality) " +
-            " WITH DISTINCT id(p) AS id, lower(p.name) AS name, p.contactEmail AS email, coalesce(p.active,true) AS active " +
+            " WITH DISTINCT id(p) AS id, toLower(p.name) AS name, p.contactEmail AS email, coalesce(p.active,true) AS active " +
             " RETURN COUNT(*) "
     )
     Page<PersonKeepCitizenDto> findPersonKeepCitizen(
@@ -192,20 +192,20 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
       value = "MATCH (m:Meeting) " +
           "WHERE id(m) = $idMeeting " +
           "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
-          "WHERE ($name IS NULL OR lower(p.name) CONTAINS $name) " +
+          "WHERE ($name IS NULL OR toLower(p.name) CONTAINS $name) " +
           "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
           "WITH p,m,cia,loc " +
           "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
-          "RETURN DISTINCT id(p) AS personId, lower(p.name) AS name, p.contactEmail AS email, " +
+          "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, " +
           "p.telephone AS telephone, cia.time AS checkedInDate",
       countQuery = "MATCH (m:Meeting) " +
           "WHERE id(m) = $idMeeting " +
           "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
-          "WHERE ($name IS NULL OR lower(p.name) CONTAINS $name) " +
+          "WHERE ($name IS NULL OR toLower(p.name) CONTAINS $name) " +
           "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
           "WITH p,m,cia,loc " +
           "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
-          "WITH DISTINCT id(p) AS personId, lower(p.name) AS name, p.contactEmail AS email, " +
+          "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, " +
           "p.telephone AS telephone, cia.time AS checkedInDate " +
           "RETURN COUNT(*)"
   )
@@ -216,7 +216,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "MATCH (m:Meeting) " +
             "WHERE id(m) = $idMeeting " +
             "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
-            "WITH DISTINCT id(p) AS personId, lower(p.name) AS name, p.contactEmail AS email, " +
+            "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, " +
             "p.telephone AS telephone, cia.time AS checkedInDate " +
             "RETURN COUNT(*)"
     )
