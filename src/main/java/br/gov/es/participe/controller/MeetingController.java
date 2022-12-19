@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -117,6 +118,8 @@ public class MeetingController {
     return ResponseEntity.noContent().build();
   }
 
+
+  @Transactional
   @PutMapping("/{id}")
   public ResponseEntity<MeetingDto> update(
       @RequestHeader(name = "Authorization") String token,
@@ -148,6 +151,8 @@ public class MeetingController {
     return ResponseEntity.status(200).body(response);
   }
 */
+
+  @Transactional
   @PostMapping("/checkIn")
   public ResponseEntity<CheckedInAtDto> checkInOnMeeting(
       @RequestHeader(name = "Authorization") String token,
@@ -195,7 +200,7 @@ public class MeetingController {
     return ResponseEntity.ok().body(participantsQuantity);
   }
 
-  
+  @Transactional
   @DeleteMapping("/{meetingId}/remove-participation/{personId}")
   public ResponseEntity<Boolean> removeMeetingParticipation(
       @RequestHeader(name = "Authorization") String token,

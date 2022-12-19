@@ -7,6 +7,7 @@ import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.StructureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class StructureController {
         return ResponseEntity.status(200).body(response);
     }
 
+    @Transactional
     @PostMapping
     @SuppressWarnings("rawtypes")
     public ResponseEntity store(
@@ -54,6 +56,8 @@ public class StructureController {
         return ResponseEntity.status(200).body(response);
     }
 
+
+    @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<StructureDto> update(
             @RequestHeader(name = "Authorization") String token,

@@ -257,7 +257,7 @@ public class MeetingService {
         .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + id));
   }
 
-  @Transactional
+  //@Transactional
   public Meeting update(Meeting meeting, MeetingParamDto meetingParamDto) {
     validate(meeting, meetingParamDto);
 
@@ -425,7 +425,7 @@ public class MeetingService {
     return Collections.emptySet();
   }
 
-  @Transactional
+  //@Transactional
   public Boolean deleteParticipation(Long personId, Long meetingId) {
     Meeting meeting = this.find(meetingId);
     Person person = personService.find(personId);

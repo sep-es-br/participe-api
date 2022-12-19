@@ -42,7 +42,7 @@ public class StructureItemService {
         return structureItems;
     }
 
-    @Transactional
+    //@Transactional
     public StructureItem create(StructureItem structureItem) {
         loadAttributes(structureItem);
 
@@ -57,7 +57,7 @@ public class StructureItemService {
         }
     }
 
-    @Transactional
+    //@Transactional
     public StructureItem update(Long id, StructureItemDto structureItemDto) {
         StructureItem structureItem = find(id);
 

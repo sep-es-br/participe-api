@@ -46,7 +46,7 @@ public class StructureService {
     return structures;
   }
 
-  @Transactional
+  //@Transactional
   public Structure save(Structure structureToSave) {
 
     validate(structureToSave);
@@ -59,7 +59,7 @@ public class StructureService {
     structureToSave.setName(newName);
   }
 
-  @Transactional
+  //@Transactional
   public Structure update(StructureParamDto dto, Long id) {
     Structure structureToUpdate = this.structureRepository
       .findById(id)

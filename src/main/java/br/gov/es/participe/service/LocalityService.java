@@ -70,7 +70,7 @@ public class LocalityService {
         return localities;
     }
 
-    @Transactional
+    //@Transactional
     public Locality create(Locality locality) {
        
         if (locality.getName()== null ||locality.getLatitudeLongitude()== null ) {
@@ -107,7 +107,7 @@ public class LocalityService {
         return localityRepository.save(locality);
     }
 
-    @Transactional
+    //@Transactional
     public Locality update(Long id, LocalityParamDto dto) {
         
         if (dto.getName()== null ||dto.getLatitudeLongitude()== null ) {

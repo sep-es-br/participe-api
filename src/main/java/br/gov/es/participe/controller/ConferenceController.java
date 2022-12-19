@@ -10,6 +10,7 @@ import br.gov.es.participe.util.domain.TokenType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -70,6 +71,7 @@ public class ConferenceController {
     return ResponseEntity.status(200).body(conferenceService.validate(name, id));
   }
 
+  @Transactional
   @PostMapping
   public ResponseEntity<ConferenceDto> store(
       @RequestHeader("Authorization") String token,
@@ -89,6 +91,7 @@ public class ConferenceController {
     return ResponseEntity.status(200).body(response);
   }
 
+  @Transactional
   @PutMapping("/{id}")
   public ResponseEntity<ConferenceDto> update(
       @RequestHeader("Authorization") String token,

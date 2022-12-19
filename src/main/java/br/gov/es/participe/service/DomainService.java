@@ -46,7 +46,7 @@ public class DomainService {
         return domains;
     }
 
-    @Transactional
+    //@Transactional
     public Domain save(Domain domain) {
         if(domain.getName() == null) {
             throw new IllegalArgumentException("Domain name is required");

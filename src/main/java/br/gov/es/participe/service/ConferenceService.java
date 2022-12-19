@@ -212,7 +212,7 @@ public class ConferenceService {
     return null;
   }
 
-  @Transactional
+  //@Transactional
   public ConferenceDto update(Long conferenceId, ConferenceParamDto conferenceParamDto) throws ParseException {
     
      
@@ -230,7 +230,7 @@ public class ConferenceService {
     return ConferenceDto.createConferenceDtoWithoutMeeting(conferenceUpdated);
   }
 
-  @Transactional
+  //@Transactional
   public Conference save(Conference conference, ConferenceParamDto param) throws ParseException {
     
     if (param.getName()== null)  {

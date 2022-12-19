@@ -70,7 +70,7 @@ public class PlanService {
         return planRepository.findByDomain(id);
     }
     
-    @Transactional
+    //@Transactional
     public Plan save(Plan plan) {
         if (plan.getId() != null) {
             Plan oldPlan = find(plan.getId());

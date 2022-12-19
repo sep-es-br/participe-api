@@ -50,7 +50,7 @@ public class FileService {
         return new UrlResource(uri);
     }
 
-    @Transactional
+    //@Transactional
     public FileDto save(MultipartFile multipartFile) throws IOException {
         br.gov.es.participe.model.File file = new br.gov.es.participe.model.File();
         file.setName(multipartFile.getOriginalFilename());
