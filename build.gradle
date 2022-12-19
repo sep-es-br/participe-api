@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.2.0.RELEASE'
+	id 'org.springframework.boot' version '2.2.12.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 	id 'java'
 	id 'org.sonarqube' version '2.7'
@@ -8,9 +8,8 @@ plugins {
 
 group = 'br.gov.es'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
+sourceCompatibility = '11'
 
-def junitJupiterVersion = '5.4.2'
 
 repositories {
 	mavenCentral()
@@ -20,6 +19,11 @@ repositories {
 }
 
 dependencies {
+
+	implementation 'org.springframework.data:spring-data-neo4j:5.2.12.RELEASE'
+    implementation 'org.neo4j:neo4j-ogm-core:3.2.18'
+    implementation 'org.neo4j:neo4j-ogm-bolt-driver:3.2.18'
+
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.3.3'
 	implementation group: 'org.springframework.social', name: 'spring-social-web', version: '2.0.0.M4'
@@ -31,30 +35,15 @@ dependencies {
 	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 
 	implementation 'javax.xml.bind:jaxb-api:2.2.11'
-	implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
+//	implementation 'org.neo4j.driver:neo4j-java-driver:5.0.0'
+//	implementation 'org.springframework.boot:spring-boot-starter-data-neo4j:2.7.4'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'io.jsonwebtoken:jjwt:0.7.0'
-	implementation 'javax.xml.bind:jaxb-api:2.2.11'
 	implementation 'org.json:json:20190722';
 	implementation 'org.apache.httpcomponents:httpclient:4.5.12';
 
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
 	implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.3.3'
-
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
-	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
-	testImplementation "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
-	testImplementation "org.testcontainers:testcontainers:1.12.5"
-	testImplementation "org.testcontainers:junit-jupiter:1.12.5"
-	testImplementation "org.testcontainers:neo4j:1.12.5"
-}
-
-test {
-	exclude 'br/gov/es/participe/**'
-	useJUnitPlatform()
 }

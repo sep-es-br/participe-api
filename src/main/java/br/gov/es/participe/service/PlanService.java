@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -65,7 +66,7 @@ public class PlanService {
     	return planRepository.findByPlanItem(id);
     }
 
-    public List<Plan> findByDomain(Long id) {
+    public Collection<Plan> findByDomain(Long id) {
         return planRepository.findByDomain(id);
     }
     

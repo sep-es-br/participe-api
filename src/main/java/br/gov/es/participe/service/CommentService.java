@@ -19,12 +19,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.validator.internal.util.stereotypes.ThreadSafe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.gov.es.participe.controller.dto.ModerationFilterDto;
@@ -203,7 +206,7 @@ public class CommentService {
     return commentRepository.countCommentByConference(id);
   }
 
-  @Transactional
+  //@Transactional
   public Comment save(Comment comment, Long idPerson, Boolean usePlanItem) {
 
     if(comment.getConference() == null){
@@ -495,7 +498,9 @@ public class CommentService {
     return commentRepository.findPersonLiked(idComment);
   }
 
-  @Transactional
+  /*
+
+  @Transactional(isolation=Isolation.READ_COMMITTED)
   public Comment begin(Comment comment, Long idModerator) {
     Person moderator = personService.find(idModerator);
     final boolean adm = moderator.getRoles() != null && moderator.getRoles().contains(ADMINISTRATOR);
@@ -519,8 +524,37 @@ public class CommentService {
     return moderatedBy.getComment();
 
   }
+ */
 
-  @Transactional
+  //@Transactional
+  public ModerationResultDto begin(Long idComment, Long idModerator) {
+
+      Comment comment = find(idComment);
+      Person moderator = personService.find(idModerator);
+      final boolean adm = moderator.getRoles() != null && moderator.getRoles().contains(ADMINISTRATOR);
+      ModeratedBy moderatedBy = moderatedByRepository.findByComment(comment);
+      if (moderatedBy != null) {
+        if (!moderatedBy.getPerson().getId().equals(moderator.getId())) {
+          if (moderatedBy.getFinish() != null && !moderatedBy.getFinish() && !adm) {
+            throw new IllegalArgumentException("moderation.comment.error.moderator");
+          }
+          moderatedByRepository.delete(moderatedBy);
+          moderatedBy = new ModeratedBy(false, new Date(), comment, moderator);
+        }
+        moderatedBy.setFinish(false);
+        moderatedBy.setTime(new Date());
+      } else {
+        moderatedBy = new ModeratedBy(false, new Date(), comment, moderator);
+      }
+      
+      moderatedBy = moderatedByRepository.save(moderatedBy);
+  
+      return findModerationResultById(comment.getId(),comment.getConference().getId());
+    
+  }
+
+
+  //@Transactional
   public Comment end(Comment comment, Long idModerator) {
     Person moderator = personService.find(idModerator);
     ModeratedBy moderatedBy = moderatedByRepository.findByComment(comment);
@@ -533,7 +567,7 @@ public class CommentService {
     return comment;
   }
 
-  @Transactional
+  //@Transactional
   public Comment update(Comment comment, ModerationParamDto moderationParamDto, Long idModerator) {
     
     if (comment == null) {

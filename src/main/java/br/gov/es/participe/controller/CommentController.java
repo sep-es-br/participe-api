@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,6 +57,7 @@ public class CommentController {
 		return ResponseEntity.status(200).body(response);
 	}
 
+	@Transactional
 	@PostMapping
 	public ResponseEntity<CommentDto> store(
 			@RequestHeader(name = "Authorization") String token,
@@ -72,6 +74,7 @@ public class CommentController {
 		return ResponseEntity.status(200).body(response);
 	}
 
+	@Transactional
 	@PostMapping("/fatherPlanItem")
 	public ResponseEntity<CommentDto> storeFatherPlanItemNode(
 			@RequestHeader("Authorization") String token,

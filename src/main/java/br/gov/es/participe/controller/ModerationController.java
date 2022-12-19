@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -145,6 +146,7 @@ public class ModerationController {
     return ResponseEntity.status(200).body(response);
   }
 
+  @Transactional
   @PutMapping("/{id}")
   public ResponseEntity<ModerationResultDto> update(@PathVariable Long id,
       @RequestHeader(name = "Authorization") String token,
@@ -164,6 +166,7 @@ public class ModerationController {
     return ResponseEntity.status(200).body(moderation);
   }
 
+  @Transactional
   @PutMapping("/begin/{id}")
   public ResponseEntity<ModerationResultDto> begin(
       @PathVariable Long id,
@@ -173,13 +176,13 @@ public class ModerationController {
       return ResponseEntity.status(401).body(null);
     }
     Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
-    Comment comment = commentService.find(id);
-    commentService.begin(comment, idPerson);
-    ModerationResultDto moderation = commentService.findModerationResultById(comment.getId(),
-        comment.getConference().getId());
+   // Comment comment = commentService.find(id);
+    //commentService.begin(id, idPerson);
+    ModerationResultDto moderation = commentService.begin(id, idPerson);
     return ResponseEntity.status(200).body(moderation);
   }
 
+  @Transactional
   @PutMapping("/end/{id}")
   public ResponseEntity<ModerationResultDto> end(
       @PathVariable Long id,
