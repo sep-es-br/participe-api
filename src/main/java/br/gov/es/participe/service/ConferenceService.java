@@ -629,8 +629,16 @@ public class ConferenceService {
     }
   }
 
-  public List<Conference> findAllWithPresentialMeetings(Date date, Long idPerson) {
-    List<Conference> conferences = new ArrayList<>(this.conferenceRepository.findAllWithPresentialMeeting(date, idPerson));
+  public List<Conference> findAllOpenWithPresentialMeetings4Admins() {
+    List<Conference> conferences = new ArrayList<>(this.conferenceRepository.findAllOpenWithPresentialMeeting4Admins());
+
+    this.removeUnusableFields(conferences);
+
+    return conferences;
+  }
+
+  public List<Conference> findAllOpenWithPresentialMeetings4Receptionists(Date date, Long idPerson) {
+    List<Conference> conferences = new ArrayList<>(this.conferenceRepository.findAllOpenWithPresentialMeeting4Receptionists(date, idPerson));
 
     this.removeUnusableFields(conferences);
 

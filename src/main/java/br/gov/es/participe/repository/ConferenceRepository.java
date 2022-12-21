@@ -61,16 +61,22 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         + "ORDER BY n.beginDate")
         Collection<Conference> findAllWithMeeting( @Param("date") Date date, @Param("idPerson") Long idPerson);
 
-        @Query("MATCH (conference:Conference)<-[occurs_in:OCCURS_IN]-(meeting:Meeting) " +
-                        "WHERE conference.displayMode CONTAINS 'OPEN' " +
-                        "AND (meeting.typeMeetingEnum IS NOT NULL AND meeting.typeMeetingEnum <> 'VIRTUAL') " +
-                        "MATCH (meeting)-[tpa:TAKES_PLACE_AT]->(locality:Locality)  " +
-                        "WHERE $date IS NULL OR ( $date >= meeting.beginDate AND $date <= meeting.endDate) " +
-                        "MATCH (person:Person)-[:IS_RECEPTIONIST_OF *0..]->(meeting) " +
-                        "WHERE ($idPerson IS NULL) OR ($idPerson IS NOT NULL AND id(person)=$idPerson) " +
-                        "RETURN conference, occurs_in, meeting, tpa, locality, person " +
-                        "ORDER BY conference.name ")
-        Collection<Conference> findAllWithPresentialMeeting( @Param("date") Date date, @Param("idPerson") Long idPerson);
+        @Query("MATCH (conference:Conference)<-[occurs_in:OCCURS_IN]-(meeting:Meeting)-[tpa:TAKES_PLACE_AT]->(locality:Locality) " +
+                "WHERE conference.displayMode CONTAINS 'OPEN' " +
+                "AND (meeting.typeMeetingEnum IS NOT NULL AND meeting.typeMeetingEnum <> 'VIRTUAL') " +
+                "RETURN conference, occurs_in, meeting, tpa, locality " +
+                "ORDER BY conference.name ")
+        Collection<Conference> findAllOpenWithPresentialMeeting4Admins();
+
+        @Query("MATCH (conference:Conference)<-[occurs_in:OCCURS_IN]-(meeting:Meeting)-[tpa:TAKES_PLACE_AT]->(locality:Locality), " +
+                     "(person:Person)-[:IS_RECEPTIONIST_OF]->(meeting) " +
+                "WHERE conference.displayMode CONTAINS 'OPEN' " +
+                "AND (meeting.typeMeetingEnum <> 'VIRTUAL') " +
+                "AND ($date >= meeting.beginDate AND $date <= meeting.endDate) " +
+                "AND (id(person)=$idPerson) " +
+                "RETURN conference, occurs_in, meeting, tpa, locality, person " +
+                "ORDER BY conference.name ")
+        Collection<Conference> findAllOpenWithPresentialMeeting4Receptionists( @Param("date") Date date, @Param("idPerson") Long idPerson);
 
         @Query("MATCH (n: Conference ) " +
                         "WHERE id(n) = $id " +

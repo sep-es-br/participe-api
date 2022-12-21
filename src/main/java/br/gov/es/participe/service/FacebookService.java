@@ -1,7 +1,5 @@
 package br.gov.es.participe.service;
 
-import br.gov.es.participe.configuration.FacebookProfileProperties;
-import br.gov.es.participe.configuration.FacebookProperties;
 import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
 import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
 import br.gov.es.participe.controller.dto.SigninDto;
@@ -9,7 +7,6 @@ import br.gov.es.participe.model.Person;
 import br.gov.es.participe.util.domain.TokenType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.User;
 import org.springframework.social.facebook.api.impl.FacebookTemplate;
@@ -20,21 +17,20 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 @Service
-@PropertySource(name = "social", value = "classpath:/social-cfg.properties")
 public class FacebookService {
 
   private static final String SERVER = "Facebook";
 
-  @Value("#{environment.getProperty('facebook.app.id')}")
+  @Value("${spring.security.oauth2.client.registration.facebook.client-id}")
   private String facebookId;
 
-  @Value("#{environment.getProperty('facebook.app.secret')}")
+  @Value("${spring.security.oauth2.client.registration.facebook.client-secret}")
   private String facebookSecret;
 
-  @Value("#{environment.getProperty('facebook.scope')}")
+  @Value("${spring.security.oauth2.client.registration.facebook.scope}")
   private String facebookScope;
 
-  @Value("#{environment.getProperty('facebook.app.user.fields')}")
+  @Value("${spring.security.oauth2.client.registration.facebook.user-fields}")
   private String[] facebookFields;
 
   @Autowired
@@ -43,11 +39,11 @@ public class FacebookService {
   @Autowired
   private TokenService tokenService;
 
-  @Autowired
-  private FacebookProperties facebookProperties;
+  @Value("${spring.security.oauth2.client.registration.facebook.redirect-uri}")
+  private String facebookRedirectUri;
 
-  @Autowired
-  private FacebookProfileProperties facebookProfileProperties;
+  @Value("${spring.security.oauth2.client.registration.facebook-profile.redirect-uri}")
+  private String facebookProfileRedirectUri;
 
   public String facebookAccessToken(
     String authorizationCode,
@@ -56,7 +52,7 @@ public class FacebookService {
   ) {
     return createFacebookConnection().getOAuthOperations().exchangeForAccess(
       authorizationCode,
-      facebookProperties.getRedirecturi(),
+      facebookRedirectUri,
       null
     ).getAccessToken();
   }
@@ -66,7 +62,7 @@ public class FacebookService {
   ) {
     return createFacebookConnection().getOAuthOperations().exchangeForAccess(
         authorizationCode,
-        facebookProfileProperties.getRedirecturi(),
+        facebookProfileRedirectUri,
         null
     ).getAccessToken();
   }
