@@ -110,8 +110,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 	@Query(" WITH" +
 			" $idConference AS Conference_Id," +
-			" $microregionChartAgroupm AS LocalityTypeGrouping_Id," +
-			" $icroregionLocalitySelected AS SelectedLocality_Id," +
+			" $microregionChartAgroup AS LocalityTypeGrouping_Id," +
+			" $microregionLocalitySelected AS SelectedLocality_Id," +
 			" $structureItemPlanSelected AS SelectedPlanItem_Id" +
 
 			" MATCH (conf:Conference) WHERE id(conf) = Conference_Id" +
@@ -176,7 +176,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" ELSE count(distinct pp)" +
 			" END as quantityParticipation")
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationRemotoAgroup(
-		@Param("idConference") Long idConference, @Param("microregionChartAgroupm") Long microregionChartAgroupm, @Param("icroregionLocalitySelected") Long icroregionLocalitySelected,
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected);
 
 	@Query(" WITH" +
@@ -218,7 +218,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationRemotoPlanItemAgroup(
 		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, @Param("structureItemPlanSelected") Long structureItemPlanSelected);
 
-	@Query(" WITH $idConference AS Conference_Id,$microregionChartAgroupm AS LocalityTypeGrouping_Id,$icroregionLocalitySelected AS SelectedLocality_Id,$structureItemPlanSelected AS SelectedPlanItem_Id,$meetings AS Meeting_List "
+	@Query(" WITH $idConference AS Conference_Id,$microregionChartAgroup AS LocalityTypeGrouping_Id,$microregionLocalitySelected AS SelectedLocality_Id,$structureItemPlanSelected AS SelectedPlanItem_Id,$meetings AS Meeting_List "
 			+
 			" MATCH(p:Person)-[:CHECKED_IN_AT]->(me:Meeting)-[:OCCURS_IN]->(conf:Conference),(p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(conf) "
 			+
@@ -241,7 +241,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" ELSE count(distinct pp) " +
 			" END as quantityParticipation ")
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationPresenteAgroup(
-		@Param("idConference") Long idConference, @Param("microregionChartAgroupm") Long microregionChartAgroupm, @Param("icroregionLocalitySelected") Long icroregionLocalitySelected,
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
 
 	@Query(
@@ -249,7 +249,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	" WITH" +
 			" $idConference AS Conference_Id," +
 			" $microregionLocalitySelected AS SelectedLocality_Id," +
-			" $tructureItemPlanSelected AS SelectedPlanItem_Id," +
+			" $structureItemPlanSelected AS SelectedPlanItem_Id," +
 			" $meetings AS Meeting_List" +
 
 			" MATCH" +
@@ -294,7 +294,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	@Query(" WITH" +
 			" $idConference AS Conference_Id," +
 			" $microregionChartAgroup AS LocalityTypeGrouping_Id," +
-			" $icroregionLocalitySelected AS SelectedLocality_Id," +
+			" $microregionLocalitySelected AS SelectedLocality_Id," +
 			" $structureItemPlanSelected AS SelectedPlanItem_Id" +
 
 			" MATCH" +
@@ -319,13 +319,13 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" parentLoc.name as name," +
 			" count(distinct a) as quantityHighlight")
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightAllAgroup(
-		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("icroregionLocalitySelected") Long icroregionLocalitySelected,
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected);
 
 	@Query(" WITH" +
 			" $idConference AS Conference_Id," +
 			" $microregionChartAgroup AS LocalityTypeGrouping_Id," +
-			" $icroregionLocalitySelected AS SelectedLocality_Id," +
+			" $microregionLocalitySelected AS SelectedLocality_Id," +
 			" $structureItemPlanSelected AS SelectedPlanItem_Id" +
 
 			" MATCH" +
@@ -351,7 +351,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" parentLoc.name as name," +
 			" count(distinct a) as quantityHighlight")
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightRemotoAgroup(
-		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("icroregionLocalitySelected") Long icroregionLocalitySelected,
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected);
 
 	@Query(
@@ -359,7 +359,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	" WITH" +
 			" $idConference AS Conference_Id," +
 			" $microregionChartAgroup AS LocalityTypeGrouping_Id," +
-			" $icroregionLocalitySelected AS SelectedLocality_Id," +
+			" $microregionLocalitySelected AS SelectedLocality_Id," +
 			" $structureItemPlanSelected AS SelectedPlanItem_Id," +
 			" $meetings AS Meeting_List" +
 
@@ -390,7 +390,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 	)
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightPresenteAgroup(
-		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("icroregionLocalitySelected") Long icroregionLocalitySelected,
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
 
 	@Query(" WITH" +
@@ -543,8 +543,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 	" WITH" +
 			" $idConference AS Conference_Id," +
-			" $microregionChartAgroupm AS LocalityTypeGrouping_Id," +
-			" $icroregionLocalitySelected AS SelectedLocality_Id," +
+			" $microregionChartAgroup AS LocalityTypeGrouping_Id," +
+			" $microregionLocalitySelected AS SelectedLocality_Id," +
 			" $structureItemPlanSelected AS SelectedPlanItem_Id" +
 
 			" MATCH" +
@@ -571,7 +571,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 	)
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsAllAgroup(
-		@Param("idConference") Long idConference, @Param("microregionChartAgroupm") Long microregionChartAgroupm, @Param("icroregionLocalitySelected") Long icroregionLocalitySelected,
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected);
 
 	@Query(
@@ -626,8 +626,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 	@Query(" WITH" +
 			" $idConference AS Conference_Id," +
-			" $microregionChartAgroupm AS LocalityTypeGrouping_Id," +
-			" $icroregionLocalitySelected AS SelectedLocality_Id," +
+			" $microregionChartAgroup AS LocalityTypeGrouping_Id," +
+			" microregionLocalitySelected AS SelectedLocality_Id," +
 			" $structureItemPlanSelected AS SelectedPlanItem_Id" +
 
 			" MATCH" +
@@ -653,7 +653,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" parentLoc.name as name," +
 			" count(distinct a) as quantityComment")
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsRemotoAgroup(
-		@Param("idConference") Long idConference, @Param("microregionChartAgroupm") Long microregionChartAgroupm, @Param("icroregionLocalitySelected") Long icroregionLocalitySelected,
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected);
 
 	@Query(
@@ -706,8 +706,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 	@Query(" WITH" +
 			" $idConference AS Conference_Id," +
-			" $microregionChartAgroupm AS LocalityTypeGrouping_Id," +
-			" $icroregionLocalitySelected AS SelectedLocality_Id," +
+			" $microregionChartAgroup AS LocalityTypeGrouping_Id," +
+			" $microregionLocalitySelected AS SelectedLocality_Id," +
 			" $structureItemPlanSelected AS SelectedPlanItem_Id," +
 			" $meetings AS Meeting_List" +
 
@@ -736,7 +736,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" parentLoc.name as name," +
 			" count(distinct a) as quantityComment")
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsPresenteAgroup(
-		@Param("idConference") Long idConference, @Param("microregionChartAgroupm") Long microregionChartAgroupm, @Param("icroregionLocalitySelected") Long icroregionLocalitySelected,
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
 
 	@Query(" WITH" +

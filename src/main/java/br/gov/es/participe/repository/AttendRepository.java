@@ -129,13 +129,7 @@ Integer countLocalityByConferenceAndType(@Param("idConference")Long idConference
   
 @Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) "+ 
        " where id(co)=$idConference "+
-       " WITH collect(p) AS personLogin "+
-       " match (p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) "+  
-       " where id(co)=$idConference "+
-       " WITH collect(p) AS personCkeckedIn, personLogin "+
-       " WITH apoc.coll.toSet(personCkeckedIn + personLogin) AS person "+
-       " UNWIND person AS p "+
-       " RETURN count(DISTINCT p.contactEmail) as c ")
+       " RETURN count(DISTINCT p) as c ")
 Integer countParticipationAllOriginsByConference( @Param("idConference") Long idConference);
 
   
