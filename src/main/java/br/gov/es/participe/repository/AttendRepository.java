@@ -127,9 +127,13 @@ Integer countLocalityByConferenceAndType(@Param("idConference")Long idConference
   Integer countParticipationAllOriginsByConference(Long idConference);
   */
   
-@Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) "+ 
-       " where id(co)=$idConference "+
-       " RETURN count(DISTINCT p) as c ")
+@Query(" match (co:Conference)<-[:TO]-(s:SelfDeclaration)<-[:MADE]-(p:Person) " +
+       " where id(co) = $idConference " +
+       " optional match (p)-[:MADE]->(lo:Login)-[:TO]->(co) " +
+       " optional match (p)-[:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " +
+       " with count(lo) as countlo, count(m) as countm, p as participant " +
+       " where countlo > 0 or countm > 0 " +
+       " return count(distinct participant) ")
 Integer countParticipationAllOriginsByConference( @Param("idConference") Long idConference);
 
   
