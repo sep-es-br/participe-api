@@ -29,6 +29,8 @@ public class Meeting extends Entity implements Serializable {
 
   private String place;
 
+  private String listaPresenca;
+
   @Relationship(type = "TAKES_PLACE_AT")
   private Locality localityPlace;
 
@@ -91,6 +93,7 @@ public class Meeting extends Entity implements Serializable {
     this.conference = new Conference(meeting.getConferenceAsDto());
     this.endDate = meeting.getEndDate();
     this.beginDate = meeting.getBeginDate();
+    this.listaPresenca = meeting.getListaPresenca();
 
     if (meeting.getLocalityCovers() != null && !meeting.getLocalityCovers().isEmpty()) {
       this.localityCovers = new HashSet<>();
@@ -117,6 +120,15 @@ public class Meeting extends Entity implements Serializable {
   public void setName(String name) {
     this.name = name;
   }
+
+
+  public String getListaPresenca() {
+		return listaPresenca;
+	}
+
+	public void setListaPresenca(String listaPresenca) {
+		this.listaPresenca = listaPresenca;
+	}
 
   public Date getBeginDate() {
     return beginDate;

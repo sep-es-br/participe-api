@@ -266,6 +266,7 @@ public class MeetingService {
     meeting.setPlace(meetingParamDto.getPlace());
     meeting.setBeginDate(meetingParamDto.getBeginDate());
     meeting.setEndDate(meetingParamDto.getEndDate());
+    meeting.setListaPresenca(meetingParamDto.getListaPresenca());
 
     updateRelationships(meeting, meetingParamDto);
 

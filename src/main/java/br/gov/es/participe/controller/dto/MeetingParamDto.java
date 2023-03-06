@@ -26,9 +26,20 @@ public class MeetingParamDto {
 	private List<ChannelDto> channels;
 	private TypeMeetingEnum type;
 	private List<Long> segmentations;
+    private String listaPresenca;
+
 
 	public MeetingParamDto() {
 
+	}
+
+
+	public String getListaPresenca() {
+		return listaPresenca;
+	}
+
+	public void setListaPresenca(String listaPresenca) {
+		this.listaPresenca = listaPresenca;
 	}
 
 	public List<Long> getSegmentations() {

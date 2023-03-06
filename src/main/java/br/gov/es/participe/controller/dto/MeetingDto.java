@@ -31,10 +31,14 @@ public class MeetingDto {
   private List<PersonDto> participants;
   private List<ChannelDto> channels;
   private List<PlanItemDto> segmentations;
+  private String listaPresenca;
 
   public MeetingDto() {
 
   }
+
+
+
 
   public MeetingDto(Meeting meeting) {
     loadMeetingDto(meeting, true);
@@ -101,6 +105,15 @@ public class MeetingDto {
   public void setId(Long id) {
     this.id = id;
   }
+
+
+	public String getListaPresenca() {
+		return listaPresenca;
+	}
+
+	public void setListaPresenca(String listaPresenca) {
+		this.listaPresenca = listaPresenca;
+	}
 
   public String getName() {
     return name;
