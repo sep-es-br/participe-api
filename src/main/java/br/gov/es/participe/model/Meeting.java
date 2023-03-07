@@ -2,6 +2,7 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.MeetingDto;
 import br.gov.es.participe.controller.dto.MeetingParamDto;
+import br.gov.es.participe.enumerator.AttendanceListEnum;
 import br.gov.es.participe.enumerator.TypeMeetingEnum;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
@@ -25,11 +26,12 @@ public class Meeting extends Entity implements Serializable {
 
   private TypeMeetingEnum typeMeetingEnum;
 
+  private AttendanceListEnum attendanceListEnum;
+
   private String address;
 
   private String place;
 
-  private String listaPresenca;
 
   @Relationship(type = "TAKES_PLACE_AT")
   private Locality localityPlace;
@@ -93,7 +95,6 @@ public class Meeting extends Entity implements Serializable {
     this.conference = new Conference(meeting.getConferenceAsDto());
     this.endDate = meeting.getEndDate();
     this.beginDate = meeting.getBeginDate();
-    this.listaPresenca = meeting.getListaPresenca();
 
     if (meeting.getLocalityCovers() != null && !meeting.getLocalityCovers().isEmpty()) {
       this.localityCovers = new HashSet<>();
@@ -122,13 +123,7 @@ public class Meeting extends Entity implements Serializable {
   }
 
 
-  public String getListaPresenca() {
-		return listaPresenca;
-	}
-
-	public void setListaPresenca(String listaPresenca) {
-		this.listaPresenca = listaPresenca;
-	}
+ 
 
   public Date getBeginDate() {
     return beginDate;
@@ -229,6 +224,16 @@ public class Meeting extends Entity implements Serializable {
   public void setTypeMeetingEnum(TypeMeetingEnum typeMeetingEnum) {
     this.typeMeetingEnum = typeMeetingEnum;
   }
+
+  public AttendanceListEnum getAttendanceListEnum() {
+    return attendanceListEnum;
+  }
+
+  public void setAttendanceListEnum(AttendanceListEnum attendanceListEnum) {
+    this.attendanceListEnum = attendanceListEnum;
+  }
+
+
 
   public Set<Channel> getChannels() {
     if (this.channels == null) {

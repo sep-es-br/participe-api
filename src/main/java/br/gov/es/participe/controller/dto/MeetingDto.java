@@ -1,5 +1,6 @@
 package br.gov.es.participe.controller.dto;
 
+import br.gov.es.participe.enumerator.AttendanceListEnum;
 import br.gov.es.participe.enumerator.TypeMeetingEnum;
 import br.gov.es.participe.model.Meeting;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -19,6 +20,8 @@ public class MeetingDto {
   private List<LocalityDto> localityCovers;
   private ConferenceDto conference;
   private TypeMeetingEnum typeMeetingEnum;
+  private AttendanceListEnum attendanceListEnum;
+
 
   private String showChannels;
 
@@ -31,7 +34,7 @@ public class MeetingDto {
   private List<PersonDto> participants;
   private List<ChannelDto> channels;
   private List<PlanItemDto> segmentations;
-  private String listaPresenca;
+ 
 
   public MeetingDto() {
 
@@ -58,6 +61,7 @@ public class MeetingDto {
     this.endDate = meeting.getEndDate();
     this.beginDate = meeting.getBeginDate();
     this.typeMeetingEnum = meeting.getTypeMeetingEnum();
+    this.attendanceListEnum = meeting.getAttendanceListEnum();
 
     if(loadConference && meeting.getConference() != null) {
       this.conference = new ConferenceDto(meeting.getConference());
@@ -105,15 +109,6 @@ public class MeetingDto {
   public void setId(Long id) {
     this.id = id;
   }
-
-
-	public String getListaPresenca() {
-		return listaPresenca;
-	}
-
-	public void setListaPresenca(String listaPresenca) {
-		this.listaPresenca = listaPresenca;
-	}
 
   public String getName() {
     return name;
@@ -209,6 +204,15 @@ public class MeetingDto {
 
   public void setTypeMeetingEnum(TypeMeetingEnum typeMeetingEnum) {
     this.typeMeetingEnum = typeMeetingEnum;
+  }
+
+
+  public AttendanceListEnum getAttendanceListEnum() {
+    return attendanceListEnum;
+  }
+
+  public void setAttendanceListEnum(AttendanceListEnum attendanceListEnum) {
+    this.attendanceListEnum = attendanceListEnum;
   }
 
   public String getShowChannels() {

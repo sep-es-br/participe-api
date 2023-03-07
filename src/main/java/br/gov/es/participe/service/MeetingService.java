@@ -183,6 +183,7 @@ public class MeetingService {
     meeting.setConference(conference);
     meeting.setPlanItems(planItems);
     meeting.setTypeMeetingEnum(meetingParamDto.getType());
+    meeting.setAttendanceListEnum(meetingParamDto.getAttendanceListEnum());
     meeting.setLocalityCovers(localityCovers);
 
     Meeting meetingResponse = meetingRepository.save(meeting);
@@ -266,7 +267,7 @@ public class MeetingService {
     meeting.setPlace(meetingParamDto.getPlace());
     meeting.setBeginDate(meetingParamDto.getBeginDate());
     meeting.setEndDate(meetingParamDto.getEndDate());
-    meeting.setListaPresenca(meetingParamDto.getListaPresenca());
+    meeting.setAttendanceListEnum(meetingParamDto.getAttendanceListEnum());
 
     updateRelationships(meeting, meetingParamDto);
 
