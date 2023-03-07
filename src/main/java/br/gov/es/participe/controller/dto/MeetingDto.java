@@ -20,7 +20,7 @@ public class MeetingDto {
   private List<LocalityDto> localityCovers;
   private ConferenceDto conference;
   private TypeMeetingEnum typeMeetingEnum;
-  private AttendanceListEnum attendanceListEnum;
+  private AttendanceListEnum attendanceListMode;
 
 
   private String showChannels;
@@ -61,7 +61,7 @@ public class MeetingDto {
     this.endDate = meeting.getEndDate();
     this.beginDate = meeting.getBeginDate();
     this.typeMeetingEnum = meeting.getTypeMeetingEnum();
-    this.attendanceListEnum = meeting.getAttendanceListEnum();
+    this.attendanceListMode = meeting.getAttendanceListMode();
 
     if(loadConference && meeting.getConference() != null) {
       this.conference = new ConferenceDto(meeting.getConference());
@@ -207,12 +207,12 @@ public class MeetingDto {
   }
 
 
-  public AttendanceListEnum getAttendanceListEnum() {
-    return attendanceListEnum;
+  public AttendanceListEnum getAttendanceListMode() {
+    return attendanceListMode;
   }
 
-  public void setAttendanceListEnum(AttendanceListEnum attendanceListEnum) {
-    this.attendanceListEnum = attendanceListEnum;
+  public void setAttendanceListMode(AttendanceListEnum attendanceListMode) {
+    this.attendanceListMode = attendanceListMode;
   }
 
   public String getShowChannels() {

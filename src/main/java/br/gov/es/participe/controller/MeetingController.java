@@ -136,7 +136,7 @@ public class MeetingController {
     }
   }
 
-  /* 
+  
   @DeleteMapping("/{id}")
   public ResponseEntity<Boolean> destroy(
       @RequestHeader(name = "Authorization") String token,
@@ -147,7 +147,7 @@ public class MeetingController {
     Boolean response = meetingService.delete(id);
     return ResponseEntity.status(200).body(response);
   }
-*/
+
   @PostMapping("/checkIn")
   public ResponseEntity<CheckedInAtDto> checkInOnMeeting(
       @RequestHeader(name = "Authorization") String token,

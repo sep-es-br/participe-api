@@ -26,7 +26,7 @@ public class Meeting extends Entity implements Serializable {
 
   private TypeMeetingEnum typeMeetingEnum;
 
-  private AttendanceListEnum attendanceListEnum;
+  private AttendanceListEnum attendanceListMode;
 
   private String address;
 
@@ -225,12 +225,12 @@ public class Meeting extends Entity implements Serializable {
     this.typeMeetingEnum = typeMeetingEnum;
   }
 
-  public AttendanceListEnum getAttendanceListEnum() {
-    return attendanceListEnum;
+  public AttendanceListEnum getAttendanceListMode() {
+    return attendanceListMode;
   }
 
-  public void setAttendanceListEnum(AttendanceListEnum attendanceListEnum) {
-    this.attendanceListEnum = attendanceListEnum;
+  public void setAttendanceListMode(AttendanceListEnum attendanceListMode) {
+    this.attendanceListMode = attendanceListMode;
   }
 
 

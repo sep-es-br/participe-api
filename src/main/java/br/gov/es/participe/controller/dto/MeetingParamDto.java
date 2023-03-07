@@ -27,7 +27,7 @@ public class MeetingParamDto {
 	private List<ChannelDto> channels;
 	private TypeMeetingEnum type;
 	private List<Long> segmentations;
-	private AttendanceListEnum attendanceListEnum;
+	private AttendanceListEnum attendanceListMode;
   
 
 
@@ -37,12 +37,12 @@ public class MeetingParamDto {
 
 
 
-	public AttendanceListEnum getAttendanceListEnum() {
-		return attendanceListEnum;
+	public AttendanceListEnum getAttendanceListMode() {
+		return attendanceListMode;
 	  }
 	
-	  public void setAttendanceListEnum(AttendanceListEnum attendanceListEnum) {
-		this.attendanceListEnum = attendanceListEnum;
+	  public void setAttendanceListMode(AttendanceListEnum attendanceListMode) {
+		this.attendanceListMode = attendanceListMode;
 	  }
 	
 	
