@@ -102,7 +102,7 @@ public class ConferenceController {
     return ResponseEntity.status(200).body(response);
   }
 
-  /* 
+  
   @DeleteMapping("/{id}")
   public ResponseEntity<Boolean> destroy(
       @RequestHeader("Authorization") String token,
@@ -113,7 +113,7 @@ public class ConferenceController {
     Boolean response = conferenceService.delete(id);
     return ResponseEntity.status(200).body(response);
   }
-*/
+
   @GetMapping("/AuthenticationScreen/{id}")
   public ResponseEntity<AuthenticationScreenDto> getAuthenticationScreen(@PathVariable Long id,
       UriComponentsBuilder uriComponentsBuilder) {

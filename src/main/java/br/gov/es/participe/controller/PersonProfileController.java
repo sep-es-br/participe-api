@@ -60,7 +60,7 @@ public class PersonProfileController {
       return ResponseEntity.status(401).body(null);
     }
   }
-/* 
+
   @PutMapping("/merge/{personIdToMerge}")
   public ResponseEntity<PersonParamDto> findPersonById(
       @RequestHeader(name = "Authorization") String token,
@@ -75,7 +75,7 @@ public class PersonProfileController {
       return ResponseEntity.status(401).body(null);
     }
   }
-*/
+
   @PutMapping("/{personId}")
   public ResponseEntity<PersonProfileSearchDto> updatePerson(
       @RequestHeader(name = "Authorization") String token,

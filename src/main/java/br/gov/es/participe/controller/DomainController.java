@@ -80,7 +80,7 @@ public class DomainController {
         DomainDto response = new DomainDto(domainService.save(domain), true);
         return ResponseEntity.status(200).body(response);
     }
-/*
+
     @DeleteMapping("/{id}")
     @SuppressWarnings({ "rawtypes" })
     public ResponseEntity destroy(
@@ -92,5 +92,5 @@ public class DomainController {
         domainService.delete(id);
         return ResponseEntity.status(200).build();
     }
-     */
+     
 }

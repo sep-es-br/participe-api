@@ -116,26 +116,21 @@ public class PersonController {
 
   }
 
-  /*
-   * @DeleteMapping("/delete/{id}")
-   * 
-   * @SuppressWarnings("rawtypes")
-   * public ResponseEntity destroy(
-   * 
-   * @RequestHeader(name = "Authorization") String token,
-   * 
-   * @PathVariable Long id) {
-   * 
-   * if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))
-   * {
-   * personService.delete(id);
-   * return ResponseEntity.status(200).build();
-   * } else {
-   * return ResponseEntity.status(401).body(null);
-   * }
-   * 
-   * }
-   */
+  
+    @DeleteMapping("/delete/{id}")
+    @SuppressWarnings("rawtypes")
+      public ResponseEntity destroy(@RequestHeader(name = "Authorization") String token,@PathVariable Long id) {
+      
+      if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))
+      {
+      personService.delete(id);
+      return ResponseEntity.status(200).build();
+      } else {
+      return ResponseEntity.status(401).body(null);
+      }
+    
+    }
+   
   @PutMapping("/{personId}")
   @SuppressWarnings("rawtypes")
   public ResponseEntity update(

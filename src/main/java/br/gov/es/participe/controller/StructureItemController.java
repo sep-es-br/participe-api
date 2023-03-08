@@ -83,7 +83,7 @@ public class StructureItemController {
                 true);
         return ResponseEntity.status(200).body(response);
     }
-/* 
+
     @DeleteMapping("/{id}")
     @SuppressWarnings("rawtypes")
     public ResponseEntity destroy(
@@ -95,5 +95,5 @@ public class StructureItemController {
         structureItemService.delete(id);
         return ResponseEntity.status(200).build();
     }
-*/
+
 }

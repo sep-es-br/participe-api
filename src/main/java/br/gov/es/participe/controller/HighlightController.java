@@ -43,7 +43,7 @@ public class HighlightController {
 		HighlightDto response = new HighlightDto(highlightService.save(highlight, "rem"));
 		return ResponseEntity.status(200).body(response);
 	}
-/* 
+
 	@SuppressWarnings("rawtypes")
 	@DeleteMapping("/deleteAll/{id}")
 	public ResponseEntity deleteAll(
@@ -68,5 +68,5 @@ public class HighlightController {
 
 		return ResponseEntity.status(200).body(response);
 	}
-	*/
+	
 }

@@ -88,7 +88,7 @@ public class CommentController {
 		return ResponseEntity.status(200).body(response);
 	}
 
- /* 
+ 
 
 	@DeleteMapping("/deleteAll/{id}")
 	public ResponseEntity<Void> delete(
@@ -101,5 +101,5 @@ public class CommentController {
 		return ResponseEntity.status(200).build();
 	}
 
-*/	
+
 }
