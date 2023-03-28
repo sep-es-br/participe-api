@@ -217,7 +217,7 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" count(distinct p) as quantityParticipation")
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationRemotoPlanItemAgroup(
 		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, @Param("structureItemPlanSelected") Long structureItemPlanSelected);
-
+/* 
 	@Query(" WITH $idConference AS Conference_Id,$microregionChartAgroup AS LocalityTypeGrouping_Id,$microregionLocalitySelected AS SelectedLocality_Id,$structureItemPlanSelected AS SelectedPlanItem_Id,$meetings AS Meeting_List "
 			+
 			" MATCH(p:Person)-[:CHECKED_IN_AT]->(me:Meeting)-[:OCCURS_IN]->(conf:Conference),(p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(conf) "
@@ -243,6 +243,43 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationPresenteAgroup(
 		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+*/
+
+@Query( 
+		" optional match (p:Person)-[:MADE]->(l:Login)-[:TO]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) , " +
+		" (p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co) " +
+		" ,(sd)-[:AS_BEING_FROM]->(cLoc:Locality)  " +
+		" where id(co) = $idConference " +
+		" AND m.attendanceListMode = 'MANUAL'   " +
+		" AND l.time >= m.beginDate and l.time <= m.endDate  " +
+		" AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
+		" WITH collect(p) as plogged  " +
+		" optional match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person),  " +
+		" (p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co), " +
+		" (sd)-[:AS_BEING_FROM]->(cLoc:Locality) " +
+		" where id(co) = $idConference  and  m.attendanceListMode = 'AUTO'   " +
+		" AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
+		" WITH plogged + collect(p) as allp  " +
+		" unwind allp as np  " +
+		" optional match(np)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co:Conference),(sd:SelfDeclaration)-[:AS_BEING_FROM]->(cLoc:Locality)  " +
+		" where id(co) = $idConference " +
+		" OPTIONAL MATCH(plt:LocalityType)<-[:OF_TYPE]-(loc:Locality)<-[:IS_LOCATED_IN *0..]-(cLoc),(loc)-[:IS_LOCATED_IN]->(pLoc) " +
+		" where id(plt) = $microregionChartAgroup  AND ($microregionLocalitySelected IS NULL OR id(pLoc) = $microregionLocalitySelected)  " +
+		" OPTIONAL MATCH planned = (np)<-[:MADE_BY|LIKED_BY]-(a:Attend)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES *0..]->(parentPlanItem:PlanItem), (a)-[:WHILE_IN]->(me)  " +
+		" WHERE id(parentPlanItem) = $structureItemPlanSelected " +
+		" OPTIONAL MATCH (pp:Person)  " +
+		" WHERE pp in nodes(planned)  " +
+		" WITH pp,np,loc,$structureItemPlanSelected AS  SelectedPlanItem_Id " +
+		" RETURN id(loc) as id,loc.latitudeLongitude as latitudeLongitude,loc.name as name, " +
+		" case SelectedPlanItem_Id  " +
+		" WHEN NULL THEN count(distinct np) " +
+		" ELSE count(distinct pp)  " +
+		" END as quantityParticipation ") 
+	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationPresenteAgroup(
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
+		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+
+/* 
 
 	@Query(
 
@@ -289,7 +326,46 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 
 			" count(distinct p)	as quantityParticipation")
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationPresentePlanItemAgroup(
-		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, @Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, 
+		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+*/
+
+
+@Query(	" match (p:Person)-[:MADE]->(l:Login)-[:TO]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) ,  " +
+		" (p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co),(sd)-[:AS_BEING_FROM]->(cLoc:Locality) " +
+		" where id(co) = $idConference " +
+		" AND m.attendanceListMode = 'MANUAL' " +
+		" AND l.time >= m.beginDate and l.time <= m.endDate   " +
+		" AND (($meetings IS NULL) OR (id(m) IN $meetings))   " +
+		" WITH collect(p) as plogged  " +
+		" match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person), " +
+		" (p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co),(sd)-[:AS_BEING_FROM]->(cLoc:Locality)  " +
+		" where id(co) = $idConference  and m.attendanceListMode = 'AUTO' " +
+		" AND (($meetings IS NULL) OR (id(m) IN $meetings))   " +
+		" WITH plogged + collect(p) as allp  " +
+		" MATCH (p:Person)<-[:MADE_BY|:LIKED_BY]-(a:Attend)-[:ABOUT]->(cPI:PlanItem), " +
+		" (cPI)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)<-[:OCCURS_IN]-(me:Meeting), " +
+		" (p)-[:MADE]->(sd:SelfDeclaration)-[:AS_BEING_FROM]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) " +
+		" WHERE ID(conf) = $idConference AND a.from = 'pres'  " +
+		" WITH allp + collect(p) as allp1  " +
+		" unwind allp1 as np " +
+		" MATCH(np)<-[:MADE_BY|:LIKED_BY]-(a:Attend)-[:ABOUT]->(cPI:PlanItem), " +
+		" (cPI)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(co)<-[:OCCURS_IN]-(m), " +
+		" (np)-[:MADE]->(sd)-[:AS_BEING_FROM]->(cLoc)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) " +
+		" WHERE ID(co) = $idConference AND a.from = 'pres' AND ( $meetings IS NULL OR id(m) IN $meetings) " +
+		" AND ($structureItemPlanSelected  IS NULL OR (id(planItem) = $structureItemPlanSelected  and id(cPI) <> $structureItemPlanSelected ) ) " +
+		" AND (id(parentLoc) = $microregionLocalitySelected OR id(cLoc) = $microregionLocalitySelected OR $microregionLocalitySelected IS NULL) " +
+		" RETURN " +
+		" CASE $structureItemPlanSelected WHEN NULL THEN id(planItem) ELSE id(cPI) END as idPlanItem, " +
+		" CASE $structureItemPlanSelected WHEN NULL THEN planItem.name ELSE cPI.name END as planItemName, " +
+		" count(distinct np) as quantityParticipation ")
+	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationPresentePlanItemAgroup(
+		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
+		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+
+
+		
+
 
 	@Query(" WITH" +
 			" $idConference AS Conference_Id," +
@@ -354,6 +430,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected);
 
+
+		/*
 	@Query(
 
 	" WITH" +
@@ -392,6 +470,43 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightPresenteAgroup(
 		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+
+ */
+
+@Query( " optional match (h:Highlight)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
+		" where id(co) = $idConference AND  " +
+		" m.attendanceListMode = 'MANUAL'  AND  " +
+		" h.time >= m.beginDate and h.time <= m.endDate  " +
+		" AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
+		" with collect(h) as plogged  " +
+		" optional match(h:Highlight)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
+		" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  h.from='pres' " +
+		" AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
+		" with plogged + collect(h) as allp  " +
+		" unwind allp as np " +
+		" MATCH (co:Conference)<-[:ABOUT]-(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem) " +
+		" ,(np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE *0..]->(plt:LocalityType) " +
+		" ,(co)<-[:OCCURS_IN]-(m)<-[:DURING]-(np) " +
+		" WHERE id(co) = $idConference " +
+		" AND np.from = 'pres' " +
+		" AND ($meetings IS NULL OR id(m) IN $meetings) " +
+		" AND id(plt) = $microregionChartAgroup " +
+		" AND ($microregionLocalitySelected IS NULL " +
+		" OR id(parentLoc) = $microregionLocalitySelected " +
+		" OR id(loc) = $microregionLocalitySelected) " +
+		" AND ($structureItemPlanSelected IS NULL " +
+		" OR id(cPI) = $structureItemPlanSelected " +
+		" OR id(planItem) = $structureItemPlanSelected) " +
+		" RETURN " +
+		" id(parentLoc) as id, " +
+		" parentLoc.latitudeLongitude as latitudeLongitude, " +
+		" parentLoc.name as name, " +
+		" count(distinct np) as quantityHighlight")
+	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightPresenteAgroup(
+		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
+		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+
+
 
 	@Query(" WITH" +
 			" $idConference AS Conference_Id," +
@@ -485,6 +600,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightRemotoPlanItemAgroup(
 		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, @Param("structureItemPlanSelected") Long structureItemPlanSelected);
 
+
+		/* 
 	@Query(" WITH" +
 			" $idConference as Conference_Id," +
 			" $microregionLocalitySelected as SelectedLocality_Id," +
@@ -539,7 +656,48 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightPresentePlanItemAgroup(
 		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, @Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
 
-	@Query(
+	*/
+		@Query( " optional match (h:Highlight)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting)  " +
+				" where id(co) = $idConference AND " +
+				" m.attendanceListMode = 'MANUAL'  AND  " +
+				" h.time >= m.beginDate and h.time <= m.endDate  " +
+				" AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
+				" with collect(h) as plogged  " +
+				" optional match(h:Highlight)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
+				" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  h.from='pres' " +
+				" AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
+				" with plogged + collect(h) as allp  " +
+				" unwind allp as np " +
+				" MATCH(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(co)<-[:OCCURS_IN]-(m), " +
+				" (m)<-[:DURING]-(np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) " +
+				" WHERE ID(co) = $idConference " +
+				" AND ($structureItemPlanSelected IS NULL " +
+				" OR (id(planItem) = $structureItemPlanSelected and id(cPI) <> $structureItemPlanSelected)) " +
+				" AND np.from = 'pres' AND ($meetings IS NULL OR id(m) IN $meetings) " +
+				" AND (id(parentLoc) = $microregionLocalitySelected OR id(loc) = $microregionLocalitySelected " +
+				" OR $microregionLocalitySelected IS NULL) " +
+				" WITH np,planItem,cPI,$structureItemPlanSelected as SelectedPlanItem_Id " +
+				" RETURN " +
+				" CASE SelectedPlanItem_Id " +
+				" WHEN NULL THEN id(planItem) " +
+				" ELSE id(cPI) " +
+				" END as idPlanItem, " +
+				" CASE SelectedPlanItem_Id " +
+				" WHEN NULL THEN planItem.name " +
+				" ELSE cPI.name " +
+				" END as planItemName, " +
+				" count(distinct np) as quantityHighlight")
+List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHighlightPresentePlanItemAgroup(
+	@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, @Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+
+	
+	
+	
+	
+	
+	
+	
+		@Query(
 
 	" WITH" +
 			" $idConference AS Conference_Id," +
@@ -704,6 +862,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsRemotoPlanItemAgroup(
 		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, @Param("structureItemPlanSelected") Long structureItemPlanSelected);
 
+
+		/* 
 	@Query(" WITH" +
 			" $idConference AS Conference_Id," +
 			" $microregionChartAgroup AS LocalityTypeGrouping_Id," +
@@ -739,6 +899,46 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
 
+		*/
+
+		@Query( " optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
+				" where id(co) = $idConference AND  " +
+				" m.attendanceListMode = 'MANUAL'  AND   " +
+				" c.time >= m.beginDate and c.time <= m.endDate AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
+				" AND c.status IN ['pub', 'arq']  " +
+				" with collect(c) as plogged " +
+				" optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting)  " +
+				" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  c.from='pres'  " +
+				" AND c.status IN ['pub', 'arq']   " +
+				" AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
+				" with plogged + collect(c) as allp   " +
+				" unwind allp as np " +
+				" MATCH(co)<-[:ABOUT]-(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem) " +
+				" ,(np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE *0..]->(plt:LocalityType) " +
+				" ,(co)<-[:OCCURS_IN]-(m)<-[:DURING]-(np) " +
+				" WHERE ID(co) = $idConference AND np.from = 'pres' " +
+				" AND (NOT np.status IN ['rem' , 'pen' ]) " +
+				" AND ($meetings IS NULL OR id(m) IN $meetings) " +
+				" AND id(plt) = $microregionChartAgroup  " +
+				" AND ($microregionLocalitySelected IS NULL " +
+				" OR id(parentLoc) = $microregionLocalitySelected " +
+				" OR id(loc) = $microregionLocalitySelected) " +
+				" AND ($structureItemPlanSelected IS NULL " +
+				" OR id(cPI) = $structureItemPlanSelected " +
+				" OR id(planItem) = $structureItemPlanSelected) " +
+				" RETURN " +
+				" id(parentLoc) as id, " +
+				" parentLoc.latitudeLongitude as latitudeLongitude, " +
+				" parentLoc.name as name, " +
+				" count(distinct np ) as quantityComment")
+List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsPresenteAgroup(
+	@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
+	@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+
+
+
+
+/* 
 	@Query(" WITH" +
 			" $idConference as Conference_Id," +
 			" $microregionLocalitySelected as SelectedLocality_Id," +
@@ -789,6 +989,48 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 			" count(distinct a) as quantityComment")
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsPresentePlanItemAgroup(
 		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, @Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+*/
+
+@Query( " optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
+		" where id(co) = $idConference AND  " +
+		" m.attendanceListMode = 'MANUAL'  AND   " +
+		" c.time >= m.beginDate and c.time <= m.endDate AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
+		" AND c.status IN ['pub', 'arq']  " +
+		" with collect(c) as plogged " +
+		" optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting)  " +
+		" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  c.from='pres'  " +
+		" AND c.status IN ['pub', 'arq']   " +
+		" AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
+		" with plogged + collect(c) as allp   " +
+		" unwind allp as np " +
+		" MATCH(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(co)<-[:OCCURS_IN]-(m), " +
+		" (np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) " +
+		" WHERE " +
+		" ID(co) = $idConference " +
+		" AND (NOT np.status IN ['rem', 'pen']) " +
+		" AND ($structureItemPlanSelected IS NULL " +
+		" OR(id(planItem) = $structureItemPlanSelected " +
+		" and id(cPI) <> $structureItemPlanSelected)) " +
+		" AND np.from = 'pres'  " +
+		" AND ($meetings IS NULL OR id(m) IN $meetings) " +
+		" AND (id(parentLoc) = $microregionLocalitySelected " +
+		" OR id(loc) = $microregionLocalitySelected " +
+		" OR $microregionLocalitySelected IS NULL) " +
+		" WITH np,planItem,cPI,$structureItemPlanSelected as SelectedPlanItem_Id " +
+		" RETURN " +
+		" CASE SelectedPlanItem_Id " +
+		" WHEN NULL THEN id(planItem) " +
+		" ELSE id(cPI) " +
+		" END as idPlanItem,  " +
+		" CASE SelectedPlanItem_Id " +
+		" WHEN NULL THEN planItem.name " +
+		" ELSE cPI.name " +
+		" END as planItemName, " +
+		" count(distinct np) as quantityComment")
+	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceProposalsPresentePlanItemAgroup(
+		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, @Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
+
+
 
 	@Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co), "
 			+

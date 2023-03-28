@@ -60,11 +60,26 @@ Integer countHighlightAllOriginsByConference( @Param("idConference") Long idConf
  Integer countHighlightRemoteOriginByConference( @Param("idConference") Long idConference);
     
     
-   
-  @Query(" match (m:Meeting)<-[:DURING]-(h:Highlight)-[:ABOUT]->(co:Conference) " + 
+   //Total de destaques
+ /*  @Query(" match (m:Meeting)<-[:DURING]-(h:Highlight)-[:ABOUT]->(co:Conference) " + 
          "  where id(co) = $idConference AND h.from='pres' AND (($meetings IS NULL) OR (id(m) IN $meetings))  " + 
          "  return count (distinct h) ")
   Integer countHighlightPresentialOriginByConference(@Param("idConference") Long idConference, @Param("meetings") List<Long> meetings);
+*/
+
+  @Query( " optional match (h:Highlight)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
+          " where id(co) = $idConference AND " +
+          " m.attendanceListMode = 'MANUAL'  AND  " +
+          " h.time >= m.beginDate and h.time <= m.endDate  " +
+          " AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
+          " with collect(h) as plogged  " +
+          " optional match(h:Highlight)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
+          " where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  h.from='pres' " +
+          " AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
+          " with plogged + collect(h) as allp  " +
+          " unwind allp as np " +
+          " return count (distinct np) ")
+Integer countHighlightPresentialOriginByConference(@Param("idConference") Long idConference, @Param("meetings") List<Long> meetings);
   
   
   

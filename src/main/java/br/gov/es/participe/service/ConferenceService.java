@@ -116,10 +116,14 @@ public class ConferenceService {
       }
       auth.setBeginDate(conference.getBeginDate());
       auth.setEndDate(conference.getEndDate());
-      auth.setProposal(this.commentService.countCommentByConference(id));
-      auth.setHighlights(this.highlightService.countHighlightByConference(id));
-      auth.setParticipations(this.attendRepository.countParticipationByConference(conference.getId()));
-      auth.setNumberOfLocalities(this.localityService.countLocalitiesParticipation(conference.getId()));
+      //auth.setProposal(this.commentService.countCommentByConference(id));
+      //auth.setHighlights(this.highlightService.countHighlightByConference(id));
+      //auth.setParticipations(this.attendRepository.countParticipationByConference(conference.getId()));
+      //auth.setNumberOfLocalities(this.localityService.countLocalitiesParticipation(conference.getId()));
+      auth.setProposal(attendRepository.countCommentAllOriginsByConference(id));
+      auth.setHighlights(highlightService.countHighlightAllOriginsByConference(id));
+      auth.setParticipations(this.attendRepository.countParticipationAllOriginsByConference(conference.getId()));
+      auth.setNumberOfLocalities(attendRepository.countLocalityAllOriginsByConference(conference.getId()));
     });
   }
 
