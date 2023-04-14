@@ -785,7 +785,7 @@ List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHi
 	@Query(" WITH" +
 			" $idConference AS Conference_Id," +
 			" $microregionChartAgroup AS LocalityTypeGrouping_Id," +
-			" microregionLocalitySelected AS SelectedLocality_Id," +
+			" $microregionLocalitySelected AS SelectedLocality_Id," +
 			" $structureItemPlanSelected AS SelectedPlanItem_Id" +
 
 			" MATCH" +
