@@ -154,7 +154,7 @@ public class MeetingService {
     return returnDto;
   }
 
-  @Transactional
+  
   public Meeting save(Meeting meeting, MeetingParamDto meetingParamDto) {
     validateMeetingFields(meeting, meetingParamDto);
 
@@ -258,7 +258,7 @@ public class MeetingService {
         .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + id));
   }
 
-  @Transactional
+  
   public Meeting update(Meeting meeting, MeetingParamDto meetingParamDto) {
     validate(meeting, meetingParamDto);
 
@@ -274,7 +274,7 @@ public class MeetingService {
     return meetingRepository.save(meeting);
   }
   
-  @Transactional
+  
   private void updateRelationships(Meeting meeting, MeetingParamDto meetingParamDto) {
     Meeting meetingUpdate = findWithoutConference(meeting.getId());
     if (meetingUpdate.getConference() == null
@@ -392,7 +392,7 @@ public class MeetingService {
     }
   }
 
-  @Transactional
+  
   public Boolean delete(Long id) {
     Set<CheckedInAt> checkedInAt = this.findCheckedInAtByMeeting(id);
     if (!checkedInAt.isEmpty()) {
@@ -403,7 +403,7 @@ public class MeetingService {
     return true;
   }
 
-  @Transactional
+  
   public CheckedInAt checkInOnMeeting(Long personId, Long meetingId, String timeZone) {
     Meeting meeting = this.find(meetingId);
     Person person = personService.find(personId);
@@ -427,7 +427,7 @@ public class MeetingService {
     return Collections.emptySet();
   }
 
-  @Transactional
+ 
   public Boolean deleteParticipation(Long personId, Long meetingId) {
     Meeting meeting = this.find(meetingId);
     Person person = personService.find(personId);

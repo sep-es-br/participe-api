@@ -401,7 +401,7 @@ public class PersonService {
     return null;
   }
 
-  @Transactional
+ 
   public Person complement(Person person, SelfDeclaration selfDeclaration) {
     Person personBD = this.havePersonWithLoginEmail(person.getContactEmail(), null, null).orElse(null);
 
@@ -499,7 +499,7 @@ public class PersonService {
     return persons;
   }
 
-  @Transactional
+  
   public void delete(Long id) {
     Person person = findRelationships(id);
     List<IsAuthenticatedBy> relationships = isAuthenticatedByRepository.findAllByIdPerson(

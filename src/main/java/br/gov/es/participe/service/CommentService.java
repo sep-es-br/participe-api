@@ -206,7 +206,7 @@ public class CommentService {
     return commentRepository.countCommentByConference(id);
   }
 
-  //@Transactional
+
   public Comment save(Comment comment, Long idPerson, Boolean usePlanItem) {
 
     if(comment.getConference() == null){
@@ -337,7 +337,6 @@ public class CommentService {
     return person;
   }
 
-  @Transactional
   public void deleteAllByIdPerson(Long id) {
     List<Comment> comments = commentRepository.findByIdPerson(id, null);
 
@@ -526,7 +525,7 @@ public class CommentService {
   }
  */
 
-  //@Transactional
+
   public ModerationResultDto begin(Long idComment, Long idModerator) {
 
       Comment comment = find(idComment);

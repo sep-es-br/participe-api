@@ -50,7 +50,7 @@ public class FileService {
         return new UrlResource(uri);
     }
 
-    @Transactional
+    
     public FileDto save(MultipartFile multipartFile) throws IOException {
         br.gov.es.participe.model.File file = new br.gov.es.participe.model.File();
         file.setName(multipartFile.getOriginalFilename());
@@ -72,7 +72,7 @@ public class FileService {
         }
     }
 
-    @Transactional
+   
     public void delete(Long id) {
         br.gov.es.participe.model.File file1 = fileRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Imagem id: " + id + " não encontrada."));

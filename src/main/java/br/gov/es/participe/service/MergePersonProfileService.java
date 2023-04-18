@@ -64,7 +64,6 @@ public class MergePersonProfileService {
     this.meetingRepository = meetingRepository;
   }
 
-  @Transactional
   public PersonParamDto merge(Long personIdToRemove, Long personId) {
 
     Person personToUpdate = this.personService.find(personId);

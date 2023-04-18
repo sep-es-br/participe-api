@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,6 +60,7 @@ public class SignInController {
     return ResponseEntity.ok().body(signinDto);
   }
 
+  @Transactional
   @PostMapping
   @SuppressWarnings("rawtypes")
   public ResponseEntity signIn(@RequestBody PersonParamDto user,

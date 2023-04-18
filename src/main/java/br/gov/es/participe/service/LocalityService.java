@@ -70,7 +70,7 @@ public class LocalityService {
         return localities;
     }
 
-    @Transactional
+   
     public Locality create(Locality locality) {
        
         if (locality.getName()== null ||locality.getLatitudeLongitude()== null ) {
@@ -107,7 +107,7 @@ public class LocalityService {
         return localityRepository.save(locality);
     }
 
-    @Transactional
+
     public Locality update(Long id, LocalityParamDto dto) {
         
         if (dto.getName()== null ||dto.getLatitudeLongitude()== null ) {
@@ -300,7 +300,7 @@ public class LocalityService {
         return null;
     }
 
-    @Transactional
+   
     public void delete(Long idLocality, Long idDomain) {
         Locality locality = find(idLocality);
         Domain domain = domainService.find(idDomain);

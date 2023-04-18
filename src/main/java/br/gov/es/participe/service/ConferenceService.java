@@ -216,7 +216,7 @@ public class ConferenceService {
     return null;
   }
 
-  @Transactional
+
   public ConferenceDto update(Long conferenceId, ConferenceParamDto conferenceParamDto) throws ParseException {
     
      
@@ -234,7 +234,7 @@ public class ConferenceService {
     return ConferenceDto.createConferenceDtoWithoutMeeting(conferenceUpdated);
   }
 
-  @Transactional
+
   public Conference save(Conference conference, ConferenceParamDto param) throws ParseException {
     
     if (param.getName()== null)  {
@@ -500,14 +500,6 @@ public class ConferenceService {
       throw new IllegalArgumentException("Plan is required");
     }
 
-//    if(conference.getFileAuthentication() == null || conference.getFileAuthentication().getId() == null) {
-//      throw new IllegalArgumentException("Authentication Image is required");
-//    }
-
-//    if(conference.getFileParticipation() == null || conference.getFileParticipation().getId() == null) {
-//      throw new IllegalArgumentException("Participation Image is required");
-//    }
-
     Conference c = this.conferenceRepository.findByNameIgnoreCase(conference.getName());
     if(c != null) {
       if(conference.getId() != null) {
@@ -574,7 +566,7 @@ public class ConferenceService {
     }
   }
 
-  @Transactional
+  
   public Boolean delete(Long id) {
     boolean deleteConference = true;
     Conference conference = this.find(id);

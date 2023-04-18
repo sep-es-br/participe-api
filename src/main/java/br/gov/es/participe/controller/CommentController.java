@@ -89,7 +89,7 @@ public class CommentController {
 	}
 
  
-
+	@Transactional
 	@DeleteMapping("/deleteAll/{id}")
 	public ResponseEntity<Void> delete(
 			@RequestHeader("Authorization") String token,

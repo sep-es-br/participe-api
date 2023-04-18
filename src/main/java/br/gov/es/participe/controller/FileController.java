@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,6 +46,7 @@ public class FileController {
     }
 
     @SuppressWarnings("rawtypes")
+    @Transactional
     @PostMapping(headers = { "Content-Type=multipart/form-data" }, value = "/upload")
     public ResponseEntity upload(
             @RequestHeader(name = "Authorization") String token,
@@ -57,6 +59,7 @@ public class FileController {
     }
  
     @SuppressWarnings("rawtypes")
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity delete(
             @RequestHeader(name = "Authorization") String token,

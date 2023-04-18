@@ -10,6 +10,7 @@ import br.gov.es.participe.util.domain.TokenType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -69,7 +70,16 @@ public class ConferenceController {
       @RequestParam(value = "id", required = false) Long id) {
     return ResponseEntity.status(200).body(conferenceService.validate(name, id));
   }
+ 
 
+  @GetMapping("/{id}")
+  public ResponseEntity<ConferenceDto> show(@PathVariable Long id) {
+    ConferenceDto response = new ConferenceDto(conferenceService.find(id));
+    conferenceService.loadOtherAttributes(response);
+    return ResponseEntity.status(200).body(response);
+  }
+
+  @Transactional
   @PostMapping
   public ResponseEntity<ConferenceDto> store(
       @RequestHeader("Authorization") String token,
@@ -82,13 +92,7 @@ public class ConferenceController {
     return ResponseEntity.status(200).body(response);
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<ConferenceDto> show(@PathVariable Long id) {
-    ConferenceDto response = new ConferenceDto(conferenceService.find(id));
-    conferenceService.loadOtherAttributes(response);
-    return ResponseEntity.status(200).body(response);
-  }
-
+  @Transactional
   @PutMapping("/{id}")
   public ResponseEntity<ConferenceDto> update(
       @RequestHeader("Authorization") String token,
@@ -102,7 +106,7 @@ public class ConferenceController {
     return ResponseEntity.status(200).body(response);
   }
 
-  
+  @Transactional
   @DeleteMapping("/{id}")
   public ResponseEntity<Boolean> destroy(
       @RequestHeader("Authorization") String token,
@@ -208,14 +212,6 @@ public class ConferenceController {
   public ResponseEntity<List<ConferenceDto>> findPresentialConferencesWithMeeting(
       @RequestHeader("Authorization") String token,
       @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date date) {
-
-    /* 
-      String[] keys = token.split(" ");
-      Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
-      Person person = personService.find(idPerson);
-      boolean adm = person.getRoles() != null &&
-      person.getRoles().contains("Administrator");
-     */
 
     List<Conference> conferences = new ArrayList<Conference>();
     if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {

@@ -2,6 +2,7 @@ package br.gov.es.participe.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class HighlightController {
 	private HighlightService highlightService;
 
 	@SuppressWarnings("rawtypes")
+	@Transactional
 	@PostMapping
 	public ResponseEntity store(
 			@RequestHeader("Authorization") String token,
@@ -45,6 +47,7 @@ public class HighlightController {
 	}
 
 	@SuppressWarnings("rawtypes")
+	@Transactional
 	@DeleteMapping("/deleteAll/{id}")
 	public ResponseEntity deleteAll(
 			@RequestHeader("Authorization") String token,
@@ -57,6 +60,7 @@ public class HighlightController {
 	}
 
 	@SuppressWarnings("rawtypes")
+	@Transactional
 	@DeleteMapping
 	public ResponseEntity delete(
 			@RequestHeader("Authorization") String token,

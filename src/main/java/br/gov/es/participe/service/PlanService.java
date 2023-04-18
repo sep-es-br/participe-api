@@ -70,7 +70,7 @@ public class PlanService {
         return planRepository.findByDomain(id);
     }
     
-    @Transactional
+  
     public Plan save(Plan plan) {
         if (plan.getId() != null) {
             Plan oldPlan = find(plan.getId());
@@ -102,7 +102,7 @@ public class PlanService {
     	return planRepository.findFilesById(id);
     }
 
-    @Transactional
+ 
     public void delete(Long id) {
         Plan plan = find(id);
 

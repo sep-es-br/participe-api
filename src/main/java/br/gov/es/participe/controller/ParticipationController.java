@@ -94,6 +94,8 @@ public class ParticipationController {
     return ResponseEntity.status(200).body(header);
   }
  
+
+  @Transactional
   @PostMapping("/portal-header/{idConference}/selfdeclarations/decline")
   public ResponseEntity<PortalHeader> setSurvey(
       @RequestHeader(name = "Authorization") String token,
@@ -123,8 +125,6 @@ public class ParticipationController {
       commentParamDto.getLocality() == null ){
 
         throw new Exception("Esta participação não foi regionalizada. Favor retornar e selecionar a região.");
-
-     // return ResponseEntity.status(200).body(null);
     }else{
 
     String[] keys = token.split(" ");
@@ -134,12 +134,10 @@ public class ParticipationController {
 
     PlanItemDto response;
     if (commentParamDto.getText() != null) {
-     // Comment comment = new Comment(commentParamDto);
       comment.setPersonMadeBy(person);
       commentService.save(comment, null, true);
     } else {
       Highlight highlight = new Highlight();
-      //Comment comment = new Comment(commentParamDto);
       highlight.setLocality(comment.getLocality());
       highlight.setPlanItem(comment.getPlanItem());
       highlight.setPersonMadeBy(person);

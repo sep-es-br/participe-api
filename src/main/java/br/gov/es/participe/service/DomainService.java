@@ -46,7 +46,7 @@ public class DomainService {
         return domains;
     }
 
-    @Transactional
+  
     public Domain save(Domain domain) {
         if(domain.getName() == null) {
             throw new IllegalArgumentException("Domain name is required");
@@ -69,7 +69,7 @@ public class DomainService {
                        .orElseThrow(() -> new IllegalArgumentException(DOMAIN_ERROR_NOT_FOUND));
     }
 
-    @Transactional
+  
     public void delete(Long id) {
         Domain domain = find(id);
 

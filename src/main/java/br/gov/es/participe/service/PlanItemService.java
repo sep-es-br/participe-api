@@ -62,7 +62,7 @@ public class PlanItemService {
         return planItems;
     }
 
-    @Transactional
+
     public PlanItem save(PlanItem planItem) {
         loadAttributes(planItem);
 
@@ -99,7 +99,7 @@ public class PlanItemService {
     	return planItemRepository.findParentsByCommentId(idComment);
     }
     
-    @Transactional
+   
     public void delete(Long id) {
         PlanItem planItem = find(id);
 

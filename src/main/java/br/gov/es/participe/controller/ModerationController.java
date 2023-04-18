@@ -176,8 +176,6 @@ public class ModerationController {
       return ResponseEntity.status(401).body(null);
     }
     Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
-   // Comment comment = commentService.find(id);
-    //commentService.begin(id, idPerson);
     ModerationResultDto moderation = commentService.begin(id, idPerson);
     return ResponseEntity.status(200).body(moderation);
   }

@@ -53,7 +53,7 @@ public class HighlightService {
   }
  
 
-  //@Transactional
+  
   public Highlight save(Highlight highlight, String from) {
 
     if(highlight.getConference() == null){
@@ -140,7 +140,7 @@ public class HighlightService {
     return highlight;
   }
 
-  @Transactional
+
   public void deleteAllByIdPerson(Long id) {
     List<Highlight> highlights = highlightRepository.findByIdPerson(id);
 
@@ -153,7 +153,7 @@ public class HighlightService {
     this.highlightRepository.deleteById(highlightId);
   }
 
-  @Transactional
+  
   public boolean delete(Highlight highlight) {
     List<Comment> comment = this.commentService.find(highlight.getPersonMadeBy().getId(),
         highlight.getPlanItem().getId(), highlight.getConference().getId(),

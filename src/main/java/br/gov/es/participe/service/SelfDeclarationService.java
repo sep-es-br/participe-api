@@ -26,7 +26,6 @@ public class SelfDeclarationService {
   @Autowired
   private PersonService personService;
 
-  @Transactional
   public SelfDeclaration save(SelfDeclaration selfDeclaration) {
     if (selfDeclaration.getConference() == null || selfDeclaration.getConference().getId() == null) {
       throw new IllegalArgumentException("Conference is required to create or edit Self Declaration");
@@ -77,7 +76,7 @@ public class SelfDeclarationService {
     return selfDeclarationRepository.findByConferenceIdAndPersonId(idConference, idPerson);
   }
 
-  @Transactional
+  
   public void delete(Long id) {
     SelfDeclaration self = find(id);
     selfDeclarationRepository.delete(self);
