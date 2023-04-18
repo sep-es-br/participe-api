@@ -112,7 +112,8 @@ public class PersonController {
       SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaration());
       Person person = personService.complement(
           new Person(personParam),
-          self);
+          self
+      );
 
       PersonDto response = new PersonDto(person);
       response.setSelfDeclaretion(new SelfDeclarationDto(self, false));
@@ -126,18 +127,18 @@ public class PersonController {
   @Transactional
   @DeleteMapping("/delete/{id}")
   @SuppressWarnings("rawtypes")
-    public ResponseEntity destroy(@RequestHeader(name = "Authorization") String token,@PathVariable Long id) {
-    
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))
-    {
-    personService.delete(id);
-    return ResponseEntity.status(200).build();
-    } else {
-    return ResponseEntity.status(401).body(null);
+  public ResponseEntity destroy(@RequestHeader(name = "Authorization") String token,@PathVariable Long id) {
+
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      personService.delete(id);
+      return ResponseEntity.status(200).build();
     }
-    
+    else {
+      return ResponseEntity.status(401).body(null);
+    }
+
   }
-   
+
   @Transactional
   @PutMapping("/{personId}")
   @SuppressWarnings("rawtypes")

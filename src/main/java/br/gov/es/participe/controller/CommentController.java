@@ -61,7 +61,8 @@ public class CommentController {
 	@PostMapping
 	public ResponseEntity<CommentDto> store(
 			@RequestHeader(name = "Authorization") String token,
-			@RequestBody CommentParamDto commentParamDto) {
+			@RequestBody CommentParamDto commentParamDto
+	) {
 
 		String[] chave = token.split(" ");
 		Long idPerson = tokenService.getPersonId(chave[1], TokenType.AUTHENTICATION);
@@ -88,7 +89,7 @@ public class CommentController {
 		return ResponseEntity.status(200).body(response);
 	}
 
- 
+
 	@Transactional
 	@DeleteMapping("/deleteAll/{id}")
 	public ResponseEntity<Void> delete(

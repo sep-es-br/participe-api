@@ -7,6 +7,8 @@ import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
 import br.gov.es.participe.util.dto.MessageDto;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +49,8 @@ public class PersonService {
   private static final String EMAIL_RESPONSE_MESSAGE = " - Confirme seu Email";
   private static final String VALID_CHARACTERS = "[A-Za-z0-9]+";
 
+  private static final Logger log = LoggerFactory.getLogger(PersonService.class);
+
   @Autowired
   private PersonRepository personRepository;
 
@@ -76,9 +80,6 @@ public class PersonService {
 
   @Autowired
   private AcessoCidadaoService acessoCidadaoService;
-
- 
-  
 
   public Boolean forgotPassword(String email, Long conferenceId, String server) {
     Optional<Person> person = this.havePersonWithLoginEmail(email, server, null);
@@ -164,13 +165,14 @@ public class PersonService {
     return signInDto;
   }
 
-  @Transactional
   public Person save(Person person, boolean isLike) {
+    log.info("Criando person contactEmail={}, isLike={}", person.getContactEmail(), isLike);
     if (!isLike) {
       String loginEmail = person.getContactEmail();
       Person personBD = personRepository.findPersonByParticipeAuthServiceEmailOrCpf(loginEmail, person.getCpf());
 
       if (personBD != null) {
+        log.info("Person contactEmail={} já registrada com personId={}", loginEmail, personBD.getId());
         return personBD;
       }
     }
@@ -178,7 +180,6 @@ public class PersonService {
     return personRepository.save(person);
   }
 
-  @Transactional
   public Person createRelationshipWithAuthService(
       RelationshipAuthServiceAuxiliaryDto relationshipAuthServiceAuxiliaryDto) {
     return createRelationshipWithAuthService(relationshipAuthServiceAuxiliaryDto, true);
@@ -192,6 +193,11 @@ public class PersonService {
   private Person createRelationshipWithAuthService(
       RelationshipAuthServiceAuxiliaryDto relationshipAuthServiceAuxiliaryDto,
       Boolean persistRelationship) {
+    log.info(
+      "Criando relacionamento com AuthService com os parâmetros {} persistRelationship={}",
+      relationshipAuthServiceAuxiliaryDto.toString(),
+      persistRelationship
+    );
     Person person = relationshipAuthServiceAuxiliaryDto.getPerson();
     Long conferenceId = relationshipAuthServiceAuxiliaryDto.getConferenceId();
     String server = relationshipAuthServiceAuxiliaryDto.getServer();
@@ -206,7 +212,9 @@ public class PersonService {
     boolean newAuthService = true;
 
     if (person.getId() == null) {
+      log.info("Person não foi criada");
       person = personRepository.save(person);
+      log.info("Person criada com sucesso personId={}", person.getId());
     } else {
       loadSelfDeclaration(person, conferenceId);
     }
@@ -219,6 +227,7 @@ public class PersonService {
     }
 
     if (conferenceId != null) {
+      log.info("Conference com conferenceId={} foi informada, buscando nó", conferenceId);
       conference = conferenceService.find(conferenceId);
     }
 
@@ -233,6 +242,13 @@ public class PersonService {
       }
       if (persistRelationship) {
         authService = authServiceRepository.save(authService);
+        log.info(
+          "Criado AuthService authServiceId={} com atributos server={}, serverId={}, numberOfAccesses={}",
+          authService.getId(),
+          authService.getServer(),
+          authService.getServerId(),
+          authService.getNumberOfAccesses()
+        );
       }
       authenticatedBy = createAuthenticatedBy(
           server,
@@ -240,7 +256,8 @@ public class PersonService {
           conference,
           password,
           authService,
-          typeAuthentication);
+          typeAuthentication
+      );
     } else {
       if (authService.getNumberOfAccesses() == null) {
         authService.setNumberOfAccesses(0);
@@ -248,6 +265,10 @@ public class PersonService {
       authService
           .setNumberOfAccesses(makeLogin ? authService.getNumberOfAccesses() + 1 : authService.getNumberOfAccesses());
       if (persistRelationship) {
+        log.info("Alterando numberOfAccesses do authServiceId={} para numberOfAccesses={}",
+          authService.getNumberOfAccesses(),
+          authService.getId()
+        );
         authServiceRepository.save(authService);
       }
       loadAuthenticatedBy(
@@ -270,6 +291,7 @@ public class PersonService {
 
     if (persistRelationship) {
       isAuthenticatedByRepository.save(authenticatedBy, 0);
+      log.info("Alterações no relacionamento isAuthenticatedById={} persistidas com sucesso", authenticatedBy.getId());
     }
     return person;
   }
@@ -282,6 +304,7 @@ public class PersonService {
   }
 
   private void verifyMakeLoginCondition(Person person, Boolean makeLogin, AuthService authService, Long conferenceId) {
+    log.info("Verificando flag makeLogin={}", makeLogin);
     if (makeLogin) {
       createLogin(person, authService, conferenceId);
     }
@@ -339,20 +362,37 @@ public class PersonService {
   }
 
   private void loadSelfDeclaration(Person person, Long conferenceId) {
-    if (conferenceId != null) {
-      SelfDeclaration sd = selfDeclarationService.findByPersonAndConference(person.getId(), conferenceId);
-      if (sd != null) {
-        person.addSelfDeclaration(sd);
-      }
+    if (conferenceId == null) {
+      log.info(
+        "Não foi informado uma Conference para consultar a SelfDeclaration da personId={}",
+        person.getId()
+      );
+    }
+    log.info("Carregando SelfDeclaration person personId={} com conferenceId={}", person.getId(), conferenceId);
+    SelfDeclaration sd = selfDeclarationService.findByPersonAndConference(person.getId(), conferenceId);
+    if (sd != null) {
+      log.info("SelfDeclaration com selfDeclarationId={} encontrada para a conferenceId={} e personId={}, adicionando à personId={}",
+              sd.getId(),
+              conferenceId,
+              person.getId(),
+              person.getId()
+      );
+      person.addSelfDeclaration(sd);
     }
   }
 
-  @Transactional
   private void createLogin(Person person, AuthService authService, Long conferenceId) {
     if (conferenceId != null) {
       Conference conference = conferenceService.find(conferenceId);
       Login login = new Login(person, authService, conference);
       loginRepository.save(login);
+      log.info(
+        "Registro de login loginId={} criado com parâmetros personId={}, authServiceId={} e conferenceId={}",
+        login.getId(),
+        login.getPerson().getId(),
+        login.getAuthService().getId(),
+        login.getConference().getId()
+      );
     }
   }
 
@@ -387,37 +427,76 @@ public class PersonService {
         authenticatedBy.setAuthType("oauth");
       }
     }
+    log.info("IsAuthenticatedBy relationshipId={} carregado com atributos email={}, name={} e authType={}",
+      authenticatedBy.getId(),
+      authenticatedBy.getEmail(),
+      authenticatedBy.getName(),
+      authenticatedBy.getAuthType()
+    );
   }
 
   private IsAuthenticatedBy getIsAuthenticatedBy(Long personId, String server) {
     List<IsAuthenticatedBy> relationships = isAuthenticatedByRepository.findAllByIdPerson(personId);
 
+    log.info("Foram encontradas {} relacionamentos de IsAuthenticatedBy para a personId={}",
+        Optional.ofNullable(relationships).map(List::size).orElse(0),
+        personId
+    );
+
     if (relationships != null && !relationships.isEmpty()) {
       for (IsAuthenticatedBy relationship : relationships)
         if (relationship.getAuthService().getServer().equalsIgnoreCase(server)) {
+          log.info("Foi encontrado um IsAuthenticatedBy relationshipId={} relacionado a personId={} e server={}",
+                  relationship.getId(),
+                  personId,
+                  server
+          );
           return relationship;
         }
     }
+    log.info("Não foi encontrado um IsAuthenticatedBy relacionado a personId={} e server={}",
+            personId,
+            server
+    );
     return null;
   }
 
- 
+
   public Person complement(Person person, SelfDeclaration selfDeclaration) {
     Person personBD = this.havePersonWithLoginEmail(person.getContactEmail(), null, null).orElse(null);
 
     if (personBD == null) {
+      log.info("Não foi encontrado uma person com email={}", person.getContactEmail());
       personBD = personRepository.save(person);
+      log.info(
+        "Person com email={} criada com sucesso com personId={}",
+        person.getContactEmail(),
+        person.getId()
+      );
     } else {
       personBD.setTelephone(person.getTelephone());
       personRepository.save(personBD);
+      log.info(
+        "Atributo telephone da personId={} alterado para telephone={} com sucesso",
+        personBD.getId(),
+        personBD.getTelephone()
+      );
     }
 
     if (selfDeclaration.getPerson() == null) {
+      log.info("Criando vinculo entre personId={} e selfDeclarationId={}", personBD.getId(), selfDeclaration.getId());
       selfDeclaration.setPerson(personBD);
     } else {
+      log.info(
+        "Alterando person do selfDeclarationId={} de oldPersonId={} para newPersonId={}",
+        selfDeclaration.getId(),
+        selfDeclaration.getPerson().getId(),
+        personBD.getId()
+      );
       selfDeclaration.getPerson().setId(personBD.getId());
     }
 
+    log.info("Persistindo alterações da selfDeclarationId={}", selfDeclaration.getId());
     selfDeclarationService.save(selfDeclaration);
 
     return find(personBD.getId());
@@ -435,6 +514,7 @@ public class PersonService {
   public PersonKeepCitizenDto findCitizenById(Long personId, Long conferenceId) {
     Person person = Optional.ofNullable(find(personId))
         .orElseThrow(() -> new IllegalArgumentException(PERSON_ERROR_NOT_FOUND));
+    log.info("PersonId={} encontrada", person.getId());
 
     List<LoginAccessDto> loginAccessDtos = personRepository.findAccessByPerson(conferenceId, personId);
 
@@ -442,6 +522,7 @@ public class PersonService {
       loginAccessDtos = new ArrayList<>();
       loginAccessDtos.add(new LoginAccessDto(SERVER, 0L));
     }
+    log.info("Foram encontrados {} registros de acessos da personId={}", loginAccessDtos.size(), person.getId());
 
     SelfDeclaration selfDeclaration = this.selfDeclarationService.findByPersonAndConference(personId, conferenceId);
 
@@ -457,6 +538,12 @@ public class PersonService {
     LocalityInfoDto recentLocality = personRepository.findLocalityByPersonAndConference(conferenceId, personId);
 
     if (recentLocality != null) {
+      log.info(
+        "RecentLocality encontrado localityId={} localityName={} para personId={}",
+        recentLocality.getLocalityId(),
+        recentLocality.getLocalityName(),
+        person.getId()
+      );
       personCitizen.setLocalityId(recentLocality.getLocalityId());
       personCitizen.setLocalityName(recentLocality.getLocalityName());
     }
@@ -499,19 +586,34 @@ public class PersonService {
     return persons;
   }
 
-  
+
   public void delete(Long id) {
     Person person = findRelationships(id);
     List<IsAuthenticatedBy> relationships = isAuthenticatedByRepository.findAllByIdPerson(
         person.getId());
-
     if (person.getSelfDeclaretions() != null && !person.getSelfDeclaretions().isEmpty()) {
-      for (SelfDeclaration self : person.getSelfDeclaretions())
+      log.info(
+        "Removendo {} SelfDeclarations relacionadas a personId={}",
+        person.getSelfDeclaretions().size(),
+        person.getId()
+      );
+      for (SelfDeclaration self : person.getSelfDeclaretions()) {
         selfDeclarationService.delete(self.getId());
+      }
     }
 
     if (relationships != null && !relationships.isEmpty()) {
+      log.info(
+        "Removendo {} relacionamentos a personId={}",
+        person.getSelfDeclaretions().size(),
+        person.getId()
+      );
       for (IsAuthenticatedBy relationship : relationships) {
+        log.info(
+          "Removendo authServiceId={} e isAuthenticatedById={}",
+          relationship.getAuthService().getId(),
+          relationship.getId()
+        );
         authServiceRepository.delete(relationship.getAuthService());
         isAuthenticatedByRepository.delete(relationship);
       }
@@ -520,13 +622,16 @@ public class PersonService {
     List<Attend> atts = attendRepository.findAllAttendByIdPerson(person.getId());
 
     if (atts != null) {
+      log.info("Removendo {} Attends relacionados ao personId={}", atts.size(), person.getId());
       attendRepository.deleteAll(atts);
     }
 
     List<Login> logins = loginRepository.findAllByPerson(id);
     if (logins != null) {
+      log.info("Removendo {} Logins relacionados ao personId={}", logins.size(), person.getId());
       loginRepository.deleteAll(logins);
     }
+    log.info("Removendo personId={}", person.getId());
     personRepository.delete(person);
   }
 
@@ -592,7 +697,10 @@ public class PersonService {
     if (conferenceId == null) {
       throw new IllegalArgumentException(PERSON_ERROR_CONFERENCE_NOT_SPECIFIED);
     }
-
+    log.info(
+      "Realizando consulta por cidadãos com parâmetros name={}, email={}, authentication={}, active={}, locality={}, conferenceId={}",
+      name, email, authentication, active, locality, conferenceId
+    );
     Page<PersonKeepCitizenDto> response = personRepository
         .findPersonKeepCitizen(name, email, authentication,
             active, locality, page);
@@ -620,14 +728,14 @@ public class PersonService {
         element.setLocalityName(recentLocality.getLocalityName());
       }
     });
-
+    log.info("Foram encontrados {} resultados", response.getSize());
     return response;
   }
 
   public Person storePersonOperator(PersonParamDto personParam, String profile) throws IOException {
-    final boolean emailsIncompativeis = (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null)
-        &&
-        !personParam.getContactEmail().equals(personParam.getConfirmEmail());
+    final boolean emailsIncompativeis =
+            (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null) &&
+            !personParam.getContactEmail().equals(personParam.getConfirmEmail());
 
     if (emailsIncompativeis) {
       MessageDto msg = new MessageDto();
@@ -642,13 +750,15 @@ public class PersonService {
         : (profile.equalsIgnoreCase("Moderator")) ? ProfileType.MODERATOR
             : (profile.equalsIgnoreCase("Recepcionist")) ? ProfileType.RECEPCIONIST : null;
 
-    List<PersonDto> personList = acessoCidadaoService.listPersonsByPerfil(profileType, "",
-        personParam.getContactEmail());
+    List<PersonDto> personList = acessoCidadaoService.listPersonsByPerfil(
+      profileType,
+      "",
+      personParam.getContactEmail()
+    );
 
     if (personList == null || personList.size() == 0) {
-
+      log.info("Não foi encontrado um usuário com o perfil={} e email={}", profileType, personParam.getContactEmail());
       return null;
-
     }
 
     Person person = this.save(new Person(personParam, false), false);
@@ -669,7 +779,7 @@ public class PersonService {
   }
 
   public ResponseEntity<?> storePerson(PersonParamDto personParam,Boolean makeLogin) {
-   
+
     if (personParam.getId() == null ){
       if(personParam.getCpf() != null){
        Optional <Person> personCpf = findByCpf(personParam.getCpf());
@@ -680,15 +790,15 @@ public class PersonService {
       }
 
       if(personParam.getContactEmail() != null){
-       Optional <Person> personEmail = findByContactEmail(personParam.getContactEmail());
-       
+       Optional<Person> personEmail = findByContactEmail(personParam.getContactEmail());
+
         if(personEmail.isPresent()){
           String nome= "Usuário já cadastrado com e-mail: "+personEmail.get().getName();
           throw new IllegalArgumentException(nome);
         }
       }
     }
-    
+
     final boolean emailsIncompativeis = (personParam.getContactEmail() != null && personParam.getConfirmEmail() != null)
         &&
         !personParam.getContactEmail().equals(personParam.getConfirmEmail());
@@ -704,9 +814,12 @@ public class PersonService {
 
     boolean notHaveParticipeLoginInThisConference = this.validate(personParam.getContactEmail(), null, SERVER);
     Boolean typeAuthenticationCpf = storePersonValidation(personParam);
-
+    log.info(
+      "notHaveParticipeLoginInThisConference={} para person={}",
+      notHaveParticipeLoginInThisConference,
+      personParam.getContactEmail()
+    );
     if (notHaveParticipeLoginInThisConference) {
-
       Person person = createParticipeLogin(personParam, makeLogin, typeAuthenticationCpf);
       return ResponseEntity.status(200).body(new PersonDto(person));
     }
@@ -743,13 +856,30 @@ public class PersonService {
     SelfDeclaration selfDeclaration;
 
     if (selfDeclarationOptional.isPresent()) {
-      selfDeclaration = this.selfDeclarationService.updateLocality(selfDeclarationOptional.get(),
-          paramSelfDeclaration.getLocality());
+      log.info(
+        "SelfDeclaration id={} encontrada atualizando com localityId={}",
+        selfDeclarationOptional.get().getId(),
+        paramSelfDeclaration.getLocality()
+      );
+      selfDeclaration = this.selfDeclarationService.updateLocality(
+              selfDeclarationOptional.get(),
+          paramSelfDeclaration.getLocality()
+      );
     } else {
       selfDeclaration = new SelfDeclaration(conference, paramSelfDeclaration.getLocality(), id);
       selfDeclaration.setReceiveInformational(
           personParam.isReceiveInformational() != null && personParam.isReceiveInformational());
       selfDeclaration.setAnswerSurvey(false);
+
+      log.info(
+        "SelfDeclaration com id={} não encontrada. Criando com localityId={}, conferenceId={}, personId={}, answerSurvey={}, receiveInformational={}",
+        selfDeclaration.getId(),
+        paramSelfDeclaration.getLocality(),
+        conference,
+        id,
+        selfDeclaration.getAnswerSurvey(),
+        selfDeclaration.getReceiveInformational()
+      );
       selfDeclaration = this.selfDeclarationService.save(selfDeclaration);
     }
 
@@ -775,7 +905,6 @@ public class PersonService {
       personParam.setConfirmEmail(personParam.getCpf() + "@cpf");
       return true;
     }
-
     return false;
   }
 
@@ -820,6 +949,11 @@ public class PersonService {
         .findByPersonAndConference(person.getId(), personParam.getSelfDeclaration().getConference());
 
     if (sd == null) {
+      log.info(
+        "Não foi encontrado SelfDeclaration relacionado a conferenceId={} e personId={}",
+        personParam.getSelfDeclaration().getConference(),
+        person.getId()
+      );
       Person personSdCreation = new Person();
       Conference conferenceSdCreation = new Conference();
       Locality localitySdCreation = new Locality();
@@ -827,18 +961,45 @@ public class PersonService {
       personSdCreation.setId(person.getId());
       conferenceSdCreation.setId(personParam.getSelfDeclaration().getConference());
       localitySdCreation.setId(personParam.getSelfDeclaration().getLocality());
-      SelfDeclaration selfDeclaration = new SelfDeclaration(conferenceSdCreation,
-          localitySdCreation, personSdCreation);
+      SelfDeclaration selfDeclaration = new SelfDeclaration(
+        conferenceSdCreation,
+        localitySdCreation,
+        personSdCreation
+      );
       selfDeclaration.setReceiveInformational(personParam.isReceiveInformational());
       selfDeclaration.setAnswerSurvey(false);
       sd = selfDeclarationService.save(selfDeclaration);
     } else if (!personParam.getSelfDeclaration().getLocality().equals(sd.getLocality().getId())) {
+      log.info(
+        "Foi encontrado uma SelfDeclaration selfDeclarationId={} para a personId={}, mas não está relacionada a localityId={} informada",
+        sd.getId(),
+        person.getId(),
+        personParam.getSelfDeclaration().getLocality()
+      );
       sd.setReceiveInformational(personParam.isReceiveInformational());
+      log.info(
+        "Alterando atributo receiveInformational da SelfDeclaration selfDeclarationId={} para {}",
+        sd.getId(),
+        sd.getReceiveInformational()
+      );
       sd = selfDeclarationService.updateLocality(
           sd,
-          personParam.getSelfDeclaration().getLocality());
+          personParam.getSelfDeclaration().getLocality()
+      );
     } else {
+      log.info(
+        "Foi encontrada uma SelfDeclaration selfDeclarationId={} com os parâmetros personId={}, conferenceId={} e localityId={}",
+        sd.getId(),
+        person.getId(),
+        personParam.getSelfDeclaration().getConference(),
+        personParam.getSelfDeclaration().getLocality()
+      );
       sd.setReceiveInformational(personParam.isReceiveInformational());
+      log.info(
+        "Alterando atributo receiveInformational da SelfDeclaration selfDeclarationId={} para {}",
+        sd.getId(),
+        sd.getReceiveInformational()
+      );
       sd = this.selfDeclarationService.save(sd);
     }
 
@@ -908,16 +1069,15 @@ public class PersonService {
         PersonDto response = new PersonDto(person);
 
         this.createRelationshipWithAuthService(
-            new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(
-                person)
+            new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
                 .password(personParam.getPassword())
                 .server(SERVER)
                 .serverId(idPerson.toString())
                 .resetPassword(false)
                 .makeLogin(makeLogin)
-                .typeAuthentication(
-                    personParam.getTypeAuthentication())
-                .build());
+                .typeAuthentication(personParam.getTypeAuthentication())
+                .build()
+        );
 
         return ResponseEntity.status(200).body(response);
       }

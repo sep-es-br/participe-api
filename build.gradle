@@ -40,6 +40,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-logging'
 	implementation 'io.jsonwebtoken:jjwt:0.7.0'
 	implementation 'org.json:json:20190722';
 	implementation 'org.apache.httpcomponents:httpclient:4.5.12';

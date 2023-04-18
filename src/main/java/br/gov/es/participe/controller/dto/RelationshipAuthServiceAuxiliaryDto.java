@@ -1,6 +1,7 @@
 package br.gov.es.participe.controller.dto;
 
 import br.gov.es.participe.model.Person;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class RelationshipAuthServiceAuxiliaryDto {
 
@@ -80,6 +81,20 @@ public class RelationshipAuthServiceAuxiliaryDto {
 
   public void setTypeAuthentication(String typeAuthentication) {
     this.typeAuthentication = typeAuthentication;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder builder = new StringBuilder("RelationshipAuthServiceAuxiliaryDto{");
+    builder.append("person=").append(person);
+    builder.append(", server='").append(server).append('\'');
+    builder.append(", serverId='").append(serverId).append('\'');
+    builder.append(", conferenceId=").append(conferenceId);
+    builder.append(", resetPassword=").append(resetPassword);
+    builder.append(", makeLogin=").append(makeLogin);
+    builder.append(", typeAuthentication='").append(typeAuthentication).append('\'');
+    builder.append('}');
+    return builder.toString();
   }
 
   public static class RelationshipAuthServiceAuxiliaryDtoBuilder {

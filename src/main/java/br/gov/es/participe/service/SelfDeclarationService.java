@@ -5,9 +5,10 @@ import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.repository.SelfDeclarationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class SelfDeclarationService {
   @Autowired
   private PersonService personService;
 
+  private static final Logger log = LoggerFactory.getLogger(SelfDeclarationService.class);
+
   public SelfDeclaration save(SelfDeclaration selfDeclaration) {
     if (selfDeclaration.getConference() == null || selfDeclaration.getConference().getId() == null) {
       throw new IllegalArgumentException("Conference is required to create or edit Self Declaration");
@@ -41,8 +44,11 @@ public class SelfDeclarationService {
 
     SelfDeclaration self = selfDeclarationRepository.findByConferenceIdAndPersonId(
         selfDeclaration.getConference().getId(), selfDeclaration.getPerson().getId());
-
     if (self == null) {
+      log.info("SelfDeclaration com conferenceId={} e personId={} não encontrada",
+        selfDeclaration.getConference().getId(),
+        selfDeclaration.getPerson().getId()
+      );
       Conference conference = conferenceService.find(selfDeclaration.getConference().getId());
       Locality locality = localityService.find(selfDeclaration.getLocality().getId());
       Person person = personService.find(selfDeclaration.getPerson().getId());
@@ -52,17 +58,34 @@ public class SelfDeclarationService {
       selfDeclaration.setPerson(person);
       selfDeclaration.setAnswerSurvey(false);
       selfDeclaration.setReceiveInformational(true);
+
     }
+    log.info(
+      "Criando SelfDeclaration com conferenceId={}, localityId={}, personId={}, answerSurvey={}, receiveInformational={}",
+      selfDeclaration.getConference().getId(),
+      selfDeclaration.getLocality().getId(),
+      selfDeclaration.getPerson().getId(),
+      selfDeclaration.getAnswerSurvey(),
+      selfDeclaration.getReceiveInformational()
+    );
     return selfDeclarationRepository.save(selfDeclaration);
   }
 
-  @Transactional
+  // @Transactional
   public SelfDeclaration updateLocality(SelfDeclaration selfDeclaration, Long idLocality) {
     selfDeclaration.setLocality(null);
+    log.info("Alterando locality para nulo da SelfDeclaration com id={}", selfDeclaration.getId());
     selfDeclarationRepository.save(selfDeclaration);
     selfDeclaration.setPerson(personService.find(selfDeclaration.getPerson().getId()));
     selfDeclaration.setConference(conferenceService.find(selfDeclaration.getConference().getId()));
     selfDeclaration.setLocality(localityService.find(idLocality));
+    log.info(
+      "Atualizado atributos da SelfDeclaration com id={} novos atributos = personId={}, conferenceId={}, localityId={}",
+      selfDeclaration.getId(),
+      selfDeclaration.getPerson().getId(),
+      selfDeclaration.getConference().getId(),
+      selfDeclaration.getLocality().getId()
+    );
     return selfDeclarationRepository.save(selfDeclaration);
   }
 
@@ -76,9 +99,10 @@ public class SelfDeclarationService {
     return selfDeclarationRepository.findByConferenceIdAndPersonId(idConference, idPerson);
   }
 
-  
+
   public void delete(Long id) {
     SelfDeclaration self = find(id);
+    log.info("Removendo SelfDeclarationId={}", self.getId());
     selfDeclarationRepository.delete(self);
   }
 
