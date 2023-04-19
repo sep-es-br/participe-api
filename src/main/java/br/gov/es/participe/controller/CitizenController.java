@@ -79,7 +79,7 @@ public class CitizenController {
     }
   }
 
-  
+
   @SuppressWarnings({ "rawtypes" })
   @Transactional
   @DeleteMapping("/{id}")

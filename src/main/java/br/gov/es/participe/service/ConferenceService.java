@@ -605,7 +605,10 @@ public class ConferenceService {
 
   public Boolean delete(Long id) {
     boolean deleteConference = true;
+    log.info("Iniciando remoção da conferenceId={}", id);
     Conference conference = this.find(id);
+
+    log.info("conferenceId={} encontrada", id);
 
     if(conference.getPlan() != null && conference.getPlan().getId() != null) {
       List<PlanItem> planItens = this.planItemService.findAllByIdPlan(conference.getPlan().getId());
@@ -619,9 +622,14 @@ public class ConferenceService {
       }
     }
     if(deleteConference) {
+      log.info(
+        "Não foi encontrado nenhum Attend relacionado ao planId={} e conferenceId={}",
+        Optional.ofNullable(conference.getPlan()).map(Plan::getId).orElse(null),
+        conference.getId()
+      );
       this.conferenceRepository.delete(conference);
     }
-
+    log.info("conferenceId={} foi removido? {}", conference.getId(), deleteConference);
     return deleteConference;
   }
 
