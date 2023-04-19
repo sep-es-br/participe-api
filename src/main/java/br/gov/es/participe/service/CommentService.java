@@ -202,7 +202,7 @@ public class CommentService {
     return commentRepository.countCommentByConference(id);
   }
 
-
+  //@Transactional
   public Comment save(Comment comment, Long idPerson, Boolean usePlanItem) {
 
     if(comment.getConference() == null){
@@ -295,7 +295,7 @@ public class CommentService {
       log.info(
         "Criando um novo highlight com os parâmetros from={}, meetingId={}, planItemId={}, localityId={}, personId={}, conferenceId={} extraídos do commentId={}",
         comment.getFrom(),
-        comment.getMeeting().getId(),
+        //comment.getMeeting().getId(),
         planItem.getId(),
         Optional.ofNullable(locality).map(Locality::getId).orElse(null),
         person.getId(),
