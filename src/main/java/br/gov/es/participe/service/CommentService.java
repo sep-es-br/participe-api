@@ -202,7 +202,7 @@ public class CommentService {
     return commentRepository.countCommentByConference(id);
   }
 
-  //@Transactional
+
   public Comment save(Comment comment, Long idPerson, Boolean usePlanItem) {
 
     if(comment.getConference() == null){
@@ -250,7 +250,10 @@ public class CommentService {
           .findFirst()
           .orElse(null);
 
-      log.info("Alterando meeting relacionado ao commentId={} para a meetingId={}", comment.getId(), meetingPresentially.getId());
+      log.info("Alterando meeting relacionado ao commentId={} para a meetingId={}",
+               comment.getId(),
+               Optional.ofNullable(meetingPresentially).map(Meeting::getId).orElse(null)
+      );
       comment.setMeeting(meetingPresentially);
       comment.setFrom("pres");
     } else {
@@ -295,7 +298,7 @@ public class CommentService {
       log.info(
         "Criando um novo highlight com os parâmetros from={}, meetingId={}, planItemId={}, localityId={}, personId={}, conferenceId={} extraídos do commentId={}",
         comment.getFrom(),
-        //comment.getMeeting().getId(),
+        Optional.ofNullable(comment.getMeeting()).map(Meeting::getId).orElse(null),
         planItem.getId(),
         Optional.ofNullable(locality).map(Locality::getId).orElse(null),
         person.getId(),
