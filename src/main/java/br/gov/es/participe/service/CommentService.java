@@ -587,6 +587,12 @@ public class CommentService {
           if (moderatedBy.getFinish() != null && !moderatedBy.getFinish() && !adm) {
             throw new IllegalArgumentException("moderation.comment.error.moderator");
           }
+          log.info(
+            "Removendo moderatedBy moderatedById={} relacionado ao commentId={} moderatorId={}",
+            moderatedBy.getId(),
+            comment.getId(),
+            moderatedBy.getPerson().getId()
+          );
           moderatedByRepository.delete(moderatedBy);
           moderatedBy = new ModeratedBy(false, new Date(), comment, moderator);
         }
@@ -597,6 +603,12 @@ public class CommentService {
       }
 
       moderatedBy = moderatedByRepository.save(moderatedBy);
+      log.info(
+        "Criado novo moderatedBy moderatedById={} relacionado ao commentId={} moderatorId={}",
+        moderatedBy.getId(),
+        comment.getId(),
+        moderatedBy.getPerson().getId()
+      );
 
       return findModerationResultById(comment.getId(),comment.getConference().getId());
 
@@ -610,9 +622,16 @@ public class CommentService {
     if (moderatedBy != null && moderatedBy.getPerson().getId().equals(moderator.getId())) {
       moderatedBy.setFinish(true);
       moderatedBy.setTime(new Date());
+      log.info(
+        "Alterando moderatedBy moderatedById={} do commentId={} e moderatorId={} para finish=true",
+        moderatedBy.getId(),
+        moderatedBy.getComment().getId(),
+        moderator.getId()
+      );
       moderatedBy = moderatedByRepository.save(moderatedBy);
       return moderatedBy.getComment();
     }
+    log.info("O comment informado commentId={} não está relacionado ao moderatorId={} informado", comment.getId(), idModerator);
     return comment;
   }
 
@@ -668,17 +687,24 @@ public class CommentService {
 
     moderatedBy.setFinish(true);
     moderatedByRepository.save(moderatedBy);
+    log.info(
+      "Criado ModeratedBy moderatedById={} relacionado ao commentId={} e moderatorId={}",
+      moderatedBy.getId(),
+      moderatedBy.getComment().getId(),
+      moderatedBy.getPerson().getId()
+    );
 
-    if ((moderationParamDto.getLocality() != null && prevLocalityID != moderationParamDto.getLocality())
-        || (moderationParamDto.getPlanItem() != null && prevPlanItemID != moderationParamDto.getPlanItem())
-        || (moderationParamStatus != null && prevStatus != moderationParamStatus.leanName)) {
+    if ((moderationParamDto.getLocality() != null && !prevLocalityID.equals(moderationParamDto.getLocality()))
+        || (moderationParamDto.getPlanItem() != null && !prevPlanItemID.equals(moderationParamDto.getPlanItem()))
+        || (moderationParamStatus != null && !prevStatus.equals(moderationParamStatus.leanName))) {
 
       // Try to remove previous highlight
       Highlight highlightDB = highlightService.find(
           comment.getPersonMadeBy().getId(),
           prevPlanItemID,
           comment.getConference().getId(),
-          prevLocalityID);
+          prevLocalityID
+      );
 
       if (highlightDB != null) {
         highlightService.removeHighlight(highlightDB);
@@ -695,12 +721,32 @@ public class CommentService {
         newHighlight.setPersonMadeBy(comment.getPersonMadeBy());
         newHighlight.setPlanItem(comment.getPlanItem());
         newHighlight.setTime(new Date());
+        log.info(
+          "Comment com status != rem, criando um novo highlight com os parâmetros conferenceId={}, from={}, localityId={}, meetingId={}, personMadeById={}, planItemId={}",
+          Optional.ofNullable(newHighlight.getConference()).map(Conference::getId).orElse(null),
+          newHighlight.getFrom(),
+          Optional.ofNullable(newHighlight.getLocality()).map(Locality::getId).orElse(null),
+          Optional.ofNullable(newHighlight.getMeeting()).map(Meeting::getId).orElse(null),
+          Optional.ofNullable(newHighlight.getPersonMadeBy()).map(Person::getId).orElse(null),
+          Optional.ofNullable(newHighlight.getPlanItem()).map(PlanItem::getId).orElse(null)
+        );
         highlightService.save(newHighlight, newHighlight.getFrom());
       }
 
     }
     comment.setConference(conferenceDB);
-    return commentRepository.save(comment);
+    final var commentCreated = commentRepository.save(comment);
+    log.info(
+      "Criando um novo comment com os parâmetros commentId={}, conferenceId={}, moderatorId={}, localityId={}, meetingId={}, personMadeById={} planItemId={}",
+      commentCreated.getId(),
+      Optional.ofNullable(commentCreated.getConference()).map(Conference::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getModerator()).map(Person::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getLocality()).map(Locality::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getMeeting()).map(Meeting::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getPersonMadeBy()).map(Person::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getPlanItem()).map(PlanItem::getId).orElse(null)
+    );
+    return commentCreated;
   }
 
   private Comment loadComment(Comment comment, ModerationParamDto moderationParamDto) {

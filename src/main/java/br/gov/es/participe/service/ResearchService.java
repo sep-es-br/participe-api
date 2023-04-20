@@ -25,7 +25,6 @@ public class ResearchService {
         return Optional.ofNullable(researchRepository.findByConferenceId(idConference));
     }
 
-    @Transactional
     public void save(Research research) {
         researchRepository.save(research);
     }

@@ -18,7 +18,6 @@ public class PortalServerService {
         return portalServerRepository.findByUrl(url);
     }
 
-    @Transactional
     public PortalServer save(PortalServer portalServer) {
         return portalServerRepository.save(portalServer);
     }

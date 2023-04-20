@@ -4,6 +4,8 @@ import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.AttendRepository;
 import br.gov.es.participe.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +54,8 @@ public class ParticipationService {
 
   @Autowired
   private PersonService personService;
+
+  private static final Logger log = LoggerFactory.getLogger(ParticipationService.class);
 
   public BodyParticipationDto body(
       Long idPlanItem,
@@ -315,9 +319,23 @@ public class ParticipationService {
   public void setSurvey(Boolean answerSurvey, Long idPerson, Long idConference) {
     SelfDeclaration self = selfDeclarationService.findByPersonAndConference(idPerson, idConference);
 
+    log.info(
+      "Alterando answerSurvey para answerSurvey={} da SelfDeclaration selfDeclarationId={} relacionados a personId={} e conferenceId={}",
+      answerSurvey,
+      self.getId(),
+      idPerson,
+      idConference
+    );
+
     self.setAnswerSurvey(answerSurvey);
 
     selfDeclarationService.save(self);
+    log.info(
+      "SelfDeclaration alterada com sucesso selfDeclarationId={} relacionados a personId={} e conferenceId={}",
+      self.getId(),
+      idPerson,
+      idConference
+    );
   }
 
   @SuppressWarnings("unused")
