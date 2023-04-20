@@ -21,12 +21,12 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
     + "AND (id(parent) IN $planItemIds OR id(child) IN $planItemIds OR NOT $planItemIds) "
     + "AND (id(locality) IN $localityIds OR NOT $localityIds) "
     + "AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment))) ";
-String WHERE_TEXT_FILTER = "WHERE ext.translate(comment.text) CONTAINS ext.translate($text) "
-    + "OR ext.translate(person.name) CONTAINS ext.translate($text) "
-    + "OR ext.translate(locality.name) CONTAINS ext.translate($text) "
-    + "OR ext.translate(planItem.name) CONTAINS ext.translate($text) "
+String WHERE_TEXT_FILTER = "WHERE apoc.text.clean(comment.text) CONTAINS apoc.text.clean($text) "
+    + "OR apoc.text.clean(person.name) CONTAINS apoc.text.clean($text) "
+    + "OR apoc.text.clean(locality.name) CONTAINS apoc.text.clean($text) "
+    + "OR apoc.text.clean(planItem.name) CONTAINS apoc.text.clean($text) "
     + "OR listPi3 IS NOT NULL "
-    + "AND any(piIte IN listPi3 WHERE ext.translate(piIte.name) CONTAINS ext.translate($text)) ";
+    + "AND any(piIte IN listPi3 WHERE apoc.text.clean(piIte.name) CONTAINS apoc.text.clean($text)) ";
 
 @Query("MATCH (p:Person)<-[a:MADE_BY]-(c:Comment)"
     + " MATCH (conf:Conference)-[ab:ABOUT]-(c)"

@@ -108,10 +108,10 @@ Integer countLocalityByConferenceAndType(@Param("idConference")Long idConference
 
           + " OPTIONAL MATCH (pi)-[comp:COMPOSES*]->(pi2:PlanItem) "
           + " WITH p,at,conf,pi,loc,lt,pi2 "
-          + " WHERE ($text IS NULL OR (at.text IS NOT NULL AND ext.translate(at.text) CONTAINS ext.translate($text)) "
-          + " OR (at.text IS NULL AND ext.translate(pi.name) CONTAINS ext.translate($text)) "
-          + " OR (at.text IS NULL AND ext.translate(loc.name) CONTAINS ext.translate($text)) "
-          + " OR (at.text IS NULL AND pi2 IS NOT NULL AND ext.translate(pi2.name) CONTAINS ext.translate($text))) "
+          + " WHERE ($text IS NULL OR (at.text IS NOT NULL AND apoc.text.clean(at.text) CONTAINS apoc.text.clean($text)) "
+          + " OR (at.text IS NULL AND apoc.text.clean(pi.name) CONTAINS apoc.text.clean($text)) "
+          + " OR (at.text IS NULL AND apoc.text.clean(loc.name) CONTAINS apoc.text.clean($text)) "
+          + " OR (at.text IS NULL AND pi2 IS NOT NULL AND apoc.text.clean(pi2.name) CONTAINS apoc.text.clean($text))) "
 
           + " OPTIONAL MATCH (at)-[mb:MODERATED_BY]->(m:Person) "
           + " RETURN count(DISTINCT id(at)) ")

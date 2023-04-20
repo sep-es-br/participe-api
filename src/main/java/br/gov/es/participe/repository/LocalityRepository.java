@@ -11,13 +11,13 @@ import java.util.List;
 public interface LocalityRepository extends Neo4jRepository<Locality, Long> {
 
     @Query("MATCH (l:Locality)-[:OF_TYPE]->(t:LocalityType) "
-    + " WHERE ext.translate(l.name) CONTAINS ext.translate($quey) "
+    + " WHERE apoc.text.clean(l.name) CONTAINS apoc.text.clean($quey) "
     + " AND id(t) = $typeId "
     + " RETURN l, [(l)-[lt:OF_TYPE]->(t:LocalityType) | [ lt, t ] ] ORDER BY l.name ")
 List<Locality> search( @Param("quey") String quey, @Param("typeId") Long typeId);
 
 @Query("MATCH (domain:Domain)<-[ili:IS_LOCATED_IN]-(l:Locality)-[:OF_TYPE]->(t:LocalityType) "
-    + " WHERE ext.translate(l.name) = ext.translate($name) "
+    + " WHERE apoc.text.clean(l.name) = apoc.text.clean($name) "
     + " AND id(t) = $typeId "
     + " RETURN domain, ili, l, [(l)-[lt:OF_TYPE]->(t:LocalityType) | [ lt, t ] ] ORDER BY l.name ")
 List<Locality> findByNameAndType( @Param("name") String name, @Param("typeId") Long typeId);
