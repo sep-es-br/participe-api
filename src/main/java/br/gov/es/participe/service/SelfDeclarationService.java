@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class SelfDeclarationService {
@@ -30,6 +31,7 @@ public class SelfDeclarationService {
   private static final Logger log = LoggerFactory.getLogger(SelfDeclarationService.class);
 
   public SelfDeclaration save(SelfDeclaration selfDeclaration) {
+
     if (selfDeclaration.getConference() == null || selfDeclaration.getConference().getId() == null) {
       throw new IllegalArgumentException("Conference is required to create or edit Self Declaration");
     }
@@ -41,7 +43,21 @@ public class SelfDeclarationService {
     if (selfDeclaration.getPerson() == null || selfDeclaration.getPerson().getId() == null) {
       throw new IllegalArgumentException("Person is required to create or edit Self Declaration");
     }
+    log.info(
+      "Iniciando criação/alteração da SelfDeclaration com parâmetros selfDeclarationId={}, conferenceId={}, localityId={}, personId={}, answerSurvey={}, receiveInformational={}",
+      selfDeclaration.getId(),
+      selfDeclaration.getConference().getId(),
+      selfDeclaration.getLocality().getId(),
+      selfDeclaration.getPerson().getId(),
+      selfDeclaration.getAnswerSurvey(),
+      selfDeclaration.getReceiveInformational()
+    );
 
+    log.info(
+      "Consultando SelfDeclaration relacionada a conferenceId={} e personId={}",
+      selfDeclaration.getConference().getId(),
+      selfDeclaration.getPerson().getId()
+    );
     SelfDeclaration self = selfDeclarationRepository.findByConferenceIdAndPersonId(
         selfDeclaration.getConference().getId(), selfDeclaration.getPerson().getId());
     if (self == null) {
@@ -61,14 +77,31 @@ public class SelfDeclarationService {
 
     }
     log.info(
-      "Criando SelfDeclaration com conferenceId={}, localityId={}, personId={}, answerSurvey={}, receiveInformational={}",
+      "Criando/Atualizando SelfDeclaration selfDeclarationId={} com conferenceId={}, localityId={}, personId={}, answerSurvey={}, receiveInformational={}",
+      selfDeclaration.getId(),
       selfDeclaration.getConference().getId(),
       selfDeclaration.getLocality().getId(),
       selfDeclaration.getPerson().getId(),
       selfDeclaration.getAnswerSurvey(),
       selfDeclaration.getReceiveInformational()
     );
-    return selfDeclarationRepository.save(selfDeclaration);
+    if (Objects.isNull(selfDeclaration.getAnswerSurvey())) {
+       throw new IllegalArgumentException("AnswerSurvey required to create or edit Self Declaration");
+    }
+    if (Objects.isNull( selfDeclaration.getReceiveInformational())) {
+      throw new IllegalArgumentException("ReceiveInformational required to create or edit Self Declaration");
+    }
+    final var updatedSelfDeclaration = selfDeclarationRepository.save(selfDeclaration);
+    log.info(
+      "SelfDeclaration selfDeclarationId={} criado/atualizado com sucesso conferenceId={}, localityId={}, personId={}, answerSurvey={}, receiveInformational={}",
+      selfDeclaration.getId(),
+      selfDeclaration.getConference().getId(),
+      selfDeclaration.getLocality().getId(),
+      selfDeclaration.getPerson().getId(),
+      selfDeclaration.getAnswerSurvey(),
+      selfDeclaration.getReceiveInformational()
+    );
+    return updatedSelfDeclaration;
   }
 
   // @Transactional

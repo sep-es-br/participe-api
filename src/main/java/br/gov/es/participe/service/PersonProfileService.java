@@ -18,6 +18,8 @@ import br.gov.es.participe.repository.IsAuthenticatedByRepository;
 import br.gov.es.participe.repository.LocalityRepository;
 import br.gov.es.participe.repository.PersonRepository;
 import br.gov.es.participe.repository.SelfDeclarationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +48,7 @@ public class PersonProfileService {
   private static final String PARTICIPE_CPF = "participeCpf";
   private static final List<String> INTERNAL_LOGIN_TYPE =
     asList(PARTICIPE_EMAIL, PARTICIPE_CPF);
+  private static final Logger log = LoggerFactory.getLogger(PersonProfileService.class);
 
   @Autowired
   public PersonProfileService(
@@ -67,7 +70,9 @@ public class PersonProfileService {
   }
 
   public PersonProfileSearchDto findById(Long idPerson, Long idConference) {
+    log.info("Consultando detalhes do perfil da personId={} na conferenceId={}", idPerson, idConference);
     Person person = personService.find(idPerson);
+    log.info("Person com personId={} encontrada", idPerson);
 
     List<IsAuthenticatedBy> isAuthenticatedBy = findIsAuthenticatedById(idPerson);
 
@@ -76,21 +81,36 @@ public class PersonProfileService {
       idPerson
     );
 
+    log.info("Consultando SelfDeclaration relacionada a personId={} e conferenceId={}", idPerson, idConference);
     Optional<SelfDeclaration> selfDeclarationOptional = findSelfDeclaration(idPerson, idConference);
 
     SelfDeclaration selfDeclaration;
 
     if(!selfDeclarationOptional.isPresent()) {
+      log.info("SelfDeclaration relacionada a personId={} e conferenceId={} não encontrada", idPerson, idConference);
       selfDeclaration = new SelfDeclaration(new SelfDeclarationParamDto(
         idConference,
         localityDto.getLocalityId(),
         idPerson
       ));
       selfDeclaration.setReceiveInformational(true);
+      log.info("Criando SelfDeclaration com conferenceId={}, personId={} e localityId={}", idConference, idPerson, localityDto.getLocalityId());
       selfDeclarationRepository.save(selfDeclaration);
+      log.info("SelfDeclaration criada com sucesso selfDeclarationId={}, conferenceId={}, personId={} e localityId={}",
+               selfDeclaration.getId(),
+               idConference,
+               idPerson,
+               localityDto.getLocalityId()
+      );
     }
     else {
       selfDeclaration = selfDeclarationOptional.get();
+      log.info("SelfDeclaration relacionada a personId={} e conferenceId={} encontrada selfDeclarationId={}, localityId={}",
+               idPerson,
+               idConference,
+               selfDeclaration.getId(),
+               Optional.ofNullable(selfDeclaration.getLocality()).map(Locality::getId).orElse(null)
+      );
     }
 
     return new PersonProfileSearchDto(

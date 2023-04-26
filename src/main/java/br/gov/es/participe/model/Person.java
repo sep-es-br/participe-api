@@ -275,4 +275,22 @@ public class Person extends Entity implements UserDetails {
   public boolean isEnabled() {
     return true;
   }
+
+  @Override
+  public String toString() {
+    final StringBuffer sb = new StringBuffer("Person{");
+    sb.append("id='").append(getId()).append('\'');
+    sb.append("name='").append(name).append('\'');
+    sb.append(", contactEmail='").append(contactEmail).append('\'');
+    sb.append(", status=").append(status);
+    sb.append(", telephone='").append(telephone).append('\'');
+    final Set<Long> obj = Optional.ofNullable(selfDeclaretions).stream()
+      .flatMap(Collection::stream)
+      .map(SelfDeclaration::getId)
+      .collect(Collectors.toSet());
+    sb.append(", selfDeclarations=").append(obj);
+    sb.append('}');
+    return sb.toString();
+  }
+
 }

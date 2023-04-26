@@ -3,9 +3,9 @@ package br.gov.es.participe.controller.dto;
 public class SelfDeclarationParamDto {
 
 	private Long id;
-	private Long conference;
-	private Long locality;
-	private Long person;
+  private Long conference;
+  private Long locality;
+  private Long person;
 
 	public SelfDeclarationParamDto() {
 	}

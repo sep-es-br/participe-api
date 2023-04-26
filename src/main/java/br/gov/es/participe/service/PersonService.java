@@ -119,20 +119,39 @@ public class PersonService {
   }
 
   public SigninDto authenticate(PersonParamDto user, String server, Long conferenceId) {
+    log.info("Iniciando autenticação personId={}, login={}, server={} conferenceId={} ", user.getId(), user.getLogin(), server, conferenceId);
     String userLogin = user.getLogin().contains("@") ? user.getLogin() : user.getLogin() + "@cpf";
 
+
+    log.info("Consultando person pelo login de email email={} no server={}, conferenceId={}", userLogin, SERVER, conferenceId);
     Optional<Person> optionalPerson = this.havePersonWithLoginEmail(userLogin, SERVER, null);
 
     if (!optionalPerson.isPresent()) {
+      log.info("Person email={} não encontrada no server={} e conferenceId={}", userLogin, server, conferenceId);
       return null;
     }
 
     final Person person = optionalPerson.get();
 
     if (person.getActive() != null && !person.getActive()) {
-      return new SigninDto(person, SERVER, null, null);
+      log.info("Person personId={} com active={}, criando resposta...", person.getId(), person.getActive());
+      final var response = new SigninDto(person, SERVER, null, null);
+      log.info(
+        "Resposta criada personId={}, conferenceId={} server={}, active={}, completed={}",
+        person.getId(),
+        conferenceId,
+        SERVER,
+        person.getActive(),
+        response.isCompleted()
+      );
+      return response;
     }
 
+    log.info(
+      "Person personId={} encontrada com active={}, gerado token e refreshToken...",
+      person.getId(),
+      person.getActive()
+    );
     String authenticationToken = tokenService.generateToken(person, TokenType.AUTHENTICATION);
     String refreshToken = tokenService.generateToken(person, TokenType.REFRESH);
 
@@ -212,10 +231,17 @@ public class PersonService {
     boolean newAuthService = true;
 
     if (person.getId() == null) {
-      log.info("Person não foi criada");
+      log.info(
+        "Person não foi criada personId={}, name={}, conferenceId={}, server={}",
+        person.getId(),
+        person.getName(),
+        conferenceId,
+        server
+      );
       person = personRepository.save(person);
       log.info("Person criada com sucesso personId={}", person.getId());
     } else {
+      log.info("Person personId={} informada, carregando selfDeclarations da conferenceId={}", person.getId(), conferenceId);
       loadSelfDeclaration(person, conferenceId);
     }
 
@@ -266,8 +292,8 @@ public class PersonService {
           .setNumberOfAccesses(makeLogin ? authService.getNumberOfAccesses() + 1 : authService.getNumberOfAccesses());
       if (persistRelationship) {
         log.info("Alterando numberOfAccesses do authServiceId={} para numberOfAccesses={}",
-          authService.getNumberOfAccesses(),
-          authService.getId()
+          authService.getId(),
+          authService.getNumberOfAccesses()
         );
         authServiceRepository.save(authService);
       }
@@ -304,7 +330,12 @@ public class PersonService {
   }
 
   private void verifyMakeLoginCondition(Person person, Boolean makeLogin, AuthService authService, Long conferenceId) {
-    log.info("Verificando flag makeLogin={}", makeLogin);
+    log.info("Verificando flag makeLogin={} para a personId={}, authService={}, conferenceId={}",
+             makeLogin,
+             person.getId(),
+             authService.getId(),
+             conferenceId
+    );
     if (makeLogin) {
       createLogin(person, authService, conferenceId);
     }
@@ -362,6 +393,7 @@ public class PersonService {
   }
 
   private void loadSelfDeclaration(Person person, Long conferenceId) {
+    // TODO: verificar possível problema, se conferenceId == null a selfDeclaration nunca será adicionada à Person
     if (conferenceId == null) {
       log.info(
         "Não foi informado uma Conference para consultar a SelfDeclaration da personId={}",
@@ -382,18 +414,31 @@ public class PersonService {
   }
 
   private void createLogin(Person person, AuthService authService, Long conferenceId) {
-    if (conferenceId != null) {
-      Conference conference = conferenceService.find(conferenceId);
-      Login login = new Login(person, authService, conference);
-      loginRepository.save(login);
+    log.info("Iniciando criação de um registro de Login para personId={}, authServiceId={}, server={}, conferenceId={}",
+             person.getId(),
+             authService.getId(),
+             authService.getServer(),
+             conferenceId
+    );
+    if (conferenceId == null) {
       log.info(
-        "Registro de login loginId={} criado com parâmetros personId={}, authServiceId={} e conferenceId={}",
-        login.getId(),
-        login.getPerson().getId(),
-        login.getAuthService().getId(),
-        login.getConference().getId()
+        "Não foi informado uma Conference para a criação do Login com os parâmetros personId={}, authServiceId={}, server={} retornando...",
+        person.getId(),
+        authService.getId(),
+        authService.getServer()
       );
+      return;
     }
+    Conference conference = conferenceService.find(conferenceId);
+    Login login = new Login(person, authService, conference);
+    loginRepository.save(login);
+    log.info(
+      "Registro de login loginId={} criado com parâmetros personId={}, authServiceId={} e conferenceId={}",
+      login.getId(),
+      login.getPerson().getId(),
+      login.getAuthService().getId(),
+      login.getConference().getId()
+    );
   }
 
   private void loadAuthenticatedBy(
@@ -463,10 +508,11 @@ public class PersonService {
 
 
   public Person complement(Person person, SelfDeclaration selfDeclaration) {
+    log.info("Iniciando complemento do cadastro da personId={}, email={}", person.getId(), person.getContactEmail());
     Person personBD = this.havePersonWithLoginEmail(person.getContactEmail(), null, null).orElse(null);
 
     if (personBD == null) {
-      log.info("Não foi encontrado uma person com email={}", person.getContactEmail());
+      log.info("Não foi encontrado uma person com personId={}, email={}", person.getId(), person.getContactEmail());
       personBD = personRepository.save(person);
       log.info(
         "Person com email={} criada com sucesso com personId={}",
@@ -474,6 +520,7 @@ public class PersonService {
         person.getId()
       );
     } else {
+      log.info("Foi encontrado uma person com personId={}, email={}", person.getId(), person.getContactEmail());
       personBD.setTelephone(person.getTelephone());
       personRepository.save(personBD);
       log.info(
@@ -909,6 +956,7 @@ public class PersonService {
   }
 
   public ResponseEntity<?> updatePerson(PersonParamDto personParam, Boolean makeLogin) {
+    log.info("Iniciando alteração da person personId={}, makeLogin={}", personParam.getId(), makeLogin);
     this.verifyTypeAuthentication(personParam);
 
     Person person = this.find(personParam.getId());
@@ -944,6 +992,7 @@ public class PersonService {
     person.setActive(personParam.getActive());
     person.setTelephone(personParam.getTelephone());
     person.setName(personParam.getName());
+    log.info("Alterando personId={} atributos: active={}, telephone={} e name={}", person.getId(), person.getActive(), person.getTelephone(), person.getName());
 
     SelfDeclaration sd = selfDeclarationService
         .findByPersonAndConference(person.getId(), personParam.getSelfDeclaration().getConference());
