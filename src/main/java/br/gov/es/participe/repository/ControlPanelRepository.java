@@ -480,14 +480,14 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 		" AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
 		" with collect(h) as plogged  " +
 		" optional match(h:Highlight)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
-		" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  h.from='pres' " +
+		" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  h.from='pres' and (m)<-[:DURING]-(h) " +
 		" AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
 		" with plogged + collect(h) as allp  " +
 		" unwind allp as np " +
 		" MATCH (co:Conference)<-[:ABOUT]-(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem) " +
 		" ,(np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE *0..]->(plt:LocalityType) " +
-		" ,(co)<-[:OCCURS_IN]-(m)<-[:DURING]-(np) " +
-		" WHERE id(co) = $idConference " +
+		" ,(co)<-[:OCCURS_IN]-(m) " +
+		" WHERE id(co) = $idConference and (m)<-[:DURING]-(np) " +
 		" AND np.from = 'pres' " +
 		" AND ($meetings IS NULL OR id(m) IN $meetings) " +
 		" AND id(plt) = $microregionChartAgroup " +
@@ -664,13 +664,13 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 				" AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
 				" with collect(h) as plogged  " +
 				" optional match(h:Highlight)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
-				" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  h.from='pres' " +
+				" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  h.from='pres' and (m)<-[:DURING]-(h)  " +
 				" AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
 				" with plogged + collect(h) as allp  " +
 				" unwind allp as np " +
 				" MATCH(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(co)<-[:OCCURS_IN]-(m), " +
 				" (m)<-[:DURING]-(np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) " +
-				" WHERE ID(co) = $idConference " +
+				" WHERE ID(co) = $idConference  and (m)<-[:DURING]-(np) " +
 				" AND ($structureItemPlanSelected IS NULL " +
 				" OR (id(planItem) = $structureItemPlanSelected and id(cPI) <> $structureItemPlanSelected)) " +
 				" AND np.from = 'pres' AND ($meetings IS NULL OR id(m) IN $meetings) " +
@@ -901,22 +901,22 @@ List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHi
 
 		*/
 
-		@Query( " optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
+		@Query( " optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting)  " +
 				" where id(co) = $idConference AND  " +
 				" m.attendanceListMode = 'MANUAL'  AND   " +
 				" c.time >= m.beginDate and c.time <= m.endDate AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
 				" AND c.status IN ['pub', 'arq']  " +
 				" with collect(c) as plogged " +
 				" optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting)  " +
-				" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  c.from='pres'  " +
+				" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  c.from='pres'  and (m)<-[:DURING]-(c) " +
 				" AND c.status IN ['pub', 'arq']   " +
 				" AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
 				" with plogged + collect(c) as allp   " +
 				" unwind allp as np " +
 				" MATCH(co)<-[:ABOUT]-(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem) " +
 				" ,(np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE *0..]->(plt:LocalityType) " +
-				" ,(co)<-[:OCCURS_IN]-(m)<-[:DURING]-(np) " +
-				" WHERE ID(co) = $idConference AND np.from = 'pres' " +
+				" ,(co)<-[:OCCURS_IN]-(m) " +
+				" WHERE ID(co) = $idConference AND np.from = 'pres' and (m)<-[:DURING]-(np) " +
 				" AND (NOT np.status IN ['rem' , 'pen' ]) " +
 				" AND ($meetings IS NULL OR id(m) IN $meetings) " +
 				" AND id(plt) = $microregionChartAgroup  " +
@@ -998,7 +998,7 @@ List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferencePr
 		" AND c.status IN ['pub', 'arq']  " +
 		" with collect(c) as plogged " +
 		" optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting)  " +
-		" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  c.from='pres'  " +
+		" where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  c.from='pres' and (m)<-[:DURING]-(c) " +
 		" AND c.status IN ['pub', 'arq']   " +
 		" AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
 		" with plogged + collect(c) as allp   " +
@@ -1006,7 +1006,7 @@ List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferencePr
 		" MATCH(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(co)<-[:OCCURS_IN]-(m), " +
 		" (np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) " +
 		" WHERE " +
-		" ID(co) = $idConference " +
+		" ID(co) = $idConference and (m)<-[:DURING]-(np)" +
 		" AND (NOT np.status IN ['rem', 'pen']) " +
 		" AND ($structureItemPlanSelected IS NULL " +
 		" OR(id(planItem) = $structureItemPlanSelected " +

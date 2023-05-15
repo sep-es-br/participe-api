@@ -74,7 +74,7 @@ Integer countHighlightAllOriginsByConference( @Param("idConference") Long idConf
           " AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
           " with collect(h) as plogged  " +
           " optional match(h:Highlight)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +
-          " where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  h.from='pres' " +
+          " where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  h.from='pres' and (m)<-[:DURING]-(h) " +
           " AND (($meetings IS NULL) OR (id(m) IN $meetings)) " +
           " with plogged + collect(h) as allp  " +
           " unwind allp as np " +
