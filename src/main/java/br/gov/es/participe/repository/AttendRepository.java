@@ -218,7 +218,7 @@ Integer countParticipationAllOriginsByConference( @Param("idConference") Long id
 
       @Query( " optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " + 
               " where id(co) = $idConference AND " + 
-              " m.attendanceListMode = 'MANUAL'  AND  " + 
+              " m.attendanceListMode = 'MANUAL'  AND " + 
               " c.time >= m.beginDate and c.time <= m.endDate AND (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
               " AND c.status IN ['pub', 'arq'] " + 
               " with collect(c) as plogged  " + 

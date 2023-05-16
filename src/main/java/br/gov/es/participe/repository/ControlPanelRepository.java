@@ -487,8 +487,8 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 		" MATCH (co:Conference)<-[:ABOUT]-(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem) " +
 		" ,(np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE *0..]->(plt:LocalityType) " +
 		" ,(co)<-[:OCCURS_IN]-(m) " +
-		" WHERE id(co) = $idConference and (m)<-[:DURING]-(np) " +
-		" AND np.from = 'pres' " +
+		" WHERE id(co) = $idConference " +
+		" AND case when m.attendanceListMode = 'AUTO' then np.from = 'pres' and (m)<-[:DURING]-(np) else np.from <> 'pres'  end " +
 		" AND ($meetings IS NULL OR id(m) IN $meetings) " +
 		" AND id(plt) = $microregionChartAgroup " +
 		" AND ($microregionLocalitySelected IS NULL " +
@@ -669,11 +669,12 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 				" with plogged + collect(h) as allp  " +
 				" unwind allp as np " +
 				" MATCH(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(co)<-[:OCCURS_IN]-(m), " +
-				" (m)<-[:DURING]-(np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) " +
-				" WHERE ID(co) = $idConference  and (m)<-[:DURING]-(np) " +
+				" (np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) " +
+				" WHERE ID(co) = $idConference " +
+				" AND case when m.attendanceListMode = 'AUTO' then np.from = 'pres' and (m)<-[:DURING]-(np) else np.from <> 'pres'  end " +
 				" AND ($structureItemPlanSelected IS NULL " +
 				" OR (id(planItem) = $structureItemPlanSelected and id(cPI) <> $structureItemPlanSelected)) " +
-				" AND np.from = 'pres' AND ($meetings IS NULL OR id(m) IN $meetings) " +
+				" AND ($meetings IS NULL OR id(m) IN $meetings) " +
 				" AND (id(parentLoc) = $microregionLocalitySelected OR id(loc) = $microregionLocalitySelected " +
 				" OR $microregionLocalitySelected IS NULL) " +
 				" WITH np,planItem,cPI,$structureItemPlanSelected as SelectedPlanItem_Id " +
@@ -916,7 +917,8 @@ List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceHi
 				" MATCH(co)<-[:ABOUT]-(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem) " +
 				" ,(np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)-[:OF_TYPE *0..]->(plt:LocalityType) " +
 				" ,(co)<-[:OCCURS_IN]-(m) " +
-				" WHERE ID(co) = $idConference AND np.from = 'pres' and (m)<-[:DURING]-(np) " +
+				" WHERE ID(co) = $idConference " +
+				" AND case when m.attendanceListMode = 'AUTO' then np.from = 'pres' and (m)<-[:DURING]-(np) else np.from <> 'pres'  end " +
 				" AND (NOT np.status IN ['rem' , 'pen' ]) " +
 				" AND ($meetings IS NULL OR id(m) IN $meetings) " +
 				" AND id(plt) = $microregionChartAgroup  " +
@@ -1006,12 +1008,12 @@ List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferencePr
 		" MATCH(np)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(co)<-[:OCCURS_IN]-(m), " +
 		" (np)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality) " +
 		" WHERE " +
-		" ID(co) = $idConference and (m)<-[:DURING]-(np)" +
+		" ID(co) = $idConference " +
+		" AND case when m.attendanceListMode = 'AUTO' then np.from = 'pres' and (m)<-[:DURING]-(np) else np.from <> 'pres'  end " +
 		" AND (NOT np.status IN ['rem', 'pen']) " +
 		" AND ($structureItemPlanSelected IS NULL " +
 		" OR(id(planItem) = $structureItemPlanSelected " +
 		" and id(cPI) <> $structureItemPlanSelected)) " +
-		" AND np.from = 'pres'  " +
 		" AND ($meetings IS NULL OR id(m) IN $meetings) " +
 		" AND (id(parentLoc) = $microregionLocalitySelected " +
 		" OR id(loc) = $microregionLocalitySelected " +
