@@ -50,22 +50,22 @@ List<Comment> findByIdPersonAndIdPlanItemAndIdConferenceAndIdLocality( @Param("i
 @Query(value =
     "MATCH (comment:Comment)-[:ABOUT]->(conference:Conference), "
         + "(conference)-[target:TARGETS]-(plan:Plan), "
-        + "(comment)-[ab1:ABOUT]->(child:PlanItem)-[composesChild:COMPOSES*]->(parent:PlanItem) "
+        + "(comment)-[ab1:ABOUT]->(child:PlanItem)-[composesChild:COMPOSES*0..]->(parent:PlanItem) "
         + "OPTIONAL MATCH (comment)-[aboutLocality:ABOUT]->(locality:Locality)-[ofType:OF_TYPE]->(localityType) "
         + "WITH locality, aboutLocality, comment, plan, parent, composesChild, child, ofType, localityType, conference "
         + WHERE_FILTER
         + "MATCH (comment)-[madeBy:MADE_BY]->(person:Person)-[made:MADE]->(selfDeclaration:SelfDeclaration) "
         + "MATCH (comment)-[aboutPlanItem:ABOUT]->(planItem:PlanItem) "
-        + "MATCH (localitySD:Locality)<-[asBeingFrom:AS_BEING_FROM]-(selfDeclaration:SelfDeclaration)-[to:TO]->(conference) "
+        //+ "optional MATCH (localitySD:Locality)<-[asBeingFrom:AS_BEING_FROM]-(selfDeclaration:SelfDeclaration)-[to:TO]->(conference) "
         + "OPTIONAL MATCH (planItem:PlanItem)-[obeys:OBEYS]->(structureItem:StructureItem) "
         + "OPTIONAL MATCH (comment)-[likedBy:LIKED_BY]->(personLikedBy:Person) "
         + "OPTIONAL MATCH (planItem)-[:COMPOSES*]->(pi3:PlanItem)-[:COMPOSES]->(plan) "
         + "WITH likedBy, personLikedBy, locality, aboutLocality, comment, madeBy, person, planItem, collect(pi3) AS listPi3, "
-        + "aboutPlanItem, plan, obeys, structureItem, ofType, localityType, made,"
-        + "selfDeclaration, to, conference, localitySD, asBeingFrom "
+        + "aboutPlanItem, plan, obeys, structureItem, ofType, localityType, made, "
+        + "conference "
         + WHERE_TEXT_FILTER
-        + "RETURN comment, aboutLocality, locality, person, madeBy, ofType, localityType, localitySD, asBeingFrom, "
-        + "aboutPlanItem, planItem, obeys, structureItem, likedBy, personLikedBy, made, selfDeclaration, to, conference",
+        + "RETURN comment, aboutLocality, locality, person, madeBy, ofType, localityType, "
+        + "aboutPlanItem, planItem, obeys, structureItem, likedBy, personLikedBy, made, conference ",
     countQuery =
         "MATCH (comment:Comment)-[:ABOUT]->(conference:Conference), "
             + "(conference)-[target:TARGETS]-(plan:Plan), "
@@ -75,13 +75,13 @@ List<Comment> findByIdPersonAndIdPlanItemAndIdConferenceAndIdLocality( @Param("i
             + WHERE_FILTER
             + "MATCH (comment)-[madeBy:MADE_BY]->(person:Person)-[made:MADE]->(selfDeclaration:SelfDeclaration) "
             + "MATCH (comment)-[aboutPlanItem:ABOUT]->(planItem:PlanItem) "
-            + "MATCH (localitySD:Locality)<-[asBeingFrom:AS_BEING_FROM]-(selfDeclaration:SelfDeclaration)-[to:TO]->(conference) "
+           // + "optional MATCH (localitySD:Locality)<-[asBeingFrom:AS_BEING_FROM]-(selfDeclaration:SelfDeclaration)-[to:TO]->(conference) "
             + "OPTIONAL MATCH (planItem:PlanItem)-[obeys:OBEYS]->(structureItem:StructureItem) "
             + "OPTIONAL MATCH (comment)-[likedBy:LIKED_BY]->(personLikedBy:Person) "
             + "OPTIONAL MATCH (planItem)-[:COMPOSES*]->(pi3:PlanItem)-[:COMPOSES]->(plan) "
             + "WITH likedBy, personLikedBy, locality, aboutLocality, comment, madeBy, person, planItem, collect(pi3) AS listPi3, "
-            + "aboutPlanItem, plan, obeys, structureItem, ofType, localityType, made,"
-            + "selfDeclaration, to, conference, localitySD, asBeingFrom "
+            + "aboutPlanItem, plan, obeys, structureItem, ofType, localityType, made, "
+            + "conference "
             + WHERE_TEXT_FILTER
             + "RETURN count(DISTINCT comment)"
 )
