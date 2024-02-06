@@ -52,6 +52,7 @@ public class ConferenceDto {
   private List<FileDto> backgroundImages;
   private String serverName;
   private boolean defaultServerConference;
+  private Boolean showStatistics;
   private ResearchConfigurationDto researchConfiguration;
 
   public ConferenceDto() {
@@ -95,6 +96,10 @@ public class ConferenceDto {
     this.subtitleAuthentication = conference.getSubtitleAuthentication();
     this.subtitleParticipation = conference.getSubtitleParticipation();
     this.subtitleRegionalization = conference.getSubtitleRegionalization();
+
+    this.showStatistics = (conference.getShowStatistics() != null )
+      ? conference.getShowStatistics()
+      : true;
     
     this.fileParticipation = (conference.getFileParticipation() != null)
       ? new FileDto(conference.getFileParticipation())
@@ -402,10 +407,19 @@ public class ConferenceDto {
   public Boolean getDefaultServerConference() {
     return defaultServerConference;
   }
-
+  
   public void setDefaultServerConference(Boolean defaultServerConference) {
     this.defaultServerConference = defaultServerConference;
   }
+
+  public Boolean getShowStatistics() {
+    return showStatistics;
+  }
+
+  public void setShowStatistics(Boolean showStatistics){
+    this.showStatistics = showStatistics;
+  }
+  
 
   public ResearchConfigurationDto getResearchConfiguration() {
     return researchConfiguration;

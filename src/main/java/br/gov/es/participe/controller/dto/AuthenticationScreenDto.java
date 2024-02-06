@@ -10,6 +10,8 @@ public class AuthenticationScreenDto {
   private String titleAuthentication;
   private String subtitleAuthentication;
 
+  private Boolean showStatistics;
+
   private FileDto fileAuthentication;
 
   private Integer proposal;
@@ -58,6 +60,14 @@ public class AuthenticationScreenDto {
 
   public void setFileAuthentication(FileDto fileAuthentication) {
     this.fileAuthentication = fileAuthentication;
+  }
+
+  public Boolean getShowStatistics() {
+    return showStatistics;
+  }
+
+  public void setShowStatistics(Boolean showStatistics) {
+    this.showStatistics = showStatistics;
   }
 
   public Integer getProposal() {
