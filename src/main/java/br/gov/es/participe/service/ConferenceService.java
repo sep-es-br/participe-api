@@ -97,6 +97,7 @@ public class ConferenceService {
       auth.setSubtitleAuthentication(conference.getSubtitleAuthentication());
       auth.setFileAuthentication(new FileDto(conference.getFileAuthentication()));
       auth.setShowStatistics(conference.getShowStatistics());
+      auth.setShowCalendar(conference.getShowCalendar());
 
       File backGroundImage = this.fileService.findRandomackGroundImage(id);
       auth.setBackgroundImageUrl(

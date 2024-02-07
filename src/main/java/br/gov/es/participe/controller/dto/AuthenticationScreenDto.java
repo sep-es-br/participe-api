@@ -11,6 +11,8 @@ public class AuthenticationScreenDto {
   private String subtitleAuthentication;
 
   private Boolean showStatistics;
+  private Boolean showCalendar;
+
 
   private FileDto fileAuthentication;
 
@@ -68,6 +70,14 @@ public class AuthenticationScreenDto {
 
   public void setShowStatistics(Boolean showStatistics) {
     this.showStatistics = showStatistics;
+  }
+
+  public Boolean getShowCalendar() {
+    return showCalendar;
+  }
+
+  public void setShowCalendar(Boolean showCalendar) {
+    this.showCalendar = showCalendar;
   }
 
   public Integer getProposal() {

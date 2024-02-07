@@ -49,7 +49,8 @@ public class ConferenceParamDto {
   private List<FileDto> backgroundImages;
   private String serverName;
   private boolean defaultServerConference;
-  private boolean showStatistics;
+  private Boolean showStatistics;
+  private Boolean showCalendar;
   private ResearchConfigurationParamDto researchConfiguration;
 
   public ConferenceParamDto() {
@@ -86,6 +87,7 @@ public class ConferenceParamDto {
     serverName = conferenceDto.getServerName();
     defaultServerConference = conferenceDto.getDefaultServerConference();
     showStatistics = conferenceDto.getShowStatistics();
+    showCalendar = conferenceDto.getSegmentation();
     researchConfiguration = new ResearchConfigurationParamDto(conferenceDto.getResearchConfiguration());
   }
 
@@ -332,6 +334,14 @@ public class ConferenceParamDto {
 
   public void setShowStatistics(Boolean showStatistics) {
     this.showStatistics = showStatistics;
+  }
+
+  public Boolean getShowCalendar() {
+    return showCalendar;
+  }
+
+  public void setShowCalendar(Boolean showCalendar) {
+    this.showCalendar = showCalendar;
   }
 
   public ResearchConfigurationParamDto getResearchConfiguration() {
