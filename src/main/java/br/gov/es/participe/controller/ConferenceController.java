@@ -219,9 +219,10 @@ public class ConferenceController {
 
     List<Conference> conferences = new ArrayList<Conference>();
     if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
-      conferences = conferenceService.findAllOpenWithPresentialMeetings4Admins();
-    } else if (personService.hasOneOfTheRoles(token, new String[] { "Recepcionist" })) {
+      Date d = date;
       conferences = conferenceService.findAllOpenWithPresentialMeetings4Receptionists(date, personService.getPerson(token).getId());
+     //conferences = conferenceService.findAllOpenWithPresentialMeetings4Admins();
+    } else if (personService.hasOneOfTheRoles(token, new String[] { "Recepcionist" })) {
     }
 
     List<ConferenceDto> response = new ArrayList<>();
