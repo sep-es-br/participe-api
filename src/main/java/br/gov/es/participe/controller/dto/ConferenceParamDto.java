@@ -51,6 +51,7 @@ public class ConferenceParamDto {
   private boolean defaultServerConference;
   private Boolean showStatistics;
   private Boolean showCalendar;
+  private Boolean showStatisticsPanel ;
   private ResearchConfigurationParamDto researchConfiguration;
 
   public ConferenceParamDto() {
@@ -87,7 +88,8 @@ public class ConferenceParamDto {
     serverName = conferenceDto.getServerName();
     defaultServerConference = conferenceDto.getDefaultServerConference();
     showStatistics = conferenceDto.getShowStatistics();
-    showCalendar = conferenceDto.getSegmentation();
+    showCalendar = conferenceDto.getShowCalendar();
+    showStatisticsPanel  = conferenceDto.getShowStatisticsPanel ();
     researchConfiguration = new ResearchConfigurationParamDto(conferenceDto.getResearchConfiguration());
   }
 
@@ -342,6 +344,14 @@ public class ConferenceParamDto {
 
   public void setShowCalendar(Boolean showCalendar) {
     this.showCalendar = showCalendar;
+  }
+
+  public Boolean getShowStatisticsPanel () {
+    return showStatisticsPanel ;
+  }
+
+  public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
+    this.showStatisticsPanel  = showStatisticsPanel ;
   }
 
   public ResearchConfigurationParamDto getResearchConfiguration() {
