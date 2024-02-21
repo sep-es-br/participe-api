@@ -55,6 +55,8 @@ public class ConferenceDto {
   private Boolean showStatistics;
   private Boolean showCalendar;
   private Boolean showStatisticsPanel ;
+  private Boolean showExternalLinks;
+
   private ResearchConfigurationDto researchConfiguration;
 
   public ConferenceDto() {
@@ -110,6 +112,10 @@ public class ConferenceDto {
     this.showStatisticsPanel  = (conference.getShowStatisticsPanel () != null )
       ? conference.getShowStatisticsPanel ()
       : true;  
+
+    this.showExternalLinks  = (conference.getShowExternalLinks () != null )
+      ? conference.getShowExternalLinks ()
+      : true;
     
     this.fileParticipation = (conference.getFileParticipation() != null)
       ? new FileDto(conference.getFileParticipation())
@@ -444,6 +450,14 @@ public class ConferenceDto {
 
   public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
     this.showStatisticsPanel  = showStatisticsPanel ;
+  }
+
+  public Boolean getShowExternalLinks() {
+    return showExternalLinks;
+  }
+
+  public void setShowExternalLinks(Boolean showExternalLinks) {
+    this.showExternalLinks = showExternalLinks;
   }
 
   public ResearchConfigurationDto getResearchConfiguration() {
