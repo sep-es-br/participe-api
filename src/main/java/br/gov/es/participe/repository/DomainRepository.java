@@ -21,8 +21,9 @@ Collection<Domain> findAll();
         " ] ORDER BY d.name")
 Domain findByIdWithLocalities( @Param("id") Long id);
 
-@Query("MATCH (domain:Domain) WHERE ($name IS NULL OR apoc.text.clean(domain.name) CONTAINS apoc.text.clean($name)) "
-        + " OPTIONAL MATCH (locality:Locality) WHERE ($name IS NULL OR apoc.text.clean(locality.name) CONTAINS apoc.text.clean($name))  "
+@Query("MATCH () "
+        + " OPTIONAL MATCH (domain:Domain) WHERE  domain.name CONTAINS ($name) "
+        + " OPTIONAL MATCH (locality:Locality) WHERE locality.name CONTAINS ($name)  "
         + " OPTIONAL MATCH (locality)-[ili:IS_LOCATED_IN]->(parentDomain:Domain) "
         + " OPTIONAL MATCH (locality)<-[i0:IS_LOCATED_IN*]-(child:Locality)-[i2:IS_LOCATED_IN*]->(parentDomain) "
         + " RETURN domain, locality, ili, parentDomain, i0, child, i2, [ "
