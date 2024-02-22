@@ -45,6 +45,11 @@ public class Conference extends Entity implements Serializable {
   private String preOpening;
   private String postClosure;
   private String menuLabel;
+  private Boolean showStatistics;
+  private Boolean showCalendar;
+  private Boolean showStatisticsPanel;
+  private Boolean showExternalLinks;
+
   @Relationship(type = "TARGETS")
   private Plan plan;
 
@@ -213,6 +218,10 @@ public class Conference extends Entity implements Serializable {
     this.preOpening = conferenceParamDto.getPreOpeningText();
     this.modeType = conferenceParamDto.getDisplayMode();
     this.statusType = conferenceParamDto.getDisplayStatusConference();
+    this.showStatistics = conferenceParamDto.getShowStatistics();
+    this.showCalendar = conferenceParamDto.getShowCalendar();
+    this.showStatisticsPanel  = conferenceParamDto.getShowStatisticsPanel();
+    this.showExternalLinks = conferenceParamDto.getShowExternalLinks();
 
     this.updateDisplayMode();
   }
@@ -225,6 +234,38 @@ public class Conference extends Entity implements Serializable {
 
   public void update(ConferenceParamDto conferenceParamDto) throws ParseException {
     this.loadBasicAttributes(conferenceParamDto);
+  }
+
+  public Boolean getShowStatistics() {
+    return this.showStatistics;
+  }
+
+  public void setShowStatistics(Boolean showStatistics) {
+    this.showStatistics = showStatistics;
+  }
+
+  public Boolean getShowCalendar() {
+    return this.showCalendar;
+  }
+
+  public void setShowCalendar(Boolean showCalendar) {
+    this.showCalendar = showCalendar;
+  }
+
+  public Boolean getShowStatisticsPanel () {
+    return showStatisticsPanel ;
+  }
+
+  public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
+    this.showStatisticsPanel  = showStatisticsPanel ;
+  }
+
+  public Boolean getShowExternalLinks() {
+    return showExternalLinks;
+  }
+
+  public void setShowExternalLinks(Boolean showExternalLinks) {
+    this.showExternalLinks = showExternalLinks;
   }
 
   public String getDescription() {

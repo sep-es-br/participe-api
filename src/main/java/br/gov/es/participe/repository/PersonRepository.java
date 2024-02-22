@@ -192,7 +192,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
       value = "MATCH (m:Meeting) " +
           "WHERE id(m) = $idMeeting " +
           "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
-          "WHERE ($name IS NULL OR toLower(p.name) CONTAINS $name) " +
+          "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
           "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
           "WITH p,m,cia,loc " +
           "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +

@@ -7,6 +7,7 @@ import br.gov.es.participe.model.PortalServer;
 import br.gov.es.participe.service.*;
 import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -223,6 +227,14 @@ public class ConferenceController {
     List<ConferenceDto> response = new ArrayList<>();
     conferences.forEach(conference -> {
       ConferenceDto conferenceDto = new ConferenceDto(conference);
+      Collections.sort(conferenceDto.getMeeting(), new Comparator<MeetingDto>() {
+
+        @Override
+        public int compare(MeetingDto o1, MeetingDto o2) {
+          return o1.getName().compareTo(o2.getName());
+        }
+        
+      });
       conferenceDto.setPlan(null);
       conferenceDto.setLocalityType(null);
       conferenceDto.setFileAuthentication(null);
