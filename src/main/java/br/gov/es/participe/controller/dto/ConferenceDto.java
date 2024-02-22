@@ -52,11 +52,6 @@ public class ConferenceDto {
   private List<FileDto> backgroundImages;
   private String serverName;
   private boolean defaultServerConference;
-  private Boolean showStatistics;
-  private Boolean showCalendar;
-  private Boolean showStatisticsPanel ;
-  private Boolean showExternalLinks;
-
   private ResearchConfigurationDto researchConfiguration;
 
   public ConferenceDto() {
@@ -100,22 +95,6 @@ public class ConferenceDto {
     this.subtitleAuthentication = conference.getSubtitleAuthentication();
     this.subtitleParticipation = conference.getSubtitleParticipation();
     this.subtitleRegionalization = conference.getSubtitleRegionalization();
-
-    this.showCalendar = (conference.getShowCalendar() != null )
-      ? conference.getShowCalendar()
-      : true;
-
-    this.showStatistics = (conference.getShowStatistics() != null )
-      ? conference.getShowStatistics()
-      : true;  
-
-    this.showStatisticsPanel  = (conference.getShowStatisticsPanel () != null )
-      ? conference.getShowStatisticsPanel ()
-      : true;  
-
-    this.showExternalLinks  = (conference.getShowExternalLinks () != null )
-      ? conference.getShowExternalLinks ()
-      : true;
     
     this.fileParticipation = (conference.getFileParticipation() != null)
       ? new FileDto(conference.getFileParticipation())
@@ -423,41 +402,9 @@ public class ConferenceDto {
   public Boolean getDefaultServerConference() {
     return defaultServerConference;
   }
-  
+
   public void setDefaultServerConference(Boolean defaultServerConference) {
     this.defaultServerConference = defaultServerConference;
-  }
-
-  public Boolean getShowCalendar() {
-    return showCalendar;
-  }
-
-  public void setShowCalendar(Boolean showCalendar){
-    this.showCalendar = showCalendar;
-  }
-
-  public Boolean getShowStatistics() {
-    return showStatistics;
-  }
-
-  public void setShowStatistics(Boolean showStatistics){
-    this.showStatistics = showStatistics;
-  }
-
-  public Boolean getShowStatisticsPanel () {
-    return showStatisticsPanel ;
-  }
-
-  public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
-    this.showStatisticsPanel  = showStatisticsPanel ;
-  }
-
-  public Boolean getShowExternalLinks() {
-    return showExternalLinks;
-  }
-
-  public void setShowExternalLinks(Boolean showExternalLinks) {
-    this.showExternalLinks = showExternalLinks;
   }
 
   public ResearchConfigurationDto getResearchConfiguration() {

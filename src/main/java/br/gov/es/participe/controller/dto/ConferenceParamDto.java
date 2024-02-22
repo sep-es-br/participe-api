@@ -49,10 +49,6 @@ public class ConferenceParamDto {
   private List<FileDto> backgroundImages;
   private String serverName;
   private boolean defaultServerConference;
-  private Boolean showStatistics;
-  private Boolean showCalendar;
-  private Boolean showStatisticsPanel ;
-  private Boolean showExternalLinks;
   private ResearchConfigurationParamDto researchConfiguration;
 
   public ConferenceParamDto() {
@@ -88,10 +84,6 @@ public class ConferenceParamDto {
     backgroundImages = conferenceDto.getBackgroundImages();
     serverName = conferenceDto.getServerName();
     defaultServerConference = conferenceDto.getDefaultServerConference();
-    showStatistics = conferenceDto.getShowStatistics();
-    showCalendar = conferenceDto.getShowCalendar();
-    showExternalLinks = conferenceDto.getShowExternalLinks();
-    showStatisticsPanel  = conferenceDto.getShowStatisticsPanel ();
     researchConfiguration = new ResearchConfigurationParamDto(conferenceDto.getResearchConfiguration());
   }
 
@@ -330,38 +322,6 @@ public class ConferenceParamDto {
 
   public void setDefaultServerConference(Boolean defaultServerConference) {
     this.defaultServerConference = defaultServerConference;
-  }
-
-  public Boolean getShowStatistics() {
-    return showStatistics;
-  }
-
-  public void setShowStatistics(Boolean showStatistics) {
-    this.showStatistics = showStatistics;
-  }
-
-  public Boolean getShowCalendar() {
-    return showCalendar;
-  }
-
-  public void setShowCalendar(Boolean showCalendar) {
-    this.showCalendar = showCalendar;
-  }
-
-  public Boolean getShowStatisticsPanel () {
-    return showStatisticsPanel ;
-  }
-
-  public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
-    this.showStatisticsPanel  = showStatisticsPanel ;
-  }
-
-  public Boolean getShowExternalLinks() {
-    return showExternalLinks;
-  }
-
-  public void setShowExternalLinks(Boolean showExternalLinks) {
-    this.showExternalLinks = showExternalLinks;
   }
 
   public ResearchConfigurationParamDto getResearchConfiguration() {

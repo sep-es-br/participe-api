@@ -62,9 +62,10 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
         Collection<Conference> findAllWithMeeting( @Param("date") Date date, @Param("idPerson") Long idPerson);
 
         @Query("MATCH (conference:Conference)<-[occurs_in:OCCURS_IN]-(meeting:Meeting)-[tpa:TAKES_PLACE_AT]->(locality:Locality) " +
-                "WHERE (meeting.typeMeetingEnum IS NOT NULL AND meeting.typeMeetingEnum <> 'VIRTUAL') " +
+                "WHERE conference.displayMode CONTAINS 'OPEN' " +
+                "AND (meeting.typeMeetingEnum IS NOT NULL AND meeting.typeMeetingEnum <> 'VIRTUAL') " +
                 "RETURN conference, occurs_in, meeting, tpa, locality " +
-                "ORDER BY conference.name, meeting.name ")
+                "ORDER BY conference.name ")
         Collection<Conference> findAllOpenWithPresentialMeeting4Admins();
 
         @Query("MATCH (conference:Conference)<-[occurs_in:OCCURS_IN]-(meeting:Meeting)-[tpa:TAKES_PLACE_AT]->(locality:Locality), " +

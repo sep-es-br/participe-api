@@ -17,8 +17,9 @@ public interface StructureRepository extends Neo4jRepository<Structure, Long> {
 "] ORDER BY s.name")
 Collection<Structure> findAll();
 
-@Query("MATCH (structure:Structure) WHERE ($name IS NULL OR apoc.text.clean(structure.name) CONTAINS apoc.text.clean($name)) "
-        + " OPTIONAL MATCH (structureItem:StructureItem)-[c:COMPOSES*]->(parentStructure:Structure) WHERE ($name IS NULL OR apoc.text.clean(structureItem.name) CONTAINS apoc.text.clean($name)) "
+@Query("MATCH () "
+        + " OPTIONAL MATCH (structure:Structure) WHERE structure.name CONTAINS ($name) "
+        + " OPTIONAL MATCH (structureItem:StructureItem)-[c:COMPOSES*]->(parentStructure:Structure) WHERE structureItem.name CONTAINS ($name) "
         + " OPTIONAL MATCH (structureItem)-[c2:COMPOSES]->(parentStructure:Structure) "
         + " OPTIONAL MATCH (structureItem)<-[c3:COMPOSES*]-(child:StructureItem) "
         + " RETURN structure, structureItem, c, parentStructure, c2, c3, child "

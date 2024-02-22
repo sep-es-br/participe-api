@@ -65,8 +65,9 @@ public interface PlanRepository extends Neo4jRepository<Plan, Long> {
             +" ]")
     Plan findByPlanItem( @Param("id") Long id);
 
-    @Query("OPTIONAL MATCH (plan:Plan) WHERE ($name IS NULL OR apoc.text.clean(plan.name) CONTAINS apoc.text.clean($name)) "
-            + " OPTIONAL MATCH (planItem:PlanItem)-[c:COMPOSES*]->(parentPlan:Plan) WHERE ($name IS NULL OR apoc.text.clean(planItem.name) CONTAINS apoc.text.clean($name)) "
+    @Query("MATCH () "
+            + " OPTIONAL MATCH (plan:Plan) WHERE plan.name CONTAINS ($name) "
+            + " OPTIONAL MATCH (planItem:PlanItem)-[c:COMPOSES*]->(parentPlan:Plan) WHERE planItem.name CONTAINS ($name) "
             + " OPTIONAL MATCH (planItem)-[c2:COMPOSES]->(parentPlan:Structure) "
             + " OPTIONAL MATCH (planItem)<-[c3:COMPOSES*]-(child:PlanItem) "
 			+ " OPTIONAL MATCH (plan)-[reg:REGIONALIZABLE]->(lt:LocalityType) "
