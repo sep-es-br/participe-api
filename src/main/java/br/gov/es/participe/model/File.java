@@ -20,6 +20,9 @@ public class File extends Entity implements Serializable {
     @Relationship(type = "IS_BACKGROUND_IMAGE_OF", direction = Relationship.OUTGOING)
     private Conference conferenceBackGround;
 
+    @Relationship(type = "IS_CALENDAR_IMAGE_OF", direction = Relationship.OUTGOING)
+    private Conference conferenceCalendarImage;
+
     public String getUrl() {
         return url;
     }
@@ -70,6 +73,15 @@ public class File extends Entity implements Serializable {
 
     public File setConferenceBackGround(Conference conferenceBackGround) {
         this.conferenceBackGround = conferenceBackGround;
+        return this;
+    }
+
+    public Conference getConferenceCalendarImage() {
+        return conferenceCalendarImage;
+    }
+
+    public File setConferenceCalendarImage(Conference conferenceCalendarImage) {
+        this.conferenceCalendarImage = conferenceCalendarImage;
         return this;
     }
 

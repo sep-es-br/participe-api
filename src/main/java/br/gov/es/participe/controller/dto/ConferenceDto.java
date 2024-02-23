@@ -50,6 +50,7 @@ public class ConferenceDto {
   private String externalLinksMenuLabel;
   private List<ExternalLinksDto> externalLinks;
   private List<FileDto> backgroundImages;
+  private List<FileDto> calendarImages;
   private String serverName;
   private boolean defaultServerConference;
   private Boolean showStatistics;
@@ -83,6 +84,11 @@ public class ConferenceDto {
     if (conference.getBackgroundImages() != null && !conference.getBackgroundImages().isEmpty()) {
       this.backgroundImages = new ArrayList<>();
       conference.getBackgroundImages().forEach(file -> this.backgroundImages.add(new FileDto(file)));
+    }
+
+    if (conference.getCalendarImages() != null && !conference.getCalendarImages().isEmpty()) {
+      this.calendarImages = new ArrayList<>();
+      conference.getCalendarImages().forEach(file -> this.calendarImages.add(new FileDto(file)));
     }
 
     this.researchConfiguration = conference.getResearch() != null ? new ResearchConfigurationDto(conference.getResearch()) : null;
@@ -410,6 +416,14 @@ public class ConferenceDto {
 
   public void setBackgroundImages(List<FileDto> backgroundImages) {
     this.backgroundImages = backgroundImages;
+  }
+
+  public List<FileDto> getCalendarImages() {
+    return calendarImages;
+  }
+
+  public void setCalendarImages(List<FileDto> calendarImages) {
+    this.calendarImages = calendarImages;
   }
 
   public String getServerName() {
