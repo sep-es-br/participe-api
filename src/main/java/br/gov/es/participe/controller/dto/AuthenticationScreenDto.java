@@ -13,7 +13,7 @@ public class AuthenticationScreenDto {
   private Boolean showStatistics;
   private Boolean showCalendar;
   private Boolean showStatisticsPanel ;
-
+  private Boolean showExternalLinks;
 
   private FileDto fileAuthentication;
 
@@ -90,6 +90,15 @@ public class AuthenticationScreenDto {
   public void setShowStatisticsPanel (Boolean showStatisticsPanel ){
     this.showStatisticsPanel  = showStatisticsPanel ;
   }
+
+  public Boolean getShowExternalLinks() {
+    return showExternalLinks;
+  }
+
+  public void setShowExternalLinks(Boolean showExternalLinks) {
+    this.showExternalLinks = showExternalLinks;
+  }
+
   
   public Integer getProposal() {
     return proposal;
