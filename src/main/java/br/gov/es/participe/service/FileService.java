@@ -96,11 +96,19 @@ public class FileService {
         return fileRepository.findAllBackGroundImageFromIdConference(idConference);
     }
 
+    public List<br.gov.es.participe.model.File> findAllCalendarImageFromConference(Long idConference) {
+        return fileRepository.findAllCalendarImageFromIdConference(idConference);
+    }
+
     public void saveAll(List<br.gov.es.participe.model.File> listFiles) {
         fileRepository.saveAll(listFiles);
     }
 
     public br.gov.es.participe.model.File findRandomackGroundImage(Long idConference) {
         return fileRepository.findRandomackGroundImage(idConference);
+    }
+
+    public br.gov.es.participe.model.File findRandomCalendarImage(Long idConference) {
+        return fileRepository.findRandomCalendarImage(idConference);
     }
 }

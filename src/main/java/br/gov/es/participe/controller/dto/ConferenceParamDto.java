@@ -47,6 +47,7 @@ public class ConferenceParamDto {
   private String externalLinksMenuLabel;
   private List<ExternalLinksDto> externalLinks;
   private List<FileDto> backgroundImages;
+  private List<FileDto> calendarImages;
   private String serverName;
   private boolean defaultServerConference;
   private Boolean showStatistics;
@@ -85,6 +86,7 @@ public class ConferenceParamDto {
     howItWork = conferenceDto.getHowItWork();
     externalLinks = conferenceDto.getExternalLinks();
     backgroundImages = conferenceDto.getBackgroundImages();
+    calendarImages = conferenceDto.getCalendarImages();
     serverName = conferenceDto.getServerName();
     defaultServerConference = conferenceDto.getDefaultServerConference();
     showStatistics = conferenceDto.getShowStatistics();
@@ -312,6 +314,14 @@ public class ConferenceParamDto {
 
   public void setBackgroundImages(List<FileDto> backgroundImages) {
     this.backgroundImages = backgroundImages;
+  }
+
+  public List<FileDto> getCalendarImages() {
+    return calendarImages;
+  }
+
+  public void setCalendarImages(List<FileDto> calendarImages) {
+    this.calendarImages = calendarImages;
   }
 
   public String getServerName() {

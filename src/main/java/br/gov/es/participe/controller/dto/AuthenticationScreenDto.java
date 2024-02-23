@@ -24,6 +24,7 @@ public class AuthenticationScreenDto {
 
   private StatusConferenceType status;
   private FileDto backgroundImageUrl;
+  private FileDto calendarImageUrl;
 
   private Date beginDate;
   private Date endDate;
@@ -136,6 +137,15 @@ public class AuthenticationScreenDto {
 
   public void setBackgroundImageUrl(FileDto backgroundImageUrl) {
     this.backgroundImageUrl = backgroundImageUrl;
+  }
+
+  
+  public FileDto getCalendarImageUrl() {
+    return this.calendarImageUrl;
+  }
+
+  public void setCalendarImageUrl(FileDto calendarImageUrl) {
+    this.calendarImageUrl = calendarImageUrl;
   }
 
   public Date getBeginDate() {
