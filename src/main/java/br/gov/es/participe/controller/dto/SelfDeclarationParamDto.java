@@ -3,11 +3,13 @@ package br.gov.es.participe.controller.dto;
 public class SelfDeclarationParamDto {
 
 	private Long id;
-  private Long conference;
-  private Long locality;
-  private Long person;
+  	private Long conference;
+  	private Long locality;
+  	private Long person;
+  	private Boolean receiveInformational;
 
 	public SelfDeclarationParamDto() {
+		
 	}
 
 	public SelfDeclarationParamDto(Long conference, Long locality, Long person) {
@@ -46,5 +48,13 @@ public class SelfDeclarationParamDto {
 
 	public void setPerson(Long person) {
 		this.person = person;
+	}
+
+	public Boolean getReceiveInformational() {
+		return receiveInformational;
+	}
+	
+	public void setReceiveInformational(Boolean receiveInformational) {
+		this.receiveInformational = receiveInformational;
 	}
 }
