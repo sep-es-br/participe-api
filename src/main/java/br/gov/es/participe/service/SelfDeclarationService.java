@@ -68,12 +68,14 @@ public class SelfDeclarationService {
       Conference conference = conferenceService.find(selfDeclaration.getConference().getId());
       Locality locality = localityService.find(selfDeclaration.getLocality().getId());
       Person person = personService.find(selfDeclaration.getPerson().getId());
+      Boolean receiveInformational = selfDeclaration.getReceiveInformational();
+
 
       selfDeclaration.setConference(conference);
       selfDeclaration.setLocality(locality);
       selfDeclaration.setPerson(person);
       selfDeclaration.setAnswerSurvey(false);
-      selfDeclaration.setReceiveInformational(true);
+      selfDeclaration.setReceiveInformational(receiveInformational);
 
     }
     log.info(
