@@ -57,6 +57,9 @@ public class Conference extends Entity implements Serializable {
   @Relationship(type = "IS_BACKGROUND_IMAGE_OF")
   private Set<File> backgroundImages;
 
+  @Relationship(type = "IS_CALENDAR_IMAGE_OF")
+  private Set<File> calendarImages;
+
   @Relationship(type = "LOCALIZES_CITIZEN_BY")
   private LocalityType localityType;
 
@@ -490,6 +493,14 @@ public class Conference extends Entity implements Serializable {
 
   public void setBackgroundImages(Set<File> backgroundImages) {
     this.backgroundImages = backgroundImages;
+  }
+
+  public Set<File> getCalendarImages() {
+    return this.calendarImages;
+  }
+
+  public void setCalendarImages(Set<File> calendarImages) {
+    this.calendarImages = calendarImages;
   }
 
   public PortalServer getDefaultServer() {

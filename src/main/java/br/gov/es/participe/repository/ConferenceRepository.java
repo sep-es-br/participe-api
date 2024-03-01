@@ -84,7 +84,8 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         "[ " +
                         "[ (n)-[r_f1: FEATURES_PARTICIPATION_IMAGE ]->(f1: File ) | [ r_f1, f1 ] ]" +
                         ", [ (n)-[r_f1: FEATURES_AUTHENTICATION_IMAGE ]->(f1: File ) | [ r_f1, f1 ] ]" +
-                        ", [ (n)-[r_f2: IS_BACKGROUND_IMAGE_OF ]->(f2: File ) | [ r_f2, f2 ] ]" +
+                        ", [ (n)<-[r_f2: IS_BACKGROUND_IMAGE_OF ]-(f2: File ) | [ r_f2, f2 ] ]" +
+                        ", [ (n)<-[r_f3: IS_CALENDAR_IMAGE_OF ]-        (f3: File ) | [ r_f3, f3 ] ]" +
                         ", [ (n)-[resea: APPLIES_TO ]-(research: Research) | [ resea, research ] ]" +
                         ", [ (n)<-[g_h_p: GUIDES_HOW_TO_PARTICIPE_IN ]-(topic: Topic) | [ g_h_p, topic] ]" +
                         ", [ (n)-[r_i1: IS_SEGMENTABLE_BY ]->(s1: StructureItem ) | [ r_i1, s1 ] ]" +

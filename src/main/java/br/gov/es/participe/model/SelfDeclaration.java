@@ -58,6 +58,7 @@ public class SelfDeclaration extends Entity implements Serializable {
     if(selfDeclaration.getPerson() != null && selfDeclaration.getPerson().getId() != null) {
       this.person = new Person(selfDeclaration.getPerson());
     }
+
   }
 
   public SelfDeclaration(SelfDeclarationParamDto selfDeclaration) {
@@ -77,6 +78,11 @@ public class SelfDeclaration extends Entity implements Serializable {
       this.person = new Person();
       this.person.setId(selfDeclaration.getPerson());
     }
+
+    if(selfDeclaration.getReceiveInformational() != null){
+      this.receiveInformational = selfDeclaration.getReceiveInformational();
+    }
+
   }
 
   public SelfDeclaration() {}

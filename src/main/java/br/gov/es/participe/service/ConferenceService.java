@@ -111,6 +111,12 @@ public class ConferenceService {
         auth.getBackgroundImageUrl().setUrl(url + backGroundImage.getId());
       }
 
+      File calendarImage = this.fileService.findRandomackGroundImage(id);
+      auth.setCalendarImageUrl( calendarImage != null ? new FileDto(conference.getFileAuthentication()) : null);
+      if(calendarImage  != null) {
+        auth.getCalendarImageUrl().setUrl(url + calendarImage.getId());
+      }
+
       Plan plan = this.planService.findByConference(conference.getId());
       if(plan.getlocalitytype() != null) {
         auth.setLocalityType(plan.getlocalitytype().getName());
@@ -274,6 +280,7 @@ public class ConferenceService {
     this.loadServe(conference, param);
     this.loadExternalLinks(conference, param);
     this.loadBackGroundImages(conference, param);
+    this.loadCalendarImages(conference, param);
     this.loadTopics(conference, param);
     if (param.getFileAuthentication() != null) {
       conference.setFileAuthentication(this.fileService.find(param.getFileAuthentication().getId()));
@@ -362,6 +369,39 @@ public class ConferenceService {
     }
     else if (files != null && !files.isEmpty()){
       log.info("Não foi encontrado nenhuma backgroundImage, removendo todas relacionadas a conferenceId={}", conference.getId());
+      files.forEach(file -> fileService.delete(file.getId()));
+    }
+  }
+
+  private void loadCalendarImages(Conference conference, ConferenceParamDto param) {
+    List<File> files = this.fileService.findAllCalendarImageFromConference(conference.getId());
+    if(param.getCalendarImages() != null && !param.getCalendarImages().isEmpty()) {
+
+      log.info("Foram informados {} calendarImages relacionadas a conferenceId={}",
+              param.getCalendarImages().size(),
+              conference.getId()
+      );
+
+      List<File> filesToSave = param.getCalendarImages().stream()
+        .map(f -> new File(f).setConferenceCalendarImage(conference)).collect(Collectors.toList());
+
+      log.info("Foram encontrados {} getCalendarImages para serem adicionadas relacionadas a conferenceId={}", filesToSave.size(), conference.getId());
+
+      if(!filesToSave.isEmpty()) {
+        this.fileService.saveAll(filesToSave);
+      }
+
+      final var filesToDelete = files.stream()
+              .map(File::getId)
+              .filter(id -> filesToSave.stream().noneMatch(file -> id.equals(file.getId())))
+              .collect(Collectors.toList());
+
+      log.info("Foram encontrados {} getCalendarImages para serem removidas relacionadas a conferenceId={}", filesToDelete.size(), conference.getId());
+
+      filesToDelete.forEach(this.fileService::delete);
+    }
+    else if (files != null && !files.isEmpty()){
+      log.info("Não foi encontrado nenhuma getCalendarImages, removendo todas relacionadas a conferenceId={}", conference.getId());
       files.forEach(file -> fileService.delete(file.getId()));
     }
   }
@@ -594,6 +634,11 @@ public class ConferenceService {
     if(conference.getBackgroundImages() == null || conference.getBackgroundImages().isEmpty()) {
       List<File> files = this.fileService.findAllBackGroundImageFromConference(conference.getId());
       conference.setBackgroundImages(files.stream().map(FileDto::new).collect(Collectors.toList()));
+    }
+
+    if(conference.getCalendarImages() == null || conference.getCalendarImages().isEmpty()) {
+      List<File> files = this.fileService.findAllCalendarImageFromConference(conference.getId());
+      conference.setCalendarImages(files.stream().map(FileDto::new).collect(Collectors.toList()));
     }
 
     if(conference.getResearchConfiguration() == null) {
