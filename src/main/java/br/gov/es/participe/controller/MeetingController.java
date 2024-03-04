@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+
 @RestController
 @CrossOrigin
 @RequestMapping(value = "/meetings")
@@ -180,6 +181,16 @@ public class MeetingController {
 
     return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/checkIn/{meetingId}")
+  public ResponseEntity<CheckedInAtDto> CheckInOnMeetingByPerson(@PathVariable Long meetingId,
+    @RequestParam(name = "personId", required = true) Long personId) {
+      CheckedInAt checkinAt = meetingService.findByPersonAndMeeting(personId, meetingId);
+      
+      return ResponseEntity.ok().body(new CheckedInAtDto(checkinAt));
+
+  }
+  
 
   @GetMapping("/{conferenceId}/targeted-by/plan-items")
   public ResponseEntity<List<PlanItemComboDto>> findAllItems(@PathVariable Long conferenceId) {

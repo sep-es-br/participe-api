@@ -460,6 +460,14 @@ public class MeetingService {
     return Collections.emptySet();
   }
 
+  public CheckedInAt findByPersonAndMeeting(Long personId, Long meetingId){
+    Optional<CheckedInAt> checkedInAt = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
+
+    if (checkedInAt.isPresent())
+      return checkedInAt.get();
+    return null;
+  }
+
 
   public Boolean deleteParticipation(Long personId, Long meetingId) {
     Meeting meeting = this.find(meetingId);
