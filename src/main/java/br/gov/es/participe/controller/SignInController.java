@@ -5,6 +5,7 @@ import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
 import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.service.AcessoCidadaoService;
 import br.gov.es.participe.service.CookieService;
+import br.gov.es.participe.service.GoogleService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.util.dto.MessageDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,6 +36,9 @@ public class SignInController {
 
   @Autowired
   private AcessoCidadaoService acessoCidadaoService;
+
+  @Autowired
+  private GoogleService googleService;
 
   @Autowired
   private CookieService cookieService;
@@ -100,6 +104,51 @@ public class SignInController {
         getConferenceId(request, response));
     String valor = encode(persoProfileSignInDto);
     return new RedirectView(buildProfileCallbackUrl(request, response, valor));
+  }
+
+  @GetMapping("/google")
+  public RedirectView indexGoogle(
+      @RequestParam("code") String authorizationCode,
+      HttpServletRequest request) {
+    String accessToken = googleService.googleAccessToken(
+        authorizationCode,
+        request,
+        "/signin/google");
+    return new RedirectView("google-response?access_token=" + accessToken);
+  }
+
+  @GetMapping("/google-profile")
+  public RedirectView indexGoogleProfile(
+      @RequestParam("code") String authorizationCode,
+      HttpServletRequest request) {
+    String accessToken = googleService.googleAccessToken(
+        authorizationCode,
+        request,
+        "/signin/google-profile");
+    return new RedirectView("google-profile-response?access_token=" + accessToken);
+  }
+
+  @GetMapping("/google-response")
+  public RedirectView google(
+      @RequestParam(name = "access_token") String accessToken,
+      HttpServletRequest request,
+      HttpServletResponse response) throws JsonProcessingException {
+    SigninDto signinDto = googleService.authenticate(accessToken,
+        getConferenceId(request, response));
+    String valor = encode(signinDto);
+    return new RedirectView(buildHomeCallbackUrl(request, response, valor));
+  }
+
+  @GetMapping("/google-profile-response")
+  public RedirectView googleProfileResponse(
+      @RequestParam(name = "access_token") String accessToken,
+      HttpServletRequest request,
+      HttpServletResponse response) throws JsonProcessingException {
+    PersonProfileSignInDto personProfileSignInDto = googleService.authenticateProfile(
+        accessToken,
+        getConferenceId(request, response));
+    String encodedSignInDto = encode(personProfileSignInDto);
+    return new RedirectView(buildProfileCallbackUrl(request, response, encodedSignInDto));
   }
 
   private String buildHomeCallbackUrl(HttpServletRequest request, HttpServletResponse response, String value) {
