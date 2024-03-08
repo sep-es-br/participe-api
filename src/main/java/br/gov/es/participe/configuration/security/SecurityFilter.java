@@ -48,7 +48,8 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.endsWith("/v2/api-docs")
                     || url.contains("/swagger-resources")
                     || url.contains("/webjars/")
-                    || url.contains("/conferences/");
+                    || url.contains("/conferences/")
+                    || url.contains("/email");
 
             if (!isPublicUrl) {
                 String token = getToken(request);

@@ -29,11 +29,11 @@ dependencies {
 	implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.29'
 	implementation 'io.springfox:springfox-swagger2:2.9.2'
 	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
-
 	implementation 'javax.xml.bind:jaxb-api:2.2.11'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'commons-io:commons-io:2.15.1'
 	implementation 'org.springframework.boot:spring-boot-starter-logging'
 	implementation 'io.jsonwebtoken:jjwt:0.7.0'
 	implementation 'org.json:json:20190722';
