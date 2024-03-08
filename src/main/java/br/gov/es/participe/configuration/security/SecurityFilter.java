@@ -44,11 +44,20 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.endsWith("/acesso-cidadao-response.html")
                     || url.endsWith("/signin")
                     || url.endsWith("/signin/participe")
+                    || url.endsWith("/signin/facebook")
+                    || url.endsWith("/signin/facebook-response")
+                    || url.endsWith("/signin/facebook-profile")
+                    || url.endsWith("/signin/facebook-profile-response")
+                    || url.endsWith("/signin/google")
+                    || url.endsWith("/signin/google-response")
+                    || url.endsWith("/signin/google-profile")
+                    || url.endsWith("/signin/google-profile-response")
                     || url.endsWith("/swagger-ui.html")
                     || url.endsWith("/v2/api-docs")
                     || url.contains("/swagger-resources")
                     || url.contains("/webjars/")
-                    || url.contains("/conferences/");
+                    || url.contains("/conferences/")
+                    || url.contains("/email");
 
             if (!isPublicUrl) {
                 String token = getToken(request);

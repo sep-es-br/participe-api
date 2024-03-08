@@ -6,6 +6,8 @@ import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.service.MeetingService;
 import br.gov.es.participe.service.PersonService;
+import br.gov.es.participe.service.QRCodeService;
+
 import br.gov.es.participe.util.interfaces.ApiPageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,10 +18,27 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+/* Início das importações */
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import javax.servlet.http.HttpServletResponse;
+import org.springframework.http.ContentDisposition;
+/* Fim das importações */
+import javax.imageio.ImageIO;
+
+import com.google.zxing.WriterException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
 
 @RestController
 @CrossOrigin
@@ -31,6 +50,9 @@ public class MeetingController {
 
   @Autowired
   private PersonService personService;
+
+  @Autowired
+  private QRCodeService qrCodeService;
 
   @GetMapping("/{idConference}/page-number")
   public ResponseEntity<Object> findPageNumberByConference(
@@ -181,6 +203,16 @@ public class MeetingController {
     return ResponseEntity.noContent().build();
   }
 
+  @GetMapping("/checkIn/{meetingId}")
+  public ResponseEntity<CheckedInAtDto> CheckInOnMeetingByPerson(@PathVariable Long meetingId,
+    @RequestParam(name = "personId", required = true) Long personId) {
+      CheckedInAt checkinAt = meetingService.findByPersonAndMeeting(personId, meetingId);
+      
+      return ResponseEntity.ok().body(new CheckedInAtDto(checkinAt));
+
+  }
+  
+
   @GetMapping("/{conferenceId}/targeted-by/plan-items")
   public ResponseEntity<List<PlanItemComboDto>> findAllItems(@PathVariable Long conferenceId) {
     List<PlanItemComboDto> response = meetingService.findPlanItemsFromConference(conferenceId);
@@ -243,4 +275,22 @@ public class MeetingController {
         person -> ResponseEntity.status(200).body(new PersonDto(person)))
         .orElseGet(() -> ResponseEntity.noContent().build());
   }
+
+  @GetMapping("/{meetingId}/generate-link-pre-registration")
+  @ResponseBody
+  public ResponseEntity  generateMeetingLink(@PathVariable Long meetingId){
+    String  UrlMeeting = meetingService.generateMeetingLink(meetingId);
+    Map<String, Object> meeting = new HashMap<>();
+    meeting.put("url",UrlMeeting);
+    return ResponseEntity.status(200).body(meeting);
+  }
+
+  @GetMapping("/{meetingId}/generate-qr-code-check-in")
+  public ResponseEntity<byte[]> getMethodName(@PathVariable Long meetingId) throws WriterException, IOException {
+    String UrlMeeting = meetingService.generateAutoCheckInLink(meetingId);
+    byte[] imageQR = qrCodeService.generateQRCode(UrlMeeting, 300, 300);
+    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageQR);
+    
+  }
+  
 }
