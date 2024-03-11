@@ -2,6 +2,9 @@ package br.gov.es.participe.service;
 
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
+
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,5 +48,15 @@ public class PreRegistrationService {
 
     }
 
-    
+    public void saveCheckIn(Long personId, Long meetingId){
+
+        PreRegistration preRegistrationStored =  preRegistrationRepository.findByMeetingAndPerson(meetingId, personId);
+
+        if(preRegistrationStored != null){
+            preRegistrationStored.setCheckIn(new Date());
+            preRegistrationRepository.save(preRegistrationStored);
+        }
+
+    }
+
 }

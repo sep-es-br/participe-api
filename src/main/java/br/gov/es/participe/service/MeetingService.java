@@ -60,6 +60,9 @@ public class MeetingService {
   @Autowired
   private PortalServerService portalServerService ;
 
+  @Autowired
+  private PreRegistrationService preRegistrationService;
+
   private final static Logger log = LoggerFactory.getLogger(MeetingService.class);
 
 
@@ -449,6 +452,7 @@ public class MeetingService {
       if (!checkedInAt.isPresent()) {
         CheckedInAt newParticipant = timeZone == null ? new CheckedInAt(person, meeting)
             : new CheckedInAt(person, meeting, timeZone);
+            preRegistrationService.saveCheckIn(personId, meetingId);
         log.info("Realizando checkin da personId={} na meetingId={} com timezone={}", personId, meetingId, timeZone);
         return checkedInAtRepository.save(newParticipant);
       }
