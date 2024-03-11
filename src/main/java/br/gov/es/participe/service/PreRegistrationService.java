@@ -45,5 +45,10 @@ public class PreRegistrationService {
 
     }
 
+    public PreRegistration find(Long id) {
+        return preRegistrationRepository.findPreRegistrationWithRelationshipsById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + id));
+      }
+
     
 }

@@ -60,7 +60,7 @@ public class PreRegistrationController {
 
     @Transactional
     @PostMapping()
-    public ResponseEntity<PreRegistrationDto> meepreRegistration(
+    public ResponseEntity<PreRegistrationDto> meetPreRegistration(
         @RequestHeader(name = "Authorization") String token,
         @RequestBody PreRegistrationParamDto preRegistationDto) throws WriterException, IOException {
  
@@ -71,6 +71,22 @@ public class PreRegistrationController {
       byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
 
       return ResponseEntity.status(200).body(new PreRegistrationDto(savedPreRegistration,imageQR) );
+    }
+
+    @Transactional
+    @PostMapping("check-in")
+    public ResponseEntity<CheckedInAtDto> preRegistrationCheckin(@RequestHeader(name = "Authorization") String token,@RequestBody CheckInPreRegistrationParamDto checkInPreRegistationDto){
+      PreRegistration preRegistration = preRegistrationService.find(checkInPreRegistationDto.getPreRegistrationId());
+      Meeting meeting = meetingService.find(checkInPreRegistationDto.getMeetingId());   
+      String checkInTime = new Date().toString();
+      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(preRegistration.getPerson().getId(), meeting.getId(), checkInTime);
+
+      if (checkedInAt != null) {
+        return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
+      }
+      return ResponseEntity.noContent().build();
+
+      // return ResponseEntity.status(200).body("");
     }
 
 }
