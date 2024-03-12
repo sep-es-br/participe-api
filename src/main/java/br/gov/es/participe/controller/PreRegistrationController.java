@@ -5,6 +5,7 @@ import br.gov.es.participe.model.CheckedInAt;
 import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PreRegistration;
+import br.gov.es.participe.service.EmailService;
 import br.gov.es.participe.service.MeetingService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.PreRegistrationService;
@@ -30,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.ContentDisposition;
 /* Fim das importações */
 import javax.imageio.ImageIO;
+import javax.mail.MessagingException;
 
 import com.google.zxing.WriterException;
 
@@ -58,11 +60,13 @@ public class PreRegistrationController {
     @Autowired
     private PreRegistrationService preRegistrationService;
 
+    @Autowired
+    private EmailService emailService;
+
     @Transactional
     @PostMapping()
-    public ResponseEntity<PreRegistrationDto> meepreRegistration(
-        @RequestHeader(name = "Authorization") String token,
-        @RequestBody PreRegistrationParamDto preRegistationDto) throws WriterException, IOException {
+    public ResponseEntity<PreRegistrationDto> meetPreRegistration(
+        @RequestBody PreRegistrationParamDto preRegistationDto) throws WriterException, IOException, MessagingException {
  
       Person person = personService.find(preRegistationDto.getPersonId());
       Meeting meeting = meetingService.find(preRegistationDto.getMeetingId());
@@ -70,7 +74,29 @@ public class PreRegistrationController {
       PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration);
       byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
 
+      Map<String, String> emailBody = preRegistrationService.buildEmailBody(meeting, imageQR);
+      String to = person.getContactEmail();
+      String title =  meeting.getConference().getName()+" - Pré-Credenciamento";
+      emailService.sendEmailPreRegistration(to, title, emailBody, imageQR);
+
+
       return ResponseEntity.status(200).body(new PreRegistrationDto(savedPreRegistration,imageQR) );
+    }
+
+    @Transactional
+    @PostMapping("check-in")
+    public ResponseEntity<CheckedInAtDto> preRegistrationCheckin(
+      @RequestBody CheckInPreRegistrationParamDto checkInPreRegistationDto){
+      PreRegistration preRegistration = preRegistrationService.find(checkInPreRegistationDto.getPreRegistrationId());
+      Meeting meeting = meetingService.find(checkInPreRegistationDto.getMeetingId()); 
+      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(preRegistration.getPerson().getId(), meeting.getId(),null);
+      if(preRegistration.getMeeting().getId() == meeting.getId()){
+        preRegistrationService.saveCheckIn(preRegistration.getPerson().getId(), meeting.getId());
+      }
+      if (checkedInAt != null) {
+        return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
+      }
+      return ResponseEntity.noContent().build();
     }
 
 }
