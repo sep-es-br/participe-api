@@ -19,7 +19,7 @@ public interface PreRegistrationRepository extends Neo4jRepository<PreRegistrati
     PreRegistration findByMeetingAndPerson( @Param("meetingId") Long meetingId, @Param("personId") Long personID);
 
     @Query("MATCH (pr:PreRegistration)-[r_1:PRE_REGISTRATION]->(p:Person),(pr)-[r_2:PRE_REGISTRATION]->(m:Meeting)" + //
-                "WHERE id(pr)=$preRegistrationId" + //
+                "WHERE id(pr)=$preRegistrationId " + //
                 "WITH pr RETURN pr, [" + //
                 "[(pr)-[r_1:PRE_REGISTRATION]->(p) | [r_1,p]]," + //
                 "[(pr)-[r_2:PRE_REGISTRATION]->(m) | [r_2,m]]" + //

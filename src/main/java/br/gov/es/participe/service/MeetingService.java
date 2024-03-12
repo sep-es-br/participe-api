@@ -456,7 +456,7 @@ public class MeetingService {
         log.info("Realizando checkin da personId={} na meetingId={} com timezone={}", personId, meetingId, timeZone);
         return checkedInAtRepository.save(newParticipant);
       }
-      throw new IllegalArgumentException("Person is already participating.");
+      throw new IllegalArgumentException("Esta pessoa já está participando neste encontro.");
     }
     throw new IllegalArgumentException("Person or Meeting not found.");
   }

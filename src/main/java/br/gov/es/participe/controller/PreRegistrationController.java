@@ -75,18 +75,19 @@ public class PreRegistrationController {
 
     @Transactional
     @PostMapping("check-in")
-    public ResponseEntity<CheckedInAtDto> preRegistrationCheckin(@RequestHeader(name = "Authorization") String token,@RequestBody CheckInPreRegistrationParamDto checkInPreRegistationDto){
+    public ResponseEntity<CheckedInAtDto> preRegistrationCheckin(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestBody CheckInPreRegistrationParamDto checkInPreRegistationDto){
       PreRegistration preRegistration = preRegistrationService.find(checkInPreRegistationDto.getPreRegistrationId());
-      Meeting meeting = meetingService.find(checkInPreRegistationDto.getMeetingId());   
-      String checkInTime = new Date().toString();
-      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(preRegistration.getPerson().getId(), meeting.getId(), checkInTime);
-
+      Meeting meeting = meetingService.find(checkInPreRegistationDto.getMeetingId()); 
+      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(preRegistration.getPerson().getId(), meeting.getId(),null);
+      if(preRegistration.getMeeting().getId() == meeting.getId()){
+        preRegistrationService.saveCheckIn(preRegistration.getPerson().getId(), meeting.getId());
+      }
       if (checkedInAt != null) {
         return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
       }
       return ResponseEntity.noContent().build();
-
-      // return ResponseEntity.status(200).body("");
     }
 
 }
