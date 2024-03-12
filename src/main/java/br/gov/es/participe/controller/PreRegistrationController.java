@@ -66,7 +66,6 @@ public class PreRegistrationController {
     @Transactional
     @PostMapping()
     public ResponseEntity<PreRegistrationDto> meetPreRegistration(
-        @RequestHeader(name = "Authorization") String token,
         @RequestBody PreRegistrationParamDto preRegistationDto) throws WriterException, IOException, MessagingException {
  
       Person person = personService.find(preRegistationDto.getPersonId());
@@ -87,7 +86,6 @@ public class PreRegistrationController {
     @Transactional
     @PostMapping("check-in")
     public ResponseEntity<CheckedInAtDto> preRegistrationCheckin(
-      @RequestHeader(name = "Authorization") String token,
       @RequestBody CheckInPreRegistrationParamDto checkInPreRegistationDto){
       PreRegistration preRegistration = preRegistrationService.find(checkInPreRegistationDto.getPreRegistrationId());
       Meeting meeting = meetingService.find(checkInPreRegistationDto.getMeetingId()); 
