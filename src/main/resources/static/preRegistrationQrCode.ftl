@@ -64,7 +64,7 @@
       <img src="data:image/png;base64,${qrcode}" alt="QR Code - Audiências Públicas" class="qr-code">
     </div>
       <div class="">
-        <p style="color: #f59a3e;margin-top: 30px;">Encontro Presencial</p>
+        <p style="color: #f59a3e;margin-top: 15px;">Encontro Presencial</p>
         <p style="font-style: italic; color: #cdcdcd;">${microregiao}</p>
         <p style="color: #cdcdcd;">${localDaReuniao}</p>
         <p style="color: #cdcdcd;">${dataDaReuniao}</p>

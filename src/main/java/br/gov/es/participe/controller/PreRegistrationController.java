@@ -77,7 +77,7 @@ public class PreRegistrationController {
 
       Map<String, String> emailBody = preRegistrationService.buildEmailBody(meeting, imageQR);
       String to = person.getContactEmail();
-      String title = "Pré-Credenciamento";
+      String title =  meeting.getConference().getName()+" - Pré-Credenciamento";
       emailService.sendEmailPreRegistration(to, title, emailBody, imageQR);
 
 
