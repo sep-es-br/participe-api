@@ -71,7 +71,9 @@
         <p  style="color: #cdcdcd;">${enderecoDaReuniao}</p>
         <p  style="color: #cdcdcd;">${municipio} - ES</p>
       </div>
-      <img src="https://hom.orcamento.es.gov.br/assets/images/poweredBy.svg">
+      <div style="text-align:center;margin-top: 1rem;" >
+      <img src="https://hom.orcamento.es.gov.br/assets/images/poweredBy_branco.svg">
+      </div>
   </div>
 </body>
 </html>
