@@ -90,9 +90,6 @@ public class PreRegistrationController {
       PreRegistration preRegistration = preRegistrationService.find(checkInPreRegistationDto.getPreRegistrationId());
       Meeting meeting = meetingService.find(checkInPreRegistationDto.getMeetingId()); 
       CheckedInAt checkedInAt = meetingService.checkInOnMeeting(preRegistration.getPerson().getId(), meeting.getId(),null);
-      if(preRegistration.getMeeting().getId() == meeting.getId()){
-        preRegistrationService.saveCheckIn(preRegistration.getPerson().getId(), meeting.getId());
-      }
       if (checkedInAt != null) {
         return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
       }
