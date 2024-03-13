@@ -61,6 +61,7 @@
     </div>
     <div style="text-align:center;margin-top: 1rem;" >
       <p class="informacoes" style="color: #cdcdcd; font-style: italic;" >Apresente o QR Code na entrada e registre sua presença</p>
+      <img src="data:image/png;base64,${qrcode}" alt="QR Code - Audiências Públicas" class="qr-code">
     </div>
       <div class="">
         <p style="color: #f59a3e;margin-top: 15px;">Encontro Presencial</p>
@@ -70,6 +71,7 @@
         <p  style="color: #cdcdcd;">${enderecoDaReuniao}</p>
         <p  style="color: #cdcdcd;">${municipio} - ES</p>
       </div>
+      <img src="https://hom.orcamento.es.gov.br/assets/images/poweredBy.svg">
   </div>
 </body>
 </html>
