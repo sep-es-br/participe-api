@@ -49,8 +49,7 @@ public class SelfDeclarationService {
       selfDeclaration.getConference().getId(),
       selfDeclaration.getLocality().getId(),
       selfDeclaration.getPerson().getId(),
-      selfDeclaration.getAnswerSurvey(),
-      selfDeclaration.getReceiveInformational()
+      selfDeclaration.getAnswerSurvey()
     );
 
     log.info(
@@ -68,14 +67,12 @@ public class SelfDeclarationService {
       Conference conference = conferenceService.find(selfDeclaration.getConference().getId());
       Locality locality = localityService.find(selfDeclaration.getLocality().getId());
       Person person = personService.find(selfDeclaration.getPerson().getId());
-      Boolean receiveInformational = selfDeclaration.getReceiveInformational();
 
 
       selfDeclaration.setConference(conference);
       selfDeclaration.setLocality(locality);
       selfDeclaration.setPerson(person);
       selfDeclaration.setAnswerSurvey(false);
-      selfDeclaration.setReceiveInformational(receiveInformational);
 
     }
     log.info(
@@ -84,14 +81,10 @@ public class SelfDeclarationService {
       selfDeclaration.getConference().getId(),
       selfDeclaration.getLocality().getId(),
       selfDeclaration.getPerson().getId(),
-      selfDeclaration.getAnswerSurvey(),
-      selfDeclaration.getReceiveInformational()
+      selfDeclaration.getAnswerSurvey()
     );
     if (Objects.isNull(selfDeclaration.getAnswerSurvey())) {
        throw new IllegalArgumentException("AnswerSurvey required to create or edit Self Declaration");
-    }
-    if (Objects.isNull( selfDeclaration.getReceiveInformational())) {
-      throw new IllegalArgumentException("ReceiveInformational required to create or edit Self Declaration");
     }
     final var updatedSelfDeclaration = selfDeclarationRepository.save(selfDeclaration);
     log.info(
@@ -100,8 +93,7 @@ public class SelfDeclarationService {
       selfDeclaration.getConference().getId(),
       selfDeclaration.getLocality().getId(),
       selfDeclaration.getPerson().getId(),
-      selfDeclaration.getAnswerSurvey(),
-      selfDeclaration.getReceiveInformational()
+      selfDeclaration.getAnswerSurvey()
     );
     return updatedSelfDeclaration;
   }
