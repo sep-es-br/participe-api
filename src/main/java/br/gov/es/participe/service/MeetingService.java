@@ -1,5 +1,6 @@
 package br.gov.es.participe.service;
 
+import br.gov.es.participe.controller.dto.ConferenceDto;
 import br.gov.es.participe.controller.dto.MeetingDto;
 import br.gov.es.participe.controller.dto.MeetingParamDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
@@ -10,6 +11,7 @@ import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
+import br.gov.es.participe.model.PortalServer;
 import br.gov.es.participe.repository.CheckedInAtRepository;
 import br.gov.es.participe.repository.MeetingRepository;
 import org.slf4j.Logger;
@@ -54,6 +56,12 @@ public class MeetingService {
 
   @Autowired
   private CheckedInAtRepository checkedInAtRepository;
+
+  @Autowired
+  private PortalServerService portalServerService ;
+
+  @Autowired
+  private PreRegistrationService preRegistrationService;
 
   private final static Logger log = LoggerFactory.getLogger(MeetingService.class);
 
@@ -444,10 +452,11 @@ public class MeetingService {
       if (!checkedInAt.isPresent()) {
         CheckedInAt newParticipant = timeZone == null ? new CheckedInAt(person, meeting)
             : new CheckedInAt(person, meeting, timeZone);
+            preRegistrationService.saveCheckIn(personId, meetingId);
         log.info("Realizando checkin da personId={} na meetingId={} com timezone={}", personId, meetingId, timeZone);
         return checkedInAtRepository.save(newParticipant);
       }
-      throw new IllegalArgumentException("Person is already participating.");
+      throw new IllegalArgumentException("Esta pessoa já está participando neste encontro.");
     }
     throw new IllegalArgumentException("Person or Meeting not found.");
   }
@@ -458,6 +467,14 @@ public class MeetingService {
       return checkedInAtRepository.findByMeeting(meetingId);
     }
     return Collections.emptySet();
+  }
+
+  public CheckedInAt findByPersonAndMeeting(Long personId, Long meetingId){
+    Optional<CheckedInAt> checkedInAt = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
+
+    if (checkedInAt.isPresent())
+      return checkedInAt.get();
+    return null;
   }
 
 
@@ -478,5 +495,21 @@ public class MeetingService {
 
   public List<CheckedInAt> findCheckedInMeetingsByPerson(Long id) {
     return this.meetingRepository.findAllPersonCheckedIn(id);
+  }
+
+  public String generateMeetingLink(Long id) {
+    Meeting meeting = this.find(id);
+    PortalServer portalMeeting = this.portalServerService.findByIdConference(meeting.getConference().getId()).get();
+    var urlMeeting = portalMeeting.getUrl() + "#/registration/"+ meeting.getConference().getId() +"/meeting/" + id;
+
+    return urlMeeting;
+  }
+
+  public String generateAutoCheckInLink(Long id) {
+    Meeting meeting = this.find(id);
+    PortalServer portalMeeting = this.portalServerService.findByIdConference(meeting.getConference().getId()).get();
+    var urlMeeting = portalMeeting.getUrl() + "#/self-check-in/" + id;
+
+    return urlMeeting;
   }
 }
