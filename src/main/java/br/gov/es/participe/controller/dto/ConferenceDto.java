@@ -2,6 +2,7 @@ package br.gov.es.participe.controller.dto;
 
 
 import br.gov.es.participe.model.Conference;
+import br.gov.es.participe.model.ConferenceColor;
 import br.gov.es.participe.model.StructureItem;
 import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
@@ -60,6 +61,8 @@ public class ConferenceDto {
 
   private ResearchConfigurationDto researchConfiguration;
 
+  private ConferenceColorDto customProperties;
+
   public ConferenceDto() {
   }
 
@@ -113,24 +116,24 @@ public class ConferenceDto {
 
     this.showStatistics = (conference.getShowStatistics() != null )
       ? conference.getShowStatistics()
-      : true;  
+      : true;
 
     this.showStatisticsPanel  = (conference.getShowStatisticsPanel () != null )
       ? conference.getShowStatisticsPanel ()
-      : true;  
+      : true;
 
     this.showExternalLinks  = (conference.getShowExternalLinks () != null )
       ? conference.getShowExternalLinks ()
       : true;
-    
+
     this.fileParticipation = (conference.getFileParticipation() != null)
       ? new FileDto(conference.getFileParticipation())
       : null;
-    
-    this.fileAuthentication = (conference.getFileAuthentication() != null) 
+
+    this.fileAuthentication = (conference.getFileAuthentication() != null)
       ? new FileDto(conference.getFileAuthentication())
       : null;
-    
+
     this.localityType = new LocalityTypeDto(conference.getLocalityType());
 
     if (conference.getSelfDeclaration() != null && !conference.getSelfDeclaration().isEmpty()) {
@@ -437,7 +440,7 @@ public class ConferenceDto {
   public Boolean getDefaultServerConference() {
     return defaultServerConference;
   }
-  
+
   public void setDefaultServerConference(Boolean defaultServerConference) {
     this.defaultServerConference = defaultServerConference;
   }
@@ -480,6 +483,14 @@ public class ConferenceDto {
 
   public void setResearchConfiguration(ResearchConfigurationDto researchConfiguration) {
     this.researchConfiguration = researchConfiguration;
+  }
+
+  public ConferenceColorDto getCustomProperties() {
+    return customProperties;
+  }
+
+  public void setCustomProperties(ConferenceColorDto customProperties) {
+    this.customProperties = customProperties;
   }
 
 }

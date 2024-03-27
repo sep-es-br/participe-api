@@ -1,5 +1,6 @@
 package br.gov.es.participe.controller.dto;
 
+import br.gov.es.participe.model.ConferenceColor;
 import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
 
@@ -56,6 +57,9 @@ public class ConferenceParamDto {
   private Boolean showExternalLinks;
   private ResearchConfigurationParamDto researchConfiguration;
 
+  private ConferenceColorDto customProperties;
+
+
   public ConferenceParamDto() {
   }
 
@@ -95,6 +99,7 @@ public class ConferenceParamDto {
     showExternalLinks = conferenceDto.getShowExternalLinks();
     showStatisticsPanel  = conferenceDto.getShowStatisticsPanel ();
     researchConfiguration = new ResearchConfigurationParamDto(conferenceDto.getResearchConfiguration());
+    customProperties = conferenceDto.getCustomProperties();
   }
 
   public List<SelfDeclarationDto> getSelfDeclaration() {
@@ -396,6 +401,14 @@ public class ConferenceParamDto {
 
   public void setDisplayStatusConference(StatusConferenceType displayStatusConference) {
     this.displayStatusConference = displayStatusConference;
+  }
+
+  public ConferenceColorDto getCustomProperties() {
+    return customProperties;
+  }
+
+  public void setCustomProperties(ConferenceColorDto customProperties) {
+    this.customProperties = customProperties;
   }
 
 }

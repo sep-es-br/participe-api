@@ -83,6 +83,8 @@ public class ConferenceService {
 
   @Autowired
   private ParticipeUtils participeUtils;
+  @Autowired
+  private ConferenceColorService conferenceColorService;
 
   private static final org.slf4j.Logger log = LoggerFactory.getLogger(ConferenceService.class);
 
@@ -237,6 +239,13 @@ public class ConferenceService {
 
     Conference conferenceStored = this.conferenceRepository.findById(conferenceId)
       .orElseThrow(() -> new IllegalStateException("This conference not exist."));
+
+      ConferenceColor conferenceColor = conferenceColorService.findByConferenceColor(conferenceId);
+      if(conferenceColor != null){
+        conferenceColorService.update(conferenceColor, conferenceParamDto.getCustomProperties());
+      }else{
+        conferenceColorService.save(conferenceStored, conferenceParamDto.getCustomProperties());
+      }
 
     conferenceStored.update(conferenceParamDto);
 

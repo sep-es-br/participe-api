@@ -2,6 +2,7 @@ package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.Conference;
+import br.gov.es.participe.model.ConferenceColor;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PortalServer;
 import br.gov.es.participe.service.*;
