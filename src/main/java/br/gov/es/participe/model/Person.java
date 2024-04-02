@@ -28,6 +28,8 @@ public class Person extends Entity implements UserDetails {
 
   private Boolean active;
 
+  private Boolean receiveInformational;
+
   @Relationship(type = "IS_AUTHENTICATED_BY")
   private Set<AuthService> authServices;
 
@@ -72,6 +74,7 @@ public class Person extends Entity implements UserDetails {
     this.name = person.getName().trim().replaceAll(" +", " ");
     this.cpf = person.getCpf();
     this.telephone = person.getTelephone();
+    this.receiveInformational = person.isReceiveInformational();
 
     if (person.getCpf() != null) {
       this.contactEmail = person.getCpf() + "@cpf";
@@ -115,6 +118,14 @@ public class Person extends Entity implements UserDetails {
 
   public void setCpf(String cpf) {
     this.cpf = cpf;
+  }
+
+  public Boolean getReceiveInformational() {
+    return receiveInformational;
+  }
+
+  public void setReceiveInformational(Boolean receiveInformational) {
+    this.receiveInformational = receiveInformational;
   }
 
   public Boolean getStatus() {

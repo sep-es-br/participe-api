@@ -6,7 +6,6 @@ public class SelfDeclarationParamDto {
   	private Long conference;
   	private Long locality;
   	private Long person;
-  	private Boolean receiveInformational;
 
 	public SelfDeclarationParamDto() {
 		
@@ -50,11 +49,4 @@ public class SelfDeclarationParamDto {
 		this.person = person;
 	}
 
-	public Boolean getReceiveInformational() {
-		return receiveInformational;
-	}
-	
-	public void setReceiveInformational(Boolean receiveInformational) {
-		this.receiveInformational = receiveInformational;
-	}
 }

@@ -510,6 +510,7 @@ public class PersonService {
   public Person complement(Person person, SelfDeclaration selfDeclaration) {
     log.info("Iniciando complemento do cadastro da personId={}, email={}", person.getId(), person.getContactEmail());
     Person personBD = this.havePersonWithLoginEmail(person.getContactEmail(), null, null).orElse(null);
+    personBD.setReceiveInformational(person.getReceiveInformational());
 
     if (personBD == null) {
       log.info("Não foi encontrado uma person com personId={}, email={}", person.getId(), person.getContactEmail());
@@ -573,9 +574,7 @@ public class PersonService {
 
     SelfDeclaration selfDeclaration = this.selfDeclarationService.findByPersonAndConference(personId, conferenceId);
 
-    final Boolean receiveInformational = Optional.ofNullable(selfDeclaration)
-        .map(SelfDeclaration::getReceiveInformational).orElse(null);
-    PersonKeepCitizenDto personCitizen = getPersonKeepCitizenDto(person, receiveInformational);
+    PersonKeepCitizenDto personCitizen = getPersonKeepCitizenDto(person);
 
     personCitizen.setAutentication(loginAccessDtos);
 
@@ -606,16 +605,15 @@ public class PersonService {
     return personCitizen;
   }
 
-  private PersonKeepCitizenDto getPersonKeepCitizenDto(Person person, Boolean receiveInformational) {
+  private PersonKeepCitizenDto getPersonKeepCitizenDto(Person person) {
     PersonKeepCitizenDto personCitizen = new PersonKeepCitizenDto();
     personCitizen.setId(person.getId());
     personCitizen.setCpf(person.getCpf());
     personCitizen.setName(person.getName());
     personCitizen.setEmail(person.getContactEmail());
     personCitizen.setTelephone(person.getTelephone());
-    personCitizen.setReceiveInformational(
-        receiveInformational != null ? receiveInformational : true);
     personCitizen.setTypeAuthentication("mail");
+    personCitizen.setReceiveInformational(person.getReceiveInformational());
     if (person.getCpf() != null && person.getContactEmail() != null
         && person.getContactEmail().startsWith(person.getCpf())) {
       personCitizen.setTypeAuthentication("cpf");
@@ -914,8 +912,6 @@ public class PersonService {
       );
     } else {
       selfDeclaration = new SelfDeclaration(conference, paramSelfDeclaration.getLocality(), id);
-      selfDeclaration.setReceiveInformational(
-          personParam.isReceiveInformational() != null && personParam.isReceiveInformational());
       selfDeclaration.setAnswerSurvey(false);
 
       log.info(
@@ -924,8 +920,7 @@ public class PersonService {
         paramSelfDeclaration.getLocality(),
         conference,
         id,
-        selfDeclaration.getAnswerSurvey(),
-        selfDeclaration.getReceiveInformational()
+        selfDeclaration.getAnswerSurvey()
       );
       selfDeclaration = this.selfDeclarationService.save(selfDeclaration);
     }
@@ -992,7 +987,8 @@ public class PersonService {
     person.setActive(personParam.getActive());
     person.setTelephone(personParam.getTelephone());
     person.setName(personParam.getName());
-    log.info("Alterando personId={} atributos: active={}, telephone={} e name={}", person.getId(), person.getActive(), person.getTelephone(), person.getName());
+    person.setReceiveInformational(personParam.isReceiveInformational());
+    log.info("Alterando personId={} atributos: active={}, telephone={}, name={} e receiveInformational{}", person.getId(), person.getActive(), person.getTelephone(), person.getName(), person.getReceiveInformational());
 
     SelfDeclaration sd = selfDeclarationService
         .findByPersonAndConference(person.getId(), personParam.getSelfDeclaration().getConference());
@@ -1015,7 +1011,6 @@ public class PersonService {
         localitySdCreation,
         personSdCreation
       );
-      selfDeclaration.setReceiveInformational(personParam.isReceiveInformational());
       selfDeclaration.setAnswerSurvey(false);
       sd = selfDeclarationService.save(selfDeclaration);
     } else if (!personParam.getSelfDeclaration().getLocality().equals(sd.getLocality().getId())) {
@@ -1024,12 +1019,6 @@ public class PersonService {
         sd.getId(),
         person.getId(),
         personParam.getSelfDeclaration().getLocality()
-      );
-      sd.setReceiveInformational(personParam.isReceiveInformational());
-      log.info(
-        "Alterando atributo receiveInformational da SelfDeclaration selfDeclarationId={} para {}",
-        sd.getId(),
-        sd.getReceiveInformational()
       );
       sd = selfDeclarationService.updateLocality(
           sd,
@@ -1043,18 +1032,11 @@ public class PersonService {
         personParam.getSelfDeclaration().getConference(),
         personParam.getSelfDeclaration().getLocality()
       );
-      sd.setReceiveInformational(personParam.isReceiveInformational());
-      log.info(
-        "Alterando atributo receiveInformational da SelfDeclaration selfDeclarationId={} para {}",
-        sd.getId(),
-        sd.getReceiveInformational()
-      );
       sd = this.selfDeclarationService.save(sd);
     }
 
-    PersonDto response = new PersonDto(
-        person,
-        sd.getReceiveInformational());
+    PersonDto response = new PersonDto(person);
+    
 
     this.createRelationshipWithAuthService(
         new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
