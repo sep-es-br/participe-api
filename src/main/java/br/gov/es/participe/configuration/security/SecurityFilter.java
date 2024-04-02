@@ -57,6 +57,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.contains("/swagger-resources")
                     || url.contains("/webjars/")
                     || url.contains("/conferences/")
+                    || url.contains("/participe/color")
                     || url.contains("/email");
 
             if (!isPublicUrl) {
