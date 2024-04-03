@@ -56,7 +56,6 @@ public class ConferenceParamDto {
   private Boolean showStatisticsPanel ;
   private Boolean showExternalLinks;
   private ResearchConfigurationParamDto researchConfiguration;
-
   private ConferenceColorDto customProperties;
 
 

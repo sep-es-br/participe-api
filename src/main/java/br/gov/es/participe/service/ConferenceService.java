@@ -658,6 +658,14 @@ public class ConferenceService {
       conference.setResearchConfiguration(this.researchService.findByIdConference(conference.getId())
                                             .map(ResearchConfigurationDto::new).orElse(null));
     }
+
+    if(conference.getCustomProperties() == null){
+      ConferenceColor cores = this.conferenceColorService.findByConferenceColor(conference.getId());
+      if(cores != null){
+        ConferenceColorDto coresDTO = new ConferenceColorDto(cores);
+        conference.setCustomProperties(coresDTO);
+      }
+    }
   }
 
 

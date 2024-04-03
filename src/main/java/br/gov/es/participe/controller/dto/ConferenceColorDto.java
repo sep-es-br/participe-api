@@ -2,6 +2,8 @@ package br.gov.es.participe.controller.dto;
 
 import org.springframework.data.neo4j.annotation.QueryResult;
 
+import br.gov.es.participe.model.ConferenceColor;
+
 @QueryResult
 public class ConferenceColorDto {
 
@@ -17,7 +19,19 @@ public class ConferenceColorDto {
     private String typeBackgroundColor;
 
     public ConferenceColorDto() {
-        // TODO document why this constructor is empty
+    }
+
+    public ConferenceColorDto(ConferenceColor conferenceColor ) {
+        this.background = conferenceColor.getBackground();
+        this.accentColor = conferenceColor.getAccentColor();
+        this.fontColor = conferenceColor.getFontColor();
+        this.cardFontColor = conferenceColor.getCardFontColor();
+        this.cardFontColorHover = conferenceColor.getCardFontColorHover();
+        this.cardColor = conferenceColor.getCardColor();
+        this.cardColorHover = conferenceColor.getCardColorHover();
+        this.cardBorderColor = conferenceColor.getCardBorderColor();
+        this.borderColor = conferenceColor.getBorderColor();
+        this.typeBackgroundColor = conferenceColor.getTypeBackgroundColor();
     }
 
     public String getBackground() {
