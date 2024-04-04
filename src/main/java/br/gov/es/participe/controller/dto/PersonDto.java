@@ -29,12 +29,9 @@ public class PersonDto {
     this.telephone = person.getTelephone();
     this.roles = person.getRoles();
     this.active = person.getActive();
+    this.receiveInformational = person.getReceiveInformational();
   }
 
-  public PersonDto(Person person, Boolean receiveInformational) {
-    this(person);
-    this.receiveInformational = receiveInformational != null ? receiveInformational : true;
-  }
 
   public Long getId() {
     return id;

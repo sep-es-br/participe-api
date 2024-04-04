@@ -8,8 +8,6 @@ public class SelfDeclarationDto {
 	private ConferenceDto conference;
 	private LocalityDto locality;
 	private PersonDto person;
-	private Boolean receiveInformational;
-	
 
 	public SelfDeclarationDto() {
 	}
@@ -17,7 +15,6 @@ public class SelfDeclarationDto {
 	public SelfDeclarationDto(SelfDeclaration selfdeclaration, boolean loadattributes) {
 		
 		this.id = selfdeclaration.getId();
-		this.receiveInformational = selfdeclaration.getReceiveInformational();
 		if(loadattributes) {
 			if(selfdeclaration.getConference() != null && selfdeclaration.getConference().getId() != null)
 				this.conference = new ConferenceDto(selfdeclaration.getConference());
@@ -62,11 +59,4 @@ public class SelfDeclarationDto {
 		this.id = id;
 	}
 
-	public Boolean getReceiveInformational() {
-		return receiveInformational;
-	}
-
-	public void setReceiveInformational(Boolean receiveInformational) {
-		this.receiveInformational = receiveInformational;
-	}
 }
