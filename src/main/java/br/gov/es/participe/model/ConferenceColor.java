@@ -24,7 +24,7 @@ public class ConferenceColor extends Entity implements Serializable {
     }
 
     public ConferenceColor(Conference conference, ConferenceColorDto conferenceColorDto) {
-        // this.conference = conference;
+        this.conference = conference;
         this.background = conferenceColorDto.getBackground();
         this.accentColor = conferenceColorDto.getAccentColor();
         this.fontColor = conferenceColorDto.getFontColor();
