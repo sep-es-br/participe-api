@@ -33,6 +33,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.contains("/participation/portal-header")
                     || url.contains("/conferences/AuthenticationScreen")
                     || (url.contains("/person") && !url.endsWith("/persons"))
+                    || url.contains("/color")
                     || url.contains("/meetings")
                     || url.endsWith("/person/forgot-password")
                     || url.endsWith("/login")

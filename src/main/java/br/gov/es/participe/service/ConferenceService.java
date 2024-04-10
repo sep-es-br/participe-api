@@ -83,6 +83,8 @@ public class ConferenceService {
 
   @Autowired
   private ParticipeUtils participeUtils;
+  @Autowired
+  private ConferenceColorService conferenceColorService;
 
   private static final org.slf4j.Logger log = LoggerFactory.getLogger(ConferenceService.class);
 
@@ -237,6 +239,13 @@ public class ConferenceService {
 
     Conference conferenceStored = this.conferenceRepository.findById(conferenceId)
       .orElseThrow(() -> new IllegalStateException("This conference not exist."));
+
+      ConferenceColor conferenceColor = conferenceColorService.findByConferenceColor(conferenceId);
+      if(conferenceColor != null){
+        conferenceColorService.update(conferenceColor, conferenceParamDto.getCustomProperties());
+      }else{
+        conferenceColorService.save(conferenceStored, conferenceParamDto.getCustomProperties());
+      }
 
     conferenceStored.update(conferenceParamDto);
 
@@ -648,6 +657,14 @@ public class ConferenceService {
     if(conference.getResearchConfiguration() == null) {
       conference.setResearchConfiguration(this.researchService.findByIdConference(conference.getId())
                                             .map(ResearchConfigurationDto::new).orElse(null));
+    }
+
+    if(conference.getCustomProperties() == null){
+      ConferenceColor cores = this.conferenceColorService.findByConferenceColor(conference.getId());
+      if(cores != null){
+        ConferenceColorDto coresDTO = new ConferenceColorDto(cores);
+        conference.setCustomProperties(coresDTO);
+      }
     }
   }
 
