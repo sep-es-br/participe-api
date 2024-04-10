@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/color")
+@RequestMapping("/color")
 public class ConferenceColorController {
     @Autowired
     private ConferenceColorService conferenceColorService;
