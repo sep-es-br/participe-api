@@ -93,7 +93,6 @@ public class PersonProfileService {
         localityDto.getLocalityId(),
         idPerson
       ));
-      selfDeclaration.setReceiveInformational(true);
       log.info("Criando SelfDeclaration com conferenceId={}, personId={} e localityId={}", idConference, idPerson, localityDto.getLocalityId());
       selfDeclarationRepository.save(selfDeclaration);
       log.info("SelfDeclaration criada com sucesso selfDeclarationId={}, conferenceId={}, personId={} e localityId={}",
@@ -119,7 +118,7 @@ public class PersonProfileService {
       isAuthenticatedBy.stream()
         .map(AuthenticationProfileDto::new)
         .collect(Collectors.toList()),
-      selfDeclaration.getReceiveInformational()
+      person.getReceiveInformational()
     );
   }
 
@@ -144,8 +143,7 @@ public class PersonProfileService {
     LocalityInfoDto locality = this.updateSelfDeclaration(
       personToUpdate,
       personDto.getConferenceId(),
-      personDto.getLocalityId(),
-      personDto.getReceiveInformational()
+      personDto.getLocalityId()
     );
 
     this.updateAuthentications(
@@ -176,6 +174,7 @@ public class PersonProfileService {
   private void updatePerson(Person personToUpdate, PersonProfileUpdateDto dto) {
     personToUpdate.setName(dto.getName().trim());
     personToUpdate.setContactEmail(dto.getContactEmail().trim());
+    personToUpdate.setReceiveInformational(dto.getReceiveInformational());
     if(personToUpdate.getActive() == null) {
       personToUpdate.setActive(true);
     }
@@ -187,8 +186,7 @@ public class PersonProfileService {
   public LocalityInfoDto updateSelfDeclaration(
     Person person,
     Long conferenceId,
-    Long localityId,
-    Boolean receiveInformational
+    Long localityId
   ) {
     SelfDeclaration selfDeclaration = findSelfDeclaration(
       person.getId(),
@@ -207,7 +205,6 @@ public class PersonProfileService {
         .orElseThrow(
           () -> new IllegalArgumentException("Locality not found.")
         );
-    selfDeclaration.setReceiveInformational(receiveInformational);
     selfDeclaration.setLocality(newLocality);
 
     this.selfDeclarationRepository.save(selfDeclaration);
