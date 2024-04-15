@@ -81,9 +81,9 @@ public class EmailService {
 			helper.setTo(to);
 			helper.setText(body, true);
 			helper.setSubject(title);
-			helper.addAttachment("QRCODE.png", base64ToImage(imageQR));
 			FileSystemResource qrCode = new FileSystemResource("qrcode.png");
-			FileSystemResource poweredBy = new FileSystemResource("poweredBy.svg");
+			FileSystemResource poweredBy = new FileSystemResource("poweredBy.png");
+			helper.addAttachment("QRCODE.png", qrCode);
 			helper.addInline("poweredBy", poweredBy);
 			helper.addInline("qrCode", qrCode);
 		} catch (Exception e ) {
