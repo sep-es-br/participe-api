@@ -8,7 +8,7 @@
 <div style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #153961; color:#fff;">
   <div class="container" style="width: 400px; margin: 0 auto; text-align: center;">
     <h2 class="titulo"  style="color: #cdcdcd; font-size: 18px;font-weight: bold;margin-top: 20px;" >${nomeDaAudiencia}</h2>
-    <div style="text-align: center;font-weight: bold;font-size: 16px;text-transform: uppercase;line-height: 24px;"  style="color: #cdcdcd;">
+    <div style="color: #cdcdcd;text-align: center;font-weight: bold;font-size: 16px;text-transform: uppercase;line-height: 24px;">
       Pré-credenciamento<br>Concluído
     </div>
     <div style="text-align:center;margin-top: 16px;" >
