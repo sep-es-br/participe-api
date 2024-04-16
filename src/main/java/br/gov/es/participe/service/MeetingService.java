@@ -508,7 +508,7 @@ public class MeetingService {
   public String generateAutoCheckInLink(Long id) {
     Meeting meeting = this.find(id);
     PortalServer portalMeeting = this.portalServerService.findByIdConference(meeting.getConference().getId()).get();
-    var urlMeeting = portalMeeting.getUrl() + "#/self-check-in/" + id;
+    var urlMeeting = portalMeeting.getUrl() + "#/self-check-in/"+ meeting.getConference().getId() +"/meeting/" + id;;
 
     return urlMeeting;
   }
