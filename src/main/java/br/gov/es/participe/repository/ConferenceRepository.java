@@ -71,7 +71,7 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                      "(person:Person)-[:IS_RECEPTIONIST_OF]->(meeting) " +
                 "WHERE conference.displayMode CONTAINS 'OPEN' " +
                 "AND (meeting.typeMeetingEnum <> 'VIRTUAL') " +
-                "AND ($date >= meeting.beginDate AND $date <= meeting.endDate) " +
+                "AND ($date >= left(meeting.beginDate,10) AND $date <= meeting.endDate) " +
                 "AND (id(person)=$idPerson) " +
                 "RETURN conference, occurs_in, meeting, tpa, locality, person " +
                 "ORDER BY conference.name ")
