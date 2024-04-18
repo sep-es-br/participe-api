@@ -412,6 +412,10 @@ public class CommentService {
   }
 
   private Page<ModerationResultDto> filterCommentsByPage(List<ModerationResultDto> commentList, Integer page, Integer size) {
+    if (commentList.isEmpty()) {
+      return new PageImpl<>(commentList);
+    }
+    
     Pageable pageRequest = PageRequest.of(page, size);
 
     int start = (int) pageRequest.getOffset();
