@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -410,7 +411,22 @@ public class CommentService {
     return commentRepository.findAllCommentsByConference(idConference, status, text, localityIds, planItemIds, page);
   }
 
-  public List<ModerationResultDto> findAllByStatus(ModerationFilterDto moderationFilterDto) {
+  private Page<ModerationResultDto> filterCommentsByPage(List<ModerationResultDto> commentList, Integer page, Integer size) {
+    if (commentList.isEmpty()) {
+      return new PageImpl<>(commentList);
+    }
+    
+    Pageable pageRequest = PageRequest.of(page, size);
+
+    int start = (int) pageRequest.getOffset();
+    int end = Math.min((start + pageRequest.getPageSize()), commentList.size());
+
+    List<ModerationResultDto> content = commentList.subList(start, end);
+
+    return new PageImpl<>(content, pageRequest, commentList.size());
+  }
+
+  public Page<ModerationResultDto> findAllByStatus(ModerationFilterDto moderationFilterDto, Integer pageNumber, Integer rowsPerPage) {
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     StringUtils stringUtils = new StringUtils();
     Calendar endDatePlus1 = Calendar.getInstance();
@@ -459,7 +475,10 @@ public class CommentService {
         c.setDisableModerate(!c.getModeratorId().equals(moderator.getId()));
       }
     });
-    return response;
+
+    Page<ModerationResultDto> pagedResponse = filterCommentsByPage(response, pageNumber, rowsPerPage);
+
+    return pagedResponse;
   }
 
   public ModerationResultDto findModerationResultById(Long idComment, Long conferenceId) {
