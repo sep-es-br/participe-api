@@ -739,9 +739,6 @@ public class PersonService {
   @Transactional
   public Page<PersonKeepCitizenDto> listKeepCitizen(String name, String email, String authentication, Boolean active,
       List<Long> locality, Long conferenceId, Pageable page) {
-    if (conferenceId == null) {
-      throw new IllegalArgumentException(PERSON_ERROR_CONFERENCE_NOT_SPECIFIED);
-    }
     log.info(
       "Realizando consulta por cidadãos com parâmetros name={}, email={}, authentication={}, active={}, locality={}, conferenceId={}",
       name, email, authentication, active, locality, conferenceId
