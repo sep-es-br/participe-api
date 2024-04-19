@@ -203,6 +203,30 @@ public class MeetingController {
     return ResponseEntity.noContent().build();
   }
 
+  @Transactional
+  @PostMapping("/selfcheckIn")
+  public ResponseEntity<CheckedInAtDto> selfCheckInOnMeeting(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestBody CheckInParamDto checkInParamDto) {
+
+    if (checkInParamDto == null ||
+        checkInParamDto.getPersonId() == null ||
+        checkInParamDto.getMeetingId() == null) {
+      throw new IllegalArgumentException("An object with Person Id and Meeting Id parameters must be informed.");
+    }
+
+    CheckedInAt checkedInAt = meetingService.checkInOnMeeting(
+        checkInParamDto.getPersonId(),
+        checkInParamDto.getMeetingId(),
+        checkInParamDto.getTimeZone());
+
+    if (checkedInAt != null) {
+      return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
+    }
+
+    return ResponseEntity.noContent().build();
+  }
+
   @GetMapping("/checkIn/{meetingId}")
   public ResponseEntity<CheckedInAtDto> CheckInOnMeetingByPerson(@PathVariable Long meetingId,
     @RequestParam(name = "personId", required = true) Long personId) {
