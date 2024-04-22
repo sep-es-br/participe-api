@@ -81,6 +81,7 @@ public class EmailService {
 			helper.setTo(to);
 			helper.setText(body, true);
 			helper.setSubject(title);
+			this.base64ToImage(imageQR);
 			FileSystemResource qrCode = new FileSystemResource("qrcode.png");
 			FileSystemResource poweredBy = new FileSystemResource("poweredBy.png");
 			helper.addAttachment("QRCODE.png", qrCode);

@@ -77,14 +77,13 @@ public class PreRegistrationService {
     }
 
 
-    public Map<String, String> buildEmailBody(Meeting meeting, byte[] imageQR){
+    public Map<String, String> buildEmailBody(Meeting meeting){
         String MICROREGIAO = "microregiao";
         String LOCAL = "localDaReuniao";
         String ENDERECO = "enderecoDaReuniao";
         String MUNICIPIO = "municipio";
         String NOMEAUDIENCIA = "nomeDaAudiencia";
         String DATA = "dataDaReuniao";
-        String QRCODE = "qrcode";
 
         Map<String, String> data = new HashMap<>();
 
@@ -93,7 +92,6 @@ public class PreRegistrationService {
         data.put(ENDERECO, meeting.getAddress());
         data.put(MUNICIPIO, meeting.getLocalityPlace().getName());
         data.put(NOMEAUDIENCIA, meeting.getConference().getName());
-        data.put(QRCODE, Base64.getEncoder().encodeToString(imageQR));
         
         
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss");
