@@ -74,7 +74,7 @@ public class PreRegistrationController {
       PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration);
       byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
 
-      Map<String, String> emailBody = preRegistrationService.buildEmailBody(meeting, imageQR);
+      Map<String, String> emailBody = preRegistrationService.buildEmailBody(meeting);
       String to = person.getContactEmail();
       String title =  meeting.getConference().getName()+" - Pré-Credenciamento";
       emailService.sendEmailPreRegistration(to, title, emailBody, imageQR);
