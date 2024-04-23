@@ -18,6 +18,15 @@ public class PersonMeetingDto {
     private Date checkedInDate;
     private String cpf;
     private Boolean isAuthTypeCpf;
+    private String authName;
+
+    public String getAuthName() {
+        return authName;
+    }
+
+    public void setAuthName(String authName) {
+        this.authName = authName;
+    }
 
     public Long getPersonId() {
         return personId;
