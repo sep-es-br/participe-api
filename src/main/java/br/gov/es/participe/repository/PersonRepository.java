@@ -153,7 +153,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
   "MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)" +
   "WHERE au.server='AcessoCidadao' OR au.server='Google'" +
   "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
-  "cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf, au.server AS authName"
+  "cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf,  COLLECT(DISTINCT au.server) AS authName"
   , countQuery = "WITH split($name,' ') AS search " +
   "UNWIND search AS s " +
   "WITH s AS s2 " +
@@ -165,7 +165,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
   "MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)" +
   "WHERE au.server='AcessoCidadao' OR au.server='Google'" +
   "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
-  "cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf, au.server AS authName " +
+  "cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf,  COLLECT(DISTINCT au.server) AS authName " +
   "RETURN COUNT(*)")
   Page<PersonMeetingDto> findPersonForMeeting(@Param("idMeeting")Long idMeeting, @Param("name")String name, Pageable pageable);
   
