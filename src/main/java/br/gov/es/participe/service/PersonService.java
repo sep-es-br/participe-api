@@ -564,7 +564,8 @@ public class PersonService {
         .orElseThrow(() -> new IllegalArgumentException(PERSON_ERROR_NOT_FOUND));
     log.info("PersonId={} encontrada", person.getId());
 
-    List<LoginAccessDto> loginAccessDtos = personRepository.findAccessByPerson(conferenceId, personId);
+    String authName = "";
+    List<LoginAccessDto> loginAccessDtos = personRepository.findAccessByPerson(conferenceId, personId, authName);
 
     if (loginAccessDtos == null) {
       loginAccessDtos = new ArrayList<>();
@@ -743,19 +744,25 @@ public class PersonService {
       "Realizando consulta por cidadãos com parâmetros name={}, email={}, authentication={}, active={}, locality={}, conferenceId={}",
       name, email, authentication, active, locality, conferenceId
     );
-    Page<PersonKeepCitizenDto> response = personRepository
-        .findPersonKeepCitizen(name, email, authentication,
-            active, locality, page);
+
+      Page<PersonKeepCitizenDto> response = personRepository
+          .findPersonKeepCitizen(name, conferenceId, email, authentication,
+              active, locality, page);
+
 
     response.forEach(element -> {
       List<LoginAccessDto> loginAccessDtos = personRepository.findAccessByPerson(
           conferenceId,
-          element.getId());
+          element.getId(),
+          authentication);
       if (loginAccessDtos == null || loginAccessDtos.isEmpty()) {
         loginAccessDtos = new ArrayList<>();
         loginAccessDtos.add(new LoginAccessDto(SERVER, 0L));
       }
       element.setAutentication(loginAccessDtos);
+
+      List<String> personConferenceList = personRepository.findPersonConferenceList(element.getId());
+      element.setConferencesName(personConferenceList);
 
       long total = 0;
       for (LoginAccessDto loginDto : loginAccessDtos) {
@@ -763,8 +770,7 @@ public class PersonService {
       }
       element.setNumberOfAcesses(total);
 
-      LocalityInfoDto recentLocality = personRepository.findLocalityByPersonAndConference(
-          conferenceId, element.getId());
+      LocalityInfoDto recentLocality = personRepository.findLastLocalityByPerson(element.getId());
       if (recentLocality != null) {
         element.setLocalityId(recentLocality.getLocalityId());
         element.setLocalityName(recentLocality.getLocalityName());
