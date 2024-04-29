@@ -33,6 +33,16 @@ public class PersonKeepCitizenDto {
 
 	private Boolean receiveInformational;
 
+	private List<String> ConferencesName;
+
+	public List<String> getConferencesName() {
+		return ConferencesName;
+	}
+
+	public void setConferencesName(List<String> conferencesName) {
+		ConferencesName = conferencesName;
+	}
+
 	public Long getId() {
 		return id;
 	}

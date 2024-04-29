@@ -80,25 +80,29 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
   
     @Query(value = " MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
         " MATCH (s)-[:TO]->(c:Conference) " +
-        " WHERE (p.name IS NULL OR  p.name CONTAINS ($name)) " +
+        " WHERE (p.name IS NULL OR  apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)) " +
         " AND (p.contactEmail IS NULL OR p.contactEmail CONTAINS ($email)) " +
         " AND ($active IS NULL OR coalesce(p.active,true) = $active) " +
-        " AND (aut.name IS NULL OR aut.name CONTAINS ($authentication)) " +
+        " AND ($idConference IS NULL OR id(c) = $idConference) " +
+        " AND (aut.name IS NULL OR apoc.text.clean(aut.name) CONTAINS apoc.text.clean($authentication)) " +
         " AND (id(loc) IN $locality OR NOT $locality) " +
-        " RETURN DISTINCT id(p) AS id, toLower(p.name) AS name, p.contactEmail AS email, coalesce(p.active,true) AS active "
+        " WITH id(p) AS id, apoc.text.capitalizeAll(toLower(p.name)) AS name, p.contactEmail AS email, coalesce(p.active,true) AS active" +
+        " RETURN DISTINCT id,  name,  email, active"  
         , countQuery =
         " MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
             "MATCH (s)-[:TO]->(c:Conference) " +
-            " WHERE (p.name IS NULL OR  p.name CONTAINS ($name)) " +
+            " WHERE (p.name IS NULL OR apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)) " +
             " AND (p.contactEmail IS NULL OR p.contactEmail CONTAINS ($email)) " +
             " AND ($active IS NULL OR coalesce(p.active,true) = $active) " +
-            " AND (aut.name IS NULL OR aut.name CONTAINS ($authentication)) " +
+            " AND ($idConference IS NULL OR id(c) = $idConference) " +
+            " AND (aut.name IS NULL OR apoc.text.clean(aut.name) CONTAINS apoc.text.clean($authentication)) " +
             " AND (id(loc) IN $locality OR NOT $locality) " +
-            " WITH DISTINCT id(p) AS id, toLower(p.name) AS name, p.contactEmail AS email, coalesce(p.active,true) AS active " +
+            " WITH DISTINCT id(p) AS id,  p.name AS name, p.contactEmail AS email, coalesce(p.active,true) AS active " +
             " RETURN COUNT(*) "
     )
     Page<PersonKeepCitizenDto> findPersonKeepCitizen(
         @Param("name") String name,
+        @Param("idConference")Long idConference,
         @Param("email") String email,
         @Param("authentication") String authentication,
         @Param("active") Boolean active,
@@ -109,10 +113,11 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
   
     @Query("MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person) " +
         "MATCH (au)<-[:USING]-(log:Login)-[:TO]->(c:Conference) " +
-        "WHERE id(c) = $idConference " +
+        "WHERE ($idConference IS NULL OR id(c) = $idConference) " +
         "AND id(p) = $idPerson " +
+        "AND ( $authName = '' OR  apoc.text.clean(aut.name) = $authName) " +
         "RETURN DISTINCT aut.name AS loginName, count(log) AS acesses")
-    List<LoginAccessDto> findAccessByPerson(@Param("idConference")Long idConference, @Param("idPerson")Long idPerson);
+    List<LoginAccessDto> findAccessByPerson(@Param("idConference")Long idConference, @Param("idPerson")Long idPerson, @Param("authName")String authName);
   
   
     @Query("MATCH (p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
@@ -132,6 +137,11 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
         "WITH {locality: loc.name, localityId: id(loc)} AS tuple " +
         "RETURN tuple.locality AS localityName, tuple.localityId AS localityId")
     LocalityInfoDto findLocalityByPersonAndConference(@Param("idConference")Long idConference, @Param("idPerson")Long idPerson);
+
+    @Query("MATCH (p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) , (s)-[:TO]->(c:Conference) " +
+    "WHERE id(p) = $idPerson " +
+    "RETURN loc.name AS localityName, id(loc) AS localityId order by c.endDate desc limit 1")
+    LocalityInfoDto findLastLocalityByPerson(@Param("idPerson")Long idPerson);
   
   
     @Query("MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
@@ -141,6 +151,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     "RETURN loc.name AS localityName, id(loc) AS localityId")
   LocalityInfoDto findLocalityByPerson(@Param("idConference")Long idConference, @Param("idPerson")Long idPerson);
   
+  //add a alteração para que esse cypher pesquisa apenas as autenticação Google e AcessoCidadao
   @Query(value = "WITH split($name,' ') AS search " +
   "UNWIND search AS s " +
   "WITH s AS s2 " +
@@ -149,8 +160,10 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
   "WHERE ALL(x IN s3 WHERE toLower(p.name) CONTAINS toLower(x)) OR ALL(x IN s3 WHERE p.contactEmail CONTAINS x) " +
   "OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m:Meeting) " +
   "WHERE id(m) = $idMeeting " +
+  "MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)" +
+  "WHERE au.server='AcessoCidadao' OR au.server='Google'" +
   "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
-  "cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf"
+  "cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf,  COLLECT(DISTINCT au.server) AS authName"
   , countQuery = "WITH split($name,' ') AS search " +
   "UNWIND search AS s " +
   "WITH s AS s2 " +
@@ -159,8 +172,10 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
   "WHERE ALL(x IN s3 WHERE toLower(p.name) CONTAINS toLower(x)) OR ALL(x IN s3 WHERE p.contactEmail CONTAINS x) " +
   "OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m:Meeting) " +
   "WHERE id(m) = $idMeeting " +
+  "MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person)" +
+  "WHERE au.server='AcessoCidadao' OR au.server='Google'" +
   "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
-  "cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf " +
+  "cia IS NOT NULL AS checkedIn, cia.time AS checkedInDate, p.cpf AS cpf,  COLLECT(DISTINCT au.server) AS authName " +
   "RETURN COUNT(*)")
   Page<PersonMeetingDto> findPersonForMeeting(@Param("idMeeting")Long idMeeting, @Param("name")String name, Pageable pageable);
   
@@ -245,7 +260,14 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
         "RETURN person, conference, auth, login"
     )
     Person findPersonByParticipeAuthServiceEmailOrCpf(@Param("email")String email, @Param("cpf")String cpf);
-  
+    
+    @Query("MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person) " +
+    "MATCH (au)<-[:USING]-(log:Login)-[:TO]->(c:Conference) " +
+    "WHERE id(p)= $idPerson " +
+    "RETURN DISTINCT c.name "
+    )
+    List<String> findPersonConferenceList(@Param("idPerson")Long idPerson);
+
   
   }
  
