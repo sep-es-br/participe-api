@@ -15,6 +15,8 @@ public class PersonKeepCitizenDto {
 
 	private List<LoginAccessDto> autentication;
 
+	private List<LoginAccessDto> autenticationIcon;
+
 	private Long localityId;
 
 	private String localityName;
@@ -73,6 +75,14 @@ public class PersonKeepCitizenDto {
 
 	public void setAutentication(List<LoginAccessDto> autentication) {
 		this.autentication = autentication;
+	}
+
+	public List<LoginAccessDto> getAutenticationIcon() {
+		return autenticationIcon;
+	}
+
+	public void setAutenticationIcon(List<LoginAccessDto> autenticationIcon) {
+		this.autenticationIcon = autenticationIcon;
 	}
 
 	public Long getLocalityId() {

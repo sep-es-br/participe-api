@@ -761,6 +761,13 @@ public class PersonService {
       }
       element.setAutentication(loginAccessDtos);
 
+      List<LoginAccessDto> loginAccessIconsDtos = personRepository.findAccessByPerson(null,element.getId(),authentication);
+      if (loginAccessIconsDtos == null || loginAccessIconsDtos.isEmpty()) {
+        loginAccessIconsDtos = new ArrayList<>();
+        loginAccessIconsDtos.add(new LoginAccessDto(SERVER, 0L));
+      }
+      element.setAutenticationIcon(loginAccessIconsDtos);
+
       List<String> personConferenceList = personRepository.findPersonConferenceList(element.getId());
       element.setConferencesName(personConferenceList);
 
