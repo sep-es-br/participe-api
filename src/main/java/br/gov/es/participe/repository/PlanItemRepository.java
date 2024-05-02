@@ -43,13 +43,15 @@ public interface PlanItemRepository extends Neo4jRepository<PlanItem, Long> {
        )
        List<PlanItem> findAllByIdPlan( @Param("idPlan") Long idPlan);
      
-       @Query(" MATCH(p:PlanItem)<-[c:COMPOSES]-(pi:PlanItem) " + " WHERE id(p) = $idPlanItem" + " RETURN pi")
+       @Query(" MATCH(p:PlanItem)<-[c:COMPOSES]-(pi:PlanItem) " + 
+       " WHERE id(p) = $idPlanItem" + 
+       " RETURN pi")
        List<PlanItem> findChildren( @Param("idPlanItem") Long idPlanItem);
      
        @Query("MATCH (p:PlanItem) DETACH DELETE p")
        void deleteAll();
      
-       @Query("MATCH (node:PlanItem)<-[:COMPOSES]-(node2:PlanItem)" + "WHERE id(node2)=$idPlanItem" + "RETURN node")
+       @Query("MATCH (node:PlanItem)<-[:COMPOSES]-(node2:PlanItem) WHERE id(node2)=$idPlanItem RETURN node")
        Optional<PlanItem> findFatherPlanItem( @Param("idPlanItem") Long idPlanItem);
      
        @Query("MATCH (c:Comment)-[about:ABOUT]->(planI:PlanItem)-[o:OBEYS]->(si:StructureItem) " + " WHERE id(c)=$idComment"
