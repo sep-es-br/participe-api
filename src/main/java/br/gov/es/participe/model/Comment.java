@@ -23,7 +23,13 @@ public class Comment extends Attend {
 	
 	@Relationship(type = "MODERATED_BY")
 	private Person moderator;
+
+	@Relationship(type = "EVALUATES", direction = Relationship.INCOMING)
+	// private Set<Person> personEvaluator; -> Pode ser mais de um avaliador - Entender melhor
+	private Person proposalEvaluator;
+
 	
+
 	public Comment() {
 	}
 	
@@ -123,4 +129,13 @@ public class Comment extends Attend {
 	public void setModerated(Boolean moderated) {
 		this.moderated = moderated;
 	}
+
+	public Person getProposalEvaluator() {
+		return proposalEvaluator;
+	}
+
+	public void setProposalEvaluator(Person proposalEvaluator) {
+		this.proposalEvaluator = proposalEvaluator;
+	}
+
 }
