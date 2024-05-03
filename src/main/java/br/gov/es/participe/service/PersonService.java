@@ -603,6 +603,8 @@ public class PersonService {
 
     personCitizen.setActive(person.getActive() == null || person.getActive());
 
+    personCitizen.setAuthName(personRepository.findPersonAutenticated(personId));
+
     return personCitizen;
   }
 
