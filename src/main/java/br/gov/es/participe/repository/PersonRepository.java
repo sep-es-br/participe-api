@@ -268,6 +268,11 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     )
     List<String> findPersonConferenceList(@Param("idPerson")Long idPerson);
 
+    @Query("MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person) " +
+    "WHERE id(p)= $idPerson and (au.server='AcessoCidadao' OR au.server='Google') " +
+    "return au.server AS authName " 
+    )
+    List<String> findPersonAutenticated(@Param("idPerson")Long idPerson);
   
   }
  

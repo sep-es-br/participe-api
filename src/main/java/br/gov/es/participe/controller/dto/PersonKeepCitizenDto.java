@@ -37,6 +37,16 @@ public class PersonKeepCitizenDto {
 
 	private List<String> ConferencesName;
 
+	private List<String> authName;
+
+    public List<String> getAuthName() {
+        return authName;
+    }
+
+    public void setAuthName(List<String> authName) {
+        this.authName = authName;
+    }
+
 	public List<String> getConferencesName() {
 		return ConferencesName;
 	}
