@@ -276,14 +276,14 @@ public class PersonService {
           authService.getNumberOfAccesses()
         );
       }
-      authenticatedBy = createAuthenticatedBy(
-          server,
-          person,
-          conference,
-          password,
-          authService,
-          typeAuthentication
-      );
+      // authenticatedBy = createAuthenticatedBy(
+      //     server,
+      //     person,
+      //     conference,
+      //     password,
+      //     authService,
+      //     typeAuthentication
+      // );
     } else {
       if (authService.getNumberOfAccesses() == null) {
         authService.setNumberOfAccesses(0);
@@ -297,21 +297,21 @@ public class PersonService {
         );
         authServiceRepository.save(authService);
       }
-      loadAuthenticatedBy(
-          authenticatedBy,
-          person,
-          serverId,
-          password,
-          conferenceId,
-          typeAuthentication);
+      // loadAuthenticatedBy(
+      //     authenticatedBy,
+      //     person,
+      //     serverId,
+      //     password,
+      //     conferenceId,
+      //     typeAuthentication);
     }
 
-    this.verifyResetPasswordCondition(
-        resetPassword,
-        newAuthService,
-        person,
-        conference,
-        authenticatedBy);
+    // this.verifyResetPasswordCondition(
+    //     resetPassword,
+    //     newAuthService,
+    //     person,
+    //     conference,
+    //     authenticatedBy);
 
     this.verifyMakeLoginCondition(person, makeLogin, authService, conferenceId);
 
@@ -1050,16 +1050,16 @@ public class PersonService {
     PersonDto response = new PersonDto(person);
     
 
-    this.createRelationshipWithAuthService(
-        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
-            .password(personParam.getPassword())
-            .server(SERVER)
-            .serverId(person.getId().toString())
-            .conferenceId(personParam.getSelfDeclaration().getConference())
-            .resetPassword(personParam.isResetPassword())
-            .makeLogin(makeLogin)
-            .typeAuthentication(personParam.getTypeAuthentication())
-            .build());
+    // this.createRelationshipWithAuthService(
+    //     new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+    //         .password(personParam.getPassword())
+    //         .server(SERVER)
+    //         .serverId(person.getId().toString())
+    //         .conferenceId(personParam.getSelfDeclaration().getConference())
+    //         .resetPassword(personParam.isResetPassword())
+    //         .makeLogin(makeLogin)
+    //         .typeAuthentication(personParam.getTypeAuthentication())
+    //         .build());
 
     return ResponseEntity.status(200).body(response);
   }
