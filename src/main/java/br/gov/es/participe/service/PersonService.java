@@ -1050,16 +1050,16 @@ public class PersonService {
     PersonDto response = new PersonDto(person);
     
 
-    this.createRelationshipWithAuthService(
-        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
-            .password(personParam.getPassword())
-            .server(SERVER)
-            .serverId(person.getId().toString())
-            .conferenceId(personParam.getSelfDeclaration().getConference())
-            .resetPassword(personParam.isResetPassword())
-            .makeLogin(makeLogin)
-            .typeAuthentication(personParam.getTypeAuthentication())
-            .build());
+    // this.createRelationshipWithAuthService(
+    //     new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+    //         .password(personParam.getPassword())
+    //         .server(SERVER)
+    //         .serverId(person.getId().toString())
+    //         .conferenceId(personParam.getSelfDeclaration().getConference())
+    //         .resetPassword(personParam.isResetPassword())
+    //         .makeLogin(makeLogin)
+    //         .typeAuthentication(personParam.getTypeAuthentication())
+    //         .build());
 
     return ResponseEntity.status(200).body(response);
   }
