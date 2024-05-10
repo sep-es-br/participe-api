@@ -24,7 +24,7 @@
         <p  style="color: #cdcdcd;">${municipio} - ES</p>
       </div>
       <div style="text-align:center;margin-top: 16px;" >
-      <img src="cid:poweredBy">
+      <img style="width:55%" src="cid:poweredBy">
       </div><br>
   </div>
 </div>
