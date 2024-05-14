@@ -43,7 +43,6 @@ public class EvaluatorService {
 
             return newEvaluator;
         } else {
-            // return null;
             throw new ParticipeServiceException("Já existe uma entidade avaliadora com o guid desta organização.");
         }
     }
