@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.gov.es.participe.controller.dto.EvaluatorParamDto;
+import br.gov.es.participe.exception.EvaluationSectionsNotFoundException;
+import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.model.Evaluator;
 import br.gov.es.participe.repository.EvaluatorRepository;
 
@@ -35,13 +37,32 @@ public class EvaluatorService {
 
         Optional<Evaluator> evaluator = evaluatorRepository.findByOrganizationGuid(evaluatorParamDto.getOrganizationGuid());
 
-        if (!evaluator.isPresent()) {
+        if (evaluator.isEmpty()) {
             Evaluator newEvaluator = new Evaluator(evaluatorParamDto);
             evaluatorRepository.save(newEvaluator);
 
             return newEvaluator;
         } else {
-            return null;
+            // return null;
+            throw new ParticipeServiceException("Já existe uma entidade avaliadora com o guid desta organização.");
         }
+    }
+
+    public Evaluator updateEvaluator(EvaluatorParamDto evaluatorParamDto, Long evalSectId) {
+
+        Evaluator evaluator = evaluatorRepository.findById(evalSectId).orElseThrow(() -> new EvaluationSectionsNotFoundException(evalSectId));
+
+        evaluator.setSections(evaluatorParamDto.getSectionsGuid());
+        evaluator.setServers(evaluatorParamDto.getServersGuid());
+
+        evaluatorRepository.save(evaluator);
+
+        return evaluator;
+    }
+
+    public void deleteEvaluator(Long evalSectId) {
+
+        evaluatorRepository.deleteById(evalSectId);
+
     }
 }
