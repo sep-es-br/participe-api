@@ -79,6 +79,9 @@ public class ConferenceService {
   private ResearchService researchService;
 
   @Autowired
+  private EvaluationService evaluationService;
+  
+  @Autowired
   private StructureService structureService;
 
   @Autowired
@@ -288,6 +291,7 @@ public class ConferenceService {
   }
 
   private void loadAttributesFromParam(Conference conference, ConferenceParamDto param) throws ParseException {
+    this.loadEvaluation(conference, param);
     this.loadResearch(conference, param);
     this.loadSegmentation(conference, param);
     this.loadServe(conference, param);
@@ -301,6 +305,19 @@ public class ConferenceService {
     if (param.getFileParticipation() != null) {
       conference.setFileParticipation(this.fileService.find(param.getFileParticipation().getId()));
     }
+  }
+
+  private void loadEvaluation(Conference conference, ConferenceParamDto param) throws ParseException{
+    Evaluation evaluation = conference.getId() == null ? new Evaluation()
+      : this.evaluationService.findByIdConference(conference.getId()).orElse(new Evaluation());
+
+    evaluation.setBeginDate(param.getEvaluationConfiguration().getBeginDate());
+    evaluation.setEndDate(param.getEvaluationConfiguration().getEndDate());
+    evaluation.setDisplayMode(param.getEvaluationConfiguration().getDisplayMode());
+    evaluation.setEvaluationDisplayStatus(param.getEvaluationConfiguration().getEvaluationDisplayStatus());
+    evaluation.setConference(conference);
+    this.evaluationService.save(evaluation);
+    log.info("Evaluation relacionado a conferenceId={} criado com sucesso com researchId={}", conference.getId(), evaluation.getId());
   }
 
   private void loadResearch(Conference conference, ConferenceParamDto param) throws ParseException {
@@ -657,6 +674,11 @@ public class ConferenceService {
     if(conference.getResearchConfiguration() == null) {
       conference.setResearchConfiguration(this.researchService.findByIdConference(conference.getId())
                                             .map(ResearchConfigurationDto::new).orElse(null));
+    }
+    
+    if(conference.getEvaluationConfiguration() == null) {
+      conference.setEvaluationConfiguration(this.evaluationService.findByIdConference(conference.getId())
+                                            .map(EvaluationConfigurationDto::new).orElse(null));
     }
 
     if(conference.getCustomProperties() == null){
