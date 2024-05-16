@@ -77,6 +77,9 @@ public class Conference extends Entity implements Serializable {
   @Relationship(type = "APPLIES_TO")
   private Research research;
 
+  @Relationship(type = "APPLIES_TO")
+  private Evaluation evaluation;
+
   @Relationship(type = "OCCURS_IN", direction = Relationship.INCOMING)
   private Set<Meeting> meeting;
 
@@ -569,5 +572,13 @@ public class Conference extends Entity implements Serializable {
 
   public void setResearch(Research research) {
     this.research = research;
+  }
+
+  public Evaluation getEvaluation() {
+    return evaluation;
+  }
+
+  public void setEvaluation(Evaluation evaluation) {
+    this.evaluation = evaluation;
   }
 }
