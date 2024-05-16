@@ -55,7 +55,7 @@ public class ConferenceParamDto {
   private Boolean showExternalLinks;
   private ResearchConfigurationParamDto researchConfiguration;
   private ConferenceColorDto customProperties;
-
+  private EvaluationConfigurationDto evaluationConfiguration;
 
   public ConferenceParamDto() {
   }
@@ -97,6 +97,7 @@ public class ConferenceParamDto {
     showStatisticsPanel  = conferenceDto.getShowStatisticsPanel ();
     researchConfiguration = new ResearchConfigurationParamDto(conferenceDto.getResearchConfiguration());
     customProperties = conferenceDto.getCustomProperties();
+    evaluationConfiguration = conferenceDto.getEvaluationConfiguration();
   }
 
   public List<SelfDeclarationDto> getSelfDeclaration() {
@@ -406,6 +407,14 @@ public class ConferenceParamDto {
 
   public void setCustomProperties(ConferenceColorDto customProperties) {
     this.customProperties = customProperties;
+  }
+
+  public EvaluationConfigurationDto getEvaluationConfiguration() {
+    return evaluationConfiguration;
+  }
+
+  public void setEvaluationConfiguration(EvaluationConfigurationDto evaluationConfiguration) {
+    this.evaluationConfiguration = evaluationConfiguration;
   }
 
 }
