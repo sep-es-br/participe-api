@@ -22,10 +22,5 @@ public class EvaluationService {
     public Optional<Evaluation> findByIdConference(Long idConference) {
         return Optional.ofNullable(evaluationRepository.findByConferenceId(idConference));
     }
-
-    // public void update(Evaluation evaluation, EvaluationCofigurationDto evaluationCofigurationDto){
-    //     Date beginDate = evaluationCofigurationDto
-    //     evaluation.setBeginDate(evaluationCofigurationDto.getBeginDate());
-    // }
     
 }
