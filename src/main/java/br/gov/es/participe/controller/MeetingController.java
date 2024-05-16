@@ -245,16 +245,33 @@ public class MeetingController {
 
   @ApiPageable
   @GetMapping("/{meetingId}/participants")
-  public ResponseEntity<Page<PersonMeetingDto>> findMeetingParticipants(@PathVariable Long meetingId,
+  public ResponseEntity<Page<PersonMeetingFilteredDto>> findMeetingParticipants(@PathVariable Long meetingId,
       @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
-      @RequestParam(name = "name", required = false) String name, @ApiIgnore Pageable page) {
-    Page<PersonMeetingDto> personMeetingDto = personService.findPersonsCheckedInOnMeeting(meetingId, localities,
-        name, page);
-    return ResponseEntity.ok().body(personMeetingDto);
+      @RequestParam(name = "name", required = false) String name, 
+      @RequestParam(name = "filter", required = true) String filter,
+      @ApiIgnore Pageable page) {
+
+      // if(filter.isBlank()){
+      //   Page<PersonMeetingDto> personMeetingDto = personService.findPersonsCheckedInOnMeeting(meetingId, localities, name, page);
+      //   return ResponseEntity.ok().body(personMeetingDto);
+      // }
+
+      Page<PersonMeetingFilteredDto> personMeetingFilteredDto = personService.findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filter, page);
+      return ResponseEntity.ok().body(personMeetingFilteredDto);  
+    
   }
 
   @GetMapping("/{meetingId}/participants/total")
-  public ResponseEntity<Long> findMeetingParticipantsNumber(@PathVariable Long meetingId) {
+  public ResponseEntity<Long> findMeetingParticipantsNumber(
+    @PathVariable Long meetingId,
+    @RequestParam(name = "preReg", required = false) Boolean preReg
+  ) {
+
+    if(preReg != null){
+      Long preRegisteredQuantity = personService.findPeoplePreRegisteredQuantityOnMeeting(meetingId);
+      return ResponseEntity.ok().body(preRegisteredQuantity);
+    }
+
     Long participantsQuantity = personService.findPeopleQuantityOnMeeting(meetingId);
     return ResponseEntity.ok().body(participantsQuantity);
   }
