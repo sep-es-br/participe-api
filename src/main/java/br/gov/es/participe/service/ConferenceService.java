@@ -117,7 +117,7 @@ public class ConferenceService {
         auth.getBackgroundImageUrl().setUrl(url + backGroundImage.getId());
       }
 
-      File calendarImage = this.fileService.findRandomackGroundImage(id);
+      File calendarImage = this.fileService.findRandomCalendarImage(id);
       auth.setCalendarImageUrl( calendarImage != null ? new FileDto(conference.getFileAuthentication()) : null);
       if(calendarImage  != null) {
         auth.getCalendarImageUrl().setUrl(url + calendarImage.getId());
