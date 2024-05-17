@@ -251,11 +251,6 @@ public class MeetingController {
       @RequestParam(name = "filter", required = true) String filter,
       @ApiIgnore Pageable page) {
 
-      // if(filter.isBlank()){
-      //   Page<PersonMeetingDto> personMeetingDto = personService.findPersonsCheckedInOnMeeting(meetingId, localities, name, page);
-      //   return ResponseEntity.ok().body(personMeetingDto);
-      // }
-
       Page<PersonMeetingFilteredDto> personMeetingFilteredDto = personService.findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filter, page);
       return ResponseEntity.ok().body(personMeetingFilteredDto);  
     
