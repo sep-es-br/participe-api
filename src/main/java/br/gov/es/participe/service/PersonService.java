@@ -1164,36 +1164,36 @@ public class PersonService {
     return personMeetingDtoPage;
   }
 
-  // public Page<PersonMeetingDto> findPersonsCheckedInOnMeeting(Long meetingId, List<Long> localities, String name,
-  //     Pageable pageable) {
-  //   if (meetingId == null) {
-  //     throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
-  //   }
+  public Page<PersonMeetingDto> findPersonsCheckedInOnMeeting(Long meetingId, List<Long> localities, String name,
+      Pageable pageable) {
+    if (meetingId == null) {
+      throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
+    }
 
-  //   Page<PersonMeetingDto> personMeetingDtoPage = personRepository.findPersonsCheckedInOnMeeting(
-  //       meetingId,
-  //       localities, name, pageable);
+    Page<PersonMeetingDto> personMeetingDtoPage = personRepository.findPersonsCheckedInOnMeeting(
+        meetingId,
+        localities, name, pageable);
 
-  //   personMeetingDtoPage.forEach(element -> {
-  //     LocalityRegionalizableDto localityInfo;
-  //     localityInfo = personRepository.findMostRecentLocality(
-  //         element.getPersonId(),
-  //         meetingId);
-  //     if (localityInfo == null) {
-  //       localityInfo = personRepository.findLocalityIfThereIsNoLogin(
-  //           element.getPersonId(),
-  //           meetingId);
-  //     }
-  //     if (localityInfo != null) {
-  //       element.setLocality(localityInfo.getLocality());
-  //       element.setRegionalizable(localityInfo.getRegionalizable());
-  //       element.setSuperLocalityId(localityInfo.getSuperLocalityId());
-  //       element.setSuperLocality(localityInfo.getSuperLocality());
-  //     }
-  //   });
+    personMeetingDtoPage.forEach(element -> {
+      LocalityRegionalizableDto localityInfo;
+      localityInfo = personRepository.findMostRecentLocality(
+          element.getPersonId(),
+          meetingId);
+      if (localityInfo == null) {
+        localityInfo = personRepository.findLocalityIfThereIsNoLogin(
+            element.getPersonId(),
+            meetingId);
+      }
+      if (localityInfo != null) {
+        element.setLocality(localityInfo.getLocality());
+        element.setRegionalizable(localityInfo.getRegionalizable());
+        element.setSuperLocalityId(localityInfo.getSuperLocalityId());
+        element.setSuperLocality(localityInfo.getSuperLocality());
+      }
+    });
 
-  //   return personMeetingDtoPage;
-  // }
+    return personMeetingDtoPage;
+  }
 
   public Page<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilter(Long meetingId, List<Long> localities, String name, String filter, Pageable pageable) {
     if (meetingId == null) {
@@ -1283,35 +1283,57 @@ public class PersonService {
 
         break;
       
-      // case "prereg_notpres":
-      //   personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(meetingId, localities, name, pageable);
+      case "prereg_notpres":
+        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(meetingId, localities, name, pageable);
 
-      //   personMeetingFilteredDtoPage.forEach(element -> {
-      //     element.setCheckedIn(element.getCheckedInDate() != null);
-      //     element.setPreRegistered(element.getPreRegisteredDate() != null);
+        personMeetingFilteredDtoPage.forEach(element -> {
+          element.setCheckedIn(element.getCheckedInDate() != null);
+          element.setPreRegistered(element.getPreRegisteredDate() != null);
 
-      //     LocalityRegionalizableDto localityInfo;
-      //     localityInfo = personRepository.findMostRecentLocality(
-      //         element.getPersonId(),
-      //         meetingId);
-      //     if (localityInfo == null) {
-      //       localityInfo = personRepository.findLocalityIfThereIsNoLogin(
-      //           element.getPersonId(),
-      //           meetingId);
-      //     }
-      //     if (localityInfo != null) {
-      //       element.setLocality(localityInfo.getLocality());
-      //       element.setRegionalizable(localityInfo.getRegionalizable());
-      //       element.setSuperLocalityId(localityInfo.getSuperLocalityId());
-      //       element.setSuperLocality(localityInfo.getSuperLocality());
-      //     }
-      //   });
+          LocalityRegionalizableDto localityInfo;
+          localityInfo = personRepository.findMostRecentLocality(
+              element.getPersonId(),
+              meetingId);
+          if (localityInfo == null) {
+            localityInfo = personRepository.findLocalityIfThereIsNoLogin(
+                element.getPersonId(),
+                meetingId);
+          }
+          if (localityInfo != null) {
+            element.setLocality(localityInfo.getLocality());
+            element.setRegionalizable(localityInfo.getRegionalizable());
+            element.setSuperLocalityId(localityInfo.getSuperLocalityId());
+            element.setSuperLocality(localityInfo.getSuperLocality());
+          }
+        });
 
-      //   break;
+        break;
         
-      // case "not_prereg_pres":
-      //   personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithCheckInAndNoPreRegistration(meetingId, localities, name, pageable);
-      //   break;
+      case "notprereg_pres":
+        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithCheckInAndNoPreRegistration(meetingId, localities, name, pageable);
+
+        personMeetingFilteredDtoPage.forEach(element -> {
+          element.setCheckedIn(element.getCheckedInDate() != null);
+          element.setPreRegistered(element.getPreRegisteredDate() != null);
+
+          LocalityRegionalizableDto localityInfo;
+          localityInfo = personRepository.findMostRecentLocality(
+              element.getPersonId(),
+              meetingId);
+          if (localityInfo == null) {
+            localityInfo = personRepository.findLocalityIfThereIsNoLogin(
+                element.getPersonId(),
+                meetingId);
+          }
+          if (localityInfo != null) {
+            element.setLocality(localityInfo.getLocality());
+            element.setRegionalizable(localityInfo.getRegionalizable());
+            element.setSuperLocalityId(localityInfo.getSuperLocalityId());
+            element.setSuperLocality(localityInfo.getSuperLocality());
+          }
+        });
+
+        break;
       
       default:
         personMeetingFilteredDtoPage = null;
