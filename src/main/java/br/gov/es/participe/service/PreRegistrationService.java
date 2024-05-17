@@ -47,6 +47,10 @@ public class PreRegistrationService {
         return createdPreRegistration;
     }
 
+    public PreRegistration findByMeetingAndPerson(Long meetingId, Long personId) {
+        return preRegistrationRepository.findByMeetingAndPerson(meetingId, personId);
+    }
+
     private void loadAttributes(PreRegistration preRegistration){
         Meeting meeting = meetingService.find(preRegistration.getMeeting().getId());
         if(meeting != null){
