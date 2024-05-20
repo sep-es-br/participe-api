@@ -363,17 +363,6 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     )
     Long findPeopleQuantityOnMeeting(@Param("idMeeting")Long idMeeting);
 
-
-    @Query(
-        "MATCH (m:Meeting) " + 
-        "WHERE id(m) = $idMeeting " +
-        "MATCH (p:Person)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m) " +
-        "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, " +
-        "p.telephone AS telephone, pr.created AS preRegisteredDate " +
-        "RETURN COUNT(*)"
-    )
-    Long findPeoplePreRegisteredQuantityOnMeeting(@Param("idMeeting") Long idMeeting);
-  
     @Query(
         " MATCH (conf: Conference)<-[:OCCURS_IN]-(m:Meeting)<-[cia:CHECKED_IN_AT]-(p:Person) " +
         " WHERE id(p) = $idPerson AND id(conf) = $idConference " +
