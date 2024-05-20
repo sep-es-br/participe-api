@@ -1,13 +1,22 @@
 package br.gov.es.participe.service;
 
+import br.gov.es.participe.controller.dto.ChildOrganizationsDto;
+import br.gov.es.participe.controller.dto.EvaluatorOrganizationDto;
+import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
+import br.gov.es.participe.controller.dto.EvaluatorServerDto;
+import br.gov.es.participe.controller.dto.OrganizationUnitsDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
 import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
 import br.gov.es.participe.controller.dto.SigninDto;
+import br.gov.es.participe.controller.dto.UnitRolesDto;
+import br.gov.es.participe.exception.ApiAcessoCidadaoException;
+import br.gov.es.participe.exception.ApiOrganogramaException;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.util.ParticipeUtils;
 import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
+
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -17,13 +26,22 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
@@ -40,6 +58,8 @@ public class AcessoCidadaoService {
   private static final String FIELD_ROLE = "role";
   private static final String AUTHORIZATION = "Authorization";
   private static final String BEARER = "Bearer ";
+  private static final String guidGoves = "fe88eb2a-a1f3-4cb1-a684-87317baf5a57";
+  public static final String STATUS = "Status: ";
 
   @Value("${spring.security.oauth2.client.provider.idsvr.issuer-uri}")
   private String issuerUri;
@@ -52,6 +72,9 @@ public class AcessoCidadaoService {
 
   @Value("${api.acessocidadao.uri.webapi}")
   private String acessocidadaoUriWebApi;
+
+  @Value("${api.organograma.uri.webapi}")
+  private String organogramaUriWebapi;
 
   @Value("${api.acessocidadao.uri.token}")
   private String acessocidadaoUriToken;
@@ -83,6 +106,10 @@ public class AcessoCidadaoService {
   @Autowired
   private ParticipeUtils participeUtils;
 
+  private final Logger logger = LogManager.getLogger(AcessoCidadaoService.class);
+
+  ObjectMapper mapper = new ObjectMapper();
+
   public SigninDto authenticate(String token, Long conferenceId) throws IOException {
     Person person = findOrCreatePerson(token, conferenceId, true);
     String authenticationToken = tokenService.generateToken(person, TokenType.AUTHENTICATION);
@@ -104,18 +131,17 @@ public class AcessoCidadaoService {
   private Person findOrCreatePerson(String token, Long conferenceId, boolean persistRelationship) throws IOException {
     JSONObject userInfo = getUserInfo(token);
     String email;
-    if(userInfo.isNull(FIELD_EMAIL)) {
+    if (userInfo.isNull(FIELD_EMAIL)) {
       email = findUserEmailInAcessoCidadao(userInfo.getString(FIELD_SUB_NOVO));
-    }
-    else {
+    } else {
       email = userInfo.getString(FIELD_EMAIL);
     }
     Optional<Person> findPerson = personService.findByLoginEmail(email);
 
-    if(findPerson.isPresent()) {
+    if (findPerson.isPresent()) {
       Person person = findPerson.get();
       person.setAccessToken(token);
-      if(person.getContactEmail() == null) {
+      if (person.getContactEmail() == null) {
         person.setContactEmail(email);
       }
       person.setRoles(getRoles(userInfo));
@@ -127,42 +153,38 @@ public class AcessoCidadaoService {
     return createPerson(userInfo, conferenceId, persistRelationship);
   }
 
-  private Person makeAuthServiceRelationship(Long conferenceId, boolean persistRelationship, JSONObject userInfo, Person person) {
-    if(persistRelationship) {
+  private Person makeAuthServiceRelationship(Long conferenceId, boolean persistRelationship, JSONObject userInfo,
+      Person person) {
+    if (persistRelationship) {
       return personService.createRelationshipWithAuthService(
-        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
-          .server(SERVER)
-          .serverId(userInfo.getString(FIELD_SUB_NOVO))
-          .conferenceId(conferenceId)
-          .resetPassword(false)
-          .makeLogin(true)
-          .build()
-      );
-    }
-    else {
+          new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+              .server(SERVER)
+              .serverId(userInfo.getString(FIELD_SUB_NOVO))
+              .conferenceId(conferenceId)
+              .resetPassword(false)
+              .makeLogin(true)
+              .build());
+    } else {
       return personService.createRelationshipWithAuthServiceWithoutPersist(
-        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
-          .server(SERVER)
-          .serverId(userInfo.getString(FIELD_SUB_NOVO))
-          .conferenceId(conferenceId)
-          .resetPassword(false)
-          .makeLogin(true)
-          .build()
-      );
+          new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+              .server(SERVER)
+              .serverId(userInfo.getString(FIELD_SUB_NOVO))
+              .conferenceId(conferenceId)
+              .resetPassword(false)
+              .makeLogin(true)
+              .build());
     }
   }
 
   private Set<String> getRoles(JSONObject userInfo) throws IOException {
     Set<String> roles = new HashSet<>();
-    if(!userInfo.isNull(FIELD_ROLE)) {
-      if(userInfo.get(FIELD_ROLE).toString().contains("[")) {
+    if (!userInfo.isNull(FIELD_ROLE)) {
+      if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
         userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));
-      }
-      else {
+      } else {
         roles.add(userInfo.getString(FIELD_ROLE));
       }
-    }
-    else {
+    } else {
       return findAllRoles(userInfo.getString(FIELD_SUB_NOVO));
     }
     return roles;
@@ -172,21 +194,18 @@ public class AcessoCidadaoService {
     Person person = new Person();
     person.setName(userInfo.getString("apelido"));
     person.setAccessToken(userInfo.get("accessToken").toString());
-    if(!userInfo.isNull(FIELD_ROLE)) {
-      if(userInfo.get(FIELD_ROLE).toString().contains("[")) {
+    if (!userInfo.isNull(FIELD_ROLE)) {
+      if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
         userInfo.getJSONArray(FIELD_ROLE).forEach(role -> person.getRoles().add((String) role));
-      }
-      else {
+      } else {
         person.getRoles().add(userInfo.getString(FIELD_ROLE));
       }
-    }
-    else {
+    } else {
       person.setRoles(findAllRoles(userInfo.getString(FIELD_SUB_NOVO)));
     }
-    if(userInfo.isNull(FIELD_EMAIL)) {
+    if (userInfo.isNull(FIELD_EMAIL)) {
       person.setContactEmail(findUserEmailInAcessoCidadao(userInfo.getString(FIELD_SUB_NOVO)));
-    }
-    else {
+    } else {
       person.setContactEmail(userInfo.getString(FIELD_EMAIL));
     }
     return makeAuthServiceRelationship(conferenceId, persistRelationship, userInfo, person);
@@ -197,8 +216,8 @@ public class AcessoCidadaoService {
     HttpPost postRequest = new HttpPost(userInfoUri);
     postRequest.addHeader(AUTHORIZATION, BEARER + token);
 
-    try(CloseableHttpResponse response = HttpClients.createDefault().execute(postRequest)) {
-      if(response.getStatusLine().getStatusCode() == 200) {
+    try (CloseableHttpResponse response = HttpClients.createDefault().execute(postRequest)) {
+      if (response.getStatusLine().getStatusCode() == 200) {
         return new JSONObject(EntityUtils.toString(response.getEntity()));
       }
     }
@@ -209,20 +228,20 @@ public class AcessoCidadaoService {
   public List<PersonDto> listPersonsByPerfil(ProfileType profileType, String name, String email) throws IOException {
     List<PersonDto> personList = new ArrayList<>();
     String token = getClientToken();
-    if(token != null) {
+    if (token != null) {
       String uri = acessocidadaoUriWebApi.concat("sistema/").concat(system);
-      if(profileType != null) {
+      if (profileType != null) {
         uri = uri.concat("/perfil/").concat(getProfileId(profileType));
 
       }
       uri = uri.concat("/usuarios");
       HttpGet get = new HttpGet(uri);
       get.addHeader(AUTHORIZATION, BEARER + token);
-      try(CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
-        if(response.getStatusLine().getStatusCode() == 200) {
+      try (CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
+        if (response.getStatusLine().getStatusCode() == 200) {
           JSONArray result = new JSONArray(EntityUtils.toString(response.getEntity()));
           result.forEach(element -> {
-            if(element instanceof JSONObject) {
+            if (element instanceof JSONObject) {
               JSONObject obj = (JSONObject) element;
               PersonDto person = new PersonDto();
               person.setSub(obj.getString("Sub"));
@@ -235,12 +254,11 @@ public class AcessoCidadaoService {
       }
     }
 
-    if(!personList.isEmpty()) {
+    if (!personList.isEmpty()) {
       personList.removeIf(
-        p -> !participeUtils.normalize(p.getName()).contains(participeUtils.normalize(name))
-             || !participeUtils.normalize(p.getContactEmail()).contains(
-          participeUtils.normalize(email))
-      );
+          p -> !participeUtils.normalize(p.getName()).contains(participeUtils.normalize(name))
+              || !participeUtils.normalize(p.getContactEmail()).contains(
+                  participeUtils.normalize(email)));
     }
 
     return personList;
@@ -249,21 +267,21 @@ public class AcessoCidadaoService {
   private Set<String> findAllRoles(String sub) throws IOException {
     String token = getClientToken();
     Set<String> roles = new HashSet<>();
-    if(token != null) {
-      for(ProfileType profileType : ProfileType.values()) {
+    if (token != null) {
+      for (ProfileType profileType : ProfileType.values()) {
         String uri = acessocidadaoUriWebApi.concat("sistema/")
-          .concat(system)
-          .concat("/perfil/")
-          .concat(getProfileId(profileType))
-          .concat("/usuarios");
+            .concat(system)
+            .concat("/perfil/")
+            .concat(getProfileId(profileType))
+            .concat("/usuarios");
         HttpGet get = new HttpGet(uri);
         get.addHeader(AUTHORIZATION, BEARER + token);
-        try(CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
-          if(response.getStatusLine().getStatusCode() == 200) {
+        try (CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
+          if (response.getStatusLine().getStatusCode() == 200) {
             JSONArray result = new JSONArray(EntityUtils.toString(response.getEntity()));
             result.forEach(element -> {
-              if(element instanceof JSONObject && ((JSONObject) element).getString("Sub").equals(
-                sub)) {
+              if (element instanceof JSONObject && ((JSONObject) element).getString("Sub").equals(
+                  sub)) {
                 roles.add(getProfileName(profileType));
               }
             });
@@ -280,12 +298,12 @@ public class AcessoCidadaoService {
 
   private String findUserEmailInAcessoCidadao(String sub) throws IOException {
     String token = getClientToken();
-    if(token != null) {
+    if (token != null) {
       String uri = acessocidadaoUriWebApi.concat("cidadao/").concat(sub).concat("/email");
       HttpGet get = new HttpGet(uri);
       get.addHeader(AUTHORIZATION, BEARER + token);
-      try(CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
-        if(response.getStatusLine().getStatusCode() == 200) {
+      try (CloseableHttpResponse response = HttpClients.createDefault().execute(get)) {
+        if (response.getStatusLine().getStatusCode() == 200) {
           JSONObject result = new JSONObject(EntityUtils.toString(response.getEntity()));
           return result.getString(FIELD_EMAIL);
         }
@@ -303,13 +321,12 @@ public class AcessoCidadaoService {
     urlParameters.add(new BasicNameValuePair("grant_type", grantType));
     urlParameters.add(new BasicNameValuePair("scope", scopes));
     postRequest.addHeader(
-      AUTHORIZATION,
-      "Basic " + Base64.getEncoder().encodeToString(basicToken.getBytes())
-    );
+        AUTHORIZATION,
+        "Basic " + Base64.getEncoder().encodeToString(basicToken.getBytes()));
 
     postRequest.setEntity(new UrlEncodedFormEntity(urlParameters, Consts.UTF_8));
-    try(CloseableHttpResponse response = HttpClients.createDefault().execute(postRequest)) {
-      if(response.getStatusLine().getStatusCode() == 200) {
+    try (CloseableHttpResponse response = HttpClients.createDefault().execute(postRequest)) {
+      if (response.getStatusLine().getStatusCode() == 200) {
         JSONObject result = new JSONObject(EntityUtils.toString(response.getEntity()));
         return result.getString("access_token");
       }
@@ -319,7 +336,7 @@ public class AcessoCidadaoService {
   }
 
   private String getProfileId(ProfileType profileType) {
-    switch(profileType) {
+    switch (profileType) {
       case ADMINISTRATOR:
         return administratorProfileId;
       case MODERATOR:
@@ -333,7 +350,7 @@ public class AcessoCidadaoService {
   }
 
   private String getProfileName(ProfileType profileType) {
-    switch(profileType) {
+    switch (profileType) {
       case ADMINISTRATOR:
         return "Administrator";
       case MODERATOR:
@@ -350,29 +367,166 @@ public class AcessoCidadaoService {
 
     JSONObject user = this.getUserInfo(token);
 
-    Optional<Person> personAlreadyUsingSocialLogin = this.personService.havePersonWithLoginEmail(user.getString(FIELD_EMAIL), SERVER, null);
+    Optional<Person> personAlreadyUsingSocialLogin = this.personService
+        .havePersonWithLoginEmail(user.getString(FIELD_EMAIL), SERVER, null);
 
-    if(personAlreadyUsingSocialLogin.isPresent()) {
+    if (personAlreadyUsingSocialLogin.isPresent()) {
       return new PersonProfileSignInDto(
-        personAlreadyUsingSocialLogin.get(),
-        SERVER,
-        user.getString(FIELD_EMAIL),
-        user.getString(FIELD_SUB_NOVO),
-        "oauth",
-        true,
-        personAlreadyUsingSocialLogin.get().getId()
-      );
+          personAlreadyUsingSocialLogin.get(),
+          SERVER,
+          user.getString(FIELD_EMAIL),
+          user.getString(FIELD_SUB_NOVO),
+          "oauth",
+          true,
+          personAlreadyUsingSocialLogin.get().getId());
     }
 
     Person person = findOrCreatePerson(token, conferenceId, false);
 
     return new PersonProfileSignInDto(
-      person,
-      SERVER,
-      user.getString(FIELD_EMAIL),
-      user.getString(FIELD_SUB_NOVO),
-      "oauth"
+        person,
+        SERVER,
+        user.getString(FIELD_EMAIL),
+        user.getString(FIELD_SUB_NOVO),
+        "oauth"
 
     );
   }
+
+  public List<EvaluatorServerDto> findUnitRoles(String guid) throws IOException {
+    String token = getClientToken();
+    String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/papeis");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) { 
+        List<EvaluatorServerDto> evaluatorServerDtos = new ArrayList<>();
+        List<UnitRolesDto> unitRolesDtos = mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {
+        });
+
+        unitRolesDtos.iterator().forEachRemaining((role) -> {
+          EvaluatorServerDto newEvalServerDto = new EvaluatorServerDto(role.getGuid(), role.getNome(), role.getAgentePublicoNome(), role.getAgentePublicoSub());
+          evaluatorServerDtos.add(newEvalServerDto);
+        });
+
+        return evaluatorServerDtos;
+      }
+      logger.error("Não foi possível buscar a lista de papéis da unidade.");
+      throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Erro ao buscar lista de papéis da unidade.");
+    }
+  }
+
+  public List<EvaluatorSectionDto> findListOfOrganizationUnits(String guid) throws IOException {
+    String token = getClientToken();
+    String url = organogramaUriWebapi.concat("/unidades/organizacao/" + guid);
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        List<EvaluatorSectionDto> evaluatorSectionDtos = new ArrayList<>();
+        List<OrganizationUnitsDto> organizationUnitsDtos = mapper.readValue(response.body(), new TypeReference<List<OrganizationUnitsDto>>() {
+        });
+
+        organizationUnitsDtos.iterator().forEachRemaining((unit) -> {
+          EvaluatorSectionDto newEvalSectionDto = new EvaluatorSectionDto(unit.getGuid(), unit.getNome());
+          evaluatorSectionDtos.add(newEvalSectionDto);
+        });
+
+        return evaluatorSectionDtos;
+
+      }
+      logger.error("Não foi possível buscar a lista de unidades da organização.");
+      throw new ApiOrganogramaException(STATUS + response.statusCode());
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiOrganogramaException("Erro ao buscar lista de unidades da organização.");
+    }
+  }
+
+  public List<EvaluatorOrganizationDto> findForOrganizations() throws IOException {
+    String token = getClientToken();
+    String url = organogramaUriWebapi.concat("/organizacoes/" + guidGoves + "/filhas");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        List<EvaluatorOrganizationDto> evaluatorOrganizationDto = new ArrayList<>();
+
+        List<ChildOrganizationsDto> childOrganizationsDtos =  mapper.readValue(response.body(), new TypeReference<List<ChildOrganizationsDto>>() {
+        });
+
+        childOrganizationsDtos.iterator().forEachRemaining((childOrg) -> {
+          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), childOrg.getRazaoSocial());
+          evaluatorOrganizationDto.add(newEvalOrgDto);
+        });
+
+        return evaluatorOrganizationDto;
+      }
+      logger.error("Não foi possível buscar a lista de organizações (Filhas do GOVES).");
+      throw new ApiOrganogramaException(STATUS + response.statusCode());
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
+    }
+  }
+
+  public List<EvaluatorOrganizationDto> findForOrganization(String guid) throws IOException {
+    String token = getClientToken();
+    String url = organogramaUriWebapi.concat("/organizacoes/" + guid + "/info");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        List<EvaluatorOrganizationDto> evaluatorOrganizationDto = new ArrayList<>();
+
+        List<ChildOrganizationsDto> childOrganizationsDtos =  mapper.readValue(response.body(), new TypeReference<List<ChildOrganizationsDto>>() {
+        });
+
+        childOrganizationsDtos.iterator().forEachRemaining((childOrg) -> {
+          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), childOrg.getRazaoSocial());
+          evaluatorOrganizationDto.add(newEvalOrgDto);
+        });
+
+        return evaluatorOrganizationDto;
+      }
+      logger.error("Não foi possível buscar a lista de organizações (Filhas do GOVES).");
+      throw new ApiOrganogramaException(STATUS + response.statusCode());
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
+    }
+  }
+
+
 }
