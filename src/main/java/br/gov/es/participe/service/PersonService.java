@@ -1258,10 +1258,6 @@ public class PersonService {
     return personRepository.findPeopleQuantityOnMeeting(meetingId);
   }
 
-  public Long findPeoplePreRegisteredQuantityOnMeeting(Long meetingId) {
-    return personRepository.findPeoplePreRegisteredQuantityOnMeeting(meetingId);
-  }
-
   public Optional<Person> findPersonIfParticipatingOnMeetingPresentially(Long personId, Date date, Long conferenceId) {
     return personRepository.findPersonIfParticipatingOnMeetingPresentially(personId, date, conferenceId);
   }
