@@ -258,14 +258,8 @@ public class MeetingController {
 
   @GetMapping("/{meetingId}/participants/total")
   public ResponseEntity<Long> findMeetingParticipantsNumber(
-    @PathVariable Long meetingId,
-    @RequestParam(name = "preReg", required = false) Boolean preReg
+    @PathVariable Long meetingId
   ) {
-
-    if(preReg != null){
-      Long preRegisteredQuantity = personService.findPeoplePreRegisteredQuantityOnMeeting(meetingId);
-      return ResponseEntity.ok().body(preRegisteredQuantity);
-    }
 
     Long participantsQuantity = personService.findPeopleQuantityOnMeeting(meetingId);
     return ResponseEntity.ok().body(participantsQuantity);
