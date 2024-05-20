@@ -1207,138 +1207,49 @@ public class PersonService {
        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithCheckIn(
          meetingId,
          localities, name, pageable);
-
-        personMeetingFilteredDtoPage.forEach(element -> {
-          element.setCheckedIn(element.getCheckedInDate() != null);
-          element.setPreRegistered(element.getPreRegisteredDate() != null);
-
-          LocalityRegionalizableDto localityInfo;
-          localityInfo = personRepository.findMostRecentLocality(
-              element.getPersonId(),
-              meetingId);
-          if (localityInfo == null) {
-            localityInfo = personRepository.findLocalityIfThereIsNoLogin(
-                element.getPersonId(),
-                meetingId);
-          }
-          if (localityInfo != null) {
-            element.setLocality(localityInfo.getLocality());
-            element.setRegionalizable(localityInfo.getRegionalizable());
-            element.setSuperLocalityId(localityInfo.getSuperLocalityId());
-            element.setSuperLocality(localityInfo.getSuperLocality());
-          }
-        });
-
         break;
 
       case "prereg":
         personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistration(meetingId, localities, name, pageable);
-
-        personMeetingFilteredDtoPage.forEach(element -> {
-          element.setCheckedIn(element.getCheckedInDate() != null);
-          element.setPreRegistered(element.getPreRegisteredDate() != null);
-
-          LocalityRegionalizableDto localityInfo;
-          localityInfo = personRepository.findMostRecentLocality(
-              element.getPersonId(),
-              meetingId);
-          if (localityInfo == null) {
-            localityInfo = personRepository.findLocalityIfThereIsNoLogin(
-                element.getPersonId(),
-                meetingId);
-          }
-          if (localityInfo != null) {
-            element.setLocality(localityInfo.getLocality());
-            element.setRegionalizable(localityInfo.getRegionalizable());
-            element.setSuperLocalityId(localityInfo.getSuperLocalityId());
-            element.setSuperLocality(localityInfo.getSuperLocality());
-          }
-        });
-
         break;
       
       case "prereg_pres":
         personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistrationAndCheckIn(meetingId, localities, name, pageable);
-
-        personMeetingFilteredDtoPage.forEach(element -> {
-          element.setCheckedIn(element.getCheckedInDate() != null);
-          element.setPreRegistered(element.getPreRegisteredDate() != null);
-
-          LocalityRegionalizableDto localityInfo;
-          localityInfo = personRepository.findMostRecentLocality(
-              element.getPersonId(),
-              meetingId);
-          if (localityInfo == null) {
-            localityInfo = personRepository.findLocalityIfThereIsNoLogin(
-                element.getPersonId(),
-                meetingId);
-          }
-          if (localityInfo != null) {
-            element.setLocality(localityInfo.getLocality());
-            element.setRegionalizable(localityInfo.getRegionalizable());
-            element.setSuperLocalityId(localityInfo.getSuperLocalityId());
-            element.setSuperLocality(localityInfo.getSuperLocality());
-          }
-        });
-
         break;
       
       case "prereg_notpres":
         personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(meetingId, localities, name, pageable);
-
-        personMeetingFilteredDtoPage.forEach(element -> {
-          element.setCheckedIn(element.getCheckedInDate() != null);
-          element.setPreRegistered(element.getPreRegisteredDate() != null);
-
-          LocalityRegionalizableDto localityInfo;
-          localityInfo = personRepository.findMostRecentLocality(
-              element.getPersonId(),
-              meetingId);
-          if (localityInfo == null) {
-            localityInfo = personRepository.findLocalityIfThereIsNoLogin(
-                element.getPersonId(),
-                meetingId);
-          }
-          if (localityInfo != null) {
-            element.setLocality(localityInfo.getLocality());
-            element.setRegionalizable(localityInfo.getRegionalizable());
-            element.setSuperLocalityId(localityInfo.getSuperLocalityId());
-            element.setSuperLocality(localityInfo.getSuperLocality());
-          }
-        });
-
         break;
         
       case "notprereg_pres":
         personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithCheckInAndNoPreRegistration(meetingId, localities, name, pageable);
-
-        personMeetingFilteredDtoPage.forEach(element -> {
-          element.setCheckedIn(element.getCheckedInDate() != null);
-          element.setPreRegistered(element.getPreRegisteredDate() != null);
-
-          LocalityRegionalizableDto localityInfo;
-          localityInfo = personRepository.findMostRecentLocality(
-              element.getPersonId(),
-              meetingId);
-          if (localityInfo == null) {
-            localityInfo = personRepository.findLocalityIfThereIsNoLogin(
-                element.getPersonId(),
-                meetingId);
-          }
-          if (localityInfo != null) {
-            element.setLocality(localityInfo.getLocality());
-            element.setRegionalizable(localityInfo.getRegionalizable());
-            element.setSuperLocalityId(localityInfo.getSuperLocalityId());
-            element.setSuperLocality(localityInfo.getSuperLocality());
-          }
-        });
-
         break;
       
       default:
         personMeetingFilteredDtoPage = null;
         break;
     }
+
+    personMeetingFilteredDtoPage.forEach(element -> {
+      element.setCheckedIn(element.getCheckedInDate() != null);
+      element.setPreRegistered(element.getPreRegisteredDate() != null);
+
+      LocalityRegionalizableDto localityInfo;
+      localityInfo = personRepository.findMostRecentLocality(
+          element.getPersonId(),
+          meetingId);
+      if (localityInfo == null) {
+        localityInfo = personRepository.findLocalityIfThereIsNoLogin(
+            element.getPersonId(),
+            meetingId);
+      }
+      if (localityInfo != null) {
+        element.setLocality(localityInfo.getLocality());
+        element.setRegionalizable(localityInfo.getRegionalizable());
+        element.setSuperLocalityId(localityInfo.getSuperLocalityId());
+        element.setSuperLocality(localityInfo.getSuperLocality());
+      }
+    });
 
     return personMeetingFilteredDtoPage;
   }
