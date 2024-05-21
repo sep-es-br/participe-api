@@ -10,7 +10,7 @@ public class EvaluatorParamDto {
     @NotBlank
     private String sectionsGuid;
     
-    private String serversGuid;
+    private String rolesGuid;
     
     public EvaluatorParamDto() {
 
@@ -28,12 +28,12 @@ public class EvaluatorParamDto {
     public void setSectionsGuid(String sectionsGuid) {
         this.sectionsGuid = sectionsGuid;
     }
-    public String getServersGuid() {
-        return serversGuid;
+    public String getRolesGuid() {
+        return rolesGuid;
     }
-    public void setServersGuid(String serversGuid) {
+    public void setRolesGuid(String rolesGuid) {
 
-        this.serversGuid = serversGuid;
+        this.rolesGuid = rolesGuid;
 
     } 
 }

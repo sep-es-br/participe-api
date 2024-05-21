@@ -9,12 +9,12 @@ public class EvaluatorDto extends EvaluatorParamDto {
     
     }
 
-    public EvaluatorDto(Evaluator evaluator) {
-        this.id = evaluator.getId();
-        this.setOrganizationGuid(evaluator.getOrganization());
-        this.setSectionsGuid(evaluator.getSections());
-        this.setServersGuid(evaluator.getServers());
-    }
+    // public EvaluatorDto(Evaluator evaluator) {
+    //     this.id = evaluator.getId();
+    //     this.setOrganizationGuid(evaluator.getOrganization());
+    //     this.setSectionsGuid(evaluator.getSections());
+    //     this.setServersGuid(evaluator.getServers());
+    // }
 
     public Long getId() {
         return id;

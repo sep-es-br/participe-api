@@ -411,7 +411,7 @@ public class AcessoCidadaoService {
         });
 
         unitRolesDtos.iterator().forEachRemaining((role) -> {
-          EvaluatorServerDto newEvalServerDto = new EvaluatorServerDto(role.getGuid(), role.getNome(), role.getAgentePublicoNome(), role.getAgentePublicoSub());
+          EvaluatorServerDto newEvalServerDto = new EvaluatorServerDto(role.getGuid(), (role.getAgentePublicoNome() + " - " + role.getNome()), role.getAgentePublicoNome(), role.getAgentePublicoSub());
           evaluatorServerDtos.add(newEvalServerDto);
         });
 
@@ -444,7 +444,7 @@ public class AcessoCidadaoService {
         });
 
         organizationUnitsDtos.iterator().forEachRemaining((unit) -> {
-          EvaluatorSectionDto newEvalSectionDto = new EvaluatorSectionDto(unit.getGuid(), unit.getNome());
+          EvaluatorSectionDto newEvalSectionDto = new EvaluatorSectionDto(unit.getGuid(), (unit.getNomeCurto() + " - " + unit.getNome()));
           evaluatorSectionDtos.add(newEvalSectionDto);
         });
 
@@ -479,7 +479,7 @@ public class AcessoCidadaoService {
         });
 
         childOrganizationsDtos.iterator().forEachRemaining((childOrg) -> {
-          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), childOrg.getRazaoSocial());
+          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), (childOrg.getNomeFantasia() + " - " + childOrg.getSigla()));
           evaluatorOrganizationDto.add(newEvalOrgDto);
         });
 
