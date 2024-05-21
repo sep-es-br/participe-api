@@ -1,6 +1,6 @@
 package br.gov.es.participe.controller.dto;
 
-public class EvaluatorServerDto extends EvaluatorDto {
+public class EvaluatorServerDto extends EvaluatorDataDto {
 
     private String agentePublicoNome;
     private String agentePublicoSub;
