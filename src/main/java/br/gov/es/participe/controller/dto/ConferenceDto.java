@@ -2,7 +2,6 @@ package br.gov.es.participe.controller.dto;
 
 
 import br.gov.es.participe.model.Conference;
-import br.gov.es.participe.model.ConferenceColor;
 import br.gov.es.participe.model.StructureItem;
 import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
@@ -62,6 +61,8 @@ public class ConferenceDto {
 
   private ConferenceColorDto customProperties;
 
+  private EvaluationConfigurationDto evaluationConfiguration;
+
   public ConferenceDto() {
   }
 
@@ -94,6 +95,8 @@ public class ConferenceDto {
     }
 
     this.researchConfiguration = conference.getResearch() != null ? new ResearchConfigurationDto(conference.getResearch()) : null;
+
+    this.evaluationConfiguration = conference.getEvaluation() != null ? new EvaluationConfigurationDto(conference.getEvaluation()) : null;
 
     this.description = conference.getDescription();
     this.id = conference.getId();
@@ -490,6 +493,14 @@ public class ConferenceDto {
 
   public void setCustomProperties(ConferenceColorDto customProperties) {
     this.customProperties = customProperties;
+  }
+
+  public EvaluationConfigurationDto getEvaluationConfiguration() {
+    return evaluationConfiguration;
+  }
+
+  public void setEvaluationConfiguration(EvaluationConfigurationDto evaluationConfiguration) {
+    this.evaluationConfiguration = evaluationConfiguration;
   }
 
 }
