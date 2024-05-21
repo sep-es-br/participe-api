@@ -58,7 +58,7 @@ public class AcessoCidadaoService {
   private static final String FIELD_ROLE = "role";
   private static final String AUTHORIZATION = "Authorization";
   private static final String BEARER = "Bearer ";
-  private static final String guidGoves = "fe88eb2a-a1f3-4cb1-a684-87317baf5a57";
+  private static final String GUIDGOVES = "fe88eb2a-a1f3-4cb1-a684-87317baf5a57";
   public static final String STATUS = "Status: ";
 
   @Value("${spring.security.oauth2.client.provider.idsvr.issuer-uri}")
