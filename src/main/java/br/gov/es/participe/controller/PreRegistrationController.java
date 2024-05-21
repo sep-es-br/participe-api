@@ -98,14 +98,7 @@ public class PreRegistrationController {
 
     @GetMapping("/{meetingId}/{personId}") 
     public ResponseEntity getPreRegistration( @PathVariable Long meetingId, @PathVariable Long personId) throws WriterException, IOException, MessagingException  { 
-      Meeting meeting = meetingService.find(meetingId); 
-      Person person = personService.find(personId); 
-      PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), person.getId());
-      if (preRegistration != null) { 
-        byte[] imageQR = qrCodeService.generateQRCode(preRegistration.getId().toString(), 300, 300); 
-        return ResponseEntity.ok().body(new PreRegistrationDto(preRegistration, imageQR)); 
-      } 
-      return ResponseEntity.noContent().build(); 
+      return ResponseEntity.ok().body(preRegistrationService.getPreRegistrationByMeetingAndPerson(meetingId, personId));
     }
 
 }

@@ -1,8 +1,11 @@
 package br.gov.es.participe.service;
 
+import br.gov.es.participe.controller.dto.PreRegistrationDto;
+import br.gov.es.participe.exception.ErrorHandlingQRCodeException;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +23,8 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.zxing.WriterException;
+
 @Service
 public class PreRegistrationService {
 
@@ -31,6 +36,9 @@ public class PreRegistrationService {
 
     @Autowired
     private PersonService personService;
+
+    @Autowired
+    private QRCodeService qrCodeService;
 
     public PreRegistration save(PreRegistration preRegistration){
 
@@ -109,5 +117,18 @@ public class PreRegistrationService {
 
         return data;
 
+    }
+
+    public PreRegistrationDto getPreRegistrationByMeetingAndPerson(Long meetingId, Long personId){
+            Meeting meeting = meetingService.find(meetingId);
+            Person person = personService.find(personId);
+            PreRegistration preRegistration = preRegistrationRepository.findByMeetingAndPerson(meeting.getId(), person.getId());
+            byte[] imageQR;
+            try {
+                imageQR = qrCodeService.generateQRCode(preRegistration.getId().toString(), 300, 300);
+            } catch (WriterException | IOException e) {
+                throw new ErrorHandlingQRCodeException("Erro ao tentar recuperar seu pré-credenciamento. ");
+            }
+            return new PreRegistrationDto(preRegistration, imageQR);
     }
 }

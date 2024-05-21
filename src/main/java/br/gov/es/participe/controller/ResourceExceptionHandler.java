@@ -1,5 +1,6 @@
 package br.gov.es.participe.controller;
 
+import br.gov.es.participe.exception.ErrorHandlingQRCodeException;
 import br.gov.es.participe.util.dto.MessageDto;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +49,11 @@ public class ResourceExceptionHandler {
   public ResponseEntity<MessageDto> handleException(RuntimeException e, HttpServletRequest req) {
     log.error("Error", e);
     return ResponseEntity.status(500).body(new MessageDto(500, e.getMessage()));
+  }
+
+  @ExceptionHandler(ErrorHandlingQRCodeException.class)
+  public ResponseEntity<MessageDto> handleException(ErrorHandlingQRCodeException e, HttpServletRequest req) {
+    log.error("Error", e);
+    return ResponseEntity.status(400).body(new MessageDto(400, e.getMessage()));
   }
 }
