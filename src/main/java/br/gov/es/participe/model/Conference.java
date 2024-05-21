@@ -56,6 +56,9 @@ public class Conference extends Entity implements Serializable {
   @Relationship(type = "FEATURES_PARTICIPATION_IMAGE")
   private File fileParticipation;
 
+  @Relationship(type = "FEATURES_FOOTER_IMAGE")
+  private File fileFooter;
+
   @Relationship(type = "FEATURES_AUTHENTICATION_IMAGE")
   private File fileAuthentication;
 
@@ -123,6 +126,10 @@ public class Conference extends Entity implements Serializable {
       this.fileParticipation = new File(conferenceDto.getFileParticipation());
     }
 
+    if(conferenceDto.getFileFooter() != null && conferenceDto.getFileFooter().getId() != null) {
+      this.fileFooter = new File(conferenceDto.getFileFooter());
+    }
+
     if(conferenceDto.getFileAuthentication() != null && conferenceDto.getFileAuthentication().getId() != null) {
       this.fileAuthentication = new File(conferenceDto.getFileAuthentication());
     }
@@ -171,6 +178,11 @@ public class Conference extends Entity implements Serializable {
     if(conferenceParamDto.getFileParticipation() != null
        && conferenceParamDto.getFileParticipation().getId() != null) {
       this.fileParticipation = new File(conferenceParamDto.getFileParticipation());
+    }
+
+    if(conferenceParamDto.getFileFooter() != null
+       && conferenceParamDto.getFileFooter().getId() != null) {
+      this.fileFooter = new File(conferenceParamDto.getFileFooter());
     }
 
     if(conferenceParamDto.getFileAuthentication() != null
@@ -410,6 +422,14 @@ public class Conference extends Entity implements Serializable {
 
   public void setFileAuthentication(File fileAuthentication) {
     this.fileAuthentication = fileAuthentication;
+  }
+
+  public File getFileFooter() {
+    return fileFooter;
+  }
+
+  public void setFileFooter(File fileFooter) {
+    this.fileFooter = fileFooter;
   }
 
   public LocalityType getLocalityType() {

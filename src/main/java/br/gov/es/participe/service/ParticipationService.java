@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -211,6 +213,19 @@ public class ParticipationService {
     }
 
     return header;
+  }
+
+  public Map<String, String> footerImage (Long id, UriComponentsBuilder uriComponentsBuilder) {
+    Map<String, String> footerImage = new HashMap<>();
+    
+    Conference conference = conferenceService.find(id);
+
+    String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
+    if (conference.getFileFooter() != null) {
+      footerImage.put("footerImage", url + conference.getFileFooter().getId());
+    }
+
+    return footerImage;
   }
 
   public ConferenceDto getConferenceDto(Long id, UriComponentsBuilder uriComponentsBuilder) {
