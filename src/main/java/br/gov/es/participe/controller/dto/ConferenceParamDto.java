@@ -32,6 +32,7 @@ public class ConferenceParamDto {
   private String subtitleRegionalization;
   private FileDto fileParticipation;
   private FileDto fileAuthentication;
+  private FileDto fileFooter;
   private LocalityTypeDto localityType;
   private List<MeetingDto> meeting;
   private List<SelfDeclarationDto> selfDeclaration;
@@ -74,6 +75,7 @@ public class ConferenceParamDto {
     titleRegionalization = conferenceDto.getTitleRegionalization();
     subtitleRegionalization = conferenceDto.getSubtitleRegionalization();
     fileParticipation = conferenceDto.getFileParticipation();
+    fileFooter = conferenceDto.getFileFooter();
     fileAuthentication = conferenceDto.getFileAuthentication();
     localityType = conferenceDto.getLocalityType();
     meeting = conferenceDto.getMeeting();
@@ -225,6 +227,14 @@ public class ConferenceParamDto {
     this.fileParticipation = fileParticipation;
   }
 
+  public FileDto getFileFooter() {
+    return fileFooter;
+  }
+
+  public void setFileFooter(FileDto fileFooter) {
+    this.fileFooter = fileFooter;
+  }
+  
   public FileDto getFileAuthentication() {
     return fileAuthentication;
   }
