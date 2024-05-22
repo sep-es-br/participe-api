@@ -7,6 +7,7 @@ import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 
+import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.model.Evaluator;
 import br.gov.es.participe.model.Organization;
 import br.gov.es.participe.model.Role;
@@ -15,14 +16,15 @@ import br.gov.es.participe.model.Section;
 public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
 
 
-    // @Query(
-    //     "MATCH (eval:Evaluator) " +
-    //     "WHERE eval.organization = $organizationGuid " +
-    //     "RETURN eval"
-    // )
-    // Optional<Evaluator> findByOrganizationGuid(@Param("organizationGuid") String organizationGuid);
+    @Query(
+        "MATCH (org:Organization), " +
+        "(section:Section)-[:BELONGS_TO]->(org), " +
+        "(role:Role)-[:BELONGS_TO]->(section) " +
+        "RETURN id(org) AS id, org.guid AS organizationGuid, " +
+        "collect(DISTINCT section.guid) AS sectionsGuid, collect(DISTINCT role.guid) AS rolesGuid"
+    )
+    List<EvaluatorResponseDto> findAllEvaluators();
 
-    
     @Query(
         value = 
             "MATCH (org:Organization) " +
@@ -36,7 +38,7 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
 
     @Query(
         "MATCH (org:Organization) " +
-        "WHERE id(org) = $orgGuid " +
+        "WHERE org.guid = $orgGuid " +
         "RETURN org"
     )
     Optional<Organization> findOrganizationByGuid(@Param("orgGuid") String orgGuid);
@@ -54,7 +56,7 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
 
     @Query(
         "MATCH (section:Section) " +
-        "WHERE id(section) = $sectionGuid " +
+        "WHERE section.guid = $sectionGuid " +
         "RETURN section"
     )
     Optional<Section> findSectionByGuid(@Param("sectionGuid") String sectionGuid);
@@ -72,7 +74,7 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
 
     @Query(
         "MATCH (role:Role) " +
-        "WHERE id(role) = $roleGuid " +
+        "WHERE role.guid = $roleGuid " +
         "RETURN role"
     )
     Optional<Role> findRoleByGuid(@Param("roleGuid") String roleGuid);
