@@ -100,10 +100,6 @@ public class ParticipationController {
       , @PathVariable Long idConference
       , UriComponentsBuilder uriComponentsBuilder) {
     Map<String, String> footerImage = participationService.footerImage(idConference, uriComponentsBuilder); 
-
-    if(footerImage.isEmpty()){
-      return ResponseEntity.ok(footerImage);
-    }
     return ResponseEntity.ok(footerImage);
   }
 
