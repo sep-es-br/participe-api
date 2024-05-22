@@ -2,8 +2,10 @@ package br.gov.es.participe.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -11,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.gov.es.participe.controller.dto.EvaluatorDto;
-import br.gov.es.participe.controller.dto.EvaluatorParamDto;
+import br.gov.es.participe.controller.dto.EvaluatorRequestDto;
+import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.exception.EvaluationSectionsNotFoundException;
 import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.model.Evaluator;
@@ -29,63 +31,27 @@ public class EvaluatorsService {
 
     private static final Logger log = LoggerFactory.getLogger(EvaluatorsService.class);
 
-    public List<Evaluator> findAllEvaluators() {
+    public List<EvaluatorResponseDto> findAllEvaluators() {
 
-        List<Evaluator> evaluatorsList = new ArrayList<Evaluator>();
+        // List<EvaluatorResponseDto> evaluatorsList = new ArrayList<EvaluatorResponseDto>();
 
-        evaluatorsRepository.findAll().iterator().forEachRemaining(evaluatorsList::add);
+        // evaluatorsRepository.findAll().iterator().forEachRemaining(evaluatorsList::add);
+
+        List<EvaluatorResponseDto> evaluatorsList = evaluatorsRepository.findAllEvaluators();
 
         return evaluatorsList;
 
     }
 
-    public EvaluatorDto saveEvaluator(EvaluatorParamDto evaluatorParamDto) {
+    public EvaluatorResponseDto saveEvaluator(EvaluatorRequestDto evaluatorRequestDto) {
 
-        // Cria o dto de avaliador
+        Organization evaluatorOrganization = this.persistOrganization(evaluatorRequestDto.getOrganizationGuid());
 
-        EvaluatorDto newEvaluatorDto = new EvaluatorDto();
+        Set<Section> evaluatorSections = this.persistSections(evaluatorRequestDto.getSectionsGuid(), evaluatorOrganization);
 
-        // Persiste organizacao no banco, adiciona guid no dto
+        Set<Role> evaluatorRoles = this.persistRoles(evaluatorRequestDto.getRolesGuid(), evaluatorSections);
 
-        Organization evaluatorOrganization = this.persistOrganization(evaluatorParamDto.getOrganizationGuid());
-
-        newEvaluatorDto.setOrganizationGuid(evaluatorOrganization.getGuid());
-
-        // Persiste seções no banco, adiciona guids no dto
-
-        String evaluatorDtoSections = "";
-
-        Stream<String> sectionsGuidArray = Arrays.stream(evaluatorParamDto.getSectionsGuid().split(","));
-
-        sectionsGuidArray.iterator().forEachRemaining((guid) -> {
-            Section evaluatorSection = this.persistSection(guid);
-            evaluatorDtoSections.concat(evaluatorSection.getGuid());
-            if(sectionsGuidArray.iterator().hasNext()){
-                evaluatorDtoSections.concat(",");
-            }
-        });
-
-        newEvaluatorDto.setSectionsGuid(evaluatorDtoSections);
-
-        // Persiste papeis no banco, adiciona guids no dto
-
-        String evaluatorDtoRoles = "";
-
-        Stream<String> rolesGuidArray = Arrays.stream(evaluatorParamDto.getRolesGuid().split(","));
-
-        rolesGuidArray.iterator().forEachRemaining((guid) -> {
-            Role evaluatorRole = this.persistRole(guid);
-            evaluatorDtoRoles.concat(evaluatorRole.getGuid());
-            if(rolesGuidArray.iterator().hasNext()){
-                evaluatorDtoRoles.concat(",");
-            }
-        });
-
-        newEvaluatorDto.setRolesGuid(evaluatorDtoRoles);
-
-        // Retorna o dto
-
-        return newEvaluatorDto;
+        return new EvaluatorResponseDto(evaluatorOrganization, evaluatorSections, evaluatorRoles);
     }
 
     // public Evaluator updateEvaluator(EvaluatorParamDto evaluatorParamDto, Long evalSectId) {
@@ -119,29 +85,51 @@ public class EvaluatorsService {
         }
     }
     
-    private Section persistSection(String sectionGuid) {
-    
-        Optional<Section> section = evaluatorsRepository.findSectionByGuid(sectionGuid);
+    private Set<Section> persistSections(List<String> sectionsGuid, Organization organization) {
 
-        if(section.isPresent()){
-            throw new ParticipeServiceException("Já existe uma entidade avaliadora com o guid deste setor.");
-        } else {
-            Section newSection = new Section(sectionGuid);
-            evaluatorsRepository.save(newSection);
-            return newSection;
-        }
+        Set<Section> evaluatorSectionsSet = new HashSet<Section>();
+
+        sectionsGuid.iterator().forEachRemaining((guid) -> {
+            Optional<Section> section = evaluatorsRepository.findSectionByGuid(guid);
+
+            if(section.isPresent()){
+                throw new ParticipeServiceException("Já existe uma entidade avaliadora com o guid deste setor.");
+            } else {
+                Section newSection = new Section(guid);
+                newSection.setOrganization(organization);
+                evaluatorsRepository.save(newSection);
+                evaluatorSectionsSet.add(newSection);
+            }
+        });
+
+        return evaluatorSectionsSet;
     }
     
-    private Role persistRole(String roleGuid) {
+    private Set<Role> persistRoles(List<String> rolesGuid, Set<Section> evaluatorSections) {
 
-        Optional<Role> Role = evaluatorsRepository.findRoleByGuid(roleGuid);
+        Set<Role> evaluatorRolesSet = new HashSet<Role>();
 
-        if(Role.isPresent()){
-            throw new ParticipeServiceException("Já existe uma entidade avaliadora com o guid deste papel.");
-        } else {
-            Role newRole = new Role(roleGuid);
-            evaluatorsRepository.save(newRole);
-            return newRole;
-        }
+        rolesGuid.iterator().forEachRemaining((guid_lotacao) -> {
+
+            String guid = guid_lotacao.split(":")[0];
+            String lotacao = guid_lotacao.split(":")[1];
+
+            Optional<Role> role = evaluatorsRepository.findRoleByGuid(guid);
+
+            if(role.isPresent()){
+                throw new ParticipeServiceException("Já existe uma entidade avaliadora com o guid deste papel.");
+            } else {
+                Role newRole = new Role(guid);
+                Section targetSection = new ArrayList<Section>(evaluatorSections).stream().filter(
+                    (section) -> section.getGuid().equals(lotacao))
+                    .findFirst()
+                    .get();
+                newRole.setSection(targetSection);
+                evaluatorsRepository.save(newRole);
+                evaluatorRolesSet.add(newRole);
+            }
+        });
+
+        return evaluatorRolesSet;
     }
 }
