@@ -17,6 +17,7 @@ public class ConferenceColorDto {
     private String cardBorderColor;
     private String borderColor;
     private String typeBackgroundColor;
+    private String cardLoginColor;
 
     public ConferenceColorDto() {
     }
@@ -32,6 +33,7 @@ public class ConferenceColorDto {
         this.cardBorderColor = conferenceColor.getCardBorderColor();
         this.borderColor = conferenceColor.getBorderColor();
         this.typeBackgroundColor = conferenceColor.getTypeBackgroundColor();
+        this.cardLoginColor = conferenceColor.getCardLoginColor();
     }
 
     public String getBackground() {
@@ -112,6 +114,14 @@ public class ConferenceColorDto {
 
     public void setTypeBackgroundColor(String typeBackgroundColor) {
         this.typeBackgroundColor = typeBackgroundColor;
+    }
+
+    public String getCardLoginColor() {
+        return cardLoginColor;
+    }
+
+    public void setCardLoginColor(String cardLoginColor) {
+        this.cardLoginColor = cardLoginColor;
     }
 }
 

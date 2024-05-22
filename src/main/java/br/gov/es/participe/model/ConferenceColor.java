@@ -19,6 +19,7 @@ public class ConferenceColor extends Entity implements Serializable {
     private String cardBorderColor;
     private String borderColor;
     private String typeBackgroundColor;
+    private String cardLoginColor;
 
     public ConferenceColor(){
     }
@@ -35,6 +36,7 @@ public class ConferenceColor extends Entity implements Serializable {
         this.cardBorderColor = conferenceColorDto.getCardBorderColor();
         this.borderColor = conferenceColorDto.getBorderColor();
         this.typeBackgroundColor = conferenceColorDto.getTypeBackgroundColor();
+        this.cardLoginColor = conferenceColorDto.getCardLoginColor();
     }
     public Conference getConference() {
         return conference;
@@ -122,5 +124,13 @@ public class ConferenceColor extends Entity implements Serializable {
 
     public void setTypeBackgroundColor(String typeBackgroundColor) {
         this.typeBackgroundColor = typeBackgroundColor;
+    }
+
+    public String getCardLoginColor() {
+        return cardLoginColor;
+    }
+
+    public void setCardLoginColor(String cardLoginColor) {
+        this.cardLoginColor = cardLoginColor;
     }
 }
