@@ -1,12 +1,10 @@
 package br.gov.es.participe.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +13,7 @@ import org.springframework.stereotype.Service;
 
 import br.gov.es.participe.controller.dto.EvaluatorRequestDto;
 import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
-import br.gov.es.participe.exception.EvaluationSectionsNotFoundException;
 import br.gov.es.participe.exception.ParticipeServiceException;
-import br.gov.es.participe.model.Evaluator;
 import br.gov.es.participe.model.Organization;
 import br.gov.es.participe.model.Role;
 import br.gov.es.participe.model.Section;
@@ -32,10 +28,6 @@ public class EvaluatorsService {
     private static final Logger log = LoggerFactory.getLogger(EvaluatorsService.class);
 
     public List<EvaluatorResponseDto> findAllEvaluators() {
-
-        // List<EvaluatorResponseDto> evaluatorsList = new ArrayList<EvaluatorResponseDto>();
-
-        // evaluatorsRepository.findAll().iterator().forEachRemaining(evaluatorsList::add);
 
         List<EvaluatorResponseDto> evaluatorsList = evaluatorsRepository.findAllEvaluators();
 
@@ -54,22 +46,16 @@ public class EvaluatorsService {
         return new EvaluatorResponseDto(evaluatorOrganization, evaluatorSections, evaluatorRoles);
     }
 
-    // public Evaluator updateEvaluator(EvaluatorParamDto evaluatorParamDto, Long evalSectId) {
+    public EvaluatorResponseDto updateEvaluator(EvaluatorRequestDto evaluatorRequestDto, Long evaluatorId) {
 
-    //     Evaluator evaluator = evaluatorsRepository.findById(evalSectId).orElseThrow(() -> new EvaluationSectionsNotFoundException(evalSectId));
+        Organization evaluatorOrganization = evaluatorsRepository.findOrganizationById(evaluatorId)
+            .orElseThrow(() -> new ParticipeServiceException("Organização não encontrada com o id fornecido"));
 
-    //     evaluator.setSections(evaluatorParamDto.getSectionsGuid());
-    //     evaluator.setServers(evaluatorParamDto.getServersGuid());
+        Set<Section> evaluatorSections = this.updateSections(evaluatorRequestDto.getSectionsGuid(), evaluatorOrganization);
 
-    //     evaluatorsRepository.save(evaluator);
+        Set<Role> evaluatorRoles = this.updateRoles(evaluatorRequestDto.getRolesGuid(), evaluatorSections);
 
-    //     return evaluator;
-    // }
-
-    public void deleteEvaluator(Long evalSectId) {
-
-        evaluatorsRepository.deleteById(evalSectId);
-
+        return new EvaluatorResponseDto(evaluatorOrganization, evaluatorSections, evaluatorRoles);
     }
 
     private Organization persistOrganization(String orgGuid) {
@@ -104,10 +90,35 @@ public class EvaluatorsService {
 
         return evaluatorSectionsSet;
     }
+
+    private Set<Section> updateSections(List<String> sectionsGuid, Organization organization) {
+
+        List<Section> evaluatorSectionsList = evaluatorsRepository.findAllSectionsWithRelationshipToOrganization(organization.getId());
+
+        evaluatorSectionsList.iterator().forEachRemaining((section) -> evaluatorsRepository.deleteById(section.getId()));
+
+        Set<Section> evaluatorSectionsSet = new HashSet<Section>();
+
+        sectionsGuid.iterator().forEachRemaining((guid) -> {
+            Section candidateSection = evaluatorsRepository.findSectionByGuid(guid)
+                .orElse(new Section(guid));
+            
+            candidateSection.setOrganization(organization);
+            evaluatorsRepository.save(candidateSection);
+            evaluatorSectionsSet.add(candidateSection);
+        });
+
+        return evaluatorSectionsSet;
+    }
     
     private Set<Role> persistRoles(List<String> rolesGuid, Set<Section> evaluatorSections) {
 
         Set<Role> evaluatorRolesSet = new HashSet<Role>();
+
+        if(rolesGuid.contains("all")){
+            evaluatorRolesSet.add(new Role("all"));
+            return evaluatorRolesSet;
+        }
 
         rolesGuid.iterator().forEachRemaining((guid_lotacao) -> {
 
@@ -132,4 +143,45 @@ public class EvaluatorsService {
 
         return evaluatorRolesSet;
     }
+
+    private Set<Role> updateRoles(List<String> rolesGuid, Set<Section> evaluatorSections) {
+
+        evaluatorSections.iterator().forEachRemaining((section) -> {
+            List<Role> evaluatorRolesList = evaluatorsRepository.findAllRolesWithRelationshipToSection(section.getId());
+            evaluatorRolesList.iterator().forEachRemaining((role) -> evaluatorsRepository.deleteById(role.getId()));
+        });
+
+        Set<Role> evaluatorRolesSet = new HashSet<Role>();
+
+        if(rolesGuid.contains("all")){
+            evaluatorRolesSet.add(new Role("all"));
+            return evaluatorRolesSet;
+        }
+
+        rolesGuid.iterator().forEachRemaining((guid_lotacao) -> {
+            String guid = guid_lotacao.split(":")[0];
+            String lotacao = guid_lotacao.split(":")[1];
+
+            Role candidateRole = evaluatorsRepository.findRoleByGuid(guid)
+                .orElse(new Role(guid));
+
+            Section targetSection = new ArrayList<Section>(evaluatorSections).stream().filter(
+                (section) -> section.getGuid().equals(lotacao))
+                .findFirst()
+                .get();
+            
+            candidateRole.setSection(targetSection);
+            evaluatorsRepository.save(candidateRole);
+            evaluatorRolesSet.add(candidateRole);
+        });
+
+        return evaluatorRolesSet;
+    }
+
+    public void deleteEvaluator(Long evaluatorId) {
+
+        evaluatorsRepository.deleteEvaluatorById(evaluatorId);
+
+    }
+    
 }
