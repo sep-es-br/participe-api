@@ -21,13 +21,11 @@ import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.EvaluatorsNamesRequestDto;
 import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
-import br.gov.es.participe.model.Evaluator;
 import br.gov.es.participe.service.AcessoCidadaoService;
 import br.gov.es.participe.service.EvaluatorsService;
 import br.gov.es.participe.service.PersonService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -77,36 +75,34 @@ public class EvaluatorsController {
     
     }
 
-    // @PutMapping("/{evalSectId}")
-    // public ResponseEntity<EvaluatorDto> updateEvaluator(
-    //     @RequestHeader(name = "Authorization") String token,
-    //     @RequestBody @Valid EvaluatorParamDto evaluatorParamDto,
-    //     @PathVariable(name = "evalSectId") Long evalSectId
-    // ) {
+    @PutMapping("/{evaluatorId}")
+    public ResponseEntity<EvaluatorResponseDto> updateEvaluator(
+        @RequestHeader(name = "Authorization") String token,
+        @RequestBody @Valid EvaluatorRequestDto evaluatorRequestDto,
+        @PathVariable(name = "evaluatorId") Long evaluatorId
+    ) {
 
-    //     if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
-    //         return ResponseEntity.status(401).body(null);
-    //     }
+        if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
+            return ResponseEntity.status(401).body(null);
+        }
 
-    //     Evaluator updatedEvaluator = evaluatorsService.updateEvaluator(evaluatorParamDto, evalSectId);
+        EvaluatorResponseDto response = evaluatorsService.updateEvaluator(evaluatorRequestDto, evaluatorId);
 
-    //     EvaluatorDto response = new EvaluatorDto(updatedEvaluator);
+        return ResponseEntity.status(200).body(response);
+    }
 
-    //     return ResponseEntity.status(200).body(response);
-    // }
-
-    @DeleteMapping("/{evalSectId}")
+    @DeleteMapping("/{evaluatorId}")
     public ResponseEntity<String> deleteEvaluator(
         @RequestHeader(name = "Authorization") String token,
-        @PathVariable(name = "evalSectId") Long evalSectId
+        @PathVariable(name = "evaluatorId") Long evaluatorId
     ) {
         if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
             return ResponseEntity.status(401).body(null);
         }
 
-        evaluatorsService.deleteEvaluator(evalSectId);
+        evaluatorsService.deleteEvaluator(evaluatorId);
 
-        return ResponseEntity.status(200).body("Entidade avaliadora excluída com sucesso.");
+        return ResponseEntity.status(200).body("Avaliador excluído com sucesso.");
     }
 
     @GetMapping("/organizations")
