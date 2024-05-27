@@ -18,8 +18,8 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
 
     @Query(
         "MATCH (org:Organization), " +
-        "(section:Section)-[:BELONGS_TO]->(org), " +
-        "(role:Role)-[:BELONGS_TO]->(section) " +
+        "(section:Section)-[:BELONGS_TO]->(org) " +
+        "OPTIONAL MATCH (role:Role)-[:BELONGS_TO]->(section) " +
         "RETURN id(org) AS id, org.guid AS organizationGuid, " +
         "collect(DISTINCT section.guid) AS sectionsGuid, collect(DISTINCT role.guid) AS rolesGuid"
     )
@@ -44,6 +44,13 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
     Optional<Organization> findOrganizationByGuid(@Param("orgGuid") String orgGuid);
 
     @Query(
+        "MATCH (org:Organization) " +
+        "WHERE id(org) = $evaluatorId " +
+        "RETURN org"
+    )
+    Optional<Organization> findOrganizationById(@Param("evaluatorId") Long evaluatorId);
+
+    @Query(
         value = 
             "MATCH (section:Section) " +
             "RETURN section",
@@ -62,6 +69,13 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
     Optional<Section> findSectionByGuid(@Param("sectionGuid") String sectionGuid);
 
     @Query(
+        "MATCH (section:Section)-[:BELONGS_TO]->(org:Organization) " +
+        "WHERE id(org)=$orgId " +
+        "RETURN collect(DISTINCT section)"
+    )
+    List<Section> findAllSectionsWithRelationshipToOrganization(@Param("orgId") Long orgId);
+
+    @Query(
         value = 
             "MATCH (role:Role) " +
             "RETURN role",
@@ -78,5 +92,22 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
         "RETURN role"
     )
     Optional<Role> findRoleByGuid(@Param("roleGuid") String roleGuid);
+
+    @Query(
+        "MATCH (role:Role)-[:BELONGS_TO]->(section:Section) " +
+        "WHERE id(section)=$sectionId " +
+        "RETURN collect(DISTINCT role)"
+    )
+    List<Role> findAllRolesWithRelationshipToSection(@Param("sectionId") Long sectionId);
+
+
+    @Query(
+        "MATCH (org:Organization) " +
+        "WHERE id(org) = $evaluatorId " +
+        "MATCH (section:Section)-[:BELONGS_TO]->(org) " +
+        "OPTIONAL MATCH (role:Role)-[:BELONGS_TO]->(section) " +
+        "DETACH DELETE org, section, role"
+    )
+    void deleteEvaluatorById(@Param("evaluatorId") Long evaluatorId);
     
 }
