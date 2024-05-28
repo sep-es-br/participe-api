@@ -3,6 +3,8 @@ package br.gov.es.participe.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -14,16 +16,20 @@ import br.gov.es.participe.model.Role;
 import br.gov.es.participe.model.Section;
 
 public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
-
-
     @Query(
-        "MATCH (org:Organization), " +
-        "(section:Section)-[:BELONGS_TO]->(org) " +
-        "OPTIONAL MATCH (role:Role)-[:BELONGS_TO]->(section) " +
-        "RETURN id(org) AS id, org.guid AS organizationGuid, " +
-        "collect(DISTINCT section.guid) AS sectionsGuid, collect(DISTINCT role.guid) AS rolesGuid"
+        value = 
+            "MATCH (org:Organization), " +
+            "(section:Section)-[:BELONGS_TO]->(org) " +
+            "OPTIONAL MATCH (role:Role)-[:BELONGS_TO]->(section) " +
+            "RETURN id(org) AS id, org.guid AS organizationGuid, " +
+            "collect(DISTINCT section.guid) AS sectionsGuid, collect(DISTINCT role.guid) AS rolesGuid",
+        countQuery = 
+            "MATCH (org:Organization), " +
+            "(section:Section)-[:BELONGS_TO]->(org) " +
+            "OPTIONAL MATCH (role:Role)-[:BELONGS_TO]->(section) " +
+            "RETURN count(DISTINCT org)"
     )
-    List<EvaluatorResponseDto> findAllEvaluators();
+    Page<EvaluatorResponseDto> findAllEvaluators(@Param("pageable") Pageable pageable);
 
     @Query(
         value = 
@@ -60,7 +66,6 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
     )
     List<Section> findAllSections();
 
-
     @Query(
         "MATCH (section:Section) " +
         "WHERE section.guid = $sectionGuid " +
@@ -85,7 +90,6 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
     )
     List<Role> findAllRoles();
 
-
     @Query(
         "MATCH (role:Role) " +
         "WHERE role.guid = $roleGuid " +
@@ -99,7 +103,6 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
         "RETURN collect(DISTINCT role)"
     )
     List<Role> findAllRolesWithRelationshipToSection(@Param("sectionId") Long sectionId);
-
 
     @Query(
         "MATCH (org:Organization) " +
