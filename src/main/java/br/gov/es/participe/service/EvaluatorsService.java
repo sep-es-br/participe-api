@@ -9,6 +9,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.gov.es.participe.controller.dto.EvaluatorRequestDto;
@@ -27,9 +29,9 @@ public class EvaluatorsService {
 
     private static final Logger log = LoggerFactory.getLogger(EvaluatorsService.class);
 
-    public List<EvaluatorResponseDto> findAllEvaluators() {
+    public Page<EvaluatorResponseDto> findAllEvaluators(Pageable pageable) {
 
-        List<EvaluatorResponseDto> evaluatorsList = evaluatorsRepository.findAllEvaluators();
+        Page<EvaluatorResponseDto> evaluatorsList = evaluatorsRepository.findAllEvaluators(pageable);
 
         return evaluatorsList;
 
@@ -44,6 +46,7 @@ public class EvaluatorsService {
         Set<Role> evaluatorRoles = this.persistRoles(evaluatorRequestDto.getRolesGuid(), evaluatorSections);
 
         return new EvaluatorResponseDto(evaluatorOrganization, evaluatorSections, evaluatorRoles);
+
     }
 
     public EvaluatorResponseDto updateEvaluator(EvaluatorRequestDto evaluatorRequestDto, Long evaluatorId) {
@@ -56,6 +59,7 @@ public class EvaluatorsService {
         Set<Role> evaluatorRoles = this.updateRoles(evaluatorRequestDto.getRolesGuid(), evaluatorSections);
 
         return new EvaluatorResponseDto(evaluatorOrganization, evaluatorSections, evaluatorRoles);
+
     }
 
     private Organization persistOrganization(String orgGuid) {
@@ -69,6 +73,7 @@ public class EvaluatorsService {
             evaluatorsRepository.save(newOrganization);
             return newOrganization;
         }
+
     }
     
     private Set<Section> persistSections(List<String> sectionsGuid, Organization organization) {
@@ -89,6 +94,7 @@ public class EvaluatorsService {
         });
 
         return evaluatorSectionsSet;
+
     }
 
     private Set<Section> updateSections(List<String> sectionsGuid, Organization organization) {
@@ -109,6 +115,7 @@ public class EvaluatorsService {
         });
 
         return evaluatorSectionsSet;
+
     }
     
     private Set<Role> persistRoles(List<String> rolesGuid, Set<Section> evaluatorSections) {
@@ -142,6 +149,7 @@ public class EvaluatorsService {
         });
 
         return evaluatorRolesSet;
+
     }
 
     private Set<Role> updateRoles(List<String> rolesGuid, Set<Section> evaluatorSections) {
@@ -176,6 +184,7 @@ public class EvaluatorsService {
         });
 
         return evaluatorRolesSet;
+        
     }
 
     public void deleteEvaluator(Long evaluatorId) {
