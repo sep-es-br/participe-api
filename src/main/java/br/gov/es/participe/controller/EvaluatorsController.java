@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,16 +50,19 @@ public class EvaluatorsController {
     private EvaluatorsService evaluatorsService;
 
     @GetMapping
-    public ResponseEntity<List<EvaluatorResponseDto>> listEvaluators(
-        @RequestHeader(name = "Authorization") String token
+    public ResponseEntity<Page<EvaluatorResponseDto>> listEvaluators(
+        @RequestHeader(name = "Authorization") String token,
+        Pageable pageable
     ) {
+
         if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
             return ResponseEntity.status(401).body(null);
         }
 
-        List<EvaluatorResponseDto> response = evaluatorsService.findAllEvaluators();
+        Page<EvaluatorResponseDto> response = evaluatorsService.findAllEvaluators(pageable);
 
         return ResponseEntity.status(200).body(response);
+
     }
 
     @PostMapping
@@ -65,6 +70,7 @@ public class EvaluatorsController {
         @RequestHeader(name = "Authorization") String token,
         @RequestBody @Valid EvaluatorRequestDto evaluatorRequestDto
     ) {
+
         if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
             return ResponseEntity.status(401).body(null);
         }
@@ -89,6 +95,7 @@ public class EvaluatorsController {
         EvaluatorResponseDto response = evaluatorsService.updateEvaluator(evaluatorRequestDto, evaluatorId);
 
         return ResponseEntity.status(200).body(response);
+
     }
 
     @DeleteMapping("/{evaluatorId}")
@@ -96,6 +103,7 @@ public class EvaluatorsController {
         @RequestHeader(name = "Authorization") String token,
         @PathVariable(name = "evaluatorId") Long evaluatorId
     ) {
+
         if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
             return ResponseEntity.status(401).body(null);
         }
@@ -103,10 +111,13 @@ public class EvaluatorsController {
         evaluatorsService.deleteEvaluator(evaluatorId);
 
         return ResponseEntity.status(200).body("Avaliador excluído com sucesso.");
+
     }
 
     @GetMapping("/organizations")
-    public ResponseEntity<List<EvaluatorOrganizationDto>> listOrganizations(@RequestHeader(name = "Authorization") String token) throws IOException  {
+    public ResponseEntity<List<EvaluatorOrganizationDto>> listOrganizations(
+        @RequestHeader(name = "Authorization") String token
+    ) throws IOException {
 
         if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
             return ResponseEntity.status(401).body(null);
@@ -115,13 +126,15 @@ public class EvaluatorsController {
         List<EvaluatorOrganizationDto> response = acessoCidadaoService.findOrganizationsFromOrganogramaAPI();
 
         return ResponseEntity.ok().body(response);
+
     }
 
 
     @GetMapping("/sections/{orgGuid}")
     public ResponseEntity<List<EvaluatorSectionDto>> listSections(
         @RequestHeader(name = "Authorization") String token,
-        @PathVariable(value = "orgGuid") String orgGuid) throws IOException  {
+        @PathVariable(value = "orgGuid") String orgGuid
+    ) throws IOException {
         
         if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
             return ResponseEntity.status(401).body(null);
@@ -130,12 +143,14 @@ public class EvaluatorsController {
         List<EvaluatorSectionDto> response = acessoCidadaoService.findSectionsFromOrganogramaAPI(orgGuid);
 
         return ResponseEntity.ok().body(response);
+
     }
 
     @GetMapping("/roles/{unitGuid}")
     public ResponseEntity<List<EvaluatorRoleDto>> listRoles(
         @RequestHeader(name = "Authorization") String token,
-        @PathVariable(value = "unitGuid") String unitGuid) throws IOException  {
+        @PathVariable(value = "unitGuid") String unitGuid
+    ) throws IOException {
         
         if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
             return ResponseEntity.status(401).body(null);
@@ -144,6 +159,7 @@ public class EvaluatorsController {
         List<EvaluatorRoleDto> response = acessoCidadaoService.findRolesFromAcessoCidadaoAPI(unitGuid);
 
         return ResponseEntity.ok().body(response);
+
     }
 
     @PostMapping("/names")
