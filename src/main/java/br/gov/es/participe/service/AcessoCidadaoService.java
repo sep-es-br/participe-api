@@ -3,7 +3,7 @@ package br.gov.es.participe.service;
 import br.gov.es.participe.controller.dto.ChildOrganizationsDto;
 import br.gov.es.participe.controller.dto.EvaluatorOrganizationDto;
 import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
-import br.gov.es.participe.controller.dto.EvaluatorServerDto;
+import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
 import br.gov.es.participe.controller.dto.OrganizationUnitsDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
@@ -393,7 +393,7 @@ public class AcessoCidadaoService {
     );
   }
 
-  public List<EvaluatorServerDto> findUnitRoles(String guid) throws IOException {
+  public List<EvaluatorRoleDto> findRolesFromAcessoCidadaoAPI(String guid) throws IOException {
     String token = getClientToken();
     String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/papeis");
 
@@ -406,27 +406,28 @@ public class AcessoCidadaoService {
     try {
       HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() == 200) { 
-        List<EvaluatorServerDto> evaluatorServerDtos = new ArrayList<>();
+        List<EvaluatorRoleDto> evaluatorServerDtos = new ArrayList<>();
         List<UnitRolesDto> unitRolesDtos = mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {
         });
 
         unitRolesDtos.iterator().forEachRemaining((role) -> {
-          EvaluatorServerDto newEvalServerDto = new EvaluatorServerDto(role.getGuid(), role.getNome(), role.getAgentePublicoNome(), role.getAgentePublicoSub());
+          EvaluatorRoleDto newEvalServerDto = new EvaluatorRoleDto(role.getGuid(), (role.getAgentePublicoNome() + " - " + role.getNome()), role.getLotacaoGuid().toLowerCase());
           evaluatorServerDtos.add(newEvalServerDto);
         });
 
         return evaluatorServerDtos;
+      } else {
+        logger.error("Não foi possível buscar a lista de papéis da unidade.");
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
       }
-      logger.error("Não foi possível buscar a lista de papéis da unidade.");
-      throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
     } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
-      logger.error(e.getMessage());
-      throw new ApiAcessoCidadaoException("Erro ao buscar lista de papéis da unidade.");
+        Thread.currentThread().interrupt();
+        logger.error(e.getMessage());
+        throw new ApiAcessoCidadaoException("Erro ao buscar lista de papéis da unidade.");
     }
   }
 
-  public List<EvaluatorSectionDto> findListOfOrganizationUnits(String guid) throws IOException {
+  public List<EvaluatorSectionDto> findSectionsFromOrganogramaAPI(String guid) throws IOException {
     String token = getClientToken();
     String url = organogramaUriWebapi.concat("/unidades/organizacao/" + guid);
 
@@ -444,23 +445,24 @@ public class AcessoCidadaoService {
         });
 
         organizationUnitsDtos.iterator().forEachRemaining((unit) -> {
-          EvaluatorSectionDto newEvalSectionDto = new EvaluatorSectionDto(unit.getGuid(), unit.getNome());
+          EvaluatorSectionDto newEvalSectionDto = new EvaluatorSectionDto(unit.getGuid(), (unit.getNomeCurto() + " - " + unit.getNome()));
           evaluatorSectionDtos.add(newEvalSectionDto);
         });
 
         return evaluatorSectionDtos;
 
+      } else {
+        logger.error("Não foi possível buscar a lista de unidades da organização.");
+        throw new ApiOrganogramaException(STATUS + response.statusCode());
       }
-      logger.error("Não foi possível buscar a lista de unidades da organização.");
-      throw new ApiOrganogramaException(STATUS + response.statusCode());
     } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
-      logger.error(e.getMessage());
-      throw new ApiOrganogramaException("Erro ao buscar lista de unidades da organização.");
+        Thread.currentThread().interrupt();
+        logger.error(e.getMessage());
+        throw new ApiOrganogramaException("Erro ao buscar lista de unidades da organização.");
     }
   }
 
-  public List<EvaluatorOrganizationDto> findForOrganizations() throws IOException {
+  public List<EvaluatorOrganizationDto> findOrganizationsFromOrganogramaAPI() throws IOException {
     String token = getClientToken();
     String url = organogramaUriWebapi.concat("/organizacoes/" + GUID_GOVES + "/filhas");
 
@@ -479,54 +481,19 @@ public class AcessoCidadaoService {
         });
 
         childOrganizationsDtos.iterator().forEachRemaining((childOrg) -> {
-          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), childOrg.getRazaoSocial());
+          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), (childOrg.getNomeFantasia() + " - " + childOrg.getSigla()));
           evaluatorOrganizationDto.add(newEvalOrgDto);
         });
 
         return evaluatorOrganizationDto;
+      } else {
+        logger.error("Não foi possível buscar a lista de organizações (Filhas do GOVES).");
+        throw new ApiOrganogramaException(STATUS + response.statusCode());
       }
-      logger.error("Não foi possível buscar a lista de organizações (Filhas do GOVES).");
-      throw new ApiOrganogramaException(STATUS + response.statusCode());
     } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
-      logger.error(e.getMessage());
-      throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
+        Thread.currentThread().interrupt();
+        logger.error(e.getMessage());
+        throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
     }
   }
-
-  public List<EvaluatorOrganizationDto> findForOrganization(String guid) throws IOException {
-    String token = getClientToken();
-    String url = organogramaUriWebapi.concat("/organizacoes/" + guid + "/info");
-
-    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-        .header(AUTHORIZATION, BEARER + token)
-        .GET().build();
-
-    HttpClient httpClient = HttpClient.newHttpClient();
-
-    try {
-      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-      if (response.statusCode() == 200) {
-        List<EvaluatorOrganizationDto> evaluatorOrganizationDto = new ArrayList<>();
-
-        List<ChildOrganizationsDto> childOrganizationsDtos =  mapper.readValue(response.body(), new TypeReference<List<ChildOrganizationsDto>>() {
-        });
-
-        childOrganizationsDtos.iterator().forEachRemaining((childOrg) -> {
-          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), childOrg.getRazaoSocial());
-          evaluatorOrganizationDto.add(newEvalOrgDto);
-        });
-
-        return evaluatorOrganizationDto;
-      }
-      logger.error("Não foi possível buscar a lista de organizações (Filhas do GOVES).");
-      throw new ApiOrganogramaException(STATUS + response.statusCode());
-    } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
-      logger.error(e.getMessage());
-      throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
-    }
-  }
-
-
 }

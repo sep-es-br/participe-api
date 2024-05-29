@@ -1,5 +1,6 @@
 package br.gov.es.participe.controller;
 
+import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.exception.ApiAcessoCidadaoException;
 import br.gov.es.participe.exception.ApiOrganogramaException;
 import br.gov.es.participe.util.dto.MessageDto;
@@ -51,6 +52,12 @@ public class ResourceExceptionHandler {
   public ResponseEntity<MessageDto> handleException(RuntimeException e, HttpServletRequest req) {
     log.error("Error", e);
     return ResponseEntity.status(500).body(new MessageDto(500, e.getMessage()));
+  }
+
+  @ExceptionHandler(ParticipeServiceException.class)
+  public ResponseEntity<MessageDto> participeServiceHandler(ParticipeServiceException e) {
+    log.error("Error", e);
+    return ResponseEntity.status(400).body(new MessageDto(400, e.getMessage()));
   }
 
   @ExceptionHandler(ApiAcessoCidadaoException.class)

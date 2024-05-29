@@ -1,16 +1,16 @@
 package br.gov.es.participe.controller.dto;
 
-public class EvaluatorDto {
+public class EvaluatorDataDto {
 
     private String guid;
     
     private String name;
 
-    public EvaluatorDto(){
+    public EvaluatorDataDto(){
 
     }
 
-    public EvaluatorDto(String guid, String name){
+    public EvaluatorDataDto(String guid, String name){
         this.guid = guid;
         this.name = name;
     }
@@ -33,5 +33,3 @@ public class EvaluatorDto {
 
     
 }
-
-
