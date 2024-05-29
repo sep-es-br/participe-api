@@ -1,7 +1,7 @@
 package br.gov.es.participe.service;
 
 import br.gov.es.participe.controller.dto.PreRegistrationDto;
-import br.gov.es.participe.exception.ErrorHandlingQRCodeException;
+import br.gov.es.participe.exception.QRCodeGenerateException;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
 
@@ -127,7 +127,7 @@ public class PreRegistrationService {
             try {
                 imageQR = qrCodeService.generateQRCode(preRegistration.getId().toString(), 300, 300);
             } catch (WriterException | IOException e) {
-                throw new ErrorHandlingQRCodeException("Erro ao tentar recuperar seu pré-credenciamento. ");
+                throw new QRCodeGenerateException("Erro ao tentar recuperar seu pré-credenciamento. ");
             }
             return new PreRegistrationDto(preRegistration, imageQR);
     }
