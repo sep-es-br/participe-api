@@ -1,11 +1,9 @@
 package br.gov.es.participe.controller;
 
-import br.gov.es.participe.exception.EvaluationSectionsNotFoundException;
 import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.exception.ApiAcessoCidadaoException;
 import br.gov.es.participe.exception.ApiOrganogramaException;
 import br.gov.es.participe.util.dto.MessageDto;
-import io.swagger.models.Response;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,14 +58,6 @@ public class ResourceExceptionHandler {
   public ResponseEntity<MessageDto> participeServiceHandler(ParticipeServiceException e) {
     log.error("Error", e);
     return ResponseEntity.status(400).body(new MessageDto(400, e.getMessage()));
-  }
-
-  //Criar exception handler pra notFound
-  @ExceptionHandler(EvaluationSectionsNotFoundException.class)
-  public ResponseEntity<MessageDto> evaluationSectionsNotFoundHandler(EvaluationSectionsNotFoundException e){
-    log.error("Error", e);
-    return ResponseEntity.status(404).body(new MessageDto(500, e.getMessage()));
-  
   }
 
   @ExceptionHandler(ApiAcessoCidadaoException.class)

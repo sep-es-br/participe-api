@@ -1,11 +1,8 @@
 package br.gov.es.participe.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -39,6 +36,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 @CrossOrigin
 @RequestMapping("/evaluators")
 public class EvaluatorsController {
+
+    private static String[] personRoles = { "Administrator", "Moderator" };
     
     @Autowired
     private PersonService personService;
@@ -55,7 +54,7 @@ public class EvaluatorsController {
         Pageable pageable
     ) {
 
-        if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
+        if (!personService.hasOneOfTheRoles(token, personRoles)) {
             return ResponseEntity.status(401).body(null);
         }
 
@@ -71,7 +70,7 @@ public class EvaluatorsController {
         @RequestBody @Valid EvaluatorRequestDto evaluatorRequestDto
     ) {
 
-        if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
+        if (!personService.hasOneOfTheRoles(token, personRoles)) {
             return ResponseEntity.status(401).body(null);
         }
 
@@ -88,7 +87,7 @@ public class EvaluatorsController {
         @PathVariable(name = "evaluatorId") Long evaluatorId
     ) {
 
-        if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
+        if (!personService.hasOneOfTheRoles(token, personRoles)) {
             return ResponseEntity.status(401).body(null);
         }
 
@@ -104,7 +103,7 @@ public class EvaluatorsController {
         @PathVariable(name = "evaluatorId") Long evaluatorId
     ) {
 
-        if (!(personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" }))) {
+        if (!personService.hasOneOfTheRoles(token, personRoles)) {
             return ResponseEntity.status(401).body(null);
         }
 
@@ -119,7 +118,7 @@ public class EvaluatorsController {
         @RequestHeader(name = "Authorization") String token
     ) throws IOException {
 
-        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+        if (!personService.hasOneOfTheRoles(token, personRoles)) {
             return ResponseEntity.status(401).body(null);
           }
 
@@ -136,7 +135,7 @@ public class EvaluatorsController {
         @PathVariable(value = "orgGuid") String orgGuid
     ) throws IOException {
         
-        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+        if (!personService.hasOneOfTheRoles(token, personRoles)) {
             return ResponseEntity.status(401).body(null);
           }
 
@@ -152,7 +151,7 @@ public class EvaluatorsController {
         @PathVariable(value = "unitGuid") String unitGuid
     ) throws IOException {
         
-        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+        if (!personService.hasOneOfTheRoles(token, personRoles)) {
             return ResponseEntity.status(401).body(null);
           }
 
@@ -168,55 +167,13 @@ public class EvaluatorsController {
         @RequestBody EvaluatorsNamesRequestDto evaluatorsNamesRequestDto
     ) throws IOException {
 
-        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+        if (!personService.hasOneOfTheRoles(token, personRoles)) {
             return ResponseEntity.status(401).body(null);
         }
 
-        List<EvaluatorOrganizationDto> organizationsList = acessoCidadaoService.findOrganizationsFromOrganogramaAPI();
-
-        Map<String, String> organizationsNamesList = organizationsList.stream()
-            .filter((org) -> evaluatorsNamesRequestDto.getOrganizationsGuidList().contains(org.getGuid()))
-            .collect(Collectors.toUnmodifiableMap((org) -> org.getGuid(), (org) -> org.getName()));
-
-        List<EvaluatorSectionDto> sectionsList = new ArrayList<EvaluatorSectionDto>();
-        
-        evaluatorsNamesRequestDto.getOrganizationsGuidList().iterator().forEachRemaining((orgGuid) -> 
-            {
-                try {
-                    acessoCidadaoService.findSectionsFromOrganogramaAPI(orgGuid).forEach(sectionsList::add);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        );
-
-        Map<String, String> sectionsNamesList = sectionsList.stream()
-            .filter((section) -> evaluatorsNamesRequestDto.getSectionsGuidList().contains(section.getGuid()))
-            .collect(Collectors.toUnmodifiableMap((section) -> section.getGuid(), (section) -> section.getName()));
-
-        List<EvaluatorRoleDto> rolesList = new ArrayList<EvaluatorRoleDto>();
-
-        evaluatorsNamesRequestDto.getSectionsGuidList().iterator().forEachRemaining((unitGuid) -> 
-            {
-                try {
-                    acessoCidadaoService.findRolesFromAcessoCidadaoAPI(unitGuid).forEach(rolesList::add);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        );
-
-        Map<String, String> rolesNamesList = rolesList.stream()
-            .filter((role) -> evaluatorsNamesRequestDto.getRolesGuidList().contains(role.getGuid()))
-            .collect(Collectors.toUnmodifiableMap((role) -> role.getGuid(), (role) -> role.getName()));
-
-        Map<String, String> response = new HashMap<String, String>();
-
-        response.putAll(organizationsNamesList);
-        response.putAll(sectionsNamesList);
-        response.putAll(rolesNamesList);
+        Map<String,String> response = evaluatorsService.mapGuidstoNames(evaluatorsNamesRequestDto);
 
         return ResponseEntity.ok().body(response);
-
+        
     }
 }

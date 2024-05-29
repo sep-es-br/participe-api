@@ -393,7 +393,6 @@ public class AcessoCidadaoService {
     );
   }
 
-  // Nota: lotacaoGuid vem em maisculas, tratamento toLower para evitar conflitos
   public List<EvaluatorRoleDto> findRolesFromAcessoCidadaoAPI(String guid) throws IOException {
     String token = getClientToken();
     String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/papeis");
