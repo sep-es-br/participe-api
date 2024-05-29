@@ -12,6 +12,7 @@ import br.gov.es.participe.util.domain.TokenType;
 import br.gov.es.participe.model.CheckedInAt;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -93,6 +94,15 @@ public class ParticipationController {
     PortalHeader header = participationService.header(idPerson, idConference, uriComponentsBuilder);
     return ResponseEntity.status(200).body(header);
   }
+
+  @GetMapping("/portal-footer-image/{idConference}")
+  public ResponseEntity<Map<String, String>> getfooterImage(@RequestHeader(name = "Authorization") String token
+      , @PathVariable Long idConference
+      , UriComponentsBuilder uriComponentsBuilder) {
+    Map<String, String> footerImage = participationService.footerImage(idConference, uriComponentsBuilder); 
+    return ResponseEntity.ok(footerImage);
+  }
+
  
 
   @Transactional

@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -1192,6 +1193,65 @@ public class PersonService {
     });
 
     return personMeetingDtoPage;
+  }
+
+  public Page<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilter(Long meetingId, List<Long> localities, String name, String filter, Pageable pageable) {
+    if (meetingId == null) {
+      throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
+    }
+
+    Page<PersonMeetingFilteredDto> personMeetingFilteredDtoPage;
+
+    switch (filter) {
+      case "pres":
+       personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithCheckIn(
+         meetingId,
+         localities, name, pageable);
+        break;
+
+      case "prereg":
+        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistration(meetingId, localities, name, pageable);
+        break;
+      
+      case "prereg_pres":
+        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistrationAndCheckIn(meetingId, localities, name, pageable);
+        break;
+      
+      case "prereg_notpres":
+        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(meetingId, localities, name, pageable);
+        break;
+        
+      case "notprereg_pres":
+        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithCheckInAndNoPreRegistration(meetingId, localities, name, pageable);
+        break;
+      
+      default:
+        personMeetingFilteredDtoPage = null;
+        break;
+    }
+
+    personMeetingFilteredDtoPage.forEach(element -> {
+      element.setCheckedIn(element.getCheckedInDate() != null);
+      element.setPreRegistered(element.getPreRegisteredDate() != null);
+
+      LocalityRegionalizableDto localityInfo;
+      localityInfo = personRepository.findMostRecentLocality(
+          element.getPersonId(),
+          meetingId);
+      if (localityInfo == null) {
+        localityInfo = personRepository.findLocalityIfThereIsNoLogin(
+            element.getPersonId(),
+            meetingId);
+      }
+      if (localityInfo != null) {
+        element.setLocality(localityInfo.getLocality());
+        element.setRegionalizable(localityInfo.getRegionalizable());
+        element.setSuperLocalityId(localityInfo.getSuperLocalityId());
+        element.setSuperLocality(localityInfo.getSuperLocality());
+      }
+    });
+
+    return personMeetingFilteredDtoPage;
   }
 
   public Long findPeopleQuantityOnMeeting(Long meetingId) {

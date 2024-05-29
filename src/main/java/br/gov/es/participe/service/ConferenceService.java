@@ -305,6 +305,9 @@ public class ConferenceService {
     if (param.getFileParticipation() != null) {
       conference.setFileParticipation(this.fileService.find(param.getFileParticipation().getId()));
     }
+    if (param.getFileFooter() != null) {
+      conference.setFileFooter(this.fileService.find(param.getFileFooter().getId()));
+    }
   }
 
   private void loadEvaluation(Conference conference, ConferenceParamDto param) throws ParseException{
