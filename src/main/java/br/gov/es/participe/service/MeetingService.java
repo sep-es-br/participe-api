@@ -513,11 +513,25 @@ public class MeetingService {
     return urlMeeting;
   }
 
-  public boolean selfCheckInIsOpen(Long id){
-    return meetingRepository.selfCheckInIsOpen(id);
+  public Boolean selfCheckInIsOpen(Long id){
+
+    Boolean selfCheckIn = meetingRepository.selfCheckInIsOpen(id);
+
+    if(selfCheckIn != null){
+      return selfCheckIn;
+    }else{
+      return false;
+    }
   }
 
-  public boolean preRegistrationIsOpen(Long id){
-    return meetingRepository.preRegistrationIsOpen(id);
+  public Boolean preRegistrationIsOpen(Long id){
+
+    Boolean preRegistration = meetingRepository.preRegistrationIsOpen(id);
+
+    if(preRegistration != null){
+      return preRegistration;
+    }else{
+      return false;
+    }
   }
 }

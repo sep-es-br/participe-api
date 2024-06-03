@@ -324,16 +324,18 @@ public class MeetingController {
     
   }
 
-  @GetMapping("/{meetingId}/{participationType}")
-  public ResponseEntity<Boolean> SelfCheckInOrPreRegistrationOpen(@PathVariable Long meetingId, @PathVariable String participationType) {
+  @GetMapping("/{meetingId}/self-check-in")
+  public ResponseEntity<Boolean> selfCheckInOpen(@PathVariable Long meetingId) {
 
-      if("PREREGISTRATION".equals(participationType)){
-        return ResponseEntity.ok(meetingService.preRegistrationIsOpen(meetingId));
-      }else if("SELFCHECKIN".equals(participationType)){
         return ResponseEntity.ok(meetingService.selfCheckInIsOpen(meetingId));
-      }
 
-      return ResponseEntity.ok(false);  
+  }
+
+  @GetMapping("/{meetingId}/pre-registration")
+  public ResponseEntity<Boolean> preRegistrationOpen(@PathVariable Long meetingId) {
+
+    return ResponseEntity.ok(meetingService.preRegistrationIsOpen(meetingId));
+
   }
   
   

@@ -92,11 +92,11 @@ List<CheckedInAt> findAllPersonCheckedIn( @Param("personId") Long personId);
 "where id(m)=$id " + 
 "RETURN datetime(m.endDate) + duration({hours: +1}) > datetime()"
 )
-boolean selfCheckInIsOpen(@Param("id") Long id);
+Boolean selfCheckInIsOpen(@Param("id") Long id);
 
 @Query("MATCH (m:Meeting) " + 
 "where id(m)=$id " + 
 "RETURN datetime(m.beginDate) > datetime()"
 )
-boolean preRegistrationIsOpen(@Param("id") Long id);
+Boolean preRegistrationIsOpen(@Param("id") Long id);
 }
