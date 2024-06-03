@@ -45,6 +45,8 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.matches(".*/meetings/\\d+/page-number")
                     || url.matches(".*/meetings/dashboard/\\d+")
                     || url.matches(".*/meetings/checkIn/\\d+")
+                    || url.matches(".*/meetings/\\d+/PREREGISTRATION")
+                    || url.matches(".*/meetings/\\d+/SELFCHECKIN")
                     || url.matches(".*/meetings/\\d+/targeted-by/plan-items")
                     || url.matches(".*/meetings/\\d+/participants")
                     || url.matches(".*/meetings/\\d+/participants/total")
