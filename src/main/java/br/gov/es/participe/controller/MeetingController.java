@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 
 
+
 @RestController
 @CrossOrigin
 @RequestMapping(value = "/meetings")
@@ -322,5 +323,20 @@ public class MeetingController {
     return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageQR);
     
   }
+
+  @GetMapping("/{meetingId}/self-check-in")
+  public ResponseEntity<Boolean> selfCheckInOpen(@PathVariable Long meetingId) {
+
+        return ResponseEntity.ok(meetingService.selfCheckInIsOpen(meetingId));
+
+  }
+
+  @GetMapping("/{meetingId}/pre-registration")
+  public ResponseEntity<Boolean> preRegistrationOpen(@PathVariable Long meetingId) {
+
+    return ResponseEntity.ok(meetingService.preRegistrationIsOpen(meetingId));
+
+  }
+  
   
 }
