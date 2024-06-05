@@ -63,6 +63,27 @@ public class ParticipationController {
     return ResponseEntity.status(200).body(participations);
   }
 
+  @GetMapping("/plan-item-children/{idConference}")
+  public ResponseEntity<BodyParticipationDto> getBodyChildren(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestParam(name = "text", required = false, defaultValue = "") String text,
+      @RequestParam(name = "idLocality", required = false) Long idLocality,
+      @RequestParam(name = "idPlanItem", required = false) Long idPlanItem,
+      @PathVariable Long idConference,
+      UriComponentsBuilder uriComponentsBuilder
+  ) {
+    String[] keys = token.split(" ");
+    Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
+
+    BodyParticipationDto body = participationService.bodyChildren(idPlanItem, idLocality, idConference, idPerson, text, uriComponentsBuilder);
+
+    if (body.getItens() != null) {
+      body.getItens().sort((i1, i2) -> i1.getName().trim().compareToIgnoreCase(i2.getName().trim()));
+    }
+
+    return ResponseEntity.status(200).body(body);
+  }
+
   @GetMapping("/plan-item/{idConference}")
   public ResponseEntity<BodyParticipationDto> getBody(
       @RequestHeader(name = "Authorization") String token,
