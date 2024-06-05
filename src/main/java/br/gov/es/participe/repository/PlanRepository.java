@@ -96,6 +96,16 @@ public interface PlanRepository extends Neo4jRepository<Plan, Long> {
     		+"]")
     Plan findFilesById( @Param("id") Long id);
 
+    @Query(" MATCH (p:Plan)-[c:COMPOSES*]-(pi:PlanItem) "
+    +" WHERE id(p)=$id AND (EXISTS {MATCH (p:Plan)-[c:COMPOSES*]-(pi)-[fe:FEATURES]-(f:File) WHERE id(p)=$id })"
+    +" RETURN p"
+    +" ,[  [(p:Plan)-[c:COMPOSES*]-(pi:PlanItem) | [c, pi]], " 
+    +" 		[(pi)-[fe:FEATURES]-(f:File) | [fe,f]], "
+    +" 		[(pi)-[o:OBEYS]-(s:StructureItem) | [o,s]], "
+    +" 		[(pi)-[a:APPLIES_TO]-(l:Locality) | [a,l]] "
+    +"]")
+Plan findParticipationFilesById( @Param("id") Long id);
+
     @Query("MATCH (p:Plan) DETACH DELETE p")
     void deleteAll();
 }

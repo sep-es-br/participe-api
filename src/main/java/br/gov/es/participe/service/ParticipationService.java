@@ -127,7 +127,7 @@ public class ParticipationService {
     List<PlanItemDto> itens = new ArrayList<>();
 
     if (idPlanItem == null) {
-      plan = planService.findFilesById(conference.getPlan().getId());
+      plan = planService.findParticipationFilesById(conference.getPlan().getId());
       planItems = plan.getItems();
     } else {
       planI = planItemService.findByIdWithLocalities(idPlanItem);

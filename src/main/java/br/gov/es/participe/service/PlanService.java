@@ -123,6 +123,10 @@ public class PlanService {
       return planRepository.findFilesById(id);
     }
 
+    public Plan findParticipationFilesById(Long id) {
+        return planRepository.findParticipationFilesById(id);
+      }
+
 
     public void delete(Long id) {
         Plan plan = find(id);
