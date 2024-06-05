@@ -65,26 +65,20 @@ public class ParticipationService {
   Long idPerson,
   String text,
   UriComponentsBuilder uriComponentsBuilder){
-    Conference conference = conferenceService.find(idConference);
-    Plan plan;
-    PlanItem planI = null;
-    Set<PlanItem> planItems;
     StructureItem structureItem = null;
     
     List<PlanItemDto> itens = new ArrayList<>();
-
-    planI = planItemService.findByPlanItemChildren(idPlanItem,idLocality);
-    planItems = planI.getChildren();
+    
+    PlanItem planI = planItemService.findByPlanItemChildren(idPlanItem,idLocality);
+    Set<PlanItem> planItems = planI.getChildren();
 
     if (planItems != null) {
       itens.addAll(getListPlanItemDto(planItems, text, idPerson, idConference, idLocality));
       if (!itens.isEmpty()) {
         structureItem = structureItemService.findByIdPlanItem(itens.get(0).getId());
       }
-    } else {
-      if (planI != null) {
+    } else if (planI != null) {
         structureItem = structureItemService.findChild(planI.getStructureItem().getId());
-      }
     }
 
     StructureItemDto structureItemDto = new StructureItemDto(structureItem, null, false, false);
