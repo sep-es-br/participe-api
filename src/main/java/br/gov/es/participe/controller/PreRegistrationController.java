@@ -96,4 +96,9 @@ public class PreRegistrationController {
       return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{meetingId}/{personId}") 
+    public ResponseEntity getPreRegistration( @PathVariable Long meetingId, @PathVariable Long personId) throws WriterException, IOException, MessagingException  { 
+      return ResponseEntity.ok().body(preRegistrationService.getPreRegistrationByMeetingAndPerson(meetingId, personId));
+    }
+
 }

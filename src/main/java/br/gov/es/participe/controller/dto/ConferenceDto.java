@@ -33,6 +33,8 @@ public class ConferenceDto {
   private List<MeetingDto> meeting;
   private FileDto fileParticipation;
   private FileDto fileAuthentication;
+  private FileDto fileFooter;
+
   private List<SelfDeclarationDto> selfDeclaration;
   private List<PersonDto> moderators;
 
@@ -130,6 +132,10 @@ public class ConferenceDto {
 
     this.fileParticipation = (conference.getFileParticipation() != null)
       ? new FileDto(conference.getFileParticipation())
+      : null;
+    
+      this.fileFooter = (conference.getFileFooter() != null)
+      ? new FileDto(conference.getFileFooter())
       : null;
 
     this.fileAuthentication = (conference.getFileAuthentication() != null)
@@ -501,6 +507,14 @@ public class ConferenceDto {
 
   public void setEvaluationConfiguration(EvaluationConfigurationDto evaluationConfiguration) {
     this.evaluationConfiguration = evaluationConfiguration;
+  }
+
+  public FileDto getFileFooter() {
+    return fileFooter;
+  }
+
+  public void setFileFooter(FileDto fileFooter) {
+    this.fileFooter = fileFooter;
   }
 
 }

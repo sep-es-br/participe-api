@@ -226,6 +226,132 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
   )
   Page<PersonMeetingDto> findPersonsCheckedInOnMeeting(@Param("idMeeting")Long idMeeting, @Param("localities")List<Long> localities, @Param("name")String name,
                                                        Pageable pageable);
+
+    @Query(
+        value = "MATCH (m:Meeting) " +
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m) " +
+            "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,cia,pr " +
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telehpone AS telephone, " +
+            "cia.time AS checkedInDate, pr.created AS preRegisteredDate",
+        countQuery = "MATCH (m:Meeting) " +
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m) " +
+            "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,cia,pr " +
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telehpone AS telephone, " +
+            "cia.time AS checkedInDate, pr.created AS preRegisteredDate " +
+            "RETURN COUNT(*)"
+    )
+    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable);
+
+
+    @Query(
+        value = "MATCH (m:Meeting) " + 
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
+            "OPTIONAL MATCH (p)-[made:MADE]->(sd:SelfDeclaration)-[abf:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,pr,cia " + 
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
+            "pr.created AS preRegisteredDate, cia.time AS checkedInDate",
+        countQuery = "MATCH (m:Meeting) " + 
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)<-[pr_rel_1:PRE_REGISTRATION]-(pr:PreRegistration)-[pr_rel_2:PRE_REGISTRATION]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
+            "OPTIONAL MATCH (p)-[made:MADE]->(sd:SelfDeclaration)-[abf:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,pr,cia " + 
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
+            "pr.created AS preRegisteredDate, cia.time AS checkedInDate " +
+            "RETURN COUNT(*)"
+    )
+    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistration(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable);
+    
+    @Query(
+        value = "MATCH (m:Meeting) " + 
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m), " +
+            "(p)-[cia:CHECKED_IN_AT]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p)-[made:MADE]->(sd:SelfDeclaration)-[abf:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,pr,cia " + 
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
+            "pr.created AS preRegisteredDate, cia.time AS checkedInDate",
+        countQuery = "MATCH (m:Meeting) " + 
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)<-[pr_rel_1:PRE_REGISTRATION]-(pr:PreRegistration)-[pr_rel_2:PRE_REGISTRATION]->(m), " +
+            "(p)-[cia:CHECKED_IN_AT]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p)-[made:MADE]->(sd:SelfDeclaration)-[abf:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,pr,cia " + 
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
+            "pr.created AS preRegisteredDate, cia.time AS checkedInDate " +
+            "RETURN COUNT(*)"
+    )
+    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistrationAndCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable); 
+    
+    @Query(
+        value = "MATCH (m:Meeting) " + 
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p)-[made:MADE]->(sd:SelfDeclaration)-[abf:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,pr " + 
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "AND NOT (p)-[:CHECKED_IN_AT]->(m) " +
+            "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
+            "pr.created AS preRegisteredDate",
+        countQuery = "MATCH (m:Meeting) " + 
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)<-[pr_rel_1:PRE_REGISTRATION]-(pr:PreRegistration)-[pr_rel_2:PRE_REGISTRATION]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p)-[made:MADE]->(sd:SelfDeclaration)-[abf:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,pr " + 
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "AND NOT (p)-[:CHECKED_IN_AT]->(m) " +
+            "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
+            "pr.created AS preRegisteredDate " +
+            "RETURN COUNT(*)"
+    )
+    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable); 
+    
+    @Query(
+        value = "MATCH (m:Meeting) " + 
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p)-[made:MADE]->(sd:SelfDeclaration)-[abf:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,cia " + 
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "AND NOT (p)<-[:PRE_REGISTRATION]-(:PreRegistration)-[:PRE_REGISTRATION]->(m) " +
+            "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
+            "cia.time AS checkedInDate",
+        countQuery = "MATCH (m:Meeting) " + 
+            "WHERE id(m) = $idMeeting " +
+            "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
+            "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
+            "OPTIONAL MATCH (p)-[made:MADE]->(sd:SelfDeclaration)-[abf:AS_BEING_FROM]->(loc:Locality) " +
+            "WITH p,m,loc,cia " + 
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "AND NOT (p)<-[:PRE_REGISTRATION]-(:PreRegistration)-[:PRE_REGISTRATION]->(m) " +
+            "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telephone AS telephone, " +
+            "cia.time AS checkedInDate " +
+            "RETURN COUNT(*)"
+    )
+    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithCheckInAndNoPreRegistration(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable);
   
     @Query(
             "MATCH (m:Meeting) " +
@@ -236,7 +362,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "RETURN COUNT(*)"
     )
     Long findPeopleQuantityOnMeeting(@Param("idMeeting")Long idMeeting);
-  
+
     @Query(
         " MATCH (conf: Conference)<-[:OCCURS_IN]-(m:Meeting)<-[cia:CHECKED_IN_AT]-(p:Person) " +
         " WHERE id(p) = $idPerson AND id(conf) = $idConference " +
