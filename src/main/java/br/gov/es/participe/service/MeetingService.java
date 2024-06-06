@@ -29,6 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
 import static br.gov.es.participe.enumerator.TypeMeetingEnum.VIRTUAL;
@@ -524,14 +526,18 @@ public class MeetingService {
     }
   }
 
-  public Boolean preRegistrationIsOpen(Long id){
+  public Map<String, Boolean> preRegistrationIsOpenAndMeetingStarted(Long id){
 
-    Boolean preRegistration = meetingRepository.preRegistrationIsOpen(id);
+    Map<String, Boolean> preRegistration = new HashMap<>();
 
-    if(preRegistration != null){
-      return preRegistration;
-    }else{
-      return false;
-    }
+    Boolean preRegistrationMeetingStarted = meetingRepository.preRegistrationIsOpenAndMeetingStarted(id);
+
+    Boolean preRegistrationMeetingClosed = meetingRepository.preRegistrationIsOpenAndMeetingClosed(id);
+    
+    preRegistration.put("preRegistrationMeetingStarted", preRegistrationMeetingStarted);
+    preRegistration.put("preRegistrationMeetingClosed", preRegistrationMeetingClosed);
+
+    return preRegistration;
+
   }
 }
