@@ -56,7 +56,8 @@ public class ConferenceDto {
   private boolean defaultServerConference;
   private Boolean showStatistics;
   private Boolean showCalendar;
-  private Boolean showStatisticsPanel ;
+  private Boolean showStatisticsPanel;
+  private Boolean showProposalsPanel;
   private Boolean showExternalLinks;
 
   private ResearchConfigurationDto researchConfiguration;
@@ -122,12 +123,16 @@ public class ConferenceDto {
       ? conference.getShowStatistics()
       : true;
 
-    this.showStatisticsPanel  = (conference.getShowStatisticsPanel () != null )
-      ? conference.getShowStatisticsPanel ()
+    this.showStatisticsPanel  = (conference.getShowStatisticsPanel() != null )
+      ? conference.getShowStatisticsPanel()
       : true;
 
-    this.showExternalLinks  = (conference.getShowExternalLinks () != null )
-      ? conference.getShowExternalLinks ()
+    this.showProposalsPanel  = (conference.getShowProposalsPanel() != null )
+      ? conference.getShowProposalsPanel()
+      : true;
+
+    this.showExternalLinks  = (conference.getShowExternalLinks() != null )
+      ? conference.getShowExternalLinks()
       : true;
 
     this.fileParticipation = (conference.getFileParticipation() != null)
@@ -475,6 +480,14 @@ public class ConferenceDto {
 
   public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
     this.showStatisticsPanel  = showStatisticsPanel ;
+  }
+
+  public Boolean getShowProposalsPanel() {
+    return showProposalsPanel;
+  }
+
+  public void setShowProposalsPanel(Boolean showProposalsPanel) {
+    this.showProposalsPanel = showProposalsPanel;
   }
 
   public Boolean getShowExternalLinks() {
