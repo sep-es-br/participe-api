@@ -332,9 +332,9 @@ public class MeetingController {
   }
 
   @GetMapping("/{meetingId}/pre-registration")
-  public ResponseEntity<Boolean> preRegistrationOpen(@PathVariable Long meetingId) {
+  public ResponseEntity<Map<String, Boolean>> preRegistrationOpen(@PathVariable Long meetingId) {
 
-    return ResponseEntity.ok(meetingService.preRegistrationIsOpen(meetingId));
+    return ResponseEntity.ok(meetingService.preRegistrationIsOpenAndMeetingStarted(meetingId));
 
   }
   
