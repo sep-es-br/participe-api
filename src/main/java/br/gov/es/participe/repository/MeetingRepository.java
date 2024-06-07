@@ -87,4 +87,23 @@ Optional<Meeting> findMeetingWithRelationshipsById( @Param("id") Long id);
 "RETURN person, checkedIn, meeting"
 )
 List<CheckedInAt> findAllPersonCheckedIn( @Param("personId") Long personId);
+
+@Query("MATCH (m:Meeting) " + 
+"where id(m)=$id " + 
+"RETURN datetime(m.endDate) + duration({hours: +1}) > datetime()"
+)
+Boolean selfCheckInIsOpen(@Param("id") Long id);
+
+@Query("MATCH (m:Meeting) " + 
+"where id(m)=$id " + 
+"RETURN datetime(m.beginDate) > datetime()"
+)
+Boolean preRegistrationIsOpenAndMeetingStarted(@Param("id") Long id);
+
+@Query("MATCH (m:Meeting) " + 
+"where id(m)=$id " + 
+"RETURN datetime(m.endDate) > datetime()"
+)
+Boolean preRegistrationIsOpenAndMeetingClosed(@Param("id") Long id);
+
 }

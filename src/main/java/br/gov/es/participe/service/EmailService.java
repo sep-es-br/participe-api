@@ -81,7 +81,12 @@ public class EmailService {
 			helper.setTo(to);
 			helper.setText(body, true);
 			helper.setSubject(title);
-			helper.addAttachment("QRCODE.png", base64ToImage(imageQR));
+			this.base64ToImage(imageQR);
+			FileSystemResource qrCode = new FileSystemResource("qrcode.png");
+			FileSystemResource poweredBy = new FileSystemResource("brasao_white.png");
+			helper.addAttachment("QRCODE.png", qrCode);
+			helper.addInline("poweredBy", poweredBy);
+			helper.addInline("qrCode", qrCode);
 		} catch (Exception e ) {
 			log.error("Error template email", e);
 		}
@@ -136,5 +141,7 @@ public class EmailService {
 		return file;
 
 	}
+
+
 
 }

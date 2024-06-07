@@ -20,7 +20,6 @@ public class SelfDeclaration extends Entity implements Serializable {
 
   private Boolean answerSurvey;
 
-  private Boolean receiveInformational;
 
   public SelfDeclaration(Long conferenceId, Long localityId, Long personId) {
     Objects.requireNonNull(conferenceId);
@@ -79,10 +78,6 @@ public class SelfDeclaration extends Entity implements Serializable {
       this.person.setId(selfDeclaration.getPerson());
     }
 
-    if(selfDeclaration.getReceiveInformational() != null){
-      this.receiveInformational = selfDeclaration.getReceiveInformational();
-    }
-
   }
 
   public SelfDeclaration() {}
@@ -119,11 +114,4 @@ public class SelfDeclaration extends Entity implements Serializable {
     this.person = person;
   }
 
-  public Boolean getReceiveInformational() {
-    return receiveInformational;
-  }
-
-  public void setReceiveInformational(Boolean receiveInformational) {
-    this.receiveInformational = receiveInformational;
-  }
 }

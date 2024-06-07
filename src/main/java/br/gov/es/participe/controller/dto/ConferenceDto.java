@@ -8,7 +8,6 @@ import br.gov.es.participe.util.domain.StatusConferenceType;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-//import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,6 +33,8 @@ public class ConferenceDto {
   private List<MeetingDto> meeting;
   private FileDto fileParticipation;
   private FileDto fileAuthentication;
+  private FileDto fileFooter;
+
   private List<SelfDeclarationDto> selfDeclaration;
   private List<PersonDto> moderators;
 
@@ -55,10 +56,15 @@ public class ConferenceDto {
   private boolean defaultServerConference;
   private Boolean showStatistics;
   private Boolean showCalendar;
-  private Boolean showStatisticsPanel ;
+  private Boolean showStatisticsPanel;
+  private Boolean showProposalsPanel;
   private Boolean showExternalLinks;
 
   private ResearchConfigurationDto researchConfiguration;
+
+  private ConferenceColorDto customProperties;
+
+  private EvaluationConfigurationDto evaluationConfiguration;
 
   public ConferenceDto() {
   }
@@ -93,6 +99,8 @@ public class ConferenceDto {
 
     this.researchConfiguration = conference.getResearch() != null ? new ResearchConfigurationDto(conference.getResearch()) : null;
 
+    this.evaluationConfiguration = conference.getEvaluation() != null ? new EvaluationConfigurationDto(conference.getEvaluation()) : null;
+
     this.description = conference.getDescription();
     this.id = conference.getId();
     this.name = conference.getName();
@@ -113,24 +121,32 @@ public class ConferenceDto {
 
     this.showStatistics = (conference.getShowStatistics() != null )
       ? conference.getShowStatistics()
-      : true;  
-
-    this.showStatisticsPanel  = (conference.getShowStatisticsPanel () != null )
-      ? conference.getShowStatisticsPanel ()
-      : true;  
-
-    this.showExternalLinks  = (conference.getShowExternalLinks () != null )
-      ? conference.getShowExternalLinks ()
       : true;
-    
+
+    this.showStatisticsPanel  = (conference.getShowStatisticsPanel() != null )
+      ? conference.getShowStatisticsPanel()
+      : true;
+
+    this.showProposalsPanel  = (conference.getShowProposalsPanel() != null )
+      ? conference.getShowProposalsPanel()
+      : true;
+
+    this.showExternalLinks  = (conference.getShowExternalLinks() != null )
+      ? conference.getShowExternalLinks()
+      : true;
+
     this.fileParticipation = (conference.getFileParticipation() != null)
       ? new FileDto(conference.getFileParticipation())
       : null;
     
-    this.fileAuthentication = (conference.getFileAuthentication() != null) 
+      this.fileFooter = (conference.getFileFooter() != null)
+      ? new FileDto(conference.getFileFooter())
+      : null;
+
+    this.fileAuthentication = (conference.getFileAuthentication() != null)
       ? new FileDto(conference.getFileAuthentication())
       : null;
-    
+
     this.localityType = new LocalityTypeDto(conference.getLocalityType());
 
     if (conference.getSelfDeclaration() != null && !conference.getSelfDeclaration().isEmpty()) {
@@ -437,7 +453,7 @@ public class ConferenceDto {
   public Boolean getDefaultServerConference() {
     return defaultServerConference;
   }
-  
+
   public void setDefaultServerConference(Boolean defaultServerConference) {
     this.defaultServerConference = defaultServerConference;
   }
@@ -466,6 +482,14 @@ public class ConferenceDto {
     this.showStatisticsPanel  = showStatisticsPanel ;
   }
 
+  public Boolean getShowProposalsPanel() {
+    return showProposalsPanel;
+  }
+
+  public void setShowProposalsPanel(Boolean showProposalsPanel) {
+    this.showProposalsPanel = showProposalsPanel;
+  }
+
   public Boolean getShowExternalLinks() {
     return showExternalLinks;
   }
@@ -480,6 +504,30 @@ public class ConferenceDto {
 
   public void setResearchConfiguration(ResearchConfigurationDto researchConfiguration) {
     this.researchConfiguration = researchConfiguration;
+  }
+
+  public ConferenceColorDto getCustomProperties() {
+    return customProperties;
+  }
+
+  public void setCustomProperties(ConferenceColorDto customProperties) {
+    this.customProperties = customProperties;
+  }
+
+  public EvaluationConfigurationDto getEvaluationConfiguration() {
+    return evaluationConfiguration;
+  }
+
+  public void setEvaluationConfiguration(EvaluationConfigurationDto evaluationConfiguration) {
+    this.evaluationConfiguration = evaluationConfiguration;
+  }
+
+  public FileDto getFileFooter() {
+    return fileFooter;
+  }
+
+  public void setFileFooter(FileDto fileFooter) {
+    this.fileFooter = fileFooter;
   }
 
 }

@@ -29,6 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
 import static br.gov.es.participe.enumerator.TypeMeetingEnum.VIRTUAL;
@@ -508,8 +510,34 @@ public class MeetingService {
   public String generateAutoCheckInLink(Long id) {
     Meeting meeting = this.find(id);
     PortalServer portalMeeting = this.portalServerService.findByIdConference(meeting.getConference().getId()).get();
-    var urlMeeting = portalMeeting.getUrl() + "#/self-check-in/" + id;
+    var urlMeeting = portalMeeting.getUrl() + "#/self-check-in/"+ meeting.getConference().getId() +"/meeting/" + id;;
 
     return urlMeeting;
+  }
+
+  public Boolean selfCheckInIsOpen(Long id){
+
+    Boolean selfCheckIn = meetingRepository.selfCheckInIsOpen(id);
+
+    if(selfCheckIn != null){
+      return selfCheckIn;
+    }else{
+      return false;
+    }
+  }
+
+  public Map<String, Boolean> preRegistrationIsOpenAndMeetingStarted(Long id){
+
+    Map<String, Boolean> preRegistration = new HashMap<>();
+
+    Boolean preRegistrationMeetingStarted = meetingRepository.preRegistrationIsOpenAndMeetingStarted(id);
+
+    Boolean preRegistrationMeetingClosed = meetingRepository.preRegistrationIsOpenAndMeetingClosed(id);
+    
+    preRegistration.put("preRegistrationMeetingStarted", preRegistrationMeetingStarted);
+    preRegistration.put("preRegistrationMeetingClosed", preRegistrationMeetingClosed);
+
+    return preRegistration;
+
   }
 }

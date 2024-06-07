@@ -79,10 +79,15 @@ public class ConferenceService {
   private ResearchService researchService;
 
   @Autowired
+  private EvaluationService evaluationService;
+  
+  @Autowired
   private StructureService structureService;
 
   @Autowired
   private ParticipeUtils participeUtils;
+  @Autowired
+  private ConferenceColorService conferenceColorService;
 
   private static final org.slf4j.Logger log = LoggerFactory.getLogger(ConferenceService.class);
 
@@ -99,6 +104,7 @@ public class ConferenceService {
       auth.setShowStatistics(conference.getShowStatistics());
       auth.setShowCalendar(conference.getShowCalendar());
       auth.setShowStatisticsPanel (conference.getShowStatisticsPanel());
+      auth.setShowProposalsPanel(conference.getShowProposalsPanel());
       auth.setShowExternalLinks(conference.getShowExternalLinks());
 
       File backGroundImage = this.fileService.findRandomackGroundImage(id);
@@ -115,7 +121,7 @@ public class ConferenceService {
         auth.getBackgroundImageUrl().setUrl(url + backGroundImage.getId());
       }
 
-      File calendarImage = this.fileService.findRandomackGroundImage(id);
+      File calendarImage = this.fileService.findRandomCalendarImage(id);
       auth.setCalendarImageUrl( calendarImage != null ? new FileDto(conference.getFileAuthentication()) : null);
       if(calendarImage  != null) {
         auth.getCalendarImageUrl().setUrl(url + calendarImage.getId());
@@ -238,6 +244,13 @@ public class ConferenceService {
     Conference conferenceStored = this.conferenceRepository.findById(conferenceId)
       .orElseThrow(() -> new IllegalStateException("This conference not exist."));
 
+      ConferenceColor conferenceColor = conferenceColorService.findByConferenceColor(conferenceId);
+      if(conferenceColor != null){
+        conferenceColorService.update(conferenceColor, conferenceParamDto.getCustomProperties());
+      }else{
+        conferenceColorService.save(conferenceStored, conferenceParamDto.getCustomProperties());
+      }
+
     conferenceStored.update(conferenceParamDto);
 
     Conference conferenceUpdated = this.save(conferenceStored, conferenceParamDto);
@@ -279,6 +292,7 @@ public class ConferenceService {
   }
 
   private void loadAttributesFromParam(Conference conference, ConferenceParamDto param) throws ParseException {
+    this.loadEvaluation(conference, param);
     this.loadResearch(conference, param);
     this.loadSegmentation(conference, param);
     this.loadServe(conference, param);
@@ -292,6 +306,22 @@ public class ConferenceService {
     if (param.getFileParticipation() != null) {
       conference.setFileParticipation(this.fileService.find(param.getFileParticipation().getId()));
     }
+    if (param.getFileFooter() != null) {
+      conference.setFileFooter(this.fileService.find(param.getFileFooter().getId()));
+    }
+  }
+
+  private void loadEvaluation(Conference conference, ConferenceParamDto param) throws ParseException{
+    Evaluation evaluation = conference.getId() == null ? new Evaluation()
+      : this.evaluationService.findByIdConference(conference.getId()).orElse(new Evaluation());
+
+    evaluation.setBeginDate(param.getEvaluationConfiguration().getBeginDate());
+    evaluation.setEndDate(param.getEvaluationConfiguration().getEndDate());
+    evaluation.setDisplayMode(param.getEvaluationConfiguration().getDisplayMode());
+    evaluation.setEvaluationDisplayStatus(param.getEvaluationConfiguration().getEvaluationDisplayStatus());
+    evaluation.setConference(conference);
+    this.evaluationService.save(evaluation);
+    log.info("Evaluation relacionado a conferenceId={} criado com sucesso com researchId={}", conference.getId(), evaluation.getId());
   }
 
   private void loadResearch(Conference conference, ConferenceParamDto param) throws ParseException {
@@ -648,6 +678,19 @@ public class ConferenceService {
     if(conference.getResearchConfiguration() == null) {
       conference.setResearchConfiguration(this.researchService.findByIdConference(conference.getId())
                                             .map(ResearchConfigurationDto::new).orElse(null));
+    }
+    
+    if(conference.getEvaluationConfiguration() == null) {
+      conference.setEvaluationConfiguration(this.evaluationService.findByIdConference(conference.getId())
+                                            .map(EvaluationConfigurationDto::new).orElse(null));
+    }
+
+    if(conference.getCustomProperties() == null){
+      ConferenceColor cores = this.conferenceColorService.findByConferenceColor(conference.getId());
+      if(cores != null){
+        ConferenceColorDto coresDTO = new ConferenceColorDto(cores);
+        conference.setCustomProperties(coresDTO);
+      }
     }
   }
 

@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +74,7 @@ public class ModerationController {
   private PersonService personService;
 
   @GetMapping
-  public ResponseEntity<List<ModerationResultDto>> findAllCommentsByStatus(
+  public ResponseEntity<Page<ModerationResultDto>> findAllCommentsByStatus(
       @RequestHeader(name = "Authorization") String token,
       @RequestParam Long conferenceId,
       @RequestParam(value = "status", required = false, defaultValue = "") String status,
@@ -83,7 +84,10 @@ public class ModerationController {
       @RequestParam(value = "planItemIds", required = false) Long[] planItemIds,
       @RequestParam(value = "structureItemIds", required = false) Long[] structureItemIds,
       @RequestParam(value = "initalDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") Date initialDate,
-      @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") Date endDate) {
+      @RequestParam(value = "endDate", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") Date endDate,
+      @RequestParam(value = "pageNumber", required = true) Integer pageNumber,
+      @RequestParam(value = "rowsPerPage", required = true) Integer rowsPerPage) 
+      {
 
     if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
       return ResponseEntity.status(401).body(null);
@@ -105,7 +109,7 @@ public class ModerationController {
     moderationFilterDto.setStructureItemIds(structureItemIds != null ? structureItemIds : emptyList);
     moderationFilterDto.setInitialDate(initialDate);
     moderationFilterDto.setEndDate(endDate);
-    List<ModerationResultDto> response = commentService.findAllByStatus(moderationFilterDto);
+    Page<ModerationResultDto> response = commentService.findAllByStatus(moderationFilterDto, pageNumber, rowsPerPage);
 
     response.forEach(c -> {
       c.setStatus(commStatus.getCompleteNameFromLeanName(c.getStatus()));
