@@ -23,6 +23,7 @@ import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
 import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.EvaluatorsNamesRequestDto;
+import br.gov.es.participe.exception.EvaluatorForbiddenException;
 import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.model.Organization;
 import br.gov.es.participe.model.Role;
@@ -45,6 +46,35 @@ public class EvaluatorsService {
         Page<EvaluatorResponseDto> evaluatorsList = evaluatorsRepository.findAllEvaluators(pageable);
 
         return evaluatorsList;
+
+    }
+
+    public String findOrganizationGuidBySectionOrRole(String sectionGuid, String roleGuid) {
+
+        Optional<Role> role = findRoleByGuid(roleGuid);
+
+        if(role.isEmpty()){
+            Optional<Section> section = findSectionByGuid(sectionGuid);
+            if(section.isEmpty()){
+                throw new EvaluatorForbiddenException();
+            } else {
+               return evaluatorsRepository.findOrganizationRelatedToSectionBySectionGuid(sectionGuid).getGuid();
+            }
+        } else {
+            return evaluatorsRepository.findOrganizationRelatedToRoleByRoleGuid(roleGuid).getGuid();
+        }
+
+    }
+
+    private Optional<Section> findSectionByGuid(String sectionGuid) {
+
+        return evaluatorsRepository.findSectionByGuid(sectionGuid);
+
+    }
+
+    private Optional<Role> findRoleByGuid(String roleGuid) {
+
+        return evaluatorsRepository.findRoleByGuid(roleGuid);
 
     }
 

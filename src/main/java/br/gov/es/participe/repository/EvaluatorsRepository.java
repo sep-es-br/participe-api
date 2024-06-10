@@ -57,6 +57,20 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
     Optional<Organization> findOrganizationById(@Param("evaluatorId") Long evaluatorId);
 
     @Query(
+        "MATCH (org:Organization)<-[:BELONGS_TO]-(section:Section) " +
+        "WHERE section.guid = $sectionGuid " +
+        "RETURN org"
+    )
+    Organization findOrganizationRelatedToSectionBySectionGuid(@Param("sectionGuid") String sectionGuid);
+
+    @Query(
+        "MATCH (org:Organization)<-[:BELONGS_TO]-(section:Section)<-[:BELONGS_TO]-(role:Role) " +
+        "WHERE role.guid = $roleGuid " +
+        "RETURN org"
+    )
+    Organization findOrganizationRelatedToRoleByRoleGuid(@Param("roleGuid") String roleGuid);
+
+    @Query(
         value = 
             "MATCH (section:Section) " +
             "RETURN section",

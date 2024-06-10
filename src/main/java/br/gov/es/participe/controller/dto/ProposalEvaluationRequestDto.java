@@ -1,0 +1,98 @@
+package br.gov.es.participe.controller.dto;
+
+public class ProposalEvaluationRequestDto {
+    private Long personId;
+    private Long proposalId;
+    private Boolean includedInNextYearLOA;
+    private String reason;
+    private String budgetUnitId;
+    private String budgetUnitName;
+    private String budgetActionId;
+    private String budgetActionName;
+    private String budgetPlan;
+    private String representing;
+
+    public ProposalEvaluationRequestDto() {
+
+    }
+    
+    public Long getPersonId() {
+        return personId;
+    }
+
+    public void setPersonId(Long personId) {
+        this.personId = personId;
+    }
+
+    public Long getProposalId() {
+        return proposalId;
+    }
+
+    public void setProposalId(Long proposalId) {
+        this.proposalId = proposalId;
+    }
+
+    public Boolean getIncludedInNextYearLOA() {
+        return includedInNextYearLOA;
+    }
+
+    public void setIncludedInNextYearLOA(Boolean includedInNextYearLOA) {
+        this.includedInNextYearLOA = includedInNextYearLOA;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getBudgetUnitId() {
+        return budgetUnitId;
+    }
+
+    public void setBudgetUnitId(String budgetUnitId) {
+        this.budgetUnitId = budgetUnitId;
+    }
+
+    public String getBudgetUnitName() {
+        return budgetUnitName;
+    }
+
+    public void setBudgetUnitName(String budgetUnitName) {
+        this.budgetUnitName = budgetUnitName;
+    }
+
+    public String getBudgetActionId() {
+        return budgetActionId;
+    }
+
+    public void setBudgetActionId(String budgetActionId) {
+        this.budgetActionId = budgetActionId;
+    }
+
+    public String getBudgetActionName() {
+        return budgetActionName;
+    }
+
+    public void setBudgetActionName(String budgetActionName) {
+        this.budgetActionName = budgetActionName;
+    }
+
+    public String getBudgetPlan() {
+        return budgetPlan;
+    }
+
+    public void setBudgetPlan(String budgetPlan) {
+        this.budgetPlan = budgetPlan;
+    }
+
+    public String getRepresenting() {
+        return representing;
+    }
+
+    public void setRepresenting(String representing) {
+        this.representing = representing;
+    }
+}

@@ -3,6 +3,7 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.exception.ApiAcessoCidadaoException;
 import br.gov.es.participe.exception.ApiOrganogramaException;
+import br.gov.es.participe.exception.EvaluatorForbiddenException;
 import br.gov.es.participe.util.dto.MessageDto;
 
 import org.slf4j.Logger;
@@ -70,5 +71,11 @@ public class ResourceExceptionHandler {
   public ResponseEntity<MessageDto> handleException(ApiOrganogramaException e) {
     log.error("Error", e);
     return ResponseEntity.status(500).body(new MessageDto(500, e.getMessage()));
+  }
+
+  @ExceptionHandler(EvaluatorForbiddenException.class)
+  public ResponseEntity<MessageDto> handleException(EvaluatorForbiddenException e) {
+    log.error("Error", e);
+    return ResponseEntity.status(403).body(new MessageDto(403, e.getMessage()));
   }
 }
