@@ -2,7 +2,6 @@ package br.gov.es.participe.controller;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -19,6 +18,7 @@ import br.gov.es.participe.controller.dto.EvaluatorRequestDto;
 import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.EvaluatorsNamesRequestDto;
+import br.gov.es.participe.controller.dto.EvaluatorsNamesResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
 import br.gov.es.participe.service.AcessoCidadaoService;
 import br.gov.es.participe.service.EvaluatorsService;
@@ -162,7 +162,7 @@ public class EvaluatorsController {
     }
 
     @PostMapping("/names")
-    public ResponseEntity<Map<String, String>> getNamesFromGuidLists(
+    public ResponseEntity<EvaluatorsNamesResponseDto> getNamesFromGuidLists(
         @RequestHeader(name = "Authorization") String token,
         @RequestBody EvaluatorsNamesRequestDto evaluatorsNamesRequestDto
     ) throws IOException {
@@ -171,7 +171,7 @@ public class EvaluatorsController {
             return ResponseEntity.status(401).body(null);
         }
 
-        Map<String,String> response = evaluatorsService.mapGuidstoNames(evaluatorsNamesRequestDto);
+        EvaluatorsNamesResponseDto response = evaluatorsService.mapGuidstoNames(evaluatorsNamesRequestDto);
 
         return ResponseEntity.ok().body(response);
         

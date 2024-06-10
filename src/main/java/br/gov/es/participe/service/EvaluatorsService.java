@@ -2,7 +2,6 @@ package br.gov.es.participe.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,12 +16,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import br.gov.es.participe.controller.dto.EvaluatorOrganizationDto;
 import br.gov.es.participe.controller.dto.EvaluatorRequestDto;
 import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
 import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.EvaluatorsNamesRequestDto;
+import br.gov.es.participe.controller.dto.EvaluatorsNamesResponseDto;
 import br.gov.es.participe.exception.EvaluatorForbiddenException;
 import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.model.Organization;
@@ -250,13 +249,7 @@ public class EvaluatorsService {
 
     }
 
-    public Map<String, String> mapGuidstoNames(EvaluatorsNamesRequestDto evaluatorsNamesRequestDto) throws IOException {
-
-        List<EvaluatorOrganizationDto> organizationsList = acessoCidadaoService.findOrganizationsFromOrganogramaAPI();
-
-        Map<String, String> organizationsNamesList = organizationsList.stream()
-            .filter((org) -> evaluatorsNamesRequestDto.getOrganizationsGuidList().contains(org.getGuid()))
-            .collect(Collectors.toUnmodifiableMap((org) -> org.getGuid(), (org) -> org.getName()));
+    public EvaluatorsNamesResponseDto mapGuidstoNames(EvaluatorsNamesRequestDto evaluatorsNamesRequestDto) throws IOException {
 
         List<EvaluatorSectionDto> sectionsList = new ArrayList<EvaluatorSectionDto>();
         
@@ -290,11 +283,7 @@ public class EvaluatorsService {
             .filter((role) -> evaluatorsNamesRequestDto.getRolesGuidList().contains(role.getGuid()))
             .collect(Collectors.toUnmodifiableMap((role) -> role.getGuid(), (role) -> role.getName()));
 
-        Map<String, String> evaluatorsNamesMap = new HashMap<String, String>();
-
-        evaluatorsNamesMap.putAll(organizationsNamesList);
-        evaluatorsNamesMap.putAll(sectionsNamesList);
-        evaluatorsNamesMap.putAll(rolesNamesList);
+        EvaluatorsNamesResponseDto evaluatorsNamesMap = new EvaluatorsNamesResponseDto(sectionsNamesList, rolesNamesList);
 
         return evaluatorsNamesMap;
 
