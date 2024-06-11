@@ -31,7 +31,7 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         + " WHERE NOT $active OR (datetime(n.beginDate) <= datetime($date) "
                         + " AND datetime(n.endDate) >= datetime($date)) "
                         + " RETURN n, [(n)-[md:MODERATORS]->(p:Person) |[n, md, p] ] "
-                        + " ORDER BY n.beginDate")
+                        + " ORDER BY n.beginDate desc")
         Collection<Conference> findAllActives( @Param("date") Date date,  @Param("active") Boolean active);
 
         Conference findByNameIgnoreCase( @Param("name") String name);
