@@ -14,21 +14,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.gov.es.participe.controller.dto.BudgetOptionsDto;
 import br.gov.es.participe.controller.dto.DomainConfigurationDto;
 import br.gov.es.participe.controller.dto.LocalityInfoDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResultDto;
-import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.ProposalEvaluationService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 
 @RestController
 @CrossOrigin
@@ -110,10 +108,15 @@ public class ProposalEvaluationController {
 
     }
 
-    // @DeleteMapping
-    // public ResponseEntity<String> deleteProposalEvaluation() {
-    //     //
-    // }
+    @DeleteMapping("/{evaluationId}")
+    public ResponseEntity<String> deleteProposalEvaluation(
+        @PathVariable(name = "evaluationId") Long evaluationId
+    ) {
+
+        proposalEvaluationService.deleteProposalEvaluation(evaluationId);
+
+        return ResponseEntity.ok().body("Avaliação de Proposta excluída com sucesso.");
+    }
 
     @GetMapping("/options/locality")
     public ResponseEntity<List<LocalityInfoDto>> getLocalityOptionsByConferenceId(
@@ -146,6 +149,15 @@ public class ProposalEvaluationController {
 
         return ResponseEntity.ok().body(response);
 
+    }
+
+    @GetMapping("/options/budgetOptions")
+    public ResponseEntity<List<BudgetOptionsDto>> fetchBudgetOptions() {
+
+        List<BudgetOptionsDto> response = proposalEvaluationService.fetchDataFromPentahoAPI();
+
+        return ResponseEntity.ok().body(response);
+    
     }
 
     @GetMapping("/options/configuration")

@@ -2,8 +2,6 @@ package br.gov.es.participe.model;
 
 import java.util.Date;
 
-// import java.util.Optional;
-
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
@@ -13,11 +11,6 @@ import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 
 @RelationshipEntity(type = "EVALUATES")
 public class Evaluates extends Entity {
-
-    /*
-    Adicionar data createdAt
-    Adicionar data updatedAt
-    */
     
     @StartNode
     private Person person;
@@ -46,12 +39,12 @@ public class Evaluates extends Entity {
 
     public Evaluates(ProposalEvaluationRequestDto proposalEvaluationRequestDto) {
         this.includedInNextYearLOA = proposalEvaluationRequestDto.getIncludedInNextYearLOA();
-        this.reason = proposalEvaluationRequestDto.getReason();
         this.budgetUnitId = proposalEvaluationRequestDto.getBudgetUnitId();
         this.budgetUnitName = proposalEvaluationRequestDto.getBudgetUnitName();
         this.budgetActionId = proposalEvaluationRequestDto.getBudgetActionId();
         this.budgetActionName = proposalEvaluationRequestDto.getBudgetActionName();
         this.budgetPlan = proposalEvaluationRequestDto.getBudgetPlan();
+        this.reason = proposalEvaluationRequestDto.getReason();
         this.representing = proposalEvaluationRequestDto.getRepresenting();
     }
 

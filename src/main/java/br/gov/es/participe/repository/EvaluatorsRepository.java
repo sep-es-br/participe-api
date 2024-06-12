@@ -88,6 +88,14 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
     Optional<Section> findSectionByGuid(@Param("sectionGuid") String sectionGuid);
 
     @Query(
+        "MATCH (section:Section) " +
+        "WHERE section.guid = $sectionGuid " +
+        "AND NOT ((section)<-[:BELONGS_TO]-(:Role)) " +
+        "RETURN section"
+    )
+    Optional<Section> findSectionWithNoRoleByGuid(@Param("sectionGuid") String sectionGuid);
+
+    @Query(
         "MATCH (section:Section)-[:BELONGS_TO]->(org:Organization) " +
         "WHERE id(org)=$orgId " +
         "RETURN collect(DISTINCT section)"
@@ -110,6 +118,13 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
         "RETURN role"
     )
     Optional<Role> findRoleByGuid(@Param("roleGuid") String roleGuid);
+
+    @Query(
+        "MATCH (role:Role) " +
+        "WHERE NOT ((role)-[:BELONGS_TO]->(:Section)) " +
+        "RETURN collect(DISTINCT role)"
+    )
+    List<Role> findAllRolesWithNoRelationships();
 
     @Query(
         "MATCH (role:Role)-[:BELONGS_TO]->(section:Section) " +

@@ -53,7 +53,7 @@ public class EvaluatorsService {
         Optional<Role> role = findRoleByGuid(roleGuid);
 
         if(role.isEmpty()){
-            Optional<Section> section = findSectionByGuid(sectionGuid);
+            Optional<Section> section = findSectionWithNoRoleByGuid(sectionGuid);
             if(section.isEmpty()){
                 throw new EvaluatorForbiddenException();
             } else {
@@ -65,9 +65,9 @@ public class EvaluatorsService {
 
     }
 
-    private Optional<Section> findSectionByGuid(String sectionGuid) {
+    private Optional<Section> findSectionWithNoRoleByGuid(String sectionGuid) {
 
-        return evaluatorsRepository.findSectionByGuid(sectionGuid);
+        return evaluatorsRepository.findSectionWithNoRoleByGuid(sectionGuid);
 
     }
 
@@ -208,6 +208,12 @@ public class EvaluatorsService {
             log.info("Buscando papeis pertencentes ao setor={}", section.getId().toString());
             List<Role> evaluatorRolesList = evaluatorsRepository.findAllRolesWithRelationshipToSection(section.getId());
             evaluatorRolesList.iterator().forEachRemaining((role) -> evaluatorsRepository.deleteById(role.getId()));
+
+            log.info("Removendo papeis sem relacionamento com nenhum setor");
+            List<Role> rolesWithNoRelationshipList = evaluatorsRepository.findAllRolesWithNoRelationships();
+            if(!rolesWithNoRelationshipList.isEmpty()) {
+                rolesWithNoRelationshipList.iterator().forEachRemaining((role) -> evaluatorsRepository.deleteById(role.getId()));
+            }
         });
 
         Set<Role> evaluatorRolesSet = new HashSet<Role>();
