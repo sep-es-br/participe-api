@@ -104,6 +104,7 @@ public class ConferenceService {
       auth.setShowStatistics(conference.getShowStatistics());
       auth.setShowCalendar(conference.getShowCalendar());
       auth.setShowStatisticsPanel (conference.getShowStatisticsPanel());
+      auth.setShowProposalsPanel(conference.getShowProposalsPanel());
       auth.setShowExternalLinks(conference.getShowExternalLinks());
 
       File backGroundImage = this.fileService.findRandomackGroundImage(id);

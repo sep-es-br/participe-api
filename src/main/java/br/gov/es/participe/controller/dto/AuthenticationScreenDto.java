@@ -12,7 +12,8 @@ public class AuthenticationScreenDto {
 
   private Boolean showStatistics;
   private Boolean showCalendar;
-  private Boolean showStatisticsPanel ;
+  private Boolean showStatisticsPanel;
+  private Boolean showProposalsPanel;
   private Boolean showExternalLinks;
 
   private FileDto fileAuthentication;
@@ -89,6 +90,14 @@ public class AuthenticationScreenDto {
 
   public void setShowStatisticsPanel (Boolean showStatisticsPanel ){
     this.showStatisticsPanel  = showStatisticsPanel ;
+  }
+
+  public Boolean getShowProposalsPanel() {
+    return showProposalsPanel;
+  }
+
+  public void setShowProposalsPanel(Boolean showProposalsPanel) {
+    this.showProposalsPanel = showProposalsPanel;
   }
 
   public Boolean getShowExternalLinks() {

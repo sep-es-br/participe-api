@@ -48,6 +48,7 @@ public class Conference extends Entity implements Serializable {
   private Boolean showStatistics;
   private Boolean showCalendar;
   private Boolean showStatisticsPanel;
+  private Boolean showProposalsPanel;
   private Boolean showExternalLinks;
 
   @Relationship(type = "TARGETS")
@@ -239,6 +240,7 @@ public class Conference extends Entity implements Serializable {
     this.showStatistics = conferenceParamDto.getShowStatistics();
     this.showCalendar = conferenceParamDto.getShowCalendar();
     this.showStatisticsPanel  = conferenceParamDto.getShowStatisticsPanel();
+    this.showProposalsPanel = conferenceParamDto.getShowProposalsPanel();
     this.showExternalLinks = conferenceParamDto.getShowExternalLinks();
 
     this.updateDisplayMode();
@@ -277,6 +279,15 @@ public class Conference extends Entity implements Serializable {
   public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
     this.showStatisticsPanel  = showStatisticsPanel ;
   }
+
+  public Boolean getShowProposalsPanel() {
+    return showProposalsPanel;
+  }
+
+  public void setShowProposalsPanel(Boolean showProposalsPanel) {
+    this.showProposalsPanel = showProposalsPanel;
+  }
+
 
   public Boolean getShowExternalLinks() {
     return showExternalLinks;
