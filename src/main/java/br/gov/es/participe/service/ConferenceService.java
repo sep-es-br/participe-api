@@ -199,6 +199,10 @@ public class ConferenceService {
     final boolean adm = person.getRoles() != null && person.getRoles().contains("Administrator");
     List<ConferenceDto> conferences = new ArrayList<>();
     this.conferenceRepository.findAllActives(new Date(), activeConferences || !adm).forEach(conference -> {
+      Evaluation evaluation = conference.getId() == null ? new Evaluation()
+      : this.evaluationService.findByIdConference(conference.getId()).orElse(null);
+      
+      conference.setEvaluation(evaluation);
       if(adm || (conference.getModerators() != null
                  && conference.getModerators().stream().anyMatch(m -> idPerson.equals(m.getId())))) {
         ConferenceDto dto = new ConferenceDto(conference);
