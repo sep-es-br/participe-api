@@ -498,8 +498,15 @@ public class AcessoCidadaoService {
   }
 
 
-  public EvaluatorRoleDto findRoleFromAcessoCidadaoAPIByAgentePublicoSub(String sub) throws IOException {
-    String token = getClientToken();
+  public EvaluatorRoleDto findRoleFromAcessoCidadaoAPIByAgentePublicoSub(String sub) {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (IOException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+    
     String url = acessocidadaoUriWebApi.concat("/agentepublico/" + sub + "/papeis");
 
     HttpRequest request = HttpRequest.newBuilder(URI.create(url))
@@ -512,8 +519,6 @@ public class AcessoCidadaoService {
       HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
       if(response.statusCode() == 200) {
-        // lógica
-
         List<EvaluatorRoleDto> evaluatorRolesDto = new ArrayList<EvaluatorRoleDto>();
 
         List<UnitRolesDto> unitRolesDtos =  mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {

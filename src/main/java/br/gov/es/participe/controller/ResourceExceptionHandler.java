@@ -6,6 +6,7 @@ import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.exception.ApiAcessoCidadaoException;
 import br.gov.es.participe.exception.ApiOrganogramaException;
 import br.gov.es.participe.exception.EvaluatorForbiddenException;
+import br.gov.es.participe.exception.NotFoundException;
 import br.gov.es.participe.util.dto.MessageDto;
 
 import org.slf4j.Logger;
@@ -86,5 +87,11 @@ public class ResourceExceptionHandler {
   public ResponseEntity<MessageDto> handleException(EvaluatorForbiddenException e) {
     log.error("Error", e);
     return ResponseEntity.status(403).body(new MessageDto(403, e.getMessage()));
+  }
+
+  @ExceptionHandler(NotFoundException.class)
+  public ResponseEntity<MessageDto> handleException(NotFoundException e){
+    log.error("Error", e);
+    return ResponseEntity.status(404).body(new MessageDto(404, e.getMessage()));
   }
 }

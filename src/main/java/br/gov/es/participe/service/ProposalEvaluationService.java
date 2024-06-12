@@ -1,7 +1,6 @@
 package br.gov.es.participe.service;
 
 import java.nio.charset.Charset;
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
@@ -36,6 +35,7 @@ import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResultDto;
+import br.gov.es.participe.exception.NotFoundException;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Evaluates;
 import br.gov.es.participe.model.IsAuthenticatedBy;
@@ -81,20 +81,13 @@ public class ProposalEvaluationService {
 
     private static final Logger log = LoggerFactory.getLogger(EvaluatorsService.class);
 
-    public String checkIsPersonEvaluator(Long personId) throws IOException {
+    public String checkIsPersonEvaluator(Long personId) {
 
         log.info("Buscando usuario com autenticacao pelo Acesso Cidadao de id={}", personId);
         IsAuthenticatedBy authRelationship = personService.getIsAuthenticatedBy(personId, "AcessoCidadao");
 
-        EvaluatorRoleDto evaluatorRoleDto = new EvaluatorRoleDto(null, null, null);
-
-        try {
-            log.info("Buscando papel na API do Acesso Cidadao");
-            evaluatorRoleDto = acessoCidadaoService.findRoleFromAcessoCidadaoAPIByAgentePublicoSub(authRelationship.getIdByAuth());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        log.info("Buscando papel na API do Acesso Cidadao");
+        EvaluatorRoleDto evaluatorRoleDto = acessoCidadaoService.findRoleFromAcessoCidadaoAPIByAgentePublicoSub(authRelationship.getIdByAuth());
 
         String roleGuid = evaluatorRoleDto.getGuid();
         String sectionGuid = evaluatorRoleDto.getLotacao();
@@ -171,8 +164,7 @@ public class ProposalEvaluationService {
     public ProposalEvaluationResponseDto updateProposalEvaluation(Long evaluationId, ProposalEvaluationRequestDto proposalEvaluationRequestDto) {
 
         log.info("Buscando dados de avaliacao de proposta com id={}", evaluationId);
-        Evaluates evaluatesRelationship = proposalEvaluationRepository.findById(evaluationId)
-            .orElseThrow();
+        Evaluates evaluatesRelationship = proposalEvaluationRepository.findById(evaluationId).orElseThrow(() -> new NotFoundException("Avaliação de Proposta"));
 
         if(evaluatesRelationship.getPerson().getId() != proposalEvaluationRequestDto.getPersonId()){
             log.info("Buscando pessoa com id={}", proposalEvaluationRequestDto.getPersonId());
