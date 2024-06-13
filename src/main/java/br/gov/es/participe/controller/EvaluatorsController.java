@@ -2,7 +2,6 @@ package br.gov.es.participe.controller;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -19,12 +18,14 @@ import br.gov.es.participe.controller.dto.EvaluatorRequestDto;
 import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.EvaluatorsNamesRequestDto;
+import br.gov.es.participe.controller.dto.EvaluatorsNamesResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
 import br.gov.es.participe.service.AcessoCidadaoService;
 import br.gov.es.participe.service.EvaluatorsService;
 import br.gov.es.participe.service.PersonService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -51,6 +52,9 @@ public class EvaluatorsController {
     @GetMapping
     public ResponseEntity<Page<EvaluatorResponseDto>> listEvaluators(
         @RequestHeader(name = "Authorization") String token,
+        @RequestParam(value = "searchOrganization", required = false, defaultValue = "") String orgGuidFilter,
+        @RequestParam(value = "searchSection", required = false, defaultValue = "") String sectionGuidFilter,
+        @RequestParam(value = "searchRole", required = false, defaultValue = "") String roleGuidFilter,
         Pageable pageable
     ) {
 
@@ -58,7 +62,12 @@ public class EvaluatorsController {
             return ResponseEntity.status(401).body(null);
         }
 
-        Page<EvaluatorResponseDto> response = evaluatorsService.findAllEvaluators(pageable);
+        Page<EvaluatorResponseDto> response = evaluatorsService.findAllEvaluators(
+            orgGuidFilter, 
+            sectionGuidFilter, 
+            roleGuidFilter, 
+            pageable
+        );
 
         return ResponseEntity.status(200).body(response);
 
@@ -162,7 +171,7 @@ public class EvaluatorsController {
     }
 
     @PostMapping("/names")
-    public ResponseEntity<Map<String, String>> getNamesFromGuidLists(
+    public ResponseEntity<EvaluatorsNamesResponseDto> getNamesFromGuidLists(
         @RequestHeader(name = "Authorization") String token,
         @RequestBody EvaluatorsNamesRequestDto evaluatorsNamesRequestDto
     ) throws IOException {
@@ -171,7 +180,7 @@ public class EvaluatorsController {
             return ResponseEntity.status(401).body(null);
         }
 
-        Map<String,String> response = evaluatorsService.mapGuidstoNames(evaluatorsNamesRequestDto);
+        EvaluatorsNamesResponseDto response = evaluatorsService.mapGuidstoNames(evaluatorsNamesRequestDto);
 
         return ResponseEntity.ok().body(response);
         

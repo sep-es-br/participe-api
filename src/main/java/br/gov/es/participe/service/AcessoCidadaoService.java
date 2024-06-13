@@ -496,4 +496,49 @@ public class AcessoCidadaoService {
         throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
     }
   }
+
+
+  public EvaluatorRoleDto findRoleFromAcessoCidadaoAPIByAgentePublicoSub(String sub) {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (IOException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+    
+    String url = acessocidadaoUriWebApi.concat("/agentepublico/" + sub + "/papeis");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+      .header(AUTHORIZATION, BEARER + token)
+      .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+      if(response.statusCode() == 200) {
+        List<EvaluatorRoleDto> evaluatorRolesDto = new ArrayList<EvaluatorRoleDto>();
+
+        List<UnitRolesDto> unitRolesDtos =  mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {
+        });
+
+        unitRolesDtos.iterator().forEachRemaining((role) -> {
+          EvaluatorRoleDto newEvalServerDto = new EvaluatorRoleDto(role.getGuid(), (role.getAgentePublicoNome() + " - " + role.getNome()), role.getLotacaoGuid().toLowerCase());
+          evaluatorRolesDto.add(newEvalServerDto);
+        });
+
+        return evaluatorRolesDto.get(0);
+
+      } else {
+        logger.error("Não foi possível buscar o papel atrelado ao sub do agente.");
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+      }
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Erro ao buscar o papel atrelado ao sub do agente.");
+    }
+  }
 }

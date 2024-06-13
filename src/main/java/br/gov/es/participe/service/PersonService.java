@@ -481,7 +481,7 @@ public class PersonService {
     );
   }
 
-  private IsAuthenticatedBy getIsAuthenticatedBy(Long personId, String server) {
+  public IsAuthenticatedBy getIsAuthenticatedBy(Long personId, String server) {
     List<IsAuthenticatedBy> relationships = isAuthenticatedByRepository.findAllByIdPerson(personId);
 
     log.info("Foram encontradas {} relacionamentos de IsAuthenticatedBy para a personId={}",
