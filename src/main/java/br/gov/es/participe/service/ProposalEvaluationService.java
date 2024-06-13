@@ -199,10 +199,20 @@ public class ProposalEvaluationService {
     public void deleteProposalEvaluation(Long evaluationId) {
 
         log.info("Buscando dados de avaliacao de proposta com id={}", evaluationId);
-        Evaluates evaluatesRelationship = proposalEvaluationRepository.findById(evaluationId).orElseThrow();
+        Evaluates evaluatesRelationship = proposalEvaluationRepository.findById(evaluationId).orElseThrow(() -> new NotFoundException("Avaliação de Proposta"));
 
         log.info("Removendo relacionamento do banco");
         proposalEvaluationRepository.delete(evaluatesRelationship);
+
+    }
+
+    public void deleteProposalEvaluationByCommentId(Long commentId) {
+
+        log.info("Buscando dados de avaliacao de proposta com id={}", commentId);
+        Evaluates evaluatesRelationsip = proposalEvaluationRepository.getEvaluatesRelationshipDataByCommentId(commentId).orElseThrow(() -> new NotFoundException("Avaliação de Proposta"));
+
+        log.info("Removendo relacionamento do banco");
+        proposalEvaluationRepository.delete(evaluatesRelationsip);
 
     }
 
@@ -245,6 +255,12 @@ public class ProposalEvaluationService {
         });
 
         return planItemComboDtoList;
+
+    }
+
+    public Boolean checkIsCommentEvaluated(Long commentId) {
+
+        return proposalEvaluationRepository.checkIsCommentEvaluated(commentId);
 
     }
 

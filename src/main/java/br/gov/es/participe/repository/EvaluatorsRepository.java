@@ -16,20 +16,35 @@ import br.gov.es.participe.model.Role;
 import br.gov.es.participe.model.Section;
 
 public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
+
+    static String SEARCH_FILTER = "WHERE "
+    + "(org.guid = $orgGuidFilter OR $orgGuidFilter = '') "
+    + "AND (section.guid = $sectionGuidFilter OR $sectionGuidFilter = '') "
+    + "AND (role.guid = $roleGuidFilter OR $roleGuidFilter = '') ";
+
     @Query(
         value = 
             "MATCH (org:Organization), " +
             "(section:Section)-[:BELONGS_TO]->(org) " +
             "OPTIONAL MATCH (role:Role)-[:BELONGS_TO]->(section) " +
+            "WITH org, section, role " +
+            SEARCH_FILTER +
             "RETURN id(org) AS id, org.guid AS organizationGuid, " +
             "collect(DISTINCT section.guid) AS sectionsGuid, collect(DISTINCT role.guid) AS rolesGuid",
         countQuery = 
             "MATCH (org:Organization), " +
             "(section:Section)-[:BELONGS_TO]->(org) " +
             "OPTIONAL MATCH (role:Role)-[:BELONGS_TO]->(section) " +
+            "WITH org, section, role " +
+            SEARCH_FILTER +
             "RETURN count(DISTINCT org)"
     )
-    Page<EvaluatorResponseDto> findAllEvaluators(@Param("pageable") Pageable pageable);
+    Page<EvaluatorResponseDto> findAllEvaluators(
+        @Param("orgGuidFilter") String orgGuidFilter,
+        @Param("sectionGuidFilter") String sectionGuidFilter,
+        @Param("roleGuidFilter") String roleGuidFilter,
+        @Param("pageable") Pageable pageable
+    );
 
     @Query(
         value = 
