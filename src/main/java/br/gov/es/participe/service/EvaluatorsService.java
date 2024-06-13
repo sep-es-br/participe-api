@@ -40,9 +40,19 @@ public class EvaluatorsService {
 
     private static final Logger log = LoggerFactory.getLogger(EvaluatorsService.class);
 
-    public Page<EvaluatorResponseDto> findAllEvaluators(Pageable pageable) {
+    public Page<EvaluatorResponseDto> findAllEvaluators(
+        String orgGuidFilter, 
+        String sectionGuidFilter, 
+        String roleGuidFilter, 
+        Pageable pageable
+    ) {
 
-        Page<EvaluatorResponseDto> evaluatorsList = evaluatorsRepository.findAllEvaluators(pageable);
+        Page<EvaluatorResponseDto> evaluatorsList = evaluatorsRepository.findAllEvaluators(
+            orgGuidFilter, 
+            sectionGuidFilter, 
+            roleGuidFilter, 
+            pageable
+        );
 
         return evaluatorsList;
 

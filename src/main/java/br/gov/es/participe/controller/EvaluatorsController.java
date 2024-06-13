@@ -25,6 +25,7 @@ import br.gov.es.participe.service.EvaluatorsService;
 import br.gov.es.participe.service.PersonService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -51,6 +52,9 @@ public class EvaluatorsController {
     @GetMapping
     public ResponseEntity<Page<EvaluatorResponseDto>> listEvaluators(
         @RequestHeader(name = "Authorization") String token,
+        @RequestParam(value = "searchOrganization", required = false, defaultValue = "") String orgGuidFilter,
+        @RequestParam(value = "searchSection", required = false, defaultValue = "") String sectionGuidFilter,
+        @RequestParam(value = "searchRole", required = false, defaultValue = "") String roleGuidFilter,
         Pageable pageable
     ) {
 
@@ -58,7 +62,12 @@ public class EvaluatorsController {
             return ResponseEntity.status(401).body(null);
         }
 
-        Page<EvaluatorResponseDto> response = evaluatorsService.findAllEvaluators(pageable);
+        Page<EvaluatorResponseDto> response = evaluatorsService.findAllEvaluators(
+            orgGuidFilter, 
+            sectionGuidFilter, 
+            roleGuidFilter, 
+            pageable
+        );
 
         return ResponseEntity.status(200).body(response);
 

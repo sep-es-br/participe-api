@@ -91,6 +91,13 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
     List<PlanItem> getPlanItemAreaOptionsByConferenceId(@Param("conferenceId") Long conferenceId);
 
     @Query(
+        "MATCH (comment:Comment) " +
+        "WHERE id(comment) = $commentId " +
+        "RETURN exists((comment)<-[:EVALUATES]-())"
+    )
+    Boolean checkIsCommentEvaluated(@Param("commentId") Long commentId);
+
+    @Query(
         "MATCH (conference:Conference)-[:TARGETS]->(plan:Plan)-[:REGIONALIZABLE]->(localityType:LocalityType), " +
         "(plan)-[:OBEYS]->(structure:Structure)<-[:COMPOSES]-(planItemAreaType:StructureItem), " +
         "(plan)<-[:COMPOSES]-(planItemArea:PlanItem)<-[:COMPOSES]-(planItem:PlanItem)-[:OBEYS]->(planItemType:StructureItem) " +

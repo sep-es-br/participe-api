@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.gov.es.participe.controller.dto.BudgetOptionsDto;
@@ -23,6 +24,7 @@ import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResultDto;
+import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.ProposalEvaluationService;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +37,9 @@ public class ProposalEvaluationController {
 
     @Autowired
     private ProposalEvaluationService proposalEvaluationService;
+
+    @Autowired
+    private PersonService personService;
 
     @GetMapping("/is-evaluator/{personId}")
     public ResponseEntity<String> checkIsPersonEvaluator(
@@ -118,6 +123,17 @@ public class ProposalEvaluationController {
         return ResponseEntity.ok().body("Avaliação de Proposta excluída com sucesso.");
     }
 
+    @DeleteMapping("/deleteByCommentId/{commentId}")
+    public ResponseEntity<String> deleteProposalEvaluationByCommentId(
+        @PathVariable(name = "commentId") Long commentId
+    ) {
+
+        proposalEvaluationService.deleteProposalEvaluationByCommentId(commentId);
+
+        return ResponseEntity.ok().body("Avaliação de Proposta excluída com sucesso.");
+
+    }
+
     @GetMapping("/options/locality")
     public ResponseEntity<List<LocalityInfoDto>> getLocalityOptionsByConferenceId(
         @RequestParam(value = "conferenceId") Long conferenceId
@@ -168,6 +184,20 @@ public class ProposalEvaluationController {
         DomainConfigurationDto response = proposalEvaluationService.getDomainConfiguration(conferenceId);
 
         return ResponseEntity.ok().body(response);
+
+    }
+
+    @GetMapping("/isCommentEvaluated")
+    public ResponseEntity<Boolean> checkIsCommentEvaluated(
+        @RequestHeader(name = "Authorization") String token,
+        @RequestParam(value = "commentId") Long commentId
+    ) {
+
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
+
+        return ResponseEntity.ok().body(proposalEvaluationService.checkIsCommentEvaluated(commentId));
 
     }
 
