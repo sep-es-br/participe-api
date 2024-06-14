@@ -2,7 +2,6 @@ package br.gov.es.participe.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,12 +16,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import br.gov.es.participe.controller.dto.EvaluatorOrganizationDto;
 import br.gov.es.participe.controller.dto.EvaluatorRequestDto;
 import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
 import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.EvaluatorsNamesRequestDto;
+import br.gov.es.participe.controller.dto.EvaluatorsNamesResponseDto;
+import br.gov.es.participe.exception.EvaluatorForbiddenException;
 import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.model.Organization;
 import br.gov.es.participe.model.Role;
@@ -40,11 +40,50 @@ public class EvaluatorsService {
 
     private static final Logger log = LoggerFactory.getLogger(EvaluatorsService.class);
 
-    public Page<EvaluatorResponseDto> findAllEvaluators(Pageable pageable) {
+    public Page<EvaluatorResponseDto> findAllEvaluators(
+        String orgGuidFilter, 
+        String sectionGuidFilter, 
+        String roleGuidFilter, 
+        Pageable pageable
+    ) {
 
-        Page<EvaluatorResponseDto> evaluatorsList = evaluatorsRepository.findAllEvaluators(pageable);
+        Page<EvaluatorResponseDto> evaluatorsList = evaluatorsRepository.findAllEvaluators(
+            orgGuidFilter, 
+            sectionGuidFilter, 
+            roleGuidFilter, 
+            pageable
+        );
 
         return evaluatorsList;
+
+    }
+
+    public String findOrganizationGuidBySectionOrRole(String sectionGuid, String roleGuid) {
+
+        Optional<Role> role = findRoleByGuid(roleGuid);
+
+        if(role.isEmpty()){
+            Optional<Section> section = findSectionWithNoRoleByGuid(sectionGuid);
+            if(section.isEmpty()){
+                throw new EvaluatorForbiddenException();
+            } else {
+               return evaluatorsRepository.findOrganizationRelatedToSectionBySectionGuid(sectionGuid).getGuid();
+            }
+        } else {
+            return evaluatorsRepository.findOrganizationRelatedToRoleByRoleGuid(roleGuid).getGuid();
+        }
+
+    }
+
+    private Optional<Section> findSectionWithNoRoleByGuid(String sectionGuid) {
+
+        return evaluatorsRepository.findSectionWithNoRoleByGuid(sectionGuid);
+
+    }
+
+    private Optional<Role> findRoleByGuid(String roleGuid) {
+
+        return evaluatorsRepository.findRoleByGuid(roleGuid);
 
     }
 
@@ -179,6 +218,12 @@ public class EvaluatorsService {
             log.info("Buscando papeis pertencentes ao setor={}", section.getId().toString());
             List<Role> evaluatorRolesList = evaluatorsRepository.findAllRolesWithRelationshipToSection(section.getId());
             evaluatorRolesList.iterator().forEachRemaining((role) -> evaluatorsRepository.deleteById(role.getId()));
+
+            log.info("Removendo papeis sem relacionamento com nenhum setor");
+            List<Role> rolesWithNoRelationshipList = evaluatorsRepository.findAllRolesWithNoRelationships();
+            if(!rolesWithNoRelationshipList.isEmpty()) {
+                rolesWithNoRelationshipList.iterator().forEachRemaining((role) -> evaluatorsRepository.deleteById(role.getId()));
+            }
         });
 
         Set<Role> evaluatorRolesSet = new HashSet<Role>();
@@ -220,13 +265,7 @@ public class EvaluatorsService {
 
     }
 
-    public Map<String, String> mapGuidstoNames(EvaluatorsNamesRequestDto evaluatorsNamesRequestDto) throws IOException {
-
-        List<EvaluatorOrganizationDto> organizationsList = acessoCidadaoService.findOrganizationsFromOrganogramaAPI();
-
-        Map<String, String> organizationsNamesList = organizationsList.stream()
-            .filter((org) -> evaluatorsNamesRequestDto.getOrganizationsGuidList().contains(org.getGuid()))
-            .collect(Collectors.toUnmodifiableMap((org) -> org.getGuid(), (org) -> org.getName()));
+    public EvaluatorsNamesResponseDto mapGuidstoNames(EvaluatorsNamesRequestDto evaluatorsNamesRequestDto) throws IOException {
 
         List<EvaluatorSectionDto> sectionsList = new ArrayList<EvaluatorSectionDto>();
         
@@ -260,11 +299,7 @@ public class EvaluatorsService {
             .filter((role) -> evaluatorsNamesRequestDto.getRolesGuidList().contains(role.getGuid()))
             .collect(Collectors.toUnmodifiableMap((role) -> role.getGuid(), (role) -> role.getName()));
 
-        Map<String, String> evaluatorsNamesMap = new HashMap<String, String>();
-
-        evaluatorsNamesMap.putAll(organizationsNamesList);
-        evaluatorsNamesMap.putAll(sectionsNamesList);
-        evaluatorsNamesMap.putAll(rolesNamesList);
+        EvaluatorsNamesResponseDto evaluatorsNamesMap = new EvaluatorsNamesResponseDto(sectionsNamesList, rolesNamesList);
 
         return evaluatorsNamesMap;
 

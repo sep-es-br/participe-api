@@ -16,20 +16,35 @@ import br.gov.es.participe.model.Role;
 import br.gov.es.participe.model.Section;
 
 public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
+
+    static String SEARCH_FILTER = "WHERE "
+    + "(org.guid = $orgGuidFilter OR $orgGuidFilter = '') "
+    + "AND (section.guid = $sectionGuidFilter OR $sectionGuidFilter = '') "
+    + "AND (role.guid = $roleGuidFilter OR $roleGuidFilter = '') ";
+
     @Query(
         value = 
             "MATCH (org:Organization), " +
             "(section:Section)-[:BELONGS_TO]->(org) " +
             "OPTIONAL MATCH (role:Role)-[:BELONGS_TO]->(section) " +
+            "WITH org, section, role " +
+            SEARCH_FILTER +
             "RETURN id(org) AS id, org.guid AS organizationGuid, " +
             "collect(DISTINCT section.guid) AS sectionsGuid, collect(DISTINCT role.guid) AS rolesGuid",
         countQuery = 
             "MATCH (org:Organization), " +
             "(section:Section)-[:BELONGS_TO]->(org) " +
             "OPTIONAL MATCH (role:Role)-[:BELONGS_TO]->(section) " +
+            "WITH org, section, role " +
+            SEARCH_FILTER +
             "RETURN count(DISTINCT org)"
     )
-    Page<EvaluatorResponseDto> findAllEvaluators(@Param("pageable") Pageable pageable);
+    Page<EvaluatorResponseDto> findAllEvaluators(
+        @Param("orgGuidFilter") String orgGuidFilter,
+        @Param("sectionGuidFilter") String sectionGuidFilter,
+        @Param("roleGuidFilter") String roleGuidFilter,
+        @Param("pageable") Pageable pageable
+    );
 
     @Query(
         value = 
@@ -57,6 +72,20 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
     Optional<Organization> findOrganizationById(@Param("evaluatorId") Long evaluatorId);
 
     @Query(
+        "MATCH (org:Organization)<-[:BELONGS_TO]-(section:Section) " +
+        "WHERE section.guid = $sectionGuid " +
+        "RETURN org"
+    )
+    Organization findOrganizationRelatedToSectionBySectionGuid(@Param("sectionGuid") String sectionGuid);
+
+    @Query(
+        "MATCH (org:Organization)<-[:BELONGS_TO]-(section:Section)<-[:BELONGS_TO]-(role:Role) " +
+        "WHERE role.guid = $roleGuid " +
+        "RETURN org"
+    )
+    Organization findOrganizationRelatedToRoleByRoleGuid(@Param("roleGuid") String roleGuid);
+
+    @Query(
         value = 
             "MATCH (section:Section) " +
             "RETURN section",
@@ -72,6 +101,14 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
         "RETURN section"
     )
     Optional<Section> findSectionByGuid(@Param("sectionGuid") String sectionGuid);
+
+    @Query(
+        "MATCH (section:Section) " +
+        "WHERE section.guid = $sectionGuid " +
+        "AND NOT ((section)<-[:BELONGS_TO]-(:Role)) " +
+        "RETURN section"
+    )
+    Optional<Section> findSectionWithNoRoleByGuid(@Param("sectionGuid") String sectionGuid);
 
     @Query(
         "MATCH (section:Section)-[:BELONGS_TO]->(org:Organization) " +
@@ -96,6 +133,13 @@ public interface EvaluatorsRepository extends Neo4jRepository<Evaluator, Long> {
         "RETURN role"
     )
     Optional<Role> findRoleByGuid(@Param("roleGuid") String roleGuid);
+
+    @Query(
+        "MATCH (role:Role) " +
+        "WHERE NOT ((role)-[:BELONGS_TO]->(:Section)) " +
+        "RETURN collect(DISTINCT role)"
+    )
+    List<Role> findAllRolesWithNoRelationships();
 
     @Query(
         "MATCH (role:Role)-[:BELONGS_TO]->(section:Section) " +
