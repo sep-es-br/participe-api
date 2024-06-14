@@ -268,6 +268,18 @@ public class ParticipationService {
     return header;
   }
 
+  public Map<String, String> webHeaderImage(Long id, UriComponentsBuilder uriComponentsBuilder) {
+    Map<String, String> image = new HashMap<>();
+    Conference conference = conferenceService.find(id);
+
+    String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
+    if (conference.getFileParticipation() != null) {
+      image.put("image", url + conference.getFileParticipation().getId());
+    }
+
+    return image;
+  }
+
   public Map<String, String> footerImage (Long id, UriComponentsBuilder uriComponentsBuilder) {
     Map<String, String> footerImage = new HashMap<>();
     

@@ -25,8 +25,10 @@ public class ConferenceColorController {
         Conference conference = conferenceColorService.findByIdConference(idConference);
         if(conference != null){
             ConferenceColor conferenceColor = conferenceColorService.findByConferenceColor(idConference);
-            return ResponseEntity.ok().body(conferenceColor);
+            if(conferenceColor != null){
+                return ResponseEntity.ok().body(conferenceColor);
+            }
         }
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().body(new ConferenceColor());
     }
 }
