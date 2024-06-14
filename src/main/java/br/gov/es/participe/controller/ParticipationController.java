@@ -116,6 +116,13 @@ public class ParticipationController {
     return ResponseEntity.status(200).body(header);
   }
 
+  @GetMapping("/web-header/{idConference}")
+  public ResponseEntity<Map<String,String>> getWebHeader(@PathVariable Long idConference
+      , UriComponentsBuilder uriComponentsBuilder) {
+        Map<String,String> image = participationService.webHeaderImage(idConference, uriComponentsBuilder);
+    return ResponseEntity.status(200).body(image);
+  }
+
   @GetMapping("/portal-footer-image/{idConference}")
   public ResponseEntity<Map<String, String>> getfooterImage(@RequestHeader(name = "Authorization") String token
       , @PathVariable Long idConference
