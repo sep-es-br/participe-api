@@ -18,8 +18,7 @@ public class ProposalEvaluationResponseDto {
     private String budgetActionName;
     private String budgetPlan;
     private String representing;
-    private String createdAt;
-    private String updatedAt;
+    private String date;
 
     public ProposalEvaluationResponseDto() {
 
@@ -38,8 +37,7 @@ public class ProposalEvaluationResponseDto {
             this.reason = evaluatesRelationship.getReason();
         }
         this.representing = evaluatesRelationship.getRepresenting();
-        this.createdAt = formatDate(evaluatesRelationship.getCreatedAt());
-        this.updatedAt = evaluatesRelationship.getUpdatedAt() != null ? formatDate(evaluatesRelationship.getUpdatedAt()) : null;
+        this.date = formatDate(evaluatesRelationship.getDate());
     }
 
     public Long getId() {
@@ -113,21 +111,13 @@ public class ProposalEvaluationResponseDto {
     public void setRepresenting(String representing) {
         this.representing = representing;
     }
-
-    public String getCreatedAt() {
-        return createdAt;
+    
+    public String getDate() {
+        return date;
     }
 
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setDate(String date) {
+        this.date = date;
     }
 
     private String formatDate(Date date) {
