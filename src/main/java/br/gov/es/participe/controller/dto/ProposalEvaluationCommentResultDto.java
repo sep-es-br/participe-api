@@ -5,23 +5,23 @@ import java.util.List;
 import org.springframework.data.neo4j.annotation.QueryResult;
 
 @QueryResult
-public class ProposalEvaluationResultDto {
+public class ProposalEvaluationCommentResultDto {
     
-    private Long id;
-    private Boolean evaluationStatus; // true = 'Avaliado'; false = 'Não Avaliado'
-    private String localityName; // Microrregiao
-    private String planItemName; // Desafio / Categoria Orçamentaria
-    private String planItemAreaName; // Area Tematica
-    private String description; // Texto da proposta
+    private Long commentId;
+    private Boolean evaluationStatus;
+    private String localityName;
+    private String planItemName;
+    private String planItemAreaName;
+    private String description;
     private List<String> evaluatorOrgsNameList;
     private String evaluatorName;
 
-    public Long getId() {
-        return id;
+    public Long getCommentId() {
+        return commentId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCommentId(Long commentId) {
+        this.commentId = commentId;
     }
 
     public Boolean getEvaluationStatus() {
