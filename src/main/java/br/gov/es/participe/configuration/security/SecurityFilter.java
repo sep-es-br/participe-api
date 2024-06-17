@@ -31,6 +31,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.matches(".*/files/\\d+")
                     || url.matches(".*/localities/complement/\\d+")
                     || url.matches(".*/participation/portal-header/\\d+")
+                    || url.matches(".*/participation/web-header/\\d+")
                     || url.matches(".*/participation/portal-header/\\d+/selfdeclarations/decline")
                     || url.matches(".*/conferences/AuthenticationScreen/\\d+")
                     || url.matches(".*/conferences/AuthenticationScreen/\\d+/pre-opening")
