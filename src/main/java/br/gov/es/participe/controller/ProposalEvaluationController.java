@@ -46,7 +46,7 @@ public class ProposalEvaluationController {
         @PathVariable(name = "personId") Long personId
     ) throws IOException {
 
-        String response = proposalEvaluationService.checkIsPersonEvaluator(personId);
+        String response = proposalEvaluationService.checkIsPersonEvaluator((long) 6);
 
         return ResponseEntity.ok().body(response);
     }
@@ -85,7 +85,7 @@ public class ProposalEvaluationController {
         @PathVariable(name = "proposalId") Long proposalId
     ) {
 
-        ProposalEvaluationResponseDto response = proposalEvaluationService.getProposalEvaluationData(proposalId);
+        ProposalEvaluationResponseDto response = proposalEvaluationService.getProposalEvaluationData((long) 6);
 
         return ResponseEntity.ok().body(response);
 
