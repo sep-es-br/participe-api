@@ -86,13 +86,13 @@ public class ProposalEvaluationService {
         IsAuthenticatedBy authRelationship = personService.getIsAuthenticatedBy(personId, "AcessoCidadao");
 
         log.info("Buscando papel na API do Acesso Cidadao");
-        EvaluatorRoleDto evaluatorRoleDto = acessoCidadaoService.findRoleFromAcessoCidadaoAPIByAgentePublicoSub(authRelationship.getIdByAuth());
+        List<EvaluatorRoleDto> evaluatorRoleDto = acessoCidadaoService.findRoleFromAcessoCidadaoAPIByAgentePublicoSub(authRelationship.getIdByAuth());
 
-        String roleGuid = evaluatorRoleDto.getGuid();
-        String sectionGuid = evaluatorRoleDto.getLotacao();
+        // String roleGuid = evaluatorRoleDto.getGuid();
+        // String sectionGuid = evaluatorRoleDto.getLotacao();
 
-        log.info("Buscando no banco papel avaliador com guid={} ou setor avaliador com guid={}", roleGuid, sectionGuid);
-        return evaluatorsService.findOrganizationGuidBySectionOrRole(sectionGuid, roleGuid);
+        // log.info("Buscando no banco papel avaliador com guid={} ou setor avaliador com guid={}", roleGuid, sectionGuid);
+        return evaluatorsService.findOrganizationGuidBySectionOrRole(evaluatorRoleDto);
 
     }
 

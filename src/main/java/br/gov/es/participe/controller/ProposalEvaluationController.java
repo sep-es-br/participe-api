@@ -18,12 +18,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.gov.es.participe.controller.dto.BudgetOptionsDto;
+import br.gov.es.participe.controller.dto.ConferenceDto;
 import br.gov.es.participe.controller.dto.DomainConfigurationDto;
 import br.gov.es.participe.controller.dto.LocalityInfoDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
+import br.gov.es.participe.service.ConferenceService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.ProposalEvaluationService;
 
@@ -40,6 +42,9 @@ public class ProposalEvaluationController {
 
     @Autowired
     private PersonService personService;
+
+    @Autowired
+    private ConferenceService conferenceService;
 
     @GetMapping("/is-evaluator/{personId}")
     public ResponseEntity<String> checkIsPersonEvaluator(
@@ -192,4 +197,12 @@ public class ProposalEvaluationController {
 
     }
 
+      @GetMapping("/conferences")
+      public ResponseEntity<List<ConferenceDto>> findConferencesActives(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestParam(name = "activeConferences", required = false, defaultValue = "false") Boolean activeConferences) {
+
+        List<ConferenceDto> conferences = conferenceService.findAllActivesEvaluation(activeConferences);
+        return ResponseEntity.status(200).body(conferences);
+  }
 }

@@ -127,10 +127,6 @@ public class EvaluatorsController {
         @RequestHeader(name = "Authorization") String token
     ) throws IOException {
 
-        if (!personService.hasOneOfTheRoles(token, personRoles)) {
-            return ResponseEntity.status(401).body(null);
-          }
-
         List<EvaluatorOrganizationDto> response = acessoCidadaoService.findOrganizationsFromOrganogramaAPI();
 
         return ResponseEntity.ok().body(response);
