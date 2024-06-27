@@ -23,7 +23,7 @@ import br.gov.es.participe.controller.dto.LocalityInfoDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
-import br.gov.es.participe.controller.dto.ProposalEvaluationResultDto;
+import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.ProposalEvaluationService;
 
@@ -53,7 +53,7 @@ public class ProposalEvaluationController {
     
     
     @GetMapping
-    public ResponseEntity<Page<ProposalEvaluationResultDto>> listProposalEvaluationsByConference(
+    public ResponseEntity<Page<ProposalEvaluationCommentResultDto>> listProposalEvaluationsByConference(
         @RequestParam(value = "evaluationStatus", required = false, defaultValue = "") Boolean evaluationStatus,
         @RequestParam(value = "localityId", required = false, defaultValue = "") Long localityId,
         @RequestParam(value = "planItemAreaId", required = false, defaultValue = "") Long planItemAreaId,
@@ -65,7 +65,7 @@ public class ProposalEvaluationController {
         Pageable pageable
     ) {
 
-        Page<ProposalEvaluationResultDto> response = proposalEvaluationService.findAllCommentsForEvaluation(
+        Page<ProposalEvaluationCommentResultDto> response = proposalEvaluationService.findAllCommentsForEvaluation(
             evaluationStatus, 
             localityId, 
             planItemAreaId, 
@@ -107,28 +107,19 @@ public class ProposalEvaluationController {
         @RequestBody ProposalEvaluationRequestDto proposalEvaluationRequestDto
     ) {
         
-        ProposalEvaluationResponseDto response = proposalEvaluationService.updateProposalEvaluation(evaluationId, proposalEvaluationRequestDto);
+        ProposalEvaluationResponseDto response = proposalEvaluationService.createProposalEvaluation(proposalEvaluationRequestDto);
 
         return ResponseEntity.ok().body(response);
 
     }
 
-    @DeleteMapping("/{evaluationId}")
+    @PostMapping("/{proposalId}")
     public ResponseEntity<String> deleteProposalEvaluation(
-        @PathVariable(name = "evaluationId") Long evaluationId
+        @PathVariable(name = "proposalId") Long proposalId,
+        @RequestBody ProposalEvaluationRequestDto proposalEvaluationRequestDto
     ) {
 
-        proposalEvaluationService.deleteProposalEvaluation(evaluationId);
-
-        return ResponseEntity.ok().body("Avaliação de Proposta excluída com sucesso.");
-    }
-
-    @DeleteMapping("/deleteByCommentId/{commentId}")
-    public ResponseEntity<String> deleteProposalEvaluationByCommentId(
-        @PathVariable(name = "commentId") Long commentId
-    ) {
-
-        proposalEvaluationService.deleteProposalEvaluationByCommentId(commentId);
+        proposalEvaluationService.deleteProposalEvaluation(proposalEvaluationRequestDto);
 
         return ResponseEntity.ok().body("Avaliação de Proposta excluída com sucesso.");
 

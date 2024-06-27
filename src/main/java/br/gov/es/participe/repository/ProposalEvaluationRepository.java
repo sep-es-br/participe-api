@@ -10,7 +10,7 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 
 import br.gov.es.participe.controller.dto.DomainConfigurationDto;
-import br.gov.es.participe.controller.dto.ProposalEvaluationResultDto;
+import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
 import br.gov.es.participe.model.Evaluates;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.PlanItem;
@@ -18,7 +18,8 @@ import br.gov.es.participe.model.PlanItem;
 public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates, Long> {
 
     static String SEARCH_FILTER = "WHERE "
-        + "($evaluationStatus = exists((comment)<-[:EVALUATES]-(person)) OR $evaluationStatus IS NULL) " // Funciona; Verificar melhorias
+        + "(eval.active = true OR eval.active IS NULL) "
+        + "AND ((NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) = $evaluationStatus OR $evaluationStatus IS NULL) "
         + "AND (id(locality) = $localityId OR $localityId IS NULL) "
         + "AND (id(area) = $planItemAreaId OR $planItemAreaId IS NULL) "
         + "AND (id(planItem) = $planItemId OR $planItemId IS NULL) "
@@ -31,12 +32,13 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
             "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
             "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
             "WHERE id(conference) = $conferenceId " +
-            "AND comment.status IN ['pub'] " +
+            "AND comment.type = 'prop' " +
+            "AND comment.status = 'pub' " +
             "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
             "WITH comment, locality, planItem, area, eval, person " +
             SEARCH_FILTER +
-            "RETURN DISTINCT id(comment) AS id, " +
-            "exists((comment)<-[:EVALUATES]-(person)) AS evaluationStatus, " +
+            "RETURN DISTINCT id(comment) AS commentId, " +
+            "(NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) AS evaluationStatus, " +
             "locality.name AS localityName, planItem.name AS planItemName, " +
             "area.name AS planItemAreaName, comment.text AS description, " +
             "collect(DISTINCT eval.representing) AS evaluatorOrgsNameList, " +
@@ -45,13 +47,14 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
             "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
             "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
             "WHERE id(conference) = $conferenceId " +
-            "AND comment.status IN ['pub'] " +
+            "AND comment.type = 'prop' " +
+            "AND comment.status = 'pub' " +
             "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
             "WITH comment, locality, planItem, area, eval, person " +
             SEARCH_FILTER +
             "RETURN count(DISTINCT comment)"
     )
-    Page<ProposalEvaluationResultDto> findAllCommentsForEvaluation(
+    Page<ProposalEvaluationCommentResultDto> findAllCommentsForEvaluation(
         @Param("evaluationStatus") Boolean evaluationStatus, 
         @Param("localityId") Long localityId, 
         @Param("planItemAreaId") Long planItemAreaId, 
@@ -65,9 +68,18 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
     @Query(
         "MATCH (person:Person)-[eval:EVALUATES]->(comment:Comment) " +
         "WHERE id(comment) = $proposalId " +
+        "AND eval.active = true " +
+        "AND (eval.deleted <> true OR eval.deleted IS NULL) " +
         "RETURN comment, eval, person"
     )
-    Optional<Evaluates> getEvaluatesRelationshipDataByCommentId(@Param("proposalId") Long proposalId);
+    Optional<Evaluates> findEvaluatesRelationshipByCommentId(@Param("proposalId") Long proposalId);
+
+    @Query(
+        "MATCH (person:Person)-[eval:EVALUATES]->(comment:Comment) " +
+        "WHERE id(comment) = $proposalId " +
+        "RETURN comment, collect(DISTINCT eval), person"
+    )
+    List<Evaluates> getEvaluatesRelationshipListByCommentId(@Param("proposalId") Long proposalId);
 
     @Query(
         "MATCH (conference:Conference)-[:TARGETS]->(plan:Plan)-[:REGIONALIZABLE]->(localityType:LocalityType)<-[:OF_TYPE]-(locality:Locality) " +
@@ -93,6 +105,9 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
     @Query(
         "MATCH (comment:Comment) " +
         "WHERE id(comment) = $commentId " +
+        "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
+        "WHERE eval.active = true " +
+        "AND eval.deleted <> true " +
         "RETURN exists((comment)<-[:EVALUATES]-())"
     )
     Boolean checkIsCommentEvaluated(@Param("commentId") Long commentId);
