@@ -26,12 +26,11 @@ public class Evaluates extends Entity {
     private String budgetActionName;
     private String budgetPlan;
     private String representing;
-    
+    private Boolean active;
+    private Boolean deleted;
+
     @DateString
-    private Date createdAt;
-    
-    @DateString
-    private Date updatedAt;
+    private Date date;
 
     public Evaluates() {
 
@@ -128,20 +127,28 @@ public class Evaluates extends Entity {
         this.representing = representing;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public Boolean getActive() {
+        return active;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
-    public Date getUpdatedAt() {
-        return updatedAt;
+    public Boolean getDeleted() {
+        return deleted;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
 }

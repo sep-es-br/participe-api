@@ -34,8 +34,7 @@ import br.gov.es.participe.controller.dto.LocalityInfoDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
-import br.gov.es.participe.controller.dto.ProposalEvaluationResultDto;
-import br.gov.es.participe.exception.NotFoundException;
+import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Evaluates;
 import br.gov.es.participe.model.IsAuthenticatedBy;
@@ -97,7 +96,7 @@ public class ProposalEvaluationService {
 
     }
 
-    public Page<ProposalEvaluationResultDto> findAllCommentsForEvaluation(
+    public Page<ProposalEvaluationCommentResultDto> findAllCommentsForEvaluation(
         Boolean evaluationStatus, 
         Long localityId, 
         Long planItemAreaId, 
@@ -109,7 +108,7 @@ public class ProposalEvaluationService {
         Pageable pageable
     ) {
 
-        Page<ProposalEvaluationResultDto> commentsForEvaluation = proposalEvaluationRepository.findAllCommentsForEvaluation(
+        Page<ProposalEvaluationCommentResultDto> commentsForEvaluation = proposalEvaluationRepository.findAllCommentsForEvaluation(
             evaluationStatus, 
             localityId, 
             planItemAreaId, 
@@ -127,7 +126,7 @@ public class ProposalEvaluationService {
     public ProposalEvaluationResponseDto getProposalEvaluationData(Long proposalId) {
 
         log.info("Buscando dados de avaliacao de proposta por comentario com id={}", proposalId);
-        Optional<Evaluates> evaluatesRelationship = proposalEvaluationRepository.getEvaluatesRelationshipDataByCommentId(proposalId);
+        Optional<Evaluates> evaluatesRelationship = proposalEvaluationRepository.findEvaluatesRelationshipByCommentId(proposalId);
 
         if(evaluatesRelationship.isPresent()){
             log.info("Dados encontrados, retornando avaliacao de proposta com id={}", evaluatesRelationship.get().getId());
@@ -140,7 +139,7 @@ public class ProposalEvaluationService {
     }
 
     public ProposalEvaluationResponseDto createProposalEvaluation(ProposalEvaluationRequestDto proposalEvaluationRequestDto) {
-        
+
         log.info("Buscando pessoa com id={}", proposalEvaluationRequestDto.getPersonId());
         Person person = personService.find(proposalEvaluationRequestDto.getPersonId());
         
@@ -152,67 +151,55 @@ public class ProposalEvaluationService {
 
         newEvaluatesRelationship.setPerson(person);
         newEvaluatesRelationship.setComment(proposal);
-        newEvaluatesRelationship.setCreatedAt(new Date());
+        newEvaluatesRelationship.setActive(true);
+        newEvaluatesRelationship.setDeleted(false);
+        newEvaluatesRelationship.setDate(new Date());
+
+        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId());
 
         proposalEvaluationRepository.save(newEvaluatesRelationship);
 
         log.info("Avaliacao de proposta criada com sucesso, id={}", newEvaluatesRelationship.getId());
         return new ProposalEvaluationResponseDto(newEvaluatesRelationship);
-    
+
     }
 
-    public ProposalEvaluationResponseDto updateProposalEvaluation(Long evaluationId, ProposalEvaluationRequestDto proposalEvaluationRequestDto) {
+    public void deleteProposalEvaluation(ProposalEvaluationRequestDto proposalEvaluationRequestDto) {
 
-        log.info("Buscando dados de avaliacao de proposta com id={}", evaluationId);
-        Evaluates evaluatesRelationship = proposalEvaluationRepository.findById(evaluationId).orElseThrow(() -> new NotFoundException("Avaliação de Proposta"));
+        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId());
 
-        if(evaluatesRelationship.getPerson().getId() != proposalEvaluationRequestDto.getPersonId()){
-            log.info("Buscando pessoa com id={}", proposalEvaluationRequestDto.getPersonId());
-            Person person = personService.find(proposalEvaluationRequestDto.getPersonId());
-            evaluatesRelationship.setPerson(person);
+        log.info("Buscando pessoa com id={}", proposalEvaluationRequestDto.getPersonId());
+        Person person = personService.find(proposalEvaluationRequestDto.getPersonId());
+        
+        log.info("Buscando comentario com id={}", proposalEvaluationRequestDto.getProposalId());
+        Comment proposal = commentService.find(proposalEvaluationRequestDto.getProposalId());
+
+        log.info("Criando novo relacionamento");
+        Evaluates newEvaluatesRelationship = new Evaluates(proposalEvaluationRequestDto);
+
+        newEvaluatesRelationship.setPerson(person);
+        newEvaluatesRelationship.setComment(proposal);
+        newEvaluatesRelationship.setActive(true);
+        newEvaluatesRelationship.setDeleted(true);
+        newEvaluatesRelationship.setDate(new Date());
+
+        proposalEvaluationRepository.save(newEvaluatesRelationship);
+
+        log.info("Avaliacao de proposta excluída com sucesso, id={}", newEvaluatesRelationship.getId());
+
+    }
+
+    private void setOtherEvaluatesRelationshipsActiveAsFalse(Long proposalId) {
+
+        log.info("Buscando lista de avaliacoes de proposta relacionadas ao comentario com id={}", proposalId);
+        List<Evaluates> evaluatesRelationshipList = proposalEvaluationRepository.getEvaluatesRelationshipListByCommentId(proposalId);
+
+        if(!evaluatesRelationshipList.isEmpty()){
+            log.info("Atribuindo estado ativo falso aos relacionamentos");
+            evaluatesRelationshipList.forEach((evaluatesRelationship) ->evaluatesRelationship.setActive(false));
+
+            proposalEvaluationRepository.saveAll(evaluatesRelationshipList);
         }
-
-        if(evaluatesRelationship.getComment().getId() != proposalEvaluationRequestDto.getProposalId()){
-            log.info("Buscando comentario com id={}", proposalEvaluationRequestDto.getProposalId());
-            Comment proposal = commentService.find(proposalEvaluationRequestDto.getProposalId());
-            evaluatesRelationship.setComment(proposal);
-        }
-
-        log.info("Atualizando dados do relacionamento");
-        evaluatesRelationship.setIncludedInNextYearLOA(proposalEvaluationRequestDto.getIncludedInNextYearLOA());
-        evaluatesRelationship.setBudgetUnitId(proposalEvaluationRequestDto.getBudgetUnitId());
-        evaluatesRelationship.setBudgetUnitName(proposalEvaluationRequestDto.getBudgetUnitName());
-        evaluatesRelationship.setBudgetActionId(proposalEvaluationRequestDto.getBudgetActionId());
-        evaluatesRelationship.setBudgetActionName(proposalEvaluationRequestDto.getBudgetActionName());
-        evaluatesRelationship.setBudgetPlan(proposalEvaluationRequestDto.getBudgetPlan());
-        evaluatesRelationship.setReason(proposalEvaluationRequestDto.getReason());
-        evaluatesRelationship.setRepresenting(proposalEvaluationRequestDto.getRepresenting());
-        evaluatesRelationship.setUpdatedAt(new Date());
-
-        proposalEvaluationRepository.save(evaluatesRelationship);
-
-        log.info("Avaliacao de proposta atualizada com sucesso, id={}", evaluatesRelationship.getId());
-        return new ProposalEvaluationResponseDto(evaluatesRelationship);
-
-    }
-
-    public void deleteProposalEvaluation(Long evaluationId) {
-
-        log.info("Buscando dados de avaliacao de proposta com id={}", evaluationId);
-        Evaluates evaluatesRelationship = proposalEvaluationRepository.findById(evaluationId).orElseThrow(() -> new NotFoundException("Avaliação de Proposta"));
-
-        log.info("Removendo relacionamento do banco");
-        proposalEvaluationRepository.delete(evaluatesRelationship);
-
-    }
-
-    public void deleteProposalEvaluationByCommentId(Long commentId) {
-
-        log.info("Buscando dados de avaliacao de proposta com id={}", commentId);
-        Evaluates evaluatesRelationsip = proposalEvaluationRepository.getEvaluatesRelationshipDataByCommentId(commentId).orElseThrow(() -> new NotFoundException("Avaliação de Proposta"));
-
-        log.info("Removendo relacionamento do banco");
-        proposalEvaluationRepository.delete(evaluatesRelationsip);
 
     }
 
