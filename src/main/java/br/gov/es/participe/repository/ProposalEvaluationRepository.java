@@ -34,6 +34,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
             "WHERE id(conference) = $conferenceId " +
             "AND comment.type = 'prop' " +
             "AND comment.status = 'pub' " +
+            "AND (comment.duplicated = false OR comment.duplicated is null) " +
             "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
             "WITH comment, locality, planItem, area, eval, person " +
             SEARCH_FILTER +
