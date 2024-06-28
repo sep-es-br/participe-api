@@ -774,6 +774,8 @@ public class CommentService {
       comment = commentRepository.save(comment);
     }
 
+    comment.setDuplicated(moderationParamDto.getDuplicated());
+
     if (moderationParamDto.getPlanItem() != null) {
       comment.setPlanItem(null);
       comment = commentRepository.save(comment);

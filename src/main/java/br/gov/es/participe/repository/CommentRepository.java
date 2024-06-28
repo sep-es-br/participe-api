@@ -107,7 +107,7 @@ Integer countCommentByConference( @Param("id")Long id);
     "c.type AS type, p.name AS citizenName, m.name AS moderatorName, mb.time AS moderateTime, mb.finish AS moderated, " +
     "id(m) AS moderatorId, id(loc) AS localityId, loc.name AS localityName, c.from as from, " +
     "id(pi) AS planItemId, pi.name AS planItemName, id(si) AS structureItemId, si.name AS structureItemName, " +
-    "id(piArea) AS areaEstrategicaId, piArea.name AS nameAreaEstrategica "+
+    "id(piArea) AS areaEstrategicaId, piArea.name AS nameAreaEstrategica, c.duplicated AS duplicated "+
     "ORDER BY c.time")
 List<ModerationResultDto> findAllByStatus(
   @Param("status") String[] status,
@@ -126,7 +126,7 @@ List<ModerationResultDto> findAllByStatus(
     "OPTIONAL MATCH (loc)<-[locin:IS_LOCATED_IN*]-(loc2:Locality)-[oftp:OF_TYPE]->(locType:LocalityType) " +
     "RETURN DISTINCT id(com) AS commentId, com.status AS status, com.text AS text, com.time AS time, com.type AS type, " +
     "p.name AS citizenName, m.name AS moderatorName, loc.name AS localityName, locType.name AS localityType, " +
-    "com.from as from ,id(loc) AS localityId")
+    "com.from as from ,id(loc) AS localityId, com.duplicated AS duplicated")
 ModerationResultDto findModerationResultById( @Param("idComment") Long idComment, @Param("idConference") Long idConference);
 
 @Query("MATCH (comm:Comment)-[ab:ABOUT]->(pi1:PlanItem) " +

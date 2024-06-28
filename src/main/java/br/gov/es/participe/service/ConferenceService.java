@@ -199,10 +199,7 @@ public class ConferenceService {
     final boolean adm = person.getRoles() != null && person.getRoles().contains("Administrator");
     List<ConferenceDto> conferences = new ArrayList<>();
     this.conferenceRepository.findAllActives(new Date(), activeConferences || !adm).forEach(conference -> {
-      Evaluation evaluation = conference.getId() == null ? new Evaluation()
-      : this.evaluationService.findByIdConference(conference.getId()).orElse(null);
-      
-      conference.setEvaluation(evaluation);
+
       if(adm || (conference.getModerators() != null
                  && conference.getModerators().stream().anyMatch(m -> idPerson.equals(m.getId())))) {
         ConferenceDto dto = new ConferenceDto(conference);
@@ -220,6 +217,29 @@ public class ConferenceService {
         }
         conferences.add(dto);
       }
+    });
+    return conferences;
+  }
+
+  public List<ConferenceDto> findAllActivesEvaluation(Boolean activeConferences) {
+    List<ConferenceDto> conferences = new ArrayList<>();
+    this.conferenceRepository.findAllActives(new Date(), activeConferences).forEach(conference -> {
+      Evaluation evaluation = conference.getId() == null ? new Evaluation()
+      : this.evaluationService.findByIdConference(conference.getId()).orElse(null);
+      
+      conference.setEvaluation(evaluation);
+      ConferenceDto dto = new ConferenceDto(conference);
+      dto.setPlan(null);
+      dto.setLocalityType(null);
+      dto.setFileAuthentication(null);
+      dto.setFileParticipation(null);
+      Date begin = this.getDate(dto.getBeginDate());
+      Date end = this.getDate(dto.getEndDate());
+      dto.setIsActive(this.participeUtils.isActive(begin, end));
+
+
+      conferences.add(dto);
+      
     });
     return conferences;
   }
