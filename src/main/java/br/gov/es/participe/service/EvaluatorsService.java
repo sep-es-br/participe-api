@@ -58,19 +58,26 @@ public class EvaluatorsService {
 
     }
 
-    public String findOrganizationGuidBySectionOrRole(String sectionGuid, String roleGuid) {
+    public String findOrganizationGuidBySectionOrRole(List<EvaluatorRoleDto> evaluatorRoleDto) {
 
-        Optional<Role> role = findRoleByGuid(roleGuid);
+        Set<String> organizationGuids = new HashSet<>();
 
-        if(role.isEmpty()){
-            Optional<Section> section = findSectionWithNoRoleByGuid(sectionGuid);
-            if(section.isEmpty()){
-                throw new EvaluatorForbiddenException();
+        for( EvaluatorRoleDto evaluator: evaluatorRoleDto){
+            Optional<Role> role = findRoleByGuid(evaluator.getGuid());
+            if(role.isEmpty()){
+                Optional<Section> section = findSectionWithNoRoleByGuid(evaluator.getLotacao());
+                if(section.isPresent()){
+                    organizationGuids.add(evaluatorsRepository.findOrganizationRelatedToSectionBySectionGuid(evaluator.getLotacao()).getGuid());
+                }
             } else {
-               return evaluatorsRepository.findOrganizationRelatedToSectionBySectionGuid(sectionGuid).getGuid();
+                organizationGuids.add(evaluatorsRepository.findOrganizationRelatedToRoleByRoleGuid(evaluator.getGuid()).getGuid());
             }
-        } else {
-            return evaluatorsRepository.findOrganizationRelatedToRoleByRoleGuid(roleGuid).getGuid();
+
+        }
+        if(!organizationGuids.isEmpty()){
+            return String.join(",", organizationGuids);
+        }else{
+            throw new EvaluatorForbiddenException();
         }
 
     }

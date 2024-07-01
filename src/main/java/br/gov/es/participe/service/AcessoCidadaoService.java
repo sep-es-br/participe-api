@@ -498,7 +498,7 @@ public class AcessoCidadaoService {
   }
 
 
-  public EvaluatorRoleDto findRoleFromAcessoCidadaoAPIByAgentePublicoSub(String sub) {
+  public List<EvaluatorRoleDto> findRoleFromAcessoCidadaoAPIByAgentePublicoSub(String sub) {
     String token = null;
 
     try {
@@ -529,7 +529,7 @@ public class AcessoCidadaoService {
           evaluatorRolesDto.add(newEvalServerDto);
         });
 
-        return evaluatorRolesDto.get(0);
+        return evaluatorRolesDto;
 
       } else {
         logger.error("Não foi possível buscar o papel atrelado ao sub do agente.");

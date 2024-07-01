@@ -10,10 +10,8 @@ public class ModerationParamDto {
 	private Long planItem;
 	private Long locality;
 	private String classification;
+	private boolean duplicated;
 
-
-
-	
 
 	public Long getId() {
 		return id;
@@ -69,6 +67,14 @@ public class ModerationParamDto {
 
 	public void setClassification(String classification) {
 		this.classification = classification;
+	}
+
+	public boolean getDuplicated() {
+		return duplicated;
+	}
+
+	public void setDuplicated(boolean duplicated) {
+		this.duplicated = duplicated;
 	}
 
 
