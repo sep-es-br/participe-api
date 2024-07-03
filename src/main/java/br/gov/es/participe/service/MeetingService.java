@@ -526,18 +526,14 @@ public class MeetingService {
     }
   }
 
-  public Map<String, Boolean> preRegistrationIsOpenAndMeetingStarted(Long id){
+  public Boolean preRegistrationIsOpen(Long id){
 
-    Map<String, Boolean> preRegistration = new HashMap<>();
-
-    Boolean preRegistrationMeetingStarted = meetingRepository.preRegistrationIsOpenAndMeetingStarted(id);
-
-    Boolean preRegistrationMeetingClosed = meetingRepository.preRegistrationIsOpenAndMeetingClosed(id);
+    Boolean preRegistrationMeetingClosed = meetingRepository.preRegistrationIsOpen(id);
     
-    preRegistration.put("preRegistrationMeetingStarted", preRegistrationMeetingStarted);
-    preRegistration.put("preRegistrationMeetingClosed", preRegistrationMeetingClosed);
-
-    return preRegistration;
-
+    if(preRegistrationMeetingClosed != null){
+      return preRegistrationMeetingClosed;
+    }else{
+      return false;
+    }
   }
 }
