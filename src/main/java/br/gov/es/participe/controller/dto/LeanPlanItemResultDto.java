@@ -10,11 +10,14 @@ public class LeanPlanItemResultDto {
     String conferenceDescription;
     Long structureItemId;
     String structureItemName;
+    Long structureItemChildrenId;
+    String structureItemChildrenName;
     List<LeanPlanItem> planItems;
 
     public class LeanPlanItem {
         Long planItemId;
         String planItemName;
+        List<LeanPlanItem> planItemsChildren;
 
         public LeanPlanItem(Long planItemId, String planItemName) {
             this.planItemId = planItemId;
@@ -36,9 +39,18 @@ public class LeanPlanItemResultDto {
         public void setPlanItemName(String planItemName) {
             this.planItemName = planItemName;
         }
+
+        public List<LeanPlanItem> getPlanItemsChildren() {
+            return planItemsChildren;
+        }
+
+        public void setPlanItemsChildren(List<LeanPlanItem> planItemsChildren) {
+            this.planItemsChildren = planItemsChildren;
+        }
     }
 
     public LeanPlanItemResultDto() {
+        
     }
 
     public LeanPlanItemResultDto(Long conferenceId, String conferenceDescription, Long structureItemId, String structureItemName, List<LeanPlanItem> planItems) {
@@ -80,6 +92,23 @@ public class LeanPlanItemResultDto {
     public void setStructureItemName(String structureItemName) {
         this.structureItemName = structureItemName;
     }
+
+    public Long getStructureItemChildrenId() {
+        return structureItemChildrenId;
+    }
+
+    public void setStructureItemChildrenId(Long structureItemChildrenId) {
+        this.structureItemChildrenId = structureItemChildrenId;
+    }
+
+    public String getStructureItemChildrenName() {
+        return structureItemChildrenName;
+    }
+
+    public void setStructureItemChildrenName(String structureItemChildrenName) {
+        this.structureItemChildrenName = structureItemChildrenName;
+    }
+
 
     public List<LeanPlanItem> getPlanItems() {
         return planItems;
