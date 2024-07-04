@@ -99,7 +99,7 @@ Integer countCommentByConference( @Param("id")Long id);
     "WITH con, c, p, pi, plan, si, pi2, loc " +
     "WHERE (c.status IN $status OR $status = [] OR $status is NULL) AND (c.from = $from OR $from IS NULL) AND id(con)=$conferenceId " +
     "AND (id(loc) IN $localityIds OR $localityIds = [] OR $localityIds is NULL) " +
-    "AND ((id(pi) IN $planItemIds OR id(pi2) IN $planItemIds) OR $planItemIds = [] OR $planItemIds is NULL) " +
+    "AND (id(pi) IN $planItemIds OR $planItemIds = [] OR $planItemIds is NULL) " +
     "AND (id(si) IN $structureItemIds OR $structureItemIds = [] OR $structureItemIds is NULL) " +
     "OPTIONAL MATCH (c)-[mb:MODERATED_BY]->(m:Person) " +
     "OPTIONAL MATCH (plan)<-[:COMPOSES]-(piArea:PlanItem)-[]-(pi) " +
