@@ -1164,73 +1164,80 @@ public class PersonService {
     return personMeetingDtoPage;
   }
 
-  public Page<PersonMeetingDto> findPersonsCheckedInOnMeeting(Long meetingId, List<Long> localities, String name,
-      Pageable pageable) {
-    if (meetingId == null) {
-      throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
-    }
+  public Page<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilterPaged(Long meetingId, List<Long> localities, String name, String filter, Pageable pageable) {
+    List<PersonMeetingFilteredDto> fullList = findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filter);
 
-    Page<PersonMeetingDto> personMeetingDtoPage = personRepository.findPersonsCheckedInOnMeeting(
-        meetingId,
-        localities, name, pageable);
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), fullList.size());
 
-    personMeetingDtoPage.forEach(element -> {
-      LocalityRegionalizableDto localityInfo;
-      localityInfo = personRepository.findMostRecentLocality(
-          element.getPersonId(),
-          meetingId);
-      if (localityInfo == null) {
-        localityInfo = personRepository.findLocalityIfThereIsNoLogin(
-            element.getPersonId(),
-            meetingId);
+    List<PersonMeetingFilteredDto> sublist = fullList.subList(start, end);
+
+    return new PageImpl<>(sublist, pageable, fullList.size());
+  }
+
+
+  public Map<String, Long> countTotalParticipantsInMeeting(Long meetingId, List<Long> localities, String name, String filter) {
+    Map<String, Long> count = new HashMap<>();
+
+    List<PersonMeetingFilteredDto> personMeetingFilteredDtoList = findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filter);
+
+    final long[] totalCheckedIn = {0L};
+
+    final long[] totalPreRegistered = {0L};
+
+    personMeetingFilteredDtoList.iterator().forEachRemaining(element -> {
+      if (element.getCheckedInDate() != null) {
+        totalCheckedIn[0]++;
       }
-      if (localityInfo != null) {
-        element.setLocality(localityInfo.getLocality());
-        element.setRegionalizable(localityInfo.getRegionalizable());
-        element.setSuperLocalityId(localityInfo.getSuperLocalityId());
-        element.setSuperLocality(localityInfo.getSuperLocality());
+
+      if (element.getPreRegisteredDate() != null) {
+        totalPreRegistered[0]++;
       }
     });
 
-    return personMeetingDtoPage;
+    count.put("checkedIn", totalCheckedIn[0]);
+    count.put("preRegistered", totalPreRegistered[0]);
+    return count;
   }
 
-  public Page<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilter(Long meetingId, List<Long> localities, String name, String filter, Pageable pageable) {
+  private List<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilter(Long meetingId, List<Long> localities, String name, String filter) {
     if (meetingId == null) {
       throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
     }
 
-    Page<PersonMeetingFilteredDto> personMeetingFilteredDtoPage;
+    List<PersonMeetingFilteredDto> personMeetingFilteredDtoList;
 
     switch (filter) {
       case "pres":
-       personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithCheckIn(
+       personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithCheckIn(
          meetingId,
-         localities, name, pageable);
+         localities, name);
         break;
 
       case "prereg":
-        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistration(meetingId, localities, name, pageable);
+        personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithPreRegistration(meetingId, localities, name);
         break;
       
       case "prereg_pres":
-        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistrationAndCheckIn(meetingId, localities, name, pageable);
+        personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithPreRegistrationAndCheckIn(meetingId, localities, name);
         break;
       
       case "prereg_notpres":
-        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(meetingId, localities, name, pageable);
+        personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(meetingId, localities, name);
         break;
         
       case "notprereg_pres":
-        personMeetingFilteredDtoPage = personRepository.findPersonsOnMeetingWithCheckInAndNoPreRegistration(meetingId, localities, name, pageable);
+        personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithCheckInAndNoPreRegistration(meetingId, localities, name);
         break;
       
       default:
-        personMeetingFilteredDtoPage = null;
+        personMeetingFilteredDtoList = null;
         break;
     }
 
-    personMeetingFilteredDtoPage.forEach(element -> {
+	  assert personMeetingFilteredDtoList != null;
+
+	  personMeetingFilteredDtoList.iterator().forEachRemaining(element -> {
       element.setCheckedIn(element.getCheckedInDate() != null);
       element.setPreRegistered(element.getPreRegisteredDate() != null);
 
@@ -1251,11 +1258,7 @@ public class PersonService {
       }
     });
 
-    return personMeetingFilteredDtoPage;
-  }
-
-  public Long findPeopleQuantityOnMeeting(Long meetingId) {
-    return personRepository.findPeopleQuantityOnMeeting(meetingId);
+    return personMeetingFilteredDtoList;
   }
 
   public Optional<Person> findPersonIfParticipatingOnMeetingPresentially(Long personId, Date date, Long conferenceId) {

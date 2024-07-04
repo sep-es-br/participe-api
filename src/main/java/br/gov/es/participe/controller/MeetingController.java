@@ -252,20 +252,25 @@ public class MeetingController {
       @RequestParam(name = "filter", required = true) String filter,
       @ApiIgnore Pageable page) {
 
-      Page<PersonMeetingFilteredDto> personMeetingFilteredDto = personService.findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filter, page);
-      return ResponseEntity.ok().body(personMeetingFilteredDto);  
+      Page<PersonMeetingFilteredDto> personMeetingFilteredDto = personService.findPersonOnMeetingByAttendanceFilterPaged(meetingId, localities, name, filter, page);
+
+      return ResponseEntity.ok().body(personMeetingFilteredDto);
     
   }
 
-  @GetMapping("/{meetingId}/participants/total")
-  public ResponseEntity<Long> findMeetingParticipantsNumber(
-    @PathVariable Long meetingId
+  @GetMapping("/{meetingId}/total")
+  public ResponseEntity<Map<String, Long>> countTotalParticipantsInMeeting(
+          @PathVariable Long meetingId,
+          @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
+          @RequestParam(name = "name", required = false) String name,
+          @RequestParam(name = "filter", required = true) String filter
   ) {
 
-    Long participantsQuantity = personService.findPeopleQuantityOnMeeting(meetingId);
-    return ResponseEntity.ok().body(participantsQuantity);
-  }
+    Map<String, Long> totalParticipants = personService.countTotalParticipantsInMeeting(meetingId, localities, name, filter);
 
+    return ResponseEntity.ok().body(totalParticipants);
+
+  }
   
   @Transactional
   @DeleteMapping("/{meetingId}/remove-participation/{personId}")
