@@ -202,30 +202,6 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
           "lt.name AS regionalizable " +
           "ORDER BY p.name DESC LIMIT 1")
   LocalityRegionalizableDto findLocalityIfThereIsNoLogin(@Param("idPerson")Long idPerson, @Param("idMeeting")Long idMeeting);
-  
-  @Query(
-      value = "MATCH (m:Meeting) " +
-          "WHERE id(m) = $idMeeting " +
-          "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
-          "WHERE ($name IS NULL OR toLower(p.name) CONTAINS toLower($name)) " +
-          "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
-          "WITH p,m,cia,loc " +
-          "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
-          "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, " +
-          "p.telephone AS telephone, cia.time AS checkedInDate",
-      countQuery = "MATCH (m:Meeting) " +
-          "WHERE id(m) = $idMeeting " +
-          "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
-          "WHERE ($name IS NULL OR toLower(p.name) CONTAINS $name) " +
-          "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) " +
-          "WITH p,m,cia,loc " +
-          "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
-          "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, " +
-          "p.telephone AS telephone, cia.time AS checkedInDate " +
-          "RETURN COUNT(*)"
-  )
-  Page<PersonMeetingDto> findPersonsCheckedInOnMeeting(@Param("idMeeting")Long idMeeting, @Param("localities")List<Long> localities, @Param("name")String name,
-                                                       Pageable pageable);
 
     @Query(
         value = "MATCH (m:Meeting) " +
@@ -250,7 +226,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "cia.time AS checkedInDate, pr.created AS preRegisteredDate " +
             "RETURN COUNT(*)"
     )
-    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable);
+    List<PersonMeetingFilteredDto> findPersonsOnMeetingWithCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name);
 
 
     @Query(
@@ -276,8 +252,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "pr.created AS preRegisteredDate, cia.time AS checkedInDate " +
             "RETURN COUNT(*)"
     )
-    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistration(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable);
-    
+    List<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistration(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name);
+
     @Query(
         value = "MATCH (m:Meeting) " + 
             "WHERE id(m) = $idMeeting " +
@@ -301,8 +277,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "pr.created AS preRegisteredDate, cia.time AS checkedInDate " +
             "RETURN COUNT(*)"
     )
-    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistrationAndCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable); 
-    
+    List<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistrationAndCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name);
+
     @Query(
         value = "MATCH (m:Meeting) " + 
             "WHERE id(m) = $idMeeting " +
@@ -326,8 +302,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "pr.created AS preRegisteredDate " +
             "RETURN COUNT(*)"
     )
-    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable); 
-    
+    List<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name);
+
     @Query(
         value = "MATCH (m:Meeting) " + 
             "WHERE id(m) = $idMeeting " +
@@ -351,17 +327,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "cia.time AS checkedInDate " +
             "RETURN COUNT(*)"
     )
-    Page<PersonMeetingFilteredDto> findPersonsOnMeetingWithCheckInAndNoPreRegistration(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name, Pageable pageable);
-  
-    @Query(
-            "MATCH (m:Meeting) " +
-            "WHERE id(m) = $idMeeting " +
-            "MATCH (p:Person)-[cia:CHECKED_IN_AT]->(m) " +
-            "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, " +
-            "p.telephone AS telephone, cia.time AS checkedInDate " +
-            "RETURN COUNT(*)"
-    )
-    Long findPeopleQuantityOnMeeting(@Param("idMeeting")Long idMeeting);
+    List<PersonMeetingFilteredDto> findPersonsOnMeetingWithCheckInAndNoPreRegistration(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name);
 
     @Query(
         " MATCH (conf: Conference)<-[:OCCURS_IN]-(m:Meeting)<-[cia:CHECKED_IN_AT]-(p:Person) " +
