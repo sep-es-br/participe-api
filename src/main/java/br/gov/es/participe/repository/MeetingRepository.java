@@ -98,6 +98,14 @@ Boolean selfCheckInIsOpen(@Param("id") Long id);
 "where id(m)=$id " + 
 "RETURN datetime(m.endDate) > datetime()"
 )
-Boolean preRegistrationIsOpen(@Param("id") Long id);
+Boolean preRegistrationIsOpenAndMeetingClosed(@Param("id") Long id);
+
+@Query("MATCH (m:Meeting) " + 
+"where id(m)=$id " + 
+"RETURN datetime(m.beginDate) > datetime()"
+)
+Boolean preRegistrationIsOpenAndMeetingStarted(@Param("id") Long id);
 
 }
+
+
