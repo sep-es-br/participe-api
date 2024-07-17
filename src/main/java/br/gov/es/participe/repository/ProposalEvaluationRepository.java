@@ -39,12 +39,18 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
             "WITH comment, locality, planItem, area, eval, person " +
             SEARCH_FILTER +
             "RETURN DISTINCT id(comment) AS commentId, " +
-            "(NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) AS evaluationStatus, " +
             "locality.name AS localityName, planItem.name AS planItemName, " +
             "area.name AS planItemAreaName, comment.text AS description, " +
-            "collect(DISTINCT eval.representing) AS evaluatorOrgsNameList, " +
-            "person.name AS evaluatorName",
-        countQuery = 
+            "CASE (NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) " +
+                  "WHEN true THEN true ELSE false END AS evaluationStatus, " +
+            "CASE (NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) " +
+                  "WHEN true THEN collect(DISTINCT eval.representing) ELSE NULL END AS evaluatorOrgsNameList, " +
+            "CASE (NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) " +
+                  "WHEN true THEN person.name ELSE NULL END AS evaluatorName, " +
+            "CASE (NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) " +
+                  "AND eval.includedInNextYearLOA = true " +
+                    "WHEN true THEN true ELSE false END AS loaIncluded",
+        countQuery =
             "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
             "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
             "WHERE id(conference) = $conferenceId " +
