@@ -15,6 +15,7 @@ public class ProposalEvaluationCommentResultDto {
     private String description;
     private List<String> evaluatorOrgsNameList;
     private String evaluatorName;
+    private Boolean loaIncluded;
 
     public Long getCommentId() {
         return commentId;
@@ -78,5 +79,13 @@ public class ProposalEvaluationCommentResultDto {
 
     public void setEvaluatorName(String evaluatorName) {
         this.evaluatorName = evaluatorName;
+    }
+
+    public Boolean getLoaIncluded() {
+        return loaIncluded;
+    }
+
+    public void setLoaIncluded(Boolean loaIncluded) {
+        this.loaIncluded = loaIncluded;
     }
 }
