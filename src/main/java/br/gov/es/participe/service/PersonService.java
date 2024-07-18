@@ -18,10 +18,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.apache.commons.text.similarity.JaroWinklerSimilarity;
+import javax.servlet.http.HttpSession;
 
 @Service
 @SuppressWarnings({ "unused" })
@@ -870,15 +873,15 @@ public class PersonService {
       return ResponseEntity.status(422).body(msg);
     }
 
-    boolean notHaveParticipeLoginInThisConference = this.validate(personParam.getContactEmail(), null, SERVER);
+    boolean notHaveAcessoCidadaoLoginInThisConference = this.validate(personParam.getContactEmail(), null, ACESSOCIDADAO);
     Boolean typeAuthenticationCpf = storePersonValidation(personParam);
     log.info(
-      "notHaveParticipeLoginInThisConference={} para person={}",
-      notHaveParticipeLoginInThisConference,
+      "notHaveAcessoCidadaoLoginInThisConference={} para person={}",
+      notHaveAcessoCidadaoLoginInThisConference,
       personParam.getContactEmail()
     );
-    if (notHaveParticipeLoginInThisConference) {
-      Person person = createParticipeLogin(personParam, makeLogin, typeAuthenticationCpf);
+    if (notHaveAcessoCidadaoLoginInThisConference) {
+      Person person = createAcessoCidadaoLogin(personParam, makeLogin, typeAuthenticationCpf);
       return ResponseEntity.status(200).body(new PersonDto(person));
     }
 
@@ -895,6 +898,63 @@ public class PersonService {
     return ResponseEntity.status(400).body(msg);
   }
 
+  private Person createAcessoCidadaoLogin(PersonParamDto personParam, Boolean makeLogin, Boolean typeAuthenticationCpf){
+    Person person = this.save(new Person(personParam, typeAuthenticationCpf), false);
+
+    final Long id = person.getId();
+    final SelfDeclarationParamDto paramSelfDeclaration = personParam.getSelfDeclaration();
+    final Long conference = paramSelfDeclaration.getConference();
+
+    Objects.requireNonNull(paramSelfDeclaration, PERSON_ERROR_SELFDECLARATION_NOT_SPECIFIED);
+    Objects.requireNonNull(conference, "Conference id must be not null");
+    Objects.requireNonNull(paramSelfDeclaration.getLocality(), "Locality id must be not null");
+    Objects.requireNonNull(id, "Person id must be not null");
+
+    final SelfDeclaration declaration = this.selfDeclarationService.findByPersonAndConference(id, conference);
+    Optional<SelfDeclaration> selfDeclarationOptional = Optional.ofNullable(declaration);
+
+    SelfDeclaration selfDeclaration;
+
+    if (selfDeclarationOptional.isPresent()) {
+      log.info(
+        "SelfDeclaration id={} encontrada atualizando com localityId={}",
+        selfDeclarationOptional.get().getId(),
+        paramSelfDeclaration.getLocality()
+      );
+      selfDeclaration = this.selfDeclarationService.updateLocality(
+              selfDeclarationOptional.get(),
+          paramSelfDeclaration.getLocality()
+      );
+    } else {
+      selfDeclaration = new SelfDeclaration(conference, paramSelfDeclaration.getLocality(), id);
+      selfDeclaration.setAnswerSurvey(false);
+
+      log.info(
+        "SelfDeclaration com id={} não encontrada. Criando com localityId={}, conferenceId={}, personId={}, answerSurvey={}, receiveInformational={}",
+        selfDeclaration.getId(),
+        paramSelfDeclaration.getLocality(),
+        conference,
+        id,
+        selfDeclaration.getAnswerSurvey()
+      );
+      selfDeclaration = this.selfDeclarationService.save(selfDeclaration);
+    }
+
+    Objects.requireNonNull(selfDeclaration.getId(), "Failed to create or update self declaration");
+
+    this.createRelationshipWithAuthService(
+        new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
+            .password(null)
+            .server(ACESSOCIDADAO)
+            .serverId(personParam.getSub())
+            .conferenceId(null)
+            .resetPassword(false)
+            .makeLogin(false)
+            .typeAuthentication(OAUTH)
+            .build());
+
+    return person;
+  }
 
   private Person createParticipeLogin(PersonParamDto personParam, Boolean makeLogin, Boolean typeAuthenticationCpf) {
     Person person = this.save(new Person(personParam, typeAuthenticationCpf), false);
@@ -1136,33 +1196,69 @@ public class PersonService {
     return ResponseEntity.status(422).body(msg);
   }
 
-  public Page<PersonMeetingDto> findPersonForMeeting(Long meetingId, String name, Pageable pageable) {
+  public Page<PersonMeetingDto> findPersonForMeeting(Long meetingId, String name, Pageable pageable,
+      HttpSession session) {
     if (meetingId == null) {
       throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
     }
 
-    Page<PersonMeetingDto> personMeetingDtoPage = personRepository.findPersonForMeeting(meetingId, name, pageable);
+    List<PersonMeetingDto> personMeetingDtoList = personRepository.findPeopleScore(meetingId, name);
 
-    personMeetingDtoPage.forEach(element -> {
-      element.setAuthTypeCpf(element.getEmail().endsWith("@cpf"));
+    if (!name.isEmpty()) {
+      acessoCidadaoService.findPublicAgentsFromAcessoCidadaoAPIByCpf("14323366736");
+      List<PublicAgentDto> publicAgentsData = (List<PublicAgentDto>) session.getAttribute("publicAgents");
 
-      LocalityRegionalizableDto localityInfo = personRepository.findMostRecentLocality(element.getPersonId(),
-          meetingId);
+      Set<String> emailSet = new HashSet<>();
+      String cleanName = cleanSimilarToApoc(name);
+      String[] cleanNameList = cleanName.split(" ");
+      String[] cleanEmail = name.split("@");
 
-      if (localityInfo == null) {
-        localityInfo = personRepository.findLocalityIfThereIsNoLogin(element.getPersonId(), meetingId);
+      for (PersonMeetingDto personMeetingDto : personMeetingDtoList) {
+        emailSet.add(personMeetingDto.getEmail());
       }
-
-      if (localityInfo != null) {
-        element.setLocality(localityInfo.getLocality());
-        element.setRegionalizable(localityInfo.getRegionalizable());
-        element.setSuperLocality(localityInfo.getSuperLocality());
-        element.setSuperLocalityId(localityInfo.getSuperLocalityId());
+      if (publicAgentsData != null) {
+        for (PublicAgentDto publicAgentDto : publicAgentsData) {
+          String nomePublicAgent = publicAgentDto.getCleanName();
+          Boolean containsName = containsAll(cleanNameList, nomePublicAgent, false);
+          Boolean containsEmail = containsAll(cleanEmail, publicAgentDto.getEmail().toLowerCase(), true);
+          if (containsName || containsEmail) {
+            if (!emailSet.contains(publicAgentDto.getEmail())) {
+              PersonMeetingDto personMeetingDto = convertToPersonMeetingDto(publicAgentDto);
+              personMeetingDtoList.add(personMeetingDto);
+              emailSet.add(publicAgentDto.getEmail());
+            }
+          }
+        }
       }
+      Collections.sort(personMeetingDtoList, new Comparator<PersonMeetingDto>() {
+        @Override
+        public int compare(PersonMeetingDto o1, PersonMeetingDto o2) {
+            return o1.getName().compareToIgnoreCase(o2.getName());
+        }
     });
 
+      int start = (int) pageable.getOffset();
+      int end = Math.min((start + pageable.getPageSize()), personMeetingDtoList.size());
+      List<PersonMeetingDto> combinedSublist = personMeetingDtoList.subList(start, end);
+      Page<PersonMeetingDto> combinedPage = new PageImpl<>(combinedSublist, pageable, personMeetingDtoList.size());
+      return combinedPage;
+    }
+
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), personMeetingDtoList.size());
+    List<PersonMeetingDto> sublist = personMeetingDtoList.subList(start, end);
+    Page<PersonMeetingDto> personMeetingDtoPage = new PageImpl<>(sublist, pageable, personMeetingDtoList.size());
     return personMeetingDtoPage;
   }
+
+  private PersonMeetingDto convertToPersonMeetingDto(PublicAgentDto publicAgentDto) {
+    PersonMeetingDto personMeetingDto = new PersonMeetingDto();
+    personMeetingDto.setSub(publicAgentDto.getSub());
+    personMeetingDto.setName(publicAgentDto.getName().toLowerCase());
+    personMeetingDto.setEmail(publicAgentDto.getEmail());
+    return personMeetingDto;
+}
+
 
   public Page<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilterPaged(Long meetingId, List<Long> localities, String name, String filter, Pageable pageable) {
     List<PersonMeetingFilteredDto> fullList = findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filter);
@@ -1280,4 +1376,26 @@ public class PersonService {
     return this.find(idPerson);
   }
 
+  public static String cleanSimilarToApoc(String input) {
+
+    String semAcentos = Normalizer.normalize(input, Normalizer.Form.NFD)
+        .replaceAll("[^\\p{ASCII}]", "");
+
+    String semEspeciais = semAcentos.replaceAll("[^a-zA-Z0-9\\s]", "");
+
+    return semEspeciais.toLowerCase();
+  }
+
+  public static boolean containsAll(String[] substrings, String target, Boolean isEmail) {
+
+    if(isEmail){
+      return target.contains(substrings[0].toLowerCase());
+    }
+    for (String substring : substrings) {
+      if (!target.contains(substring)) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

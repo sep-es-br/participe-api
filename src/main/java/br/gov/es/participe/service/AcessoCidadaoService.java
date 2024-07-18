@@ -7,6 +7,7 @@ import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
 import br.gov.es.participe.controller.dto.OrganizationUnitsDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
+import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
 import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.controller.dto.UnitRolesDto;
@@ -41,6 +42,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -496,6 +498,79 @@ public class AcessoCidadaoService {
         throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
     }
   }
+
+  public List<PublicAgentDto> findPublicAgentsFromAcessoCidadaoAPI(){
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (IOException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+
+    String url = acessocidadaoUriWebApi.concat("conjunto/" + GUID_GOVES + "/agentesPublicos");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+      .header(AUTHORIZATION, BEARER + token)
+      .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try{
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    
+    if(response.statusCode() == 200) {
+      List<PublicAgentDto> publicAgentDtos =  mapper.readValue(response.body(), new TypeReference<List<PublicAgentDto>>() {
+      });
+
+      return publicAgentDtos;
+      } else {
+        logger.error("Não foi possível buscar os agentes publicos atrelado ao Guid GOVES.");
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+      }
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Não foi possível buscar os agentes publicos atrelado ao Guid GOVES.");
+    }
+  }
+
+  public List<PublicAgentDto> findPublicAgentsFromAcessoCidadaoAPIByCpf(String cpf){
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (IOException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+
+    String url = acessocidadaoUriWebApi.concat("cidadao/" + cpf);
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+      .header(AUTHORIZATION, BEARER + token)
+      .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try{
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    
+    if(response.statusCode() == 200) {
+      List<PublicAgentDto> publicAgentDtos =  mapper.readValue(response.body(), new TypeReference<List<PublicAgentDto>>() {
+      });
+
+      return publicAgentDtos;
+      } else {
+        logger.error("Não foi possível buscar os agentes publicos atrelado ao Guid GOVES.");
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+      }
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Não foi possível buscar os agentes publicos atrelado ao Guid GOVES.");
+    }
+  }
+
 
 
   public List<EvaluatorRoleDto> findRoleFromAcessoCidadaoAPIByAgentePublicoSub(String sub) {

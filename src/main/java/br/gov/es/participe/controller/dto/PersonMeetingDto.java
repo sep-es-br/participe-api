@@ -2,8 +2,6 @@ package br.gov.es.participe.controller.dto;
 
 import org.springframework.data.neo4j.annotation.QueryResult;
 
-import br.gov.es.participe.model.AuthService;
-
 import java.util.Date;
 import java.util.List;
 
@@ -22,6 +20,7 @@ public class PersonMeetingDto {
     private String cpf;
     private Boolean isAuthTypeCpf;
     private List<String> authName;
+    private String sub;
 
     public List<String> getAuthName() {
         return authName;
@@ -125,5 +124,13 @@ public class PersonMeetingDto {
 
     public void setAuthTypeCpf(Boolean authTypeCpf) {
         isAuthTypeCpf = authTypeCpf;
+    }
+
+    public String getSub() {
+        return sub;
+    }
+
+    public void setSub(String sub) {
+        this.sub = sub;
     }
 }
