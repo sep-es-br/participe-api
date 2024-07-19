@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java.io.IOException;
 import java.text.Normalizer;
@@ -23,7 +25,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.apache.commons.text.similarity.JaroWinklerSimilarity;
 import javax.servlet.http.HttpSession;
 
 @Service
@@ -1202,20 +1203,50 @@ public class PersonService {
       throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
     }
 
-    List<PersonMeetingDto> personMeetingDtoList = personRepository.findPeopleScore(meetingId, name);
+    List<PersonMeetingDto> personMeetingDtoList = personRepository.findPersonByNameForMeeting(meetingId, name);
 
     if (!name.isEmpty()) {
-      acessoCidadaoService.findPublicAgentsFromAcessoCidadaoAPIByCpf("14323366736");
       List<PublicAgentDto> publicAgentsData = (List<PublicAgentDto>) session.getAttribute("publicAgents");
 
+      if (this.onlyNumbers(name)) {
+        PublicAgentDto publicAgentDto = acessoCidadaoService.findTheAgentPublicSubByCpfInAcessoCidadaoAPI(name);
+
+        if (publicAgentDto.getSub() != null) {
+          PersonMeetingDto personSubMeetingDto = personRepository.findPersonByIdForMeeting(meetingId, publicAgentDto.getSub());
+          if(personSubMeetingDto != null){
+            personMeetingDtoList.add(personSubMeetingDto);
+            return new PageImpl<>(personMeetingDtoList, pageable, personMeetingDtoList.size());
+          }
+            PublicAgentDto publicAgent = acessoCidadaoService.findAgentPublicBySubInAcessoCidadaoAPI(publicAgentDto.getSub());
+            PersonMeetingDto personMeetingDto = convertToPersonMeetingDto(publicAgent);
+            personMeetingDtoList.add(personMeetingDto);
+            return new PageImpl<>(personMeetingDtoList, pageable, personMeetingDtoList.size());
+        }
+
+        PublicAgentDto personDto = acessoCidadaoService.findSubFromPersonInAcessoCidadaoAPIByCpf(name);
+
+        PersonMeetingDto personSubMeetingDto = personRepository.findPersonByIdForMeeting(meetingId, personDto.getSub());
+
+        if(personSubMeetingDto != null){
+          personMeetingDtoList.add(personSubMeetingDto);
+          return new PageImpl<>(personMeetingDtoList, pageable, personMeetingDtoList.size());
+        }
+        personDto = acessoCidadaoService.findThePersonEmailBySubInAcessoCidadaoAPI(personDto);
+        personDto.setName("<Novo Usuário>");
+        PersonMeetingDto personMeetingDto = convertToPersonMeetingDto(personDto);
+        personMeetingDtoList.add(personMeetingDto);
+        return new PageImpl<>(personMeetingDtoList, pageable, personMeetingDtoList.size());
+
+      }
+
       Set<String> emailSet = new HashSet<>();
+      for (PersonMeetingDto personMeetingDto : personMeetingDtoList) {
+        emailSet.add(personMeetingDto.getEmail());
+      }
       String cleanName = cleanSimilarToApoc(name);
       String[] cleanNameList = cleanName.split(" ");
       String[] cleanEmail = name.split("@");
 
-      for (PersonMeetingDto personMeetingDto : personMeetingDtoList) {
-        emailSet.add(personMeetingDto.getEmail());
-      }
       if (publicAgentsData != null) {
         for (PublicAgentDto publicAgentDto : publicAgentsData) {
           String nomePublicAgent = publicAgentDto.getCleanName();
@@ -1233,9 +1264,9 @@ public class PersonService {
       Collections.sort(personMeetingDtoList, new Comparator<PersonMeetingDto>() {
         @Override
         public int compare(PersonMeetingDto o1, PersonMeetingDto o2) {
-            return o1.getName().compareToIgnoreCase(o2.getName());
+          return o1.getName().compareToIgnoreCase(o2.getName());
         }
-    });
+      });
 
       int start = (int) pageable.getOffset();
       int end = Math.min((start + pageable.getPageSize()), personMeetingDtoList.size());
@@ -1398,4 +1429,11 @@ public class PersonService {
     }
     return true;
   }
+
+  public boolean onlyNumbers(String string) {
+        String padrao = "^\\d+$";
+        Pattern pattern = Pattern.compile(padrao);
+        Matcher matcher = pattern.matcher(string);
+        return matcher.matches();
+    }
 }

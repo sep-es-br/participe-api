@@ -4,17 +4,18 @@ import java.text.Normalizer;
 
 import org.apache.catalina.valves.rewrite.InternalRewriteMap.LowerCase;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PublicAgentDto {
 
-    @JsonProperty("Sub")
+    @JsonAlias({"sub", "Sub"})
     private String sub;
 
     @JsonProperty("Nome")
     private String name;
 
-    @JsonProperty("Email")
+    @JsonAlias({"email", "Email"})
     private String email;
 
     @JsonProperty("SubDescontinuado")
