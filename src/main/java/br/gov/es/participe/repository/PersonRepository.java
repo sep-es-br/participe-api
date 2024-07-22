@@ -187,6 +187,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
                "WHERE (au.server = 'AcessoCidadao' OR au.server = 'Google') AND (" +
                "ALL(x IN cs WHERE apoc.text.clean(p.name) CONTAINS apoc.text.clean(x)) " +
                "OR ALL(x IN cs WHERE apoc.text.clean(p.contactEmail) CONTAINS apoc.text.clean(x))) " +
+               "AND ($sub IS NULL OR aut.idByAuth = $sub ) " +
+               "AND ($cEmail IS NULL OR p.contactEmail = $cEmail) " +
                "OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m:Meeting) " +
                "WHERE id(m) = mId " +
                "CALL { " +
@@ -210,36 +212,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
                "       cia.time AS checkedInDate, " +
                "       COLLECT(DISTINCT au.server) AS authName " +
                "ORDER BY name ASC")
-    List<PersonMeetingDto> findPersonByNameForMeeting(@Param("idMeeting")Long idMeeting, @Param("name")String name);
-
-    @Query(
-    "WITH $idMeeting AS mId " +
-               "MATCH (au:AuthService)<-[aut:IS_AUTHENTICATED_BY]-(p:Person) " +
-               "WHERE (au.server = 'AcessoCidadao' OR au.server = 'Google') AND (" +
-               "aut.idByAuth = $sub) " +
-               "OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m:Meeting) " +
-               "WHERE id(m) = mId " +
-               "CALL { " +
-               "    WITH p " +
-               "    OPTIONAL MATCH (p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(c:Conference), " +
-               "    (sd)-[ab:AS_BEING_FROM]->(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) " +
-               "    OPTIONAL MATCH (l)-[:IS_LOCATED_IN]->(sl:Locality) " +
-               "    RETURN l.name AS locality, sl.name AS superLocality, id(sl) AS superLocalityId, lt.name AS regionalizable " +
-               "    ORDER BY c.beginDate DESC LIMIT 1 " +
-               "} " +
-               "RETURN DISTINCT " +
-               "       id(p) AS personId, " +
-               "       locality, " +
-               "       superLocality, " +
-               "       superLocalityId, " +
-               "       regionalizable, " +
-               "       toLower(p.name) AS name, " +
-               "       p.contactEmail AS email, " +
-               "       p.telephone AS telephone, " +
-               "       cia IS NOT NULL AS checkedIn, " +
-               "       cia.time AS checkedInDate, " +
-               "       COLLECT(DISTINCT au.server) AS authName ")
-    PersonMeetingDto findPersonByIdForMeeting(@Param("idMeeting")Long idMeeting, @Param("sub")String sub);
+    List<PersonMeetingDto> findPersonByNameForMeeting(@Param("idMeeting")Long idMeeting, @Param("name")String name, @Param("sub")String sub, @Param("cEmail")String cEmail);
   
     @Query(
       "MATCH (m:Meeting)-[:OCCURS_IN]->(c:Conference) " +
