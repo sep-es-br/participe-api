@@ -2,9 +2,7 @@ package br.gov.es.participe;
 
 import br.gov.es.participe.configuration.ApplicationProperties;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
-import br.gov.es.participe.service.AcessoCidadaoService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -33,14 +31,10 @@ import java.util.TimeZone;
 		UserDetailsServiceAutoConfiguration.class
 })
 @EnableScheduling
-@ComponentScan({"br.gov.es.participe"})
 public class ParticipeApplication implements ServletContextListener, HttpSessionListener {
 
 	@Value("${app.default-timezone}")
 	private String timeZone;
-
-	@Autowired
-    private AcessoCidadaoService acessoCidadaoService;
 
 	private static List<PublicAgentDto> publicAgentsData;
 
@@ -48,7 +42,6 @@ public class ParticipeApplication implements ServletContextListener, HttpSession
 	public void init(){
 		// Setting Spring Boot SetTimeZone
 		TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
-		publicAgentsData = acessoCidadaoService.findPublicAgentsFromAcessoCidadaoAPI();
 	}
 
 	public static void main(String[] args) {
@@ -68,8 +61,11 @@ public class ParticipeApplication implements ServletContextListener, HttpSession
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
-		// TODO Auto-generated method stub
 		HttpSessionListener.super.sessionDestroyed(se);
+	}
+
+	public static void setPublicAgentsData(List<PublicAgentDto> publicAgentsData) {
+		ParticipeApplication.publicAgentsData = publicAgentsData;
 	}
 
 }
