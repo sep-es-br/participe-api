@@ -1231,7 +1231,10 @@ public class PersonService {
           personMeetingDtoList.add(personSubMeetingDto);
           return new PageImpl<>(personMeetingDtoList, pageable, personMeetingDtoList.size());
         }
-        personDto = acessoCidadaoService.findThePersonEmailBySubInAcessoCidadaoAPI(personDto);
+
+        if(personDto.getSub() != null){
+          personDto = acessoCidadaoService.findThePersonEmailBySubInAcessoCidadaoAPI(personDto);
+        }
         personDto.setName("<Novo Usuário>");
         PersonMeetingDto personMeetingDto = convertToPersonMeetingDto(personDto);
         personMeetingDtoList.add(personMeetingDto);

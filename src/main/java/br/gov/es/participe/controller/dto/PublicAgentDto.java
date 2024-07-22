@@ -2,8 +2,6 @@ package br.gov.es.participe.controller.dto;
 
 import java.text.Normalizer;
 
-import org.apache.catalina.valves.rewrite.InternalRewriteMap.LowerCase;
-
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,6 +15,9 @@ public class PublicAgentDto {
 
     @JsonAlias({"email", "Email"})
     private String email;
+
+    @JsonProperty("corporativo")
+    private String corporativo;
 
     @JsonProperty("SubDescontinuado")
     private String discontinuedSub;
@@ -75,6 +76,14 @@ public class PublicAgentDto {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCorporativo() {
+        return corporativo;
+    }
+
+    public void setCorporativo(String corporativo) {
+        this.corporativo = corporativo;
     }
 
     public static String cleanSimilarToApoc(String input) {
