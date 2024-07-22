@@ -22,6 +22,7 @@ public class PersonParamDto {
   private boolean active;
   private boolean receiveInformational;
   private Set<Meeting> welcomesMeetings;
+  private String sub;
 
   public PersonParamDto() {
   }
@@ -154,5 +155,13 @@ public class PersonParamDto {
 
   public void setWelcomesMeetings(Set<Meeting> welcomesMeetings) {
     this.welcomesMeetings = welcomesMeetings;
+  }
+
+  public String getSub() {
+    return sub;
+  }
+
+  public void setSub(String sub) {
+    this.sub = sub;
   }
 }
