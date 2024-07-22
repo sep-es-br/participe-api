@@ -25,6 +25,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.springframework.http.ContentDisposition;
 /* Fim das importações */
 import javax.imageio.ImageIO;
@@ -290,11 +292,12 @@ public class MeetingController {
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long meetingId,
       @RequestParam(name = "name", required = false, defaultValue = "") String name,
-      Pageable pageable) {
+      Pageable pageable,
+      HttpSession session) {
     if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       return ResponseEntity.status(401).body(null);
     }
-    Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable);
+    Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable, session);
     return ResponseEntity.status(200).body(personMeetingDtoPage);
   }
 

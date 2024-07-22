@@ -7,6 +7,7 @@ import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
 import br.gov.es.participe.controller.dto.OrganizationUnitsDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
+import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
 import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.controller.dto.UnitRolesDto;
@@ -35,12 +36,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -494,6 +502,203 @@ public class AcessoCidadaoService {
         Thread.currentThread().interrupt();
         logger.error(e.getMessage());
         throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
+    }
+  }
+
+  public List<PublicAgentDto> findPublicAgentsFromAcessoCidadaoAPI() {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (IOException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+
+    String url = acessocidadaoUriWebApi.concat("conjunto/" + GUID_GOVES + "/agentesPublicos");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+      if (response.statusCode() == 200) {
+        List<PublicAgentDto> publicAgentDtos = mapper.readValue(response.body(),
+            new TypeReference<List<PublicAgentDto>>() {
+            });
+
+        return publicAgentDtos;
+      } else {
+        logger.error("Não foi possível buscar os agentes publicos atrelado ao Guid GOVES.");
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+      }
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Não foi possível buscar os agentes publicos atrelado ao Guid GOVES.");
+    }
+  }
+
+  public PublicAgentDto findTheAgentPublicSubByCpfInAcessoCidadaoAPI(String cpf) {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (IOException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+
+    String url = acessocidadaoUriWebApi.concat("agentepublico/" + cpf + "/sub");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+      if (response.statusCode() == 200) {
+        PublicAgentDto publicAgentDtos = mapper.readValue(response.body(), new TypeReference<PublicAgentDto>() {
+        });
+
+        return publicAgentDtos;
+      } else {
+        return new PublicAgentDto();
+      }
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Não foi possível buscar o sub do agente publicos atrelado ao CPF.");
+    }
+  }
+
+  public PublicAgentDto findAgentPublicBySubInAcessoCidadaoAPI(String sub) {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (IOException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+
+    String url = acessocidadaoUriWebApi.concat("agentepublico/" + sub);
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+      if (response.statusCode() == 200) {
+        PublicAgentDto publicAgentDtos = mapper.readValue(response.body(), new TypeReference<PublicAgentDto>() {
+        });
+
+        return publicAgentDtos;
+      } else {
+        return null;
+      }
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Não foi possível buscar o agente publicos atrelado a esse sub.");
+    }
+  }
+
+  public PublicAgentDto findThePersonEmailBySubInAcessoCidadaoAPI(PublicAgentDto personDto) {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (IOException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+
+    String url = acessocidadaoUriWebApi.concat("cidadao/" + personDto.getSub() + "/email");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+      if (response.statusCode() == 200) {
+        String responseBody = response.body();
+        if (responseBody.contains("\"email\":null")) {
+          return personDto;
+        }
+        PublicAgentDto PersonApiDto = mapper.readValue(response.body(), new TypeReference<PublicAgentDto>() {
+        });
+        personDto.setEmail(PersonApiDto.getEmail());
+        return personDto;
+      } else {
+        logger.error("Não foi possível buscar o email do cidadão atrelado a esse sub.");
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+      }
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Não foi possível buscar o email do cidadão atrelado a esse sub.");
+    }
+  }
+
+  public PublicAgentDto findSubFromPersonInAcessoCidadaoAPIByCpf(String cpf) {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (IOException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+
+    String urlString = acessocidadaoUriWebApi.concat("cidadao/" + cpf + "/pesquisaSub");
+
+    try {
+      URL url = new URL(urlString);
+
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setRequestMethod("PUT");
+      connection.setDoOutput(true);
+
+      connection.setFixedLengthStreamingMode(0);
+      connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+      connection.setRequestProperty("Accept", "application/json");
+      connection.setRequestProperty("Authorization", "Bearer " + token);
+      connection.connect();
+
+      System.out.println("Response code: " + connection.getResponseCode());
+      if (connection.getResponseCode() == 200) {
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+          response.append(inputLine);
+        }
+        in.close();
+
+        String responseString = response.toString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        PublicAgentDto publicAgentDto = objectMapper.readValue(responseString, PublicAgentDto.class);
+
+        return publicAgentDto;
+      } else {
+        logger.error("Não foi possível buscar o cidadão atrelado ao CPF.");
+        throw new ApiAcessoCidadaoException(STATUS + connection.getResponseCode());
+      }
+    } catch (IOException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Não foi possível buscar o cidadão atrelado ao CPF.");
     }
   }
 
