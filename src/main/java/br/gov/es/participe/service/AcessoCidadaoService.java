@@ -643,7 +643,7 @@ public class AcessoCidadaoService {
         return personDto;
       } else {
         logger.error("Não foi possível buscar o email do cidadão atrelado a esse sub.");
-        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+        throw new ApiAcessoCidadaoException("Não foi possível buscar o email do cidadão atrelado a esse sub.");
       }
     } catch (IOException | InterruptedException e) {
       Thread.currentThread().interrupt();
@@ -693,7 +693,16 @@ public class AcessoCidadaoService {
         return publicAgentDto;
       } else {
         logger.error("Não foi possível buscar o cidadão atrelado ao CPF.");
-        throw new ApiAcessoCidadaoException(STATUS + connection.getResponseCode());
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+          response.append(inputLine);
+        }
+        in.close();
+
+        String responseString = response.toString();
+        throw new ApiAcessoCidadaoException(responseString);
       }
     } catch (IOException e) {
       Thread.currentThread().interrupt();
