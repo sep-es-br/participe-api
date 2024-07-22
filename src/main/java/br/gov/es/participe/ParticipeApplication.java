@@ -31,7 +31,6 @@ import java.util.TimeZone;
 		UserDetailsServiceAutoConfiguration.class
 })
 @EnableScheduling
-@ComponentScan({"br.gov.es.participe"})
 public class ParticipeApplication implements ServletContextListener, HttpSessionListener {
 
 	@Value("${app.default-timezone}")
