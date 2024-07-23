@@ -21,6 +21,7 @@ public class MyJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) {
         List<PublicAgentDto> publicAgentsData = acessoCidadaoService.findPublicAgentsFromAcessoCidadaoAPI();
         ParticipeApplication.setPublicAgentsData(publicAgentsData);
+        System.out.println("Repopulando a lista de agentes públicos");
     }
 
 }
