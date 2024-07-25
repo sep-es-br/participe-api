@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import javax.swing.text.html.Option;
+
 import java.util.Base64;
 
 import org.apache.tomcat.util.json.ParseException;
@@ -88,10 +91,6 @@ public class ProposalEvaluationService {
         log.info("Buscando papel na API do Acesso Cidadao");
         List<EvaluatorRoleDto> evaluatorRoleDto = acessoCidadaoService.findRoleFromAcessoCidadaoAPIByAgentePublicoSub(authRelationship.getIdByAuth());
 
-        // String roleGuid = evaluatorRoleDto.getGuid();
-        // String sectionGuid = evaluatorRoleDto.getLotacao();
-
-        // log.info("Buscando no banco papel avaliador com guid={} ou setor avaliador com guid={}", roleGuid, sectionGuid);
         return evaluatorsService.findOrganizationGuidBySectionOrRole(evaluatorRoleDto);
 
     }
@@ -123,18 +122,21 @@ public class ProposalEvaluationService {
         
     }
 
-    public ProposalEvaluationResponseDto getProposalEvaluationData(Long proposalId) {
+    public ProposalEvaluationResponseDto getProposalEvaluationData(Long proposalId, String guid) {
 
         log.info("Buscando dados de avaliacao de proposta por comentario com id={}", proposalId);
-        Optional<Evaluates> evaluatesRelationship = proposalEvaluationRepository.findEvaluatesRelationshipByCommentId(proposalId);
+        Optional<List<Evaluates>> evaluatesRelationship = proposalEvaluationRepository.findEvaluatesRelationshipByCommentId(proposalId);
 
         if(evaluatesRelationship.isPresent()){
-            log.info("Dados encontrados, retornando avaliacao de proposta com id={}", evaluatesRelationship.get().getId());
-            return new ProposalEvaluationResponseDto(evaluatesRelationship.get());
-        } else {
-            log.info("Dados nao encontrados, retornando DTO de resposta vazio");
-            return new ProposalEvaluationResponseDto();
-        }
+            for (Evaluates evaluete : evaluatesRelationship.get()) {
+                if(evaluete.getRepresenting().equals(guid)){
+                    log.info("Dados encontrados, retornando avaliacao de proposta com id={}", evaluete.getId());
+                    return new ProposalEvaluationResponseDto(evaluete);
+                }
+            }
+        } 
+        log.info("Dados nao encontrados, retornando DTO de resposta vazio");
+        return new ProposalEvaluationResponseDto();
 
     }
 
@@ -155,7 +157,7 @@ public class ProposalEvaluationService {
         newEvaluatesRelationship.setDeleted(false);
         newEvaluatesRelationship.setDate(new Date());
 
-        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId());
+        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId(), proposalEvaluationRequestDto.getRepresenting());
 
         proposalEvaluationRepository.save(newEvaluatesRelationship);
 
@@ -166,7 +168,7 @@ public class ProposalEvaluationService {
 
     public void deleteProposalEvaluation(ProposalEvaluationRequestDto proposalEvaluationRequestDto) {
 
-        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId());
+        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId(), proposalEvaluationRequestDto.getRepresenting());
 
         log.info("Buscando pessoa com id={}", proposalEvaluationRequestDto.getPersonId());
         Person person = personService.find(proposalEvaluationRequestDto.getPersonId());
@@ -189,10 +191,10 @@ public class ProposalEvaluationService {
 
     }
 
-    private void setOtherEvaluatesRelationshipsActiveAsFalse(Long proposalId) {
+    private void setOtherEvaluatesRelationshipsActiveAsFalse(Long proposalId, String guid) {
 
         log.info("Buscando lista de avaliacoes de proposta relacionadas ao comentario com id={}", proposalId);
-        List<Evaluates> evaluatesRelationshipList = proposalEvaluationRepository.getEvaluatesRelationshipListByCommentId(proposalId);
+        List<Evaluates> evaluatesRelationshipList = proposalEvaluationRepository.getEvaluatesRelationshipListByCommentId(proposalId, guid);
 
         if(!evaluatesRelationshipList.isEmpty()){
             log.info("Atribuindo estado ativo falso aos relacionamentos");

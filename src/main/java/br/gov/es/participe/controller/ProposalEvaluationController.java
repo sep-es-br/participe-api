@@ -87,10 +87,11 @@ public class ProposalEvaluationController {
 
     @GetMapping("/{proposalId}")
     public ResponseEntity<ProposalEvaluationResponseDto> getProposalEvaluationData(
-        @PathVariable(name = "proposalId") Long proposalId
+        @PathVariable(name = "proposalId") Long proposalId,
+        @RequestParam(value = "guid", required = false, defaultValue = "") String guid
     ) {
 
-        ProposalEvaluationResponseDto response = proposalEvaluationService.getProposalEvaluationData(proposalId);
+        ProposalEvaluationResponseDto response = proposalEvaluationService.getProposalEvaluationData(proposalId, guid);
 
         return ResponseEntity.ok().body(response);
 
