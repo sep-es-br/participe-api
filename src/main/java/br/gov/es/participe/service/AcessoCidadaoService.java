@@ -677,7 +677,7 @@ public class AcessoCidadaoService {
       connection.connect();
 
       System.out.println("Response code: " + connection.getResponseCode());
-      if (connection.getResponseCode() == 200) {
+      if (connection.getResponseCode() == 200 || connection.getResponseCode() == 201 ) {
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String inputLine;
         StringBuilder response = new StringBuilder();
