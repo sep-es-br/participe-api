@@ -419,7 +419,7 @@ public class AcessoCidadaoService {
         });
 
         unitRolesDtos.iterator().forEachRemaining((role) -> {
-          EvaluatorRoleDto newEvalServerDto = new EvaluatorRoleDto(role.getGuid(), (role.getAgentePublicoNome() + " - " + role.getNome()), role.getLotacaoGuid().toLowerCase());
+          EvaluatorRoleDto newEvalServerDto = new EvaluatorRoleDto(role.getGuid(), (role.getAgentePublicoNome() + " - " + role.getNome()), guid);
           evaluatorServerDtos.add(newEvalServerDto);
         });
 
