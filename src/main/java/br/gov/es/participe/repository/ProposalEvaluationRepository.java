@@ -121,7 +121,8 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
     @Query(
         "MATCH (conference:Conference)-[:TARGETS]->(plan:Plan)<-[:COMPOSES]-(planItemArea:PlanItem) " +
         "WHERE id(conference) = $conferenceId " +
-        "RETURN planItemArea"
+        "RETURN planItemArea " +
+        "ORDER BY planItemArea.name asc "
     )
     List<PlanItem> getPlanItemAreaOptionsByConferenceId(@Param("conferenceId") Long conferenceId);
 
