@@ -13,9 +13,27 @@ public class ProposalEvaluationCommentResultDto {
     private String planItemName;
     private String planItemAreaName;
     private String description;
-    private List<String> evaluatorOrgsNameList;
+    private List<EvaluatorOrgsNameAndLoaIncluded> evaluatorOrgsNameAndLoaIncludedList;
     private String evaluatorName;
-    private Boolean loaIncluded;
+
+    public class EvaluatorOrgsNameAndLoaIncluded {
+        private String evaluatorOrgsName;
+        private Boolean loaIncluded;
+
+        public String getEvaluatorOrgsName() {
+            return evaluatorOrgsName;
+        }
+        public void setEvaluatorOrgsName(String evaluatorOrgsName) {
+            this.evaluatorOrgsName = evaluatorOrgsName;
+        }
+        public Boolean getLoaIncluded() {
+            return loaIncluded;
+        }
+        public void setLoaIncluded(Boolean loaIncluded) {
+            this.loaIncluded = loaIncluded;
+        }
+
+    }
 
     public Long getCommentId() {
         return commentId;
@@ -65,12 +83,13 @@ public class ProposalEvaluationCommentResultDto {
         this.description = description;
     }
 
-    public List<String> getEvaluatorOrgsNameList() {
-        return evaluatorOrgsNameList;
+    public List<EvaluatorOrgsNameAndLoaIncluded> getEvaluatorOrgsNameAndLoaIncludedList() {
+        return evaluatorOrgsNameAndLoaIncludedList;
     }
 
-    public void setEvaluatorOrgsNameList(List<String> evaluatorOrgsNameList) {
-        this.evaluatorOrgsNameList = evaluatorOrgsNameList;
+    public void setEvaluatorOrgsNameAndLoaIncludedList(
+            List<EvaluatorOrgsNameAndLoaIncluded> evaluatorOrgsNameAndLoaIncludedList) {
+        this.evaluatorOrgsNameAndLoaIncludedList = evaluatorOrgsNameAndLoaIncludedList;
     }
     
     public String getEvaluatorName() {
@@ -81,11 +100,4 @@ public class ProposalEvaluationCommentResultDto {
         this.evaluatorName = evaluatorName;
     }
 
-    public Boolean getLoaIncluded() {
-        return loaIncluded;
-    }
-
-    public void setLoaIncluded(Boolean loaIncluded) {
-        this.loaIncluded = loaIncluded;
-    }
 }
