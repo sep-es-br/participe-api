@@ -1,6 +1,8 @@
 package br.gov.es.participe.service;
 
 import java.nio.charset.Charset;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
@@ -36,6 +38,7 @@ import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
+import br.gov.es.participe.controller.dto.ProposalEvaluationJasperParamDto;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Evaluates;
 import br.gov.es.participe.model.IsAuthenticatedBy;
@@ -43,6 +46,15 @@ import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.repository.ProposalEvaluationRepository;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 @Service
 public class ProposalEvaluationService {
@@ -76,6 +88,15 @@ public class ProposalEvaluationService {
 
     @Value("${pentahoBI.password}")
     private String password;
+
+    @Value("${spring.data.neo4j.uri}")
+    private String urlConnection;
+
+    @Value("${spring.data.neo4j.username}")
+    private String userName;
+
+    @Value("${spring.data.neo4j.password}")
+    private String passwordNeo4j;
 
     private static final String charset = "UTF-8";
 
@@ -312,6 +333,52 @@ public class ProposalEvaluationService {
 
     public DomainConfigurationDto getDomainConfiguration(Long conferenceId) {
         return proposalEvaluationRepository.getDomainConfiguration(conferenceId);
+    }
+
+    public ByteArrayInputStream jasperXlsx(Boolean evaluationStatus,
+            Long localityId,
+            Long planItemAreaId,
+            Long planItemId,
+            String organizationGuid,
+            Boolean loaIncluded,
+            String commentText,
+            Long conferenceId) {
+
+        ProposalEvaluationJasperParamDto proposalEvaluationJasperParamDto = new ProposalEvaluationJasperParamDto(
+                evaluationStatus, localityId, planItemAreaId, planItemId, organizationGuid, loaIncluded, commentText,
+                conferenceId);
+        Map<String, Object> proposalEvaluationMap = proposalEvaluationJasperParamDto.getProposalEvaluationJasperMap();
+        
+        
+        try {
+            Connection connection = DriverManager.getConnection(
+            "jdbc:neo4j:" + this.urlConnection,
+            this.userName,
+            this.passwordNeo4j);
+            JasperReport report = JasperCompileManager.compileReport(ProposalEvaluationService.class.getResourceAsStream("/jasper/proposalEvaluation.jrxml"));
+            JasperPrint print = JasperFillManager.fillReport(report, proposalEvaluationMap, connection);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            JRXlsxExporter exporter = new JRXlsxExporter();
+            exporter.setExporterInput(new SimpleExporterInput(print));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+
+            SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
+            configuration.setWhitePageBackground(false);
+            
+            exporter.setConfiguration(configuration);
+
+            exporter.exportReport();
+
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+
+            return inputStream;
+
+        } catch (JRException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e){
+            System.err.println(e);
+            throw new RuntimeException(e);
+        }
     }
 
 }
