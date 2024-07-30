@@ -1,7 +1,10 @@
 package br.gov.es.participe.controller.dto;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ProposalEvaluationJasperParamDto {
 
@@ -9,12 +12,17 @@ public class ProposalEvaluationJasperParamDto {
     
     
     public ProposalEvaluationJasperParamDto(Boolean evaluationStatus, Long localityId, Long planItemAreaId,
-    Long planItemId, String organizationGuid, Boolean loaIncluded, String commentText, Long conferenceId) {
+    Long planItemId, List<String> organizationGuid, Boolean loaIncluded, String commentText, Long conferenceId) {
         proposalEvaluationJasperMap.put("evaluationStatus", evaluationStatus);
         proposalEvaluationJasperMap.put("localityId", localityId);
         proposalEvaluationJasperMap.put("planItemAreaId", planItemAreaId);
         proposalEvaluationJasperMap.put("planItemId", planItemId);
-        proposalEvaluationJasperMap.put("organizationGuid", organizationGuid != null ? "'" + organizationGuid + "'" : null);
+        List<String> formattedOrganizationGuid = (organizationGuid != null && !organizationGuid.isEmpty())
+        ? organizationGuid.stream()
+                          .map(guid -> "'" + guid + "'")
+                          .collect(Collectors.toList())
+        : Collections.emptyList();
+        proposalEvaluationJasperMap.put("organizationGuid", formattedOrganizationGuid);
         proposalEvaluationJasperMap.put("loaIncluded", loaIncluded);
         proposalEvaluationJasperMap.put("commentText", commentText != null ? "'" + commentText + "'" : null);
         proposalEvaluationJasperMap.put("conferenceId", conferenceId);

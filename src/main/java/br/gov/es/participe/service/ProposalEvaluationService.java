@@ -119,7 +119,7 @@ public class ProposalEvaluationService {
         Long localityId, 
         Long planItemAreaId, 
         Long planItemId,
-        String organizationGuid, 
+        List<String> organizationGuid, 
         Boolean loaIncluded, 
         String commentText, 
         Long conferenceId, 
@@ -339,7 +339,7 @@ public class ProposalEvaluationService {
             Long localityId,
             Long planItemAreaId,
             Long planItemId,
-            String organizationGuid,
+            List<String> organizationGuid,
             Boolean loaIncluded,
             String commentText,
             Long conferenceId) {

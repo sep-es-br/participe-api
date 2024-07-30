@@ -23,7 +23,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         + "AND (id(locality) = $localityId OR $localityId IS NULL) "
         + "AND (id(area) = $planItemAreaId OR $planItemAreaId IS NULL) "
         + "AND (id(planItem) = $planItemId OR $planItemId IS NULL) "
-        + "AND ((eval.representing IS NOT NULL AND eval.representing = $organizationGuid) OR $organizationGuid = '') "
+        + "AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $organizationGuid) OR $organizationGuid = []) "
         + "AND ((eval.includedInNextYearLOA IS NOT NULL AND eval.includedInNextYearLOA = $loaIncluded) OR $loaIncluded IS NULL) "
         + "AND apoc.text.clean(comment.text) CONTAINS apoc.text.clean($commentText) ";
 
@@ -82,7 +82,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         @Param("localityId") Long localityId, 
         @Param("planItemAreaId") Long planItemAreaId, 
         @Param("planItemId") Long planItemId,
-        @Param("organizationGuid") String organizationGuid, 
+        @Param("organizationGuid") List<String> organizationGuid, 
         @Param("loaIncluded") Boolean loaIncluded, 
         @Param("commentText") String commentText, 
         @Param("conferenceId") Long conferenceId, 

@@ -65,7 +65,7 @@ public class ProposalEvaluationController {
         @RequestParam(value = "localityId", required = false, defaultValue = "") Long localityId,
         @RequestParam(value = "planItemAreaId", required = false, defaultValue = "") Long planItemAreaId,
         @RequestParam(value = "planItemId", required = false, defaultValue = "") Long planItemId,
-        @RequestParam(value = "organizationGuid", required = false, defaultValue = "") String organizationGuid,
+        @RequestParam(value = "organizationGuid", required = false, defaultValue = "") List<String> organizationGuid,
         @RequestParam(value = "loaIncluded", required = false, defaultValue = "") Boolean loaIncluded,
         @RequestParam(value = "commentText", required = false, defaultValue = "") String commentText,
         @RequestParam(value = "conferenceId", required = true) Long conferenceId,
@@ -215,7 +215,7 @@ public class ProposalEvaluationController {
             @RequestParam(value = "localityId", required = false, defaultValue = "") Long localityId,
             @RequestParam(value = "planItemAreaId", required = false, defaultValue = "") Long planItemAreaId,
             @RequestParam(value = "planItemId", required = false, defaultValue = "") Long planItemId,
-            @RequestParam(value = "organizationGuid", required = false, defaultValue = "") String organizationGuid,
+            @RequestParam(value = "organizationGuid", required = false, defaultValue = "") List<String> organizationGuid,
             @RequestParam(value = "loaIncluded", required = false, defaultValue = "") Boolean loaIncluded,
             @RequestParam(value = "commentText", required = false, defaultValue = "") String commentText,
             @RequestParam(value = "conferenceId", required = true) Long conferenceId) {

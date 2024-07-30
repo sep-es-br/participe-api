@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ProposalEvaluationXml" pageWidth="1000" pageHeight="595" orientation="Landscape" columnWidth="960" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" isIgnorePagination="true" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ProposalEvaluation" pageWidth="1000" pageHeight="595" orientation="Landscape" columnWidth="960" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" isIgnorePagination="true" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapter.jrdax"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="localityId" class="java.lang.Long" isForPrompting="false"/>
 	<parameter name="evaluationStatus" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="planItemAreaId" class="java.lang.Long" isForPrompting="false"/>
 	<parameter name="planItemId" class="java.lang.Long" isForPrompting="false"/>
-	<parameter name="organizationGuid" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="organizationGuid" class="java.util.List" nestedType="java.lang.String" isForPrompting="false">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+	</parameter>
 	<parameter name="loaIncluded" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="commentText" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="conferenceId" class="java.lang.Long" isForPrompting="false"/>
@@ -26,7 +28,7 @@ AND comment.status = 'pub'
         AND (id(locality) = $P!{localityId}  OR  $P!{localityId} IS NULL) 
         AND (id(area) = $P!{planItemAreaId} OR $P!{planItemAreaId} IS NULL) 
         AND (id(planItem) = $P!{planItemId} OR $P!{planItemId} IS NULL) 
-        AND ((eval.representing IS NOT NULL AND eval.representing = $P!{organizationGuid}) OR ($P!{organizationGuid} = '' OR $P!{organizationGuid} IS NULL )) 
+        AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $P!{organizationGuid}) OR $P!{organizationGuid} = [])
         AND ((eval.includedInNextYearLOA IS NOT NULL AND eval.includedInNextYearLOA = $P!{loaIncluded}) OR $P!{loaIncluded} IS NULL) 
         AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR $P!{commentText} IS NULL)
             WITH comment, locality, planItem, area, 
@@ -61,7 +63,7 @@ AND comment.status = 'pub'
             finalResult.evaluationStatus AS evaluationStatus, 
             finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList, 
 finalResult.evaluatorName AS evaluatorName 
-ORDER BY area.name asc, locality.name asc]]>
+ORDER BY area.name asc, locality.name asc;]]>
 	</queryString>
 	<field name="commentId" class="java.lang.Object">
 		<property name="com.jaspersoft.studio.field.name" value="commentId"/>
