@@ -13,6 +13,8 @@
 	<parameter name="loaIncluded" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="commentText" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="conferenceId" class="java.lang.Long" isForPrompting="false"/>
+	<parameter name="localityTypeName" class="java.lang.String" nestedType="" isForPrompting="false"/>
+	<parameter name="structureItemName" class="java.lang.String" nestedType="" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference),  
 (comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) 
@@ -99,13 +101,7 @@ ORDER BY area.name asc, locality.name asc;]]>
 	</field>
 	<title>
 		<band height="30" splitType="Stretch">
-			<staticText>
-				<reportElement x="-20" y="0" width="270" height="30" uuid="d38166d5-46ca-4444-9316-271ceb4abd86"/>
-				<textElement>
-					<font size="12" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Área Estratégica]]></text>
-			</staticText>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
 				<reportElement x="250" y="0" width="606" height="30" uuid="3ddced7c-9617-4799-879b-f17e758ca228"/>
 				<textElement>
@@ -113,13 +109,20 @@ ORDER BY area.name asc, locality.name asc;]]>
 				</textElement>
 				<text><![CDATA[Descrição]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="856" y="0" width="124" height="30" uuid="00dbb001-2bf6-473c-82f1-97f9df8de976"/>
+			<textField>
+				<reportElement x="-20" y="0" width="270" height="30" uuid="a89a6800-8a39-49da-928e-a9f6becc7cdf"/>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Microrregião]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$P{structureItemName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="856" y="0" width="124" height="30" uuid="a0cb26b3-5dd9-4764-8f2f-d40187b155ad"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{localityTypeName}]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<detail>

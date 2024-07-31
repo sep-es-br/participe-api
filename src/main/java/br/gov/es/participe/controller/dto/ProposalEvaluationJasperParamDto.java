@@ -12,7 +12,7 @@ public class ProposalEvaluationJasperParamDto {
     
     
     public ProposalEvaluationJasperParamDto(Boolean evaluationStatus, Long localityId, Long planItemAreaId,
-    Long planItemId, List<String> organizationGuid, Boolean loaIncluded, String commentText, Long conferenceId) {
+    Long planItemId, List<String> organizationGuid, Boolean loaIncluded, String commentText, Long conferenceId, String localityTypeName, String structureItemName) {
         proposalEvaluationJasperMap.put("evaluationStatus", evaluationStatus);
         proposalEvaluationJasperMap.put("localityId", localityId);
         proposalEvaluationJasperMap.put("planItemAreaId", planItemAreaId);
@@ -26,6 +26,8 @@ public class ProposalEvaluationJasperParamDto {
         proposalEvaluationJasperMap.put("loaIncluded", loaIncluded);
         proposalEvaluationJasperMap.put("commentText", commentText != null ? "'" + commentText + "'" : null);
         proposalEvaluationJasperMap.put("conferenceId", conferenceId);
+        proposalEvaluationJasperMap.put("localityTypeName", localityTypeName);
+        proposalEvaluationJasperMap.put("structureItemName", structureItemName);
     }
     
     public Map<String, Object> getProposalEvaluationJasperMap() {

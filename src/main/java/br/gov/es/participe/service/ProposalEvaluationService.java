@@ -37,6 +37,7 @@ import br.gov.es.participe.controller.dto.LocalityInfoDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
+import br.gov.es.participe.controller.dto.StructureItemAndLocalityTypeDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationJasperParamDto;
 import br.gov.es.participe.model.Comment;
@@ -343,10 +344,12 @@ public class ProposalEvaluationService {
             Boolean loaIncluded,
             String commentText,
             Long conferenceId) {
+        
+        StructureItemAndLocalityTypeDto structureItemAndLocalityTypeDto = proposalEvaluationRepository.getStructureItemAndLocalityType(conferenceId);
 
         ProposalEvaluationJasperParamDto proposalEvaluationJasperParamDto = new ProposalEvaluationJasperParamDto(
                 evaluationStatus, localityId, planItemAreaId, planItemId, organizationGuid, loaIncluded, commentText,
-                conferenceId);
+                conferenceId, structureItemAndLocalityTypeDto.getLocalityTypeName(), structureItemAndLocalityTypeDto.getStructureItemName());
         Map<String, Object> proposalEvaluationMap = proposalEvaluationJasperParamDto.getProposalEvaluationJasperMap();
         
         
