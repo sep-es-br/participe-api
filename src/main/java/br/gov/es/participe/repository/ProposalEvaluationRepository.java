@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import br.gov.es.participe.controller.dto.DomainConfigurationDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
+import br.gov.es.participe.controller.dto.StructureItemAndLocalityTypeDto;
 import br.gov.es.participe.model.Evaluates;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.PlanItem;
@@ -23,7 +24,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         + "AND (id(locality) = $localityId OR $localityId IS NULL) "
         + "AND (id(area) = $planItemAreaId OR $planItemAreaId IS NULL) "
         + "AND (id(planItem) = $planItemId OR $planItemId IS NULL) "
-        + "AND ((eval.representing IS NOT NULL AND eval.representing = $organizationGuid) OR $organizationGuid = '') "
+        + "AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $organizationGuid) OR $organizationGuid = []) "
         + "AND ((eval.includedInNextYearLOA IS NOT NULL AND eval.includedInNextYearLOA = $loaIncluded) OR $loaIncluded IS NULL) "
         + "AND apoc.text.clean(comment.text) CONTAINS apoc.text.clean($commentText) ";
 
@@ -82,7 +83,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         @Param("localityId") Long localityId, 
         @Param("planItemAreaId") Long planItemAreaId, 
         @Param("planItemId") Long planItemId,
-        @Param("organizationGuid") String organizationGuid, 
+        @Param("organizationGuid") List<String> organizationGuid, 
         @Param("loaIncluded") Boolean loaIncluded, 
         @Param("commentText") String commentText, 
         @Param("conferenceId") Long conferenceId, 
@@ -147,4 +148,9 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
     )
     DomainConfigurationDto getDomainConfiguration(@Param("conferenceId") Long conferenceId);
 
+    @Query(
+        "MATCH (c:Conference)-[:TARGETS]->(p:Plan)-[:OBEYS]->(s:Structure)<-[:COMPOSES]-(si:StructureItem), (p)-[:REGIONALIZABLE]->(lt:LocalityType) " +
+        "WHERE id(c)= $conferenceId RETURN si.name AS structureItemName , lt.name AS localityTypeName"
+    )
+    StructureItemAndLocalityTypeDto getStructureItemAndLocalityType(@Param("conferenceId") Long conferenceId);
 }
