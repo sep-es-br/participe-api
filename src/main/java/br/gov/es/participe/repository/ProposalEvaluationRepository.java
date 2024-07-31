@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import br.gov.es.participe.controller.dto.DomainConfigurationDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
+import br.gov.es.participe.controller.dto.StructureItemAndLocalityTypeDto;
 import br.gov.es.participe.model.Evaluates;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.PlanItem;
@@ -23,50 +24,66 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         + "AND (id(locality) = $localityId OR $localityId IS NULL) "
         + "AND (id(area) = $planItemAreaId OR $planItemAreaId IS NULL) "
         + "AND (id(planItem) = $planItemId OR $planItemId IS NULL) "
-        + "AND ((eval.representing IS NOT NULL AND eval.representing = $organizationGuid) OR $organizationGuid = '') "
+        + "AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $organizationGuid) OR $organizationGuid = []) "
         + "AND ((eval.includedInNextYearLOA IS NOT NULL AND eval.includedInNextYearLOA = $loaIncluded) OR $loaIncluded IS NULL) "
         + "AND apoc.text.clean(comment.text) CONTAINS apoc.text.clean($commentText) ";
 
-    @Query(
-        value =
-            "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
+    @Query(value = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference),  " +
             "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
             "WHERE id(conference) = $conferenceId " +
             "AND comment.type = 'prop' " +
             "AND comment.status = 'pub' " +
-            "AND (comment.duplicated = false OR comment.duplicated is null) " +
+            "AND (comment.duplicated = false OR comment.duplicated IS NULL) " +
             "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
             "WITH comment, locality, planItem, area, eval, person " +
             SEARCH_FILTER +
-            "RETURN DISTINCT id(comment) AS commentId, " +
-            "locality.name AS localityName, planItem.name AS planItemName, " +
-            "area.name AS planItemAreaName, comment.text AS description, " +
-            "CASE (NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) " +
-                  "WHEN true THEN true ELSE false END AS evaluationStatus, " +
-            "CASE (NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) " +
-                  "WHEN true THEN collect(DISTINCT eval.representing) ELSE NULL END AS evaluatorOrgsNameList, " +
-            "CASE (NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) " +
-                  "WHEN true THEN person.name ELSE NULL END AS evaluatorName, " +
-            "CASE (NOT eval.deleted OR eval.deleted IS NULL) AND (exists((comment)<-[:EVALUATES]-())) " +
-                  "AND eval.includedInNextYearLOA = true " +
-                    "WHEN true THEN true ELSE false END AS loaIncluded",
-        countQuery =
-            "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
-            "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
-            "WHERE id(conference) = $conferenceId " +
-            "AND comment.type = 'prop' " +
-            "AND comment.status = 'pub' " +
-            "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
-            "WITH comment, locality, planItem, area, eval, person " +
-            SEARCH_FILTER +
-            "RETURN count(DISTINCT comment)"
-    )
+            "WITH comment, locality, planItem, area, " +
+            "CASE  " +
+            "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN true  " +
+            "ELSE false  " +
+            "END AS evaluationStatus, " +
+            "CASE  " +
+            "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, loaIncluded: eval.includedInNextYearLOA}) " +
+            "ELSE NULL  " +
+            "END AS evaluatorOrgsNameAndLoaIncludedList, " +
+            "CASE  " +
+            "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN person.name  " +
+            "ELSE NULL  " +
+            "END AS evaluatorName " +
+            "WITH comment, locality, planItem, area, " +
+            "[result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList, evaluatorName: evaluatorName}) " +
+            "WHERE result.evaluationStatus = true] AS trueResults, " +
+            "[result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList, evaluatorName: evaluatorName}) " +
+            "WHERE result.evaluationStatus = false] AS falseResults " +
+            "WITH comment, locality, planItem, area, " +
+            "CASE " +
+            "WHEN SIZE(trueResults) > 0 THEN HEAD(trueResults) " +
+            "ELSE HEAD(falseResults) " +
+            "END AS finalResult " +
+            "RETURN DISTINCT " +
+            "id(comment) AS commentId, " +
+            "locality.name AS localityName, " +
+            "planItem.name AS planItemName, " +
+            "area.name AS planItemAreaName, " +
+            "comment.text AS description, " +
+            "finalResult.evaluationStatus AS evaluationStatus, " +
+            "finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList, " +
+            "finalResult.evaluatorName AS evaluatorName ", 
+            countQuery = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
+                    "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
+                    "WHERE id(conference) = $conferenceId " +
+                    "AND comment.type = 'prop' " +
+                    "AND comment.status = 'pub' " +
+                    "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
+                    "WITH comment, locality, planItem, area, eval, person " +
+                    SEARCH_FILTER +
+                    "RETURN count(DISTINCT comment)")
     Page<ProposalEvaluationCommentResultDto> findAllCommentsForEvaluation(
         @Param("evaluationStatus") Boolean evaluationStatus, 
         @Param("localityId") Long localityId, 
         @Param("planItemAreaId") Long planItemAreaId, 
         @Param("planItemId") Long planItemId,
-        @Param("organizationGuid") String organizationGuid, 
+        @Param("organizationGuid") List<String> organizationGuid, 
         @Param("loaIncluded") Boolean loaIncluded, 
         @Param("commentText") String commentText, 
         @Param("conferenceId") Long conferenceId, 
@@ -79,14 +96,14 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         "AND (eval.deleted <> true OR eval.deleted IS NULL) " +
         "RETURN comment, eval, person"
     )
-    Optional<Evaluates> findEvaluatesRelationshipByCommentId(@Param("proposalId") Long proposalId);
+    Optional<List<Evaluates>> findEvaluatesRelationshipByCommentId(@Param("proposalId") Long proposalId);
 
     @Query(
         "MATCH (person:Person)-[eval:EVALUATES]->(comment:Comment) " +
-        "WHERE id(comment) = $proposalId " +
+        "WHERE id(comment) = $proposalId AND ($guid is null OR eval.representing = $guid) " +
         "RETURN comment, collect(DISTINCT eval), person"
     )
-    List<Evaluates> getEvaluatesRelationshipListByCommentId(@Param("proposalId") Long proposalId);
+    List<Evaluates> getEvaluatesRelationshipListByCommentId(@Param("proposalId") Long proposalId, @Param("guid") String guid);
 
     @Query(
         "MATCH (conference:Conference)-[:TARGETS]->(plan:Plan)-[:REGIONALIZABLE]->(localityType:LocalityType)<-[:OF_TYPE]-(locality:Locality) " +
@@ -105,7 +122,8 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
     @Query(
         "MATCH (conference:Conference)-[:TARGETS]->(plan:Plan)<-[:COMPOSES]-(planItemArea:PlanItem) " +
         "WHERE id(conference) = $conferenceId " +
-        "RETURN planItemArea"
+        "RETURN planItemArea " +
+        "ORDER BY planItemArea.name asc "
     )
     List<PlanItem> getPlanItemAreaOptionsByConferenceId(@Param("conferenceId") Long conferenceId);
 
@@ -130,4 +148,9 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
     )
     DomainConfigurationDto getDomainConfiguration(@Param("conferenceId") Long conferenceId);
 
+    @Query(
+        "MATCH (c:Conference)-[:TARGETS]->(p:Plan)-[:OBEYS]->(s:Structure)<-[:COMPOSES]-(si:StructureItem), (p)-[:REGIONALIZABLE]->(lt:LocalityType) " +
+        "WHERE id(c)= $conferenceId RETURN si.name AS structureItemName , lt.name AS localityTypeName"
+    )
+    StructureItemAndLocalityTypeDto getStructureItemAndLocalityType(@Param("conferenceId") Long conferenceId);
 }

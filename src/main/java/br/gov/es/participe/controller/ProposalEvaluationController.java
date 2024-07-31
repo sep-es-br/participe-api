@@ -1,14 +1,16 @@
 package br.gov.es.participe.controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,7 +65,7 @@ public class ProposalEvaluationController {
         @RequestParam(value = "localityId", required = false, defaultValue = "") Long localityId,
         @RequestParam(value = "planItemAreaId", required = false, defaultValue = "") Long planItemAreaId,
         @RequestParam(value = "planItemId", required = false, defaultValue = "") Long planItemId,
-        @RequestParam(value = "organizationGuid", required = false, defaultValue = "") String organizationGuid,
+        @RequestParam(value = "organizationGuid", required = false, defaultValue = "") List<String> organizationGuid,
         @RequestParam(value = "loaIncluded", required = false, defaultValue = "") Boolean loaIncluded,
         @RequestParam(value = "commentText", required = false, defaultValue = "") String commentText,
         @RequestParam(value = "conferenceId", required = true) Long conferenceId,
@@ -87,10 +89,11 @@ public class ProposalEvaluationController {
 
     @GetMapping("/{proposalId}")
     public ResponseEntity<ProposalEvaluationResponseDto> getProposalEvaluationData(
-        @PathVariable(name = "proposalId") Long proposalId
+        @PathVariable(name = "proposalId") Long proposalId,
+        @RequestParam(value = "guid", required = false, defaultValue = "") String guid
     ) {
 
-        ProposalEvaluationResponseDto response = proposalEvaluationService.getProposalEvaluationData(proposalId);
+        ProposalEvaluationResponseDto response = proposalEvaluationService.getProposalEvaluationData(proposalId, guid);
 
         return ResponseEntity.ok().body(response);
 
@@ -197,12 +200,36 @@ public class ProposalEvaluationController {
 
     }
 
-      @GetMapping("/conferences")
-      public ResponseEntity<List<ConferenceDto>> findConferencesActives(
-      @RequestHeader(name = "Authorization") String token,
-      @RequestParam(name = "activeConferences", required = false, defaultValue = "false") Boolean activeConferences) {
+    @GetMapping("/conferences")
+    public ResponseEntity<List<ConferenceDto>> findConferencesActives(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestParam(name = "activeConferences", required = false, defaultValue = "false") Boolean activeConferences) {
 
         List<ConferenceDto> conferences = conferenceService.findAllActivesEvaluation(activeConferences);
         return ResponseEntity.status(200).body(conferences);
-  }
+    }
+
+    @GetMapping("/proposalEvaluationXlsx")
+    public ResponseEntity<InputStreamResource> findproposalEvaluationXml(
+            @RequestParam(value = "evaluationStatus", required = false, defaultValue = "") Boolean evaluationStatus,
+            @RequestParam(value = "localityId", required = false, defaultValue = "") Long localityId,
+            @RequestParam(value = "planItemAreaId", required = false, defaultValue = "") Long planItemAreaId,
+            @RequestParam(value = "planItemId", required = false, defaultValue = "") Long planItemId,
+            @RequestParam(value = "organizationGuid", required = false, defaultValue = "") List<String> organizationGuid,
+            @RequestParam(value = "loaIncluded", required = false, defaultValue = "") Boolean loaIncluded,
+            @RequestParam(value = "commentText", required = false, defaultValue = "") String commentText,
+            @RequestParam(value = "conferenceId", required = true) Long conferenceId) {
+
+        ByteArrayInputStream response = proposalEvaluationService.jasperXlsx(
+                evaluationStatus,
+                localityId,
+                planItemAreaId,
+                planItemId,
+                organizationGuid,
+                loaIncluded,
+                commentText,
+                conferenceId);
+
+        return new ResponseEntity<>(new InputStreamResource(response), HttpStatus.OK);
+    }
 }

@@ -1,6 +1,8 @@
 package br.gov.es.participe.service;
 
 import java.nio.charset.Charset;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.HashMap;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
 import java.util.Base64;
 
 import org.apache.tomcat.util.json.ParseException;
@@ -34,7 +37,9 @@ import br.gov.es.participe.controller.dto.LocalityInfoDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
+import br.gov.es.participe.controller.dto.StructureItemAndLocalityTypeDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
+import br.gov.es.participe.controller.dto.ProposalEvaluationJasperParamDto;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Evaluates;
 import br.gov.es.participe.model.IsAuthenticatedBy;
@@ -42,6 +47,15 @@ import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.repository.ProposalEvaluationRepository;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 @Service
 public class ProposalEvaluationService {
@@ -76,6 +90,15 @@ public class ProposalEvaluationService {
     @Value("${pentahoBI.password}")
     private String password;
 
+    @Value("${spring.data.neo4j.uri}")
+    private String urlConnection;
+
+    @Value("${spring.data.neo4j.username}")
+    private String userName;
+
+    @Value("${spring.data.neo4j.password}")
+    private String passwordNeo4j;
+
     private static final String charset = "UTF-8";
 
     private static final Logger log = LoggerFactory.getLogger(EvaluatorsService.class);
@@ -88,10 +111,6 @@ public class ProposalEvaluationService {
         log.info("Buscando papel na API do Acesso Cidadao");
         List<EvaluatorRoleDto> evaluatorRoleDto = acessoCidadaoService.findRoleFromAcessoCidadaoAPIByAgentePublicoSub(authRelationship.getIdByAuth());
 
-        // String roleGuid = evaluatorRoleDto.getGuid();
-        // String sectionGuid = evaluatorRoleDto.getLotacao();
-
-        // log.info("Buscando no banco papel avaliador com guid={} ou setor avaliador com guid={}", roleGuid, sectionGuid);
         return evaluatorsService.findOrganizationGuidBySectionOrRole(evaluatorRoleDto);
 
     }
@@ -101,7 +120,7 @@ public class ProposalEvaluationService {
         Long localityId, 
         Long planItemAreaId, 
         Long planItemId,
-        String organizationGuid, 
+        List<String> organizationGuid, 
         Boolean loaIncluded, 
         String commentText, 
         Long conferenceId, 
@@ -123,18 +142,21 @@ public class ProposalEvaluationService {
         
     }
 
-    public ProposalEvaluationResponseDto getProposalEvaluationData(Long proposalId) {
+    public ProposalEvaluationResponseDto getProposalEvaluationData(Long proposalId, String guid) {
 
         log.info("Buscando dados de avaliacao de proposta por comentario com id={}", proposalId);
-        Optional<Evaluates> evaluatesRelationship = proposalEvaluationRepository.findEvaluatesRelationshipByCommentId(proposalId);
+        Optional<List<Evaluates>> evaluatesRelationship = proposalEvaluationRepository.findEvaluatesRelationshipByCommentId(proposalId);
 
         if(evaluatesRelationship.isPresent()){
-            log.info("Dados encontrados, retornando avaliacao de proposta com id={}", evaluatesRelationship.get().getId());
-            return new ProposalEvaluationResponseDto(evaluatesRelationship.get());
-        } else {
-            log.info("Dados nao encontrados, retornando DTO de resposta vazio");
-            return new ProposalEvaluationResponseDto();
-        }
+            for (Evaluates evaluete : evaluatesRelationship.get()) {
+                if(evaluete.getRepresenting().equals(guid)){
+                    log.info("Dados encontrados, retornando avaliacao de proposta com id={}", evaluete.getId());
+                    return new ProposalEvaluationResponseDto(evaluete);
+                }
+            }
+        } 
+        log.info("Dados nao encontrados, retornando DTO de resposta vazio");
+        return new ProposalEvaluationResponseDto();
 
     }
 
@@ -155,7 +177,7 @@ public class ProposalEvaluationService {
         newEvaluatesRelationship.setDeleted(false);
         newEvaluatesRelationship.setDate(new Date());
 
-        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId());
+        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId(), proposalEvaluationRequestDto.getRepresenting());
 
         proposalEvaluationRepository.save(newEvaluatesRelationship);
 
@@ -166,7 +188,7 @@ public class ProposalEvaluationService {
 
     public void deleteProposalEvaluation(ProposalEvaluationRequestDto proposalEvaluationRequestDto) {
 
-        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId());
+        setOtherEvaluatesRelationshipsActiveAsFalse(proposalEvaluationRequestDto.getProposalId(), proposalEvaluationRequestDto.getRepresenting());
 
         log.info("Buscando pessoa com id={}", proposalEvaluationRequestDto.getPersonId());
         Person person = personService.find(proposalEvaluationRequestDto.getPersonId());
@@ -189,10 +211,10 @@ public class ProposalEvaluationService {
 
     }
 
-    private void setOtherEvaluatesRelationshipsActiveAsFalse(Long proposalId) {
+    private void setOtherEvaluatesRelationshipsActiveAsFalse(Long proposalId, String guid) {
 
         log.info("Buscando lista de avaliacoes de proposta relacionadas ao comentario com id={}", proposalId);
-        List<Evaluates> evaluatesRelationshipList = proposalEvaluationRepository.getEvaluatesRelationshipListByCommentId(proposalId);
+        List<Evaluates> evaluatesRelationshipList = proposalEvaluationRepository.getEvaluatesRelationshipListByCommentId(proposalId, guid);
 
         if(!evaluatesRelationshipList.isEmpty()){
             log.info("Atribuindo estado ativo falso aos relacionamentos");
@@ -312,6 +334,54 @@ public class ProposalEvaluationService {
 
     public DomainConfigurationDto getDomainConfiguration(Long conferenceId) {
         return proposalEvaluationRepository.getDomainConfiguration(conferenceId);
+    }
+
+    public ByteArrayInputStream jasperXlsx(Boolean evaluationStatus,
+            Long localityId,
+            Long planItemAreaId,
+            Long planItemId,
+            List<String> organizationGuid,
+            Boolean loaIncluded,
+            String commentText,
+            Long conferenceId) {
+        
+        StructureItemAndLocalityTypeDto structureItemAndLocalityTypeDto = proposalEvaluationRepository.getStructureItemAndLocalityType(conferenceId);
+
+        ProposalEvaluationJasperParamDto proposalEvaluationJasperParamDto = new ProposalEvaluationJasperParamDto(
+                evaluationStatus, localityId, planItemAreaId, planItemId, organizationGuid, loaIncluded, commentText,
+                conferenceId, structureItemAndLocalityTypeDto.getLocalityTypeName(), structureItemAndLocalityTypeDto.getStructureItemName());
+        Map<String, Object> proposalEvaluationMap = proposalEvaluationJasperParamDto.getProposalEvaluationJasperMap();
+        
+        
+        try {
+            Connection connection = DriverManager.getConnection(
+            "jdbc:neo4j:" + this.urlConnection,
+            this.userName,
+            this.passwordNeo4j);
+            JasperReport report = JasperCompileManager.compileReport(ProposalEvaluationService.class.getResourceAsStream("/jasper/proposalEvaluation.jrxml"));
+            JasperPrint print = JasperFillManager.fillReport(report, proposalEvaluationMap, connection);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            JRXlsxExporter exporter = new JRXlsxExporter();
+            exporter.setExporterInput(new SimpleExporterInput(print));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+
+            SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
+            configuration.setWhitePageBackground(false);
+            
+            exporter.setConfiguration(configuration);
+
+            exporter.exportReport();
+
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+
+            return inputStream;
+
+        } catch (JRException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e){
+            System.err.println(e);
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -1216,10 +1216,16 @@ public class PersonService {
           if(!personSubMeetingDto.isEmpty()){
             return new PageImpl<>(personSubMeetingDto, pageable, personSubMeetingDto.size());
           }
-            PublicAgentDto publicAgent = acessoCidadaoService.findAgentPublicBySubInAcessoCidadaoAPI(publicAgentDto.getSub());
-            PersonMeetingDto personMeetingDto = convertToPersonMeetingDto(publicAgent);
-            personMeetingDtoList.add(personMeetingDto);
-            return new PageImpl<>(personMeetingDtoList, pageable, personMeetingDtoList.size());
+          PublicAgentDto publicAgent = acessoCidadaoService.findAgentPublicBySubInAcessoCidadaoAPI(publicAgentDto.getSub());
+
+          personSubMeetingDto = personRepository.findPersonByNameForMeeting(meetingId,"", null,publicAgent.getEmail());
+          if(!personSubMeetingDto.isEmpty()){
+            return new PageImpl<>(personSubMeetingDto, pageable, personSubMeetingDto.size());
+          }
+
+          PersonMeetingDto personMeetingDto = convertToPersonMeetingDto(publicAgent);
+          personMeetingDtoList.add(personMeetingDto);
+          return new PageImpl<>(personMeetingDtoList, pageable, personMeetingDtoList.size());
         }
 
         PublicAgentDto personDto = acessoCidadaoService.findSubFromPersonInAcessoCidadaoAPIByCpf(name);
@@ -1230,13 +1236,11 @@ public class PersonService {
           return new PageImpl<>(personSubMeetingDto, pageable, personSubMeetingDto.size());
         }
 
-        if(personDto.getSub() != null){
-          personDto = acessoCidadaoService.findThePersonEmailBySubInAcessoCidadaoAPI(personDto);
-          if(personDto.getEmail() != null){
-            personSubMeetingDto = personRepository.findPersonByNameForMeeting(meetingId,"", null,personDto.getEmail());
-            if(!personSubMeetingDto.isEmpty()){
-              return new PageImpl<>(personSubMeetingDto, pageable, personSubMeetingDto.size());
-            }
+        personDto = acessoCidadaoService.findThePersonEmailBySubInAcessoCidadaoAPI(personDto);
+        if(personDto.getEmail() != null){
+          personSubMeetingDto = personRepository.findPersonByNameForMeeting(meetingId,"", null,personDto.getEmail());
+          if(!personSubMeetingDto.isEmpty()){
+            return new PageImpl<>(personSubMeetingDto, pageable, personSubMeetingDto.size());
           }
         }
         personDto.setName("<Novo Usuário>");
