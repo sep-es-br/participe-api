@@ -9,8 +9,22 @@ public class Role extends Evaluator {
     @Relationship(value = "BELONGS_TO", direction = Relationship.OUTGOING)
     private Section section;
 
-    public Role(String guid) {
+    private String lotacao;
+
+    public Role() {
+    }
+    
+    public Role(String guid, String name) {
         this.setGuid(guid);
+        this.setName(name);
+    }
+    
+    public String getLotacao() {
+        return lotacao;
+    }
+
+    public void setLotacao(String lotacao) {
+        this.lotacao = lotacao;
     }
     
     public Section getSection() {
