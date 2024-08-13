@@ -96,11 +96,11 @@ public class EvaluatorsService {
 
     public EvaluatorResponseDto saveEvaluator(EvaluatorRequestDto evaluatorRequestDto) {
 
-        Organization evaluatorOrganization = this.persistOrganization(evaluatorRequestDto.getOrganizationGuid());
+        Organization evaluatorOrganization = this.persistOrganization(evaluatorRequestDto.getOrganization());
 
-        Set<Section> evaluatorSections = this.persistSections(evaluatorRequestDto.getSectionsGuid(), evaluatorOrganization);
+        Set<Section> evaluatorSections = this.persistSections(evaluatorRequestDto.getSections(), evaluatorOrganization);
 
-        Set<Role> evaluatorRoles = this.persistRoles(evaluatorRequestDto.getRolesGuid(), evaluatorSections);
+        Set<Role> evaluatorRoles = this.persistRoles(evaluatorRequestDto.getRoles(), evaluatorSections);
 
         return new EvaluatorResponseDto(evaluatorOrganization, evaluatorSections, evaluatorRoles);
 
@@ -110,43 +110,46 @@ public class EvaluatorsService {
 
         Organization evaluatorOrganization = evaluatorsRepository.findOrganizationById(evaluatorId)
             .orElseThrow(() -> new ParticipeServiceException("Organização não encontrada com o id fornecido"));
+        
+        evaluatorOrganization.setName(evaluatorRequestDto.getOrganization().getName());
+        evaluatorsRepository.save(evaluatorOrganization);
 
-        Set<Section> evaluatorSections = this.updateSections(evaluatorRequestDto.getSectionsGuid(), evaluatorOrganization);
+        Set<Section> evaluatorSections = this.updateSections(evaluatorRequestDto.getSections(), evaluatorOrganization);
 
-        Set<Role> evaluatorRoles = this.updateRoles(evaluatorRequestDto.getRolesGuid(), evaluatorSections);
+        Set<Role> evaluatorRoles = this.updateRoles(evaluatorRequestDto.getRoles(), evaluatorSections);
 
         return new EvaluatorResponseDto(evaluatorOrganization, evaluatorSections, evaluatorRoles);
 
     }
 
-    private Organization persistOrganization(String orgGuid) {
+    private Organization persistOrganization(Organization org) {
 
-        log.info("Persistindo organizacao com guid={}", orgGuid);
-        Optional<Organization> organization = evaluatorsRepository.findOrganizationByGuid(orgGuid);
+        log.info("Persistindo organizacao com guid={}", org.getGuid());
+        Optional<Organization> organization = evaluatorsRepository.findOrganizationByGuid(org.getGuid());
 
         if(organization.isPresent()){
             throw new ParticipeServiceException("Já existe uma entidade avaliadora com o guid desta organização.");
         } else {
-            Organization newOrganization = new Organization(orgGuid);
+            Organization newOrganization = new Organization(org.getGuid(),org.getName());
             evaluatorsRepository.save(newOrganization);
             return newOrganization;
         }
 
     }
     
-    private Set<Section> persistSections(List<String> sectionsGuid, Organization organization) {
+    private Set<Section> persistSections(List<Section> sections, Organization organization) {
 
         Set<Section> evaluatorSectionsSet = new HashSet<Section>();
 
-        sectionsGuid.iterator().forEachRemaining((guid) -> {
-            log.info("Persistindo setor com guid={}", guid);
-            Optional<Section> section = evaluatorsRepository.findSectionByGuid(guid);
+        sections.iterator().forEachRemaining((sect) -> {
+            log.info("Persistindo setor com guid={}", sect.getGuid());
+            Optional<Section> section = evaluatorsRepository.findSectionByGuid(sect.getGuid());
 
             if(section.isPresent()){
                 throw new ParticipeServiceException("Já existe uma entidade avaliadora com o guid deste setor.");
             } else {
-                Section newSection = new Section(guid);
-                log.info("Criando relacionamento entre setor={} e organizacao={}", guid, organization.getGuid());
+                Section newSection = new Section(sect.getGuid(),sect.getName());
+                log.info("Criando relacionamento entre setor={} e organizacao={}", sect.getGuid(), organization.getGuid());
                 newSection.setOrganization(organization);
                 evaluatorsRepository.save(newSection);
                 evaluatorSectionsSet.add(newSection);
@@ -157,7 +160,7 @@ public class EvaluatorsService {
 
     }
 
-    private Set<Section> updateSections(List<String> sectionsGuid, Organization organization) {
+    private Set<Section> updateSections(List<Section> sections, Organization organization) {
 
         log.info("Buscando setores pertencentes a organizacao={}", organization.getId().toString());
         List<Section> evaluatorSectionsList = evaluatorsRepository.findAllSectionsWithRelationshipToOrganization(organization.getId());
@@ -166,13 +169,14 @@ public class EvaluatorsService {
 
         Set<Section> evaluatorSectionsSet = new HashSet<Section>();
 
-        sectionsGuid.iterator().forEachRemaining((guid) -> {
-            log.info("Buscando setor com guid={}", guid);
-            Section candidateSection = evaluatorsRepository.findSectionByGuid(guid)
-                .orElse(new Section(guid));
+        sections.iterator().forEachRemaining((section) -> {
+            log.info("Buscando setor com guid={}", section.getGuid());
+            Section candidateSection = evaluatorsRepository.findSectionByGuid(section.getGuid())
+                .orElse(new Section(section.getGuid(), section.getName()));
             
-            log.info("Criando relacionamento entre setor={} e organizacao={}", guid, organization.getId().toString());
+            log.info("Criando relacionamento entre setor={} e organizacao={}", section.getGuid(), organization.getId().toString());
             candidateSection.setOrganization(organization);
+            candidateSection.setName(section.getName());
             evaluatorsRepository.save(candidateSection);
             evaluatorSectionsSet.add(candidateSection);
         });
@@ -181,20 +185,20 @@ public class EvaluatorsService {
 
     }
     
-    private Set<Role> persistRoles(List<String> rolesGuid, Set<Section> evaluatorSections) {
+    private Set<Role> persistRoles(List<Role> roles, Set<Section> evaluatorSections) {
 
         Set<Role> evaluatorRolesSet = new HashSet<Role>();
 
-        if(rolesGuid.contains("all")){
+        if(roles.stream().anyMatch(role -> "Todos".equals(role.getName()))){
             log.info("Nenhum guid foi fornecido, nenhum papel sera persistido no banco");
-            evaluatorRolesSet.add(new Role("all"));
+            evaluatorRolesSet.add(new Role());
             return evaluatorRolesSet;
         }
 
-        rolesGuid.iterator().forEachRemaining((guid_lotacao) -> {
+        roles.iterator().forEachRemaining((guid_lotacao_name) -> {
 
-            String guid = guid_lotacao.split(":")[0];
-            String lotacao = guid_lotacao.split(":")[1];
+            String guid = guid_lotacao_name.getGuid();
+            String lotacao = guid_lotacao_name.getLotacao();
 
             log.info("Persistindo papel com guid={}", guid);
             Optional<Role> role = evaluatorsRepository.findRoleByGuid(guid);
@@ -202,7 +206,7 @@ public class EvaluatorsService {
             if(role.isPresent()){
                 throw new ParticipeServiceException("Já existe uma entidade avaliadora com o guid deste papel.");
             } else {
-                Role newRole = new Role(guid);
+                Role newRole = new Role(guid, guid_lotacao_name.getName());
                 log.info("Buscando no banco setor com guid={}", lotacao);
                 Section targetSection = new ArrayList<Section>(evaluatorSections).stream().filter(
                     (section) -> section.getGuid().equals(lotacao))
@@ -219,7 +223,7 @@ public class EvaluatorsService {
 
     }
 
-    private Set<Role> updateRoles(List<String> rolesGuid, Set<Section> evaluatorSections) {
+    private Set<Role> updateRoles(List<Role> roles, Set<Section> evaluatorSections) {
 
         evaluatorSections.iterator().forEachRemaining((section) -> {
             log.info("Buscando papeis pertencentes ao setor={}", section.getId().toString());
@@ -235,19 +239,19 @@ public class EvaluatorsService {
 
         Set<Role> evaluatorRolesSet = new HashSet<Role>();
 
-        if(rolesGuid.contains("all")){
+        if(roles.stream().anyMatch(role -> "Todos".equals(role.getName()))){
             log.info("Nenhum guid foi fornecido, nenhum papel sera persistido no banco");
-            evaluatorRolesSet.add(new Role("all"));
+            evaluatorRolesSet.add(new Role());
             return evaluatorRolesSet;
         }
 
-        rolesGuid.iterator().forEachRemaining((guid_lotacao) -> {
-            String guid = guid_lotacao.split(":")[0];
-            String lotacao = guid_lotacao.split(":")[1];
+        roles.iterator().forEachRemaining((guid_lotacao_name) -> {
+            String guid = guid_lotacao_name.getGuid();
+            String lotacao = guid_lotacao_name.getLotacao();
 
             log.info("Buscando papel com guid={}", guid);
             Role candidateRole = evaluatorsRepository.findRoleByGuid(guid)
-                .orElse(new Role(guid));
+                .orElse(new Role(guid,guid_lotacao_name.getName()));
 
             log.info("Buscando no banco setor com guid={}", lotacao);
             Section targetSection = new ArrayList<Section>(evaluatorSections).stream().filter(
@@ -257,6 +261,7 @@ public class EvaluatorsService {
             
             log.info("Criando relacionamento entre papel={} e setor={}", guid, targetSection.getGuid());
             candidateRole.setSection(targetSection);
+            candidateRole.setName(guid_lotacao_name.getName());
             evaluatorsRepository.save(candidateRole);
             evaluatorRolesSet.add(candidateRole);
         });

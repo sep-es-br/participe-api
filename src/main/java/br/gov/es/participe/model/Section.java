@@ -9,8 +9,12 @@ public class Section extends Evaluator {
     @Relationship(value = "BELONGS_TO", direction = Relationship.OUTGOING)
     private Organization organization;
 
-    public Section(String guid) {
+    public Section() {
+    }
+    
+    public Section(String guid, String name) {
         this.setGuid(guid);
+        this.setName(name);
     }
     
     public Organization getOrganization() {
