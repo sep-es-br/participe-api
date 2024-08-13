@@ -2,44 +2,49 @@ package br.gov.es.participe.controller.dto;
 
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import br.gov.es.participe.model.Organization;
+import br.gov.es.participe.model.Role;
+import br.gov.es.participe.model.Section;
 
 public class EvaluatorRequestDto {
     
-    @NotBlank
-    private String organizationGuid;
+    @NotNull
+    private Organization organization;
 
     @NotEmpty
-    private List<String> sectionsGuid;
+    private List<Section> sections;
     
-    private List<String> rolesGuid;
+    private List<Role> roles;
 
     public EvaluatorRequestDto() {
 
     }
 
-    public String getOrganizationGuid() {
-        return organizationGuid;
+    public Organization getOrganization() {
+        return organization;
     }
 
-    public void setOrganizationGuid(String organizationGuid) {
-        this.organizationGuid = organizationGuid;
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 
-    public List<String> getSectionsGuid() {
-        return sectionsGuid;
+    public List<Section> getSections() {
+        return sections;
     }
 
-    public void setSectionsGuid(List<String> sectionsGuid) {
-        this.sectionsGuid = sectionsGuid;
+    public void setSections(List<Section> sections) {
+        this.sections = sections;
     }
 
-    public List<String> getRolesGuid() {
-        return rolesGuid;
+    public List<Role> getRoles() {
+        return roles;
     }
 
-    public void setRolesGuid(List<String> rolesGuid) {
-        this.rolesGuid = rolesGuid;
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
+    
 }
