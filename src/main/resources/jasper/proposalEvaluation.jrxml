@@ -74,7 +74,7 @@ AND comment.status = 'pub'
             finalResult.evaluationStatus AS evaluationStatus, 
             finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList, 
 finalResult.evaluatorName AS evaluatorName 
-ORDER BY area.name asc, locality.name asc;]]>
+ORDER BY area.name asc, planItemName asc,locality.name asc;]]>
 	</queryString>
 	<field name="commentId" class="java.lang.Object">
 		<property name="com.jaspersoft.studio.field.name" value="commentId"/>
