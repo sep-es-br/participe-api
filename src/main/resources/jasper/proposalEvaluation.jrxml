@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ProposalEvaluation" pageWidth="1000" pageHeight="595" orientation="Landscape" columnWidth="960" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" isIgnorePagination="true" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ProposalEvaluation" pageWidth="1500" pageHeight="595" orientation="Landscape" columnWidth="1460" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" isIgnorePagination="true" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapter.jrdax"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<parameter name="localityId" class="java.lang.Long" isForPrompting="false"/>
 	<parameter name="evaluationStatus" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="planItemAreaId" class="java.lang.Long" isForPrompting="false"/>
@@ -103,7 +112,7 @@ ORDER BY area.name asc, locality.name asc;]]>
 		<band height="30" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
-				<reportElement x="250" y="0" width="606" height="30" uuid="3ddced7c-9617-4799-879b-f17e758ca228"/>
+				<reportElement x="582" y="0" width="774" height="30" uuid="3ddced7c-9617-4799-879b-f17e758ca228"/>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
@@ -117,12 +126,19 @@ ORDER BY area.name asc, locality.name asc;]]>
 				<textFieldExpression><![CDATA[$P{structureItemName}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="856" y="0" width="124" height="30" uuid="a0cb26b3-5dd9-4764-8f2f-d40187b155ad"/>
+				<reportElement x="1356" y="0" width="124" height="30" uuid="a0cb26b3-5dd9-4764-8f2f-d40187b155ad"/>
 				<textElement>
 					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{localityTypeName}]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement x="250" y="0" width="332" height="30" uuid="7868c665-3320-48e2-b145-6be315496209"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Subárea]]></text>
+			</staticText>
 		</band>
 	</title>
 	<detail>
@@ -137,7 +153,7 @@ ORDER BY area.name asc, locality.name asc;]]>
 				<textFieldExpression><![CDATA[$F{planItemAreaName}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="250" y="0" width="606" height="30" uuid="d901e148-1f3a-44b2-8911-eaf0a1266f13">
+				<reportElement x="582" y="0" width="774" height="30" uuid="d901e148-1f3a-44b2-8911-eaf0a1266f13">
 					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 				</reportElement>
 				<textElement>
@@ -146,8 +162,17 @@ ORDER BY area.name asc, locality.name asc;]]>
 				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement mode="Transparent" x="856" y="0" width="124" height="30" uuid="dcfbb0df-c3f2-4e44-a9f0-e4b04e6e84a4"/>
+				<reportElement mode="Transparent" x="1356" y="0" width="124" height="30" uuid="dcfbb0df-c3f2-4e44-a9f0-e4b04e6e84a4"/>
 				<textFieldExpression><![CDATA[$F{localityName}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="250" y="0" width="332" height="30" uuid="a754fd91-3072-4740-a763-692a1556761d">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement>
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{planItemName}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
