@@ -2,6 +2,7 @@ package br.gov.es.participe.model;
 
 import br.gov.es.participe.controller.dto.MeetingDto;
 import br.gov.es.participe.controller.dto.MeetingParamDto;
+import br.gov.es.participe.enumerator.AttendanceListEnum;
 import br.gov.es.participe.enumerator.TypeMeetingEnum;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
@@ -25,9 +26,12 @@ public class Meeting extends Entity implements Serializable {
 
   private TypeMeetingEnum typeMeetingEnum;
 
+  private AttendanceListEnum attendanceListMode;
+
   private String address;
 
   private String place;
+
 
   @Relationship(type = "TAKES_PLACE_AT")
   private Locality localityPlace;
@@ -117,6 +121,9 @@ public class Meeting extends Entity implements Serializable {
   public void setName(String name) {
     this.name = name;
   }
+
+
+ 
 
   public Date getBeginDate() {
     return beginDate;
@@ -217,6 +224,16 @@ public class Meeting extends Entity implements Serializable {
   public void setTypeMeetingEnum(TypeMeetingEnum typeMeetingEnum) {
     this.typeMeetingEnum = typeMeetingEnum;
   }
+
+  public AttendanceListEnum getAttendanceListMode() {
+    return attendanceListMode;
+  }
+
+  public void setAttendanceListMode(AttendanceListEnum attendanceListMode) {
+    this.attendanceListMode = attendanceListMode;
+  }
+
+
 
   public Set<Channel> getChannels() {
     if (this.channels == null) {

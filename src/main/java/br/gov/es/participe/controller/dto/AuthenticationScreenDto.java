@@ -10,6 +10,12 @@ public class AuthenticationScreenDto {
   private String titleAuthentication;
   private String subtitleAuthentication;
 
+  private Boolean showStatistics;
+  private Boolean showCalendar;
+  private Boolean showStatisticsPanel;
+  private Boolean showProposalsPanel;
+  private Boolean showExternalLinks;
+
   private FileDto fileAuthentication;
 
   private Integer proposal;
@@ -19,6 +25,7 @@ public class AuthenticationScreenDto {
 
   private StatusConferenceType status;
   private FileDto backgroundImageUrl;
+  private FileDto calendarImageUrl;
 
   private Date beginDate;
   private Date endDate;
@@ -60,6 +67,48 @@ public class AuthenticationScreenDto {
     this.fileAuthentication = fileAuthentication;
   }
 
+  public Boolean getShowStatistics() {
+    return showStatistics;
+  }
+
+  public void setShowStatistics(Boolean showStatistics) {
+    this.showStatistics = showStatistics;
+  }
+
+  
+  public Boolean getShowCalendar() {
+    return showCalendar;
+  }
+  
+  public void setShowCalendar(Boolean showCalendar) {
+    this.showCalendar = showCalendar;
+  }
+  
+  public Boolean getShowStatisticsPanel (){
+    return showStatisticsPanel ;
+  }
+
+  public void setShowStatisticsPanel (Boolean showStatisticsPanel ){
+    this.showStatisticsPanel  = showStatisticsPanel ;
+  }
+
+  public Boolean getShowProposalsPanel() {
+    return showProposalsPanel;
+  }
+
+  public void setShowProposalsPanel(Boolean showProposalsPanel) {
+    this.showProposalsPanel = showProposalsPanel;
+  }
+
+  public Boolean getShowExternalLinks() {
+    return showExternalLinks;
+  }
+
+  public void setShowExternalLinks(Boolean showExternalLinks) {
+    this.showExternalLinks = showExternalLinks;
+  }
+
+  
   public Integer getProposal() {
     return proposal;
   }
@@ -106,6 +155,15 @@ public class AuthenticationScreenDto {
 
   public void setBackgroundImageUrl(FileDto backgroundImageUrl) {
     this.backgroundImageUrl = backgroundImageUrl;
+  }
+
+  
+  public FileDto getCalendarImageUrl() {
+    return this.calendarImageUrl;
+  }
+
+  public void setCalendarImageUrl(FileDto calendarImageUrl) {
+    this.calendarImageUrl = calendarImageUrl;
   }
 
   public Date getBeginDate() {

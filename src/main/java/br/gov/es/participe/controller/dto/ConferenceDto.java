@@ -8,7 +8,6 @@ import br.gov.es.participe.util.domain.StatusConferenceType;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,6 +33,8 @@ public class ConferenceDto {
   private List<MeetingDto> meeting;
   private FileDto fileParticipation;
   private FileDto fileAuthentication;
+  private FileDto fileFooter;
+
   private List<SelfDeclarationDto> selfDeclaration;
   private List<PersonDto> moderators;
 
@@ -50,9 +51,20 @@ public class ConferenceDto {
   private String externalLinksMenuLabel;
   private List<ExternalLinksDto> externalLinks;
   private List<FileDto> backgroundImages;
+  private List<FileDto> calendarImages;
   private String serverName;
   private boolean defaultServerConference;
+  private Boolean showStatistics;
+  private Boolean showCalendar;
+  private Boolean showStatisticsPanel;
+  private Boolean showProposalsPanel;
+  private Boolean showExternalLinks;
+
   private ResearchConfigurationDto researchConfiguration;
+
+  private ConferenceColorDto customProperties;
+
+  private EvaluationConfigurationDto evaluationConfiguration;
 
   public ConferenceDto() {
   }
@@ -80,7 +92,14 @@ public class ConferenceDto {
       conference.getBackgroundImages().forEach(file -> this.backgroundImages.add(new FileDto(file)));
     }
 
+    if (conference.getCalendarImages() != null && !conference.getCalendarImages().isEmpty()) {
+      this.calendarImages = new ArrayList<>();
+      conference.getCalendarImages().forEach(file -> this.calendarImages.add(new FileDto(file)));
+    }
+
     this.researchConfiguration = conference.getResearch() != null ? new ResearchConfigurationDto(conference.getResearch()) : null;
+
+    this.evaluationConfiguration = conference.getEvaluation() != null ? new EvaluationConfigurationDto(conference.getEvaluation()) : null;
 
     this.description = conference.getDescription();
     this.id = conference.getId();
@@ -95,15 +114,39 @@ public class ConferenceDto {
     this.subtitleAuthentication = conference.getSubtitleAuthentication();
     this.subtitleParticipation = conference.getSubtitleParticipation();
     this.subtitleRegionalization = conference.getSubtitleRegionalization();
-    
+
+    this.showCalendar = (conference.getShowCalendar() != null )
+      ? conference.getShowCalendar()
+      : true;
+
+    this.showStatistics = (conference.getShowStatistics() != null )
+      ? conference.getShowStatistics()
+      : true;
+
+    this.showStatisticsPanel  = (conference.getShowStatisticsPanel() != null )
+      ? conference.getShowStatisticsPanel()
+      : true;
+
+    this.showProposalsPanel  = (conference.getShowProposalsPanel() != null )
+      ? conference.getShowProposalsPanel()
+      : true;
+
+    this.showExternalLinks  = (conference.getShowExternalLinks() != null )
+      ? conference.getShowExternalLinks()
+      : true;
+
     this.fileParticipation = (conference.getFileParticipation() != null)
       ? new FileDto(conference.getFileParticipation())
       : null;
     
-    this.fileAuthentication = (conference.getFileAuthentication() != null) 
+      this.fileFooter = (conference.getFileFooter() != null)
+      ? new FileDto(conference.getFileFooter())
+      : null;
+
+    this.fileAuthentication = (conference.getFileAuthentication() != null)
       ? new FileDto(conference.getFileAuthentication())
       : null;
-    
+
     this.localityType = new LocalityTypeDto(conference.getLocalityType());
 
     if (conference.getSelfDeclaration() != null && !conference.getSelfDeclaration().isEmpty()) {
@@ -391,6 +434,14 @@ public class ConferenceDto {
     this.backgroundImages = backgroundImages;
   }
 
+  public List<FileDto> getCalendarImages() {
+    return calendarImages;
+  }
+
+  public void setCalendarImages(List<FileDto> calendarImages) {
+    this.calendarImages = calendarImages;
+  }
+
   public String getServerName() {
     return serverName;
   }
@@ -407,12 +458,76 @@ public class ConferenceDto {
     this.defaultServerConference = defaultServerConference;
   }
 
+  public Boolean getShowCalendar() {
+    return showCalendar;
+  }
+
+  public void setShowCalendar(Boolean showCalendar){
+    this.showCalendar = showCalendar;
+  }
+
+  public Boolean getShowStatistics() {
+    return showStatistics;
+  }
+
+  public void setShowStatistics(Boolean showStatistics){
+    this.showStatistics = showStatistics;
+  }
+
+  public Boolean getShowStatisticsPanel () {
+    return showStatisticsPanel ;
+  }
+
+  public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
+    this.showStatisticsPanel  = showStatisticsPanel ;
+  }
+
+  public Boolean getShowProposalsPanel() {
+    return showProposalsPanel;
+  }
+
+  public void setShowProposalsPanel(Boolean showProposalsPanel) {
+    this.showProposalsPanel = showProposalsPanel;
+  }
+
+  public Boolean getShowExternalLinks() {
+    return showExternalLinks;
+  }
+
+  public void setShowExternalLinks(Boolean showExternalLinks) {
+    this.showExternalLinks = showExternalLinks;
+  }
+
   public ResearchConfigurationDto getResearchConfiguration() {
     return researchConfiguration;
   }
 
   public void setResearchConfiguration(ResearchConfigurationDto researchConfiguration) {
     this.researchConfiguration = researchConfiguration;
+  }
+
+  public ConferenceColorDto getCustomProperties() {
+    return customProperties;
+  }
+
+  public void setCustomProperties(ConferenceColorDto customProperties) {
+    this.customProperties = customProperties;
+  }
+
+  public EvaluationConfigurationDto getEvaluationConfiguration() {
+    return evaluationConfiguration;
+  }
+
+  public void setEvaluationConfiguration(EvaluationConfigurationDto evaluationConfiguration) {
+    this.evaluationConfiguration = evaluationConfiguration;
+  }
+
+  public FileDto getFileFooter() {
+    return fileFooter;
+  }
+
+  public void setFileFooter(FileDto fileFooter) {
+    this.fileFooter = fileFooter;
   }
 
 }

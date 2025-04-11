@@ -5,10 +5,13 @@ public class ModerationParamDto {
 	private Long id;
 	private String text;
 	private String type;
+	private String from;
 	private String status;
 	private Long planItem;
 	private Long locality;
 	private String classification;
+	private boolean duplicated;
+
 
 	public Long getId() {
 		return id;
@@ -65,5 +68,28 @@ public class ModerationParamDto {
 	public void setClassification(String classification) {
 		this.classification = classification;
 	}
+
+	public boolean getDuplicated() {
+		return duplicated;
+	}
+
+	public void setDuplicated(boolean duplicated) {
+		this.duplicated = duplicated;
+	}
+
+
+    /**
+     * @return String return the from
+     */
+    public String getFrom() {
+        return from;
+    }
+
+    /**
+     * @param from the from to set
+     */
+    public void setFrom(String from) {
+        this.from = from;
+    }
 
 }

@@ -62,7 +62,7 @@ public class PlanItemService {
         return planItems;
     }
 
-    @Transactional
+
     public PlanItem save(PlanItem planItem) {
         loadAttributes(planItem);
 
@@ -79,6 +79,10 @@ public class PlanItemService {
         return planItemRepository
                 .findByIdWithLocalities(id)
                 .orElseThrow(() -> new IllegalArgumentException(PLAN_ITEM_NOT_FOUND + id));
+    }
+
+    public PlanItem findByPlanItemChildren(Long idPlanItem, Long idLocality){
+        return planItemRepository.findByPlanItemChildren(idPlanItem,idLocality).orElseThrow(() -> new IllegalArgumentException(PLAN_ITEM_NOT_FOUND + idPlanItem));
     }
     
     public List<PlanItem> findChildren(Long idPlanItem){
@@ -99,7 +103,7 @@ public class PlanItemService {
     	return planItemRepository.findParentsByCommentId(idComment);
     }
     
-    @Transactional
+   
     public void delete(Long id) {
         PlanItem planItem = find(id);
 
@@ -120,6 +124,7 @@ public class PlanItemService {
         loadAttend(planItem);
     }
 
+    @Transactional
     private void loadLocalities(PlanItem planItem) {
         Set<Long> ids = planItem.getLocalitiesIds();
         if (planItem.getId() != null) {

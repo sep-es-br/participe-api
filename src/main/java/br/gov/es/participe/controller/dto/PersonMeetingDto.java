@@ -3,6 +3,7 @@ package br.gov.es.participe.controller.dto;
 import org.springframework.data.neo4j.annotation.QueryResult;
 
 import java.util.Date;
+import java.util.List;
 
 @QueryResult
 public class PersonMeetingDto {
@@ -18,6 +19,16 @@ public class PersonMeetingDto {
     private Date checkedInDate;
     private String cpf;
     private Boolean isAuthTypeCpf;
+    private List<String> authName;
+    private String sub;
+
+    public List<String> getAuthName() {
+        return authName;
+    }
+
+    public void setAuthName(List<String> authName) {
+        this.authName = authName;
+    }
 
     public Long getPersonId() {
         return personId;
@@ -113,5 +124,13 @@ public class PersonMeetingDto {
 
     public void setAuthTypeCpf(Boolean authTypeCpf) {
         isAuthTypeCpf = authTypeCpf;
+    }
+
+    public String getSub() {
+        return sub;
+    }
+
+    public void setSub(String sub) {
+        this.sub = sub;
     }
 }

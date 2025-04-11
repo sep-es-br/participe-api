@@ -1,6 +1,6 @@
 package br.gov.es.participe.controller.dto;
 
-import org.springframework.data.neo4j.annotation.*;
+//import org.springframework.data.neo4j.annotation.*;
 
 import java.util.*;
 

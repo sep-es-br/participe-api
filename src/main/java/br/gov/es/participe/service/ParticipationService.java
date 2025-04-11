@@ -4,6 +4,8 @@ import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.AttendRepository;
 import br.gov.es.participe.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,14 +57,68 @@ public class ParticipationService {
   @Autowired
   private PersonService personService;
 
+  private static final Logger log = LoggerFactory.getLogger(ParticipationService.class);
+
+  public BodyParticipationDto bodyChildren(Long idPlanItem,
+  Long idLocality,
+  Long idConference,
+  Long idPerson,
+  String text,
+  UriComponentsBuilder uriComponentsBuilder){
+    StructureItem structureItem = null;
+    
+    List<PlanItemDto> itens = new ArrayList<>();
+    
+    PlanItem planI = planItemService.findByPlanItemChildren(idPlanItem,idLocality);
+    Set<PlanItem> planItems = planI.getChildren();
+
+    if (planItems != null) {
+      itens.addAll(getListPlanItemDto(planItems, text, idPerson, idConference, idLocality));
+      if (!itens.isEmpty()) {
+        structureItem = structureItemService.findByIdPlanItem(itens.get(0).getId());
+      }
+    } else if (planI != null) {
+        structureItem = structureItemService.findChild(planI.getStructureItem().getId());
+    }
+
+    StructureItemDto structureItemDto = new StructureItemDto(structureItem, null, false, false);
+
+    structureItemDto.setParent(null);
+    structureItemDto.setLocality(null);
+    structureItemDto.setStructure(null);
+
+    LinkParentDto link = new LinkParentDto();
+
+    if (structureItem != null && structureItem.getLink() != null && planI != null) {
+      link.setIdParent(planI.getId());
+      link.setTextLink(structureItem.getLink());
+      structureItemDto.setLink(null);
+      structureItemDto.setParentLink(link);
+    }
+
+    String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
+    itens.forEach(item -> {
+      if (structureItemDto.getLogo() && item.getFile() != null && item.getFile().getId() != null) {
+        item.setImage(url + item.getFile().getId());
+        item.setFile(null);
+      }
+    });
+
+    BodyParticipationDto body = new BodyParticipationDto();
+    body.setItens(itens);
+    body.setStructureitem(structureItemDto);
+
+    return body;
+
+  }
+
   public BodyParticipationDto body(
       Long idPlanItem,
       Long idLocality,
       Long idConference,
       Long idPerson,
       String text,
-      UriComponentsBuilder uriComponentsBuilder
-  ) {
+      UriComponentsBuilder uriComponentsBuilder) {
     Conference conference = conferenceService.find(idConference);
     Plan plan;
     PlanItem planI = null;
@@ -118,7 +176,7 @@ public class ParticipationService {
   }
 
   private List<PlanItemDto> getListPlanItemDto(Set<PlanItem> planItems, String text, Long idPerson, Long idConference,
-                                               Long idLocality) {
+      Long idLocality) {
     List<PlanItemDto> itens = new ArrayList<>();
     if (planItems != null) {
       if (!planItems.isEmpty() && text != null && !text.isEmpty()) {
@@ -158,7 +216,7 @@ public class ParticipationService {
     return (planItem.getName() != null
         && !planItem.getName().isEmpty() && stringUtils.compareIfAContainsB(planItem.getName(), text))
         || (planItem.getDescription() != null && !planItem.getDescription().isEmpty()
-        && stringUtils.compareIfAContainsB(planItem.getDescription(), text));
+            && stringUtils.compareIfAContainsB(planItem.getDescription(), text));
   }
 
   public PlanItemDto generatePlanItemDtoFront(PlanItem planItem, Long idPerson, Long idConference, Long idLocality) {
@@ -186,8 +244,7 @@ public class ParticipationService {
         idPerson,
         planItem.getId(),
         idConference,
-        idLocality
-    );
+        idLocality);
     planItemDto.setVotes(high != null && !high.isEmpty());
     return planItemDto;
   }
@@ -196,7 +253,8 @@ public class ParticipationService {
     PortalHeader header = new PortalHeader();
     Conference conference = conferenceService.find(id);
     SelfDeclaration self = selfDeclarationService.findByPersonAndConference(idPerson, id);
-    researchService.findByIdConference(id).ifPresent(research -> header.setResearch(new ResearchConfigurationDto(research)));
+    researchService.findByIdConference(id)
+        .ifPresent(research -> header.setResearch(new ResearchConfigurationDto(research)));
 
     header.setTitle(conference.getTitleParticipation());
     header.setSubtitle(conference.getSubtitleParticipation());
@@ -206,8 +264,33 @@ public class ParticipationService {
     if (conference.getFileParticipation() != null) {
       header.setImage(url + conference.getFileParticipation().getId());
     }
-    
+
     return header;
+  }
+
+  public Map<String, String> webHeaderImage(Long id, UriComponentsBuilder uriComponentsBuilder) {
+    Map<String, String> image = new HashMap<>();
+    Conference conference = conferenceService.find(id);
+
+    String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
+    if (conference.getFileParticipation() != null) {
+      image.put("image", url + conference.getFileParticipation().getId());
+    }
+
+    return image;
+  }
+
+  public Map<String, String> footerImage (Long id, UriComponentsBuilder uriComponentsBuilder) {
+    Map<String, String> footerImage = new HashMap<>();
+    
+    Conference conference = conferenceService.find(id);
+
+    String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
+    if (conference.getFileFooter() != null) {
+      footerImage.put("footerImage", url + conference.getFileFooter().getId());
+    }
+
+    return footerImage;
   }
 
   public ConferenceDto getConferenceDto(Long id, UriComponentsBuilder uriComponentsBuilder) {
@@ -238,9 +321,9 @@ public class ParticipationService {
   public ParticipationsDto findAll(Long idPerson, String text, Long idConference, Pageable pageable) {
     ParticipationsDto dto = new ParticipationsDto();
     Plan plan = planService.findByConferenceWithPlanItem(idConference);
-    Page<ParticipationDto> participations = attendRepository.findByIdConferenceAndIdPersonAndText(idPerson, idConference, text,
-        pageable
-    );
+    Page<ParticipationDto> participations = attendRepository.findByIdConferenceAndIdPersonAndText(idPerson,
+        idConference, text,
+        pageable);
     for (ParticipationDto participation : participations) {
       PlanItem planItem = getPlanItemDto(plan.getItems(), participation.getPlanItem().getId());
 
@@ -316,11 +399,26 @@ public class ParticipationService {
   public void setSurvey(Boolean answerSurvey, Long idPerson, Long idConference) {
     SelfDeclaration self = selfDeclarationService.findByPersonAndConference(idPerson, idConference);
 
+    log.info(
+      "Alterando answerSurvey para answerSurvey={} da SelfDeclaration selfDeclarationId={} relacionados a personId={} e conferenceId={}",
+      answerSurvey,
+      self.getId(),
+      idPerson,
+      idConference
+    );
+
     self.setAnswerSurvey(answerSurvey);
 
     selfDeclarationService.save(self);
+    log.info(
+      "SelfDeclaration alterada com sucesso selfDeclarationId={} relacionados a personId={} e conferenceId={}",
+      self.getId(),
+      idPerson,
+      idConference
+    );
   }
 
+  @SuppressWarnings("unused")
   private void verifyPersonConsistence(Long idPerson, SelfDeclaration self) {
     if (self.getPerson() == null) {
       Person person = personService.find(idPerson);

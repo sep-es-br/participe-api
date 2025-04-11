@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import br.gov.es.participe.enumerator.AttendanceListEnum;
 
 public class MeetingParamDto {
 
@@ -26,10 +27,25 @@ public class MeetingParamDto {
 	private List<ChannelDto> channels;
 	private TypeMeetingEnum type;
 	private List<Long> segmentations;
+	private AttendanceListEnum attendanceListMode;
+  
+
 
 	public MeetingParamDto() {
 
 	}
+
+
+
+	public AttendanceListEnum getAttendanceListMode() {
+		return attendanceListMode;
+	  }
+	
+	  public void setAttendanceListMode(AttendanceListEnum attendanceListMode) {
+		this.attendanceListMode = attendanceListMode;
+	  }
+	
+	
 
 	public List<Long> getSegmentations() {
 		return segmentations;

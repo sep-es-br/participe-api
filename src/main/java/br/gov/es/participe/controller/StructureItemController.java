@@ -2,9 +2,11 @@ package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.StructureItemDto;
 import br.gov.es.participe.model.StructureItem;
+import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.StructureItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -19,7 +21,11 @@ public class StructureItemController {
     @Autowired
     private StructureItemService structureItemService;
 
+    @Autowired
+    private PersonService personService;
+
     @GetMapping
+    @SuppressWarnings("rawtypes")
     public ResponseEntity index(@RequestParam(value = "query", required = false) String query) {
         List<StructureItem> structureItems;
         if (query != null && !query.isEmpty()) {
@@ -35,6 +41,7 @@ public class StructureItemController {
     }
 
     @GetMapping("list")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity listByStructure(@RequestParam(value = "id") Long idStructure) {
         List<StructureItem> structureItems = structureItemService.findByStructure(idStructure);
         List<StructureItemDto> response = null;
@@ -44,27 +51,54 @@ public class StructureItemController {
         return ResponseEntity.status(200).body(response);
     }
 
+
+    @Transactional
     @PostMapping
-    public ResponseEntity store(@RequestBody StructureItemDto structureItemDto) {
+    @SuppressWarnings("rawtypes")
+    public ResponseEntity store(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestBody StructureItemDto structureItemDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         StructureItem structureItem = new StructureItem(structureItemDto);
         StructureItemDto response = new StructureItemDto(structureItemService.create(structureItem), null, true, true);
         return ResponseEntity.status(200).body(response);
     }
 
     @GetMapping("/{id}")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity show(@PathVariable Long id) {
         StructureItemDto response = new StructureItemDto(structureItemService.find(id), null, true, true);
         return ResponseEntity.status(200).body(response);
     }
 
+
+    @Transactional
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable Long id, @RequestBody StructureItemDto structureItemDto) {
-        StructureItemDto response = new StructureItemDto(structureItemService.update(id, structureItemDto), null, true, true);
+    @SuppressWarnings("rawtypes")
+    public ResponseEntity update(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id,
+            @RequestBody StructureItemDto structureItemDto) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
+        StructureItemDto response = new StructureItemDto(structureItemService.update(id, structureItemDto), null, true,
+                true);
         return ResponseEntity.status(200).body(response);
     }
 
+
+    @Transactional
     @DeleteMapping("/{id}")
-    public ResponseEntity destroy(@PathVariable Long id) {
+    @SuppressWarnings("rawtypes")
+    public ResponseEntity destroy(
+            @RequestHeader(name = "Authorization") String token,
+            @PathVariable Long id) {
+        if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+            return ResponseEntity.status(401).body(null);
+        }
         structureItemService.delete(id);
         return ResponseEntity.status(200).build();
     }

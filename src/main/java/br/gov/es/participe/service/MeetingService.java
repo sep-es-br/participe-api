@@ -1,5 +1,6 @@
 package br.gov.es.participe.service;
 
+import br.gov.es.participe.controller.dto.ConferenceDto;
 import br.gov.es.participe.controller.dto.MeetingDto;
 import br.gov.es.participe.controller.dto.MeetingParamDto;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
@@ -10,13 +11,15 @@ import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
+import br.gov.es.participe.model.PortalServer;
 import br.gov.es.participe.repository.CheckedInAtRepository;
 import br.gov.es.participe.repository.MeetingRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,6 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
 import static br.gov.es.participe.enumerator.TypeMeetingEnum.VIRTUAL;
@@ -54,6 +59,15 @@ public class MeetingService {
   @Autowired
   private CheckedInAtRepository checkedInAtRepository;
 
+  @Autowired
+  private PortalServerService portalServerService ;
+
+  @Autowired
+  private PreRegistrationService preRegistrationService;
+
+  private final static Logger log = LoggerFactory.getLogger(MeetingService.class);
+
+
   public List<Meeting> findAllDashboard(Long idConference) {
     List<Meeting> meetings = new ArrayList<>();
 
@@ -62,45 +76,43 @@ public class MeetingService {
   }
 
   public Integer findNumberPageMeeting(
-    Date currentDate,
-    Long idConference,
-    String name,
-    Date beginDate,
-    Date endDate,
-    List<Long> localities,
-    Pageable pageable
-  ) {
+      Date currentDate,
+      Long idConference,
+      String name,
+      Date beginDate,
+      Date endDate,
+      List<Long> localities,
+      Pageable pageable) {
 
     Integer pageNumber = 0;
     Page<Meeting> meetingsPage;
 
     do {
       meetingsPage = meetingRepository.findAll(
-        idConference,
-        name,
-        beginDate,
-        endDate,
-        localities,
-        pageable
-      );
+          idConference,
+          name,
+          beginDate,
+          endDate,
+          localities,
+          pageable);
 
       List<Meeting> meetings = meetingsPage.getContent();
 
       boolean containsCurrentDate = this.verifyIfContainsCurrentDate(currentDate, meetings);
 
-      if(containsCurrentDate) {
+      if (containsCurrentDate) {
         return pageable.getPageNumber();
       }
 
       pageable = pageable.next();
 
-    } while(meetingsPage.hasNext());
+    } while (meetingsPage.hasNext());
 
     return pageNumber;
   }
 
   private boolean verifyIfContainsCurrentDate(Date currentDate, List<Meeting> meetings) {
-    for(Meeting meeting : meetings) {
+    for (Meeting meeting : meetings) {
 
       Calendar meetingDateCalendar = Calendar.getInstance();
       meetingDateCalendar.setTime(meeting.getBeginDate());
@@ -108,14 +120,12 @@ public class MeetingService {
       Calendar currentDateCalendar = Calendar.getInstance();
       currentDateCalendar.setTime(currentDate);
 
-      boolean sameYear =
-        meetingDateCalendar.get(Calendar.YEAR) == currentDateCalendar.get(Calendar.YEAR);
-      boolean sameMonth =
-        meetingDateCalendar.get(Calendar.MONTH) == currentDateCalendar.get(Calendar.MONTH);
-      boolean sameOrGreaterDay =
-        meetingDateCalendar.get(Calendar.DAY_OF_MONTH) >= currentDateCalendar.get(Calendar.DAY_OF_MONTH);
+      boolean sameYear = meetingDateCalendar.get(Calendar.YEAR) == currentDateCalendar.get(Calendar.YEAR);
+      boolean sameMonth = meetingDateCalendar.get(Calendar.MONTH) == currentDateCalendar.get(Calendar.MONTH);
+      boolean sameOrGreaterDay = meetingDateCalendar.get(Calendar.DAY_OF_MONTH) >= currentDateCalendar
+          .get(Calendar.DAY_OF_MONTH);
 
-      if(sameOrGreaterDay && sameMonth && sameYear) {
+      if (sameOrGreaterDay && sameMonth && sameYear) {
         return true;
       }
     }
@@ -123,43 +133,41 @@ public class MeetingService {
   }
 
   public Page<MeetingDto> findAll(
-    Long idConference,
-    String name,
-    Date beginDate,
-    Date endDate,
-    List<Long> localities,
-    Pageable pageable
-  ) {
+      Long idConference,
+      String name,
+      Date beginDate,
+      Date endDate,
+      List<Long> localities,
+      Pageable pageable) {
     return meetingRepository.findAll(
-      idConference,
-      name,
-      beginDate,
-      endDate,
-      localities,
-      pageable
-    ).map(meeting -> new MeetingDto(meeting, false));
+        idConference,
+        name,
+        beginDate,
+        endDate,
+        localities,
+        pageable).map(meeting -> new MeetingDto(meeting, false));
   }
 
   public Meeting findById(Long meetingId) {
-    if(meetingId == null) {
+    if (meetingId == null) {
       throw new IllegalArgumentException("Meeting id must be informed.");
     }
 
     return meetingRepository.findById(meetingId)
-      .orElseThrow(() -> new IllegalArgumentException("Meeting not found"));
+        .orElseThrow(() -> new IllegalArgumentException("Meeting not found"));
   }
 
   public List<PlanItemComboDto> findPlanItemsFromConference(Long idConference) {
     List<PlanItemComboDto> returnDto = new ArrayList<>();
     List<PlanItem> result = planItemService.findByIdConference(idConference);
-    for(PlanItem planItem : result) {
+    for (PlanItem planItem : result) {
       returnDto.add(new PlanItemComboDto(planItem.getId(), planItem.getName()));
     }
 
     return returnDto;
   }
 
-  @Transactional
+
   public Meeting save(Meeting meeting, MeetingParamDto meetingParamDto) {
     validateMeetingFields(meeting, meetingParamDto);
 
@@ -169,17 +177,26 @@ public class MeetingService {
 
     Set<Locality> localityCovers = extractLocalityFrom(meeting);
 
+    log.info("{} localities encontradas para a meetingId={}", localityCovers.size(), meeting.getId());
+
     Set<PlanItem> planItems = extractPlanItemFrom(meetingParamDto);
 
-    if(localityCovers.isEmpty()) {
+    log.info("{} planItems encontradas para a meetingId={}", planItems.size(), meeting.getId());
+
+    if (localityCovers.isEmpty()) {
       return null;
     }
 
-    if(!meetingParamDto.getType().equals(VIRTUAL)) {
+    if (!meetingParamDto.getType().equals(VIRTUAL)) {
       Locality localityPlace = localityService.find(meeting.getLocalityPlace().getId());
-      if(localityPlace == null) {
+      if (localityPlace == null) {
         return null;
       }
+      log.info(
+        "Meeting não é do tipo VIRTUAL, vinculando localityPlace localityId={} a meetingId={}",
+        localityPlace.getId(),
+        meeting.getId()
+      );
       meeting.setLocalityPlace(localityPlace);
     }
 
@@ -188,18 +205,26 @@ public class MeetingService {
     meeting.setConference(conference);
     meeting.setPlanItems(planItems);
     meeting.setTypeMeetingEnum(meetingParamDto.getType());
+    meeting.setAttendanceListMode(meetingParamDto.getAttendanceListMode());
     meeting.setLocalityCovers(localityCovers);
 
+    log.info(
+      "Salvando meeting com os atributos conferenceId={}, {} planItems, typeMeeting={}, attendanceListMode={}, {} localityCovers",
+      conference.getId(),
+      planItems.size(),
+      meetingParamDto.getType(),
+      meetingParamDto.getAttendanceListMode(),
+      localityCovers.size()
+    );
     Meeting meetingResponse = meetingRepository.save(meeting);
 
     Meeting meetingUpdate = findWithoutConference(meetingResponse.getId());
 
-    if(!meetingParamDto.getType().equals(VIRTUAL)) {
-      makeRelationshipWithReceptionist(meeting, meetingUpdate, meetingParamDto);
+    if (!meetingParamDto.getType().equals(VIRTUAL)) {
+      makeRelationshipWithReceptionist(meetingUpdate, meetingParamDto);
     }
 
     return meetingRepository.save(meetingUpdate);
-
   }
 
   private Set<PlanItem> extractPlanItemFrom(MeetingParamDto meetingParamDto) {
@@ -216,7 +241,7 @@ public class MeetingService {
 
     meeting.getLocalityCovers().forEach(locality -> {
       Locality localityTemp = localityService.find(locality.getId());
-      if(localityTemp != null) {
+      if (localityTemp != null) {
         localityCovers.add(localityTemp);
       }
     });
@@ -224,46 +249,46 @@ public class MeetingService {
   }
 
   private void saveOrUpdateChannel(Meeting meeting, MeetingParamDto meetingParamDto) {
-    if(VIRTUAL.equals(meetingParamDto.getType())
-       || PRESENCIAL_VIRTUAL.equals(meetingParamDto.getType())) {
+    if (VIRTUAL.equals(meetingParamDto.getType())
+        || PRESENCIAL_VIRTUAL.equals(meetingParamDto.getType())) {
       Set<Channel> channels = channelService.saveChannelsMeeting(meetingParamDto.getChannels(), meeting);
+      log.info("Criando vinculo da meetingId={} com {} channels", meeting.getId(), channels.size());
       meeting.setChannels(channels);
     }
   }
 
   private void validateMeetingFields(Meeting meeting, MeetingParamDto meetingParamDto) {
-    if((meeting.getLocalityPlace() == null || meeting.getLocalityPlace().getId() == null)
-       && !meetingParamDto.getType().equals(VIRTUAL)
-    ) {
+    if ((meeting.getLocalityPlace() == null || meeting.getLocalityPlace().getId() == null)
+        && !meetingParamDto.getType().equals(VIRTUAL)) {
       throw new IllegalArgumentException("Locality to 'TAKES_PLACE_AT' is required");
     }
 
-    if(meeting.getLocalityCovers() == null || meeting.getLocalityCovers().isEmpty()) {
+    if (meeting.getLocalityCovers() == null || meeting.getLocalityCovers().isEmpty()) {
       throw new IllegalArgumentException("coverage locations is required");
     }
 
-    if(meeting.getConference() == null || meeting.getConference().getId() == null) {
+    if (meeting.getConference() == null || meeting.getConference().getId() == null) {
       throw new IllegalArgumentException("Conference is required");
     }
 
-    if((meetingParamDto.getSegmentations() == null || meetingParamDto.getSegmentations().isEmpty())
-       && (meeting.getConference().getStructureItems() != null
-           && !meeting.getConference().getStructureItems().isEmpty())) {
+    if ((meetingParamDto.getSegmentations() == null || meetingParamDto.getSegmentations().isEmpty())
+        && (meeting.getConference().getStructureItems() != null
+            && !meeting.getConference().getStructureItems().isEmpty())) {
       throw new IllegalArgumentException("Segment is required");
     }
   }
 
   public Meeting findWithoutConference(Long id) {
     return meetingRepository.findMeetingWithoutConference(id)
-      .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + id));
   }
 
   public Meeting find(Long id) {
     return meetingRepository.findMeetingWithRelationshipsById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Meeting not found: " + id));
   }
 
-  @Transactional
+
   public Meeting update(Meeting meeting, MeetingParamDto meetingParamDto) {
     validate(meeting, meetingParamDto);
 
@@ -272,159 +297,197 @@ public class MeetingService {
     meeting.setPlace(meetingParamDto.getPlace());
     meeting.setBeginDate(meetingParamDto.getBeginDate());
     meeting.setEndDate(meetingParamDto.getEndDate());
+    meeting.setAttendanceListMode(meetingParamDto.getAttendanceListMode());
 
     updateRelationships(meeting, meetingParamDto);
 
     return meetingRepository.save(meeting);
   }
 
+
   private void updateRelationships(Meeting meeting, MeetingParamDto meetingParamDto) {
     Meeting meetingUpdate = findWithoutConference(meeting.getId());
-    if(meetingUpdate.getConference() == null
-       || !meetingUpdate.getConference().getId().equals(meetingParamDto.getConference())) {
+    if (meetingUpdate.getConference() == null
+        || !meetingUpdate.getConference().getId().equals(meetingParamDto.getConference())) {
       Conference conf = conferenceService.find(meetingParamDto.getConference());
-      if(conf != null) {
+      if (conf != null) {
         meetingUpdate.setConference(null);
+        log.info("Criando vinculo entre meetingId={} e conferenceId={}", meetingUpdate.getId(), conf.getId());
         meeting.setConference(conf);
       }
     }
-    if(!meetingUpdate.getLocalityPlace().getId().equals(meetingParamDto.getLocalityPlace())) {
+    if (!meetingUpdate.getLocalityPlace().getId().equals(meetingParamDto.getLocalityPlace())) {
       Locality newLocality = localityService.find(meetingParamDto.getLocalityPlace());
 
-      if(newLocality != null) {
+      if (newLocality != null) {
         meetingUpdate.setLocalityPlace(null);
         meeting.setLocalityPlace(newLocality);
+        log.info("Criando vinculo entre meetingId={} e localityPlaceId={}", meetingUpdate.getId(), newLocality.getId());
       }
     }
-    if(meetingParamDto.getSegmentations() != null && !meetingParamDto.getSegmentations().isEmpty()) {
+    if (meetingParamDto.getSegmentations() != null && !meetingParamDto.getSegmentations().isEmpty()) {
       meetingUpdate.getPlanItems().clear();
       Set<PlanItem> planItems = new HashSet<>();
       meetingParamDto.getSegmentations().forEach(planItemId -> {
         planItems.add(planItemService.find(planItemId));
         meeting.setPlanItems(planItems);
+        log.info("Criando vinculo entre meetingId={} e planItemId={}", meetingUpdate.getId(), planItemId);
       });
     }
-    if(meetingParamDto.getLocalityCovers() != null && !meetingParamDto.getLocalityCovers().isEmpty()) {
+    if (meetingParamDto.getLocalityCovers() != null && !meetingParamDto.getLocalityCovers().isEmpty()) {
       Set<Locality> covers = new HashSet<>();
       meetingUpdate.getLocalityCovers().clear();
       meetingParamDto.getLocalityCovers().forEach(locality -> {
         covers.add(localityService.find(locality));
         meeting.setLocalityCovers(covers);
+        log.info("Criando vinculo entre meetingId={} e localityCoversId={}", meetingUpdate.getId(), locality);
       });
     }
 
-    if(VIRTUAL.equals(meetingParamDto.getType())
-       || PRESENCIAL_VIRTUAL.equals(meetingParamDto.getType())) {
+    if (VIRTUAL.equals(meetingParamDto.getType())
+        || PRESENCIAL_VIRTUAL.equals(meetingParamDto.getType())) {
+      log.info("Meeting com meetingId={} é VIRTUAL ou PRESENCIAL_VIRTUAL meetingType={}", meetingUpdate.getId(), meetingParamDto.getType());
       saveOrUpdateChannel(meeting, meetingParamDto);
     }
-    makeRelationshipWithReceptionist(meeting, meetingUpdate, meetingParamDto);
+
+    makeRelationshipWithReceptionist(meeting, meetingParamDto);
     meetingRepository.save(meetingUpdate);
   }
 
-  private void makeRelationshipWithReceptionist(Meeting meeting, Meeting meetingUpdate, MeetingParamDto meetingParamDto) {
-    if((meetingParamDto.getReceptionists() != null && !meetingParamDto.getReceptionists().isEmpty())
-       || (meetingParamDto.getReceptionistEmails() != null
-           && !meetingParamDto.getReceptionistEmails().isEmpty())) {
-      if(meetingUpdate.getReceptionists() != null) {
-        meetingUpdate.getReceptionists().clear();
-      }
-      meeting.setReceptionists(new HashSet<>());
-      meeting.getReceptionists().addAll(
-        findReceptionist(meetingParamDto.getReceptionistEmails(), meetingParamDto.getReceptionists()));
-    }
-  }
+  private void makeRelationshipWithReceptionist(Meeting meetingUpdate, MeetingParamDto meetingParamDto) {
+    if (meetingParamDto.getReceptionists() != null) {
 
-  private Set<Person> findReceptionist(List<String> emails, List<Long> idsReceptionist) {
-    Set<Person> receptionists = new HashSet<>();
-    if(idsReceptionist != null && !idsReceptionist.isEmpty()) {
-      idsReceptionist.forEach(receptionist -> receptionists.add(personService.find(receptionist)));
-    }
-    if(emails != null && !emails.isEmpty()) {
-      emails.forEach(receptionistEmail -> {
-        Optional<Person> person = personService.findByContactEmail(receptionistEmail);
-        person.ifPresent(receptionists::add);
+      // Remove excluded
+      Set<Person> recs2Remove = new HashSet<Person>();
+      meetingUpdate.getReceptionists().forEach((recInDb) -> {
+        if (!(meetingParamDto.getReceptionists().contains(recInDb.getId()))) {
+          recInDb.getWelcomesMeetings().removeIf((rec) -> (rec.getId().equals(meetingUpdate.getId())));
+          personService.save(recInDb, true);
+          log.info("Desvinculando receptionistId={} da meetingId={}", recInDb.getId(), meetingUpdate.getId());
+          recs2Remove.add(recInDb);
+        }
+      });
+      meetingUpdate.getReceptionists().removeAll(recs2Remove);
+
+      // Add new receptionists
+      meetingParamDto.getReceptionists().forEach((recId) -> {
+        if (meetingUpdate.getReceptionists().stream().noneMatch((recInDb) -> (recInDb.getId().equals(recId)))) {
+          log.info("Novo receptionist receptionistId={} informado para a meetingId={}", recId, meetingUpdate.getId());
+          Person newRec = personService.find(recId);
+          if (newRec.getWelcomesMeetings() == null) {
+            newRec.setWelcomesMeetings(new HashSet<Meeting>());
+          }
+          if (!newRec.getWelcomesMeetings().contains(meetingUpdate)) {
+            log.info("Criando relacionamento entre o receptionistId={} e a meetingId={}", newRec.getId(), meetingUpdate.getId());
+            newRec.getWelcomesMeetings().add(meetingUpdate);
+          }
+          //Person p = personService.find(newRec.getId());
+          //p.setWelcomesMeetings(newRec.getWelcomesMeetings());
+          personService.save(newRec, true);
+          if (meetingUpdate.getReceptionists() == null) {
+            meetingUpdate.setReceptionists(new HashSet<Person>());
+          }
+          Set<Person> newRecList = meetingUpdate.getReceptionists();
+          newRecList.add(newRec);
+          meetingUpdate.setReceptionists(newRecList);
+          log.info("Criando relacionamento entre o a meetingId={} e receptionistId={}", meetingUpdate.getId(), newRec.getId());
+        }
       });
     }
-    return receptionists;
   }
 
   private void validate(Meeting meeting, MeetingParamDto meetingParamDto) {
-    if(meetingParamDto.getLocalityPlace() == null) {
+    if (meetingParamDto.getLocalityPlace() == null) {
       throw new IllegalArgumentException("Locality to 'TAKES_PLACE_AT' is required");
     }
 
-    if(meetingParamDto.getLocalityCovers() == null || meetingParamDto.getLocalityCovers().isEmpty()) {
+    if (meetingParamDto.getLocalityCovers() == null || meetingParamDto.getLocalityCovers().isEmpty()) {
       throw new IllegalArgumentException("coverage locations is required");
     }
 
-    if(meetingParamDto.getConference() == null) {
+    if (meetingParamDto.getConference() == null) {
       throw new IllegalArgumentException("Conference is required");
     }
 
     Conference conf = conferenceService.find(meetingParamDto.getConference());
     validateMeetingIntervalDate(conf, meetingParamDto);
 
-    if(meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
+    if (meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
       throw new IllegalArgumentException("Meeting cannot be updated as it has registration of participant(s)");
     }
   }
 
   private void validateMeetingIntervalDate(Conference conf, MeetingParamDto meetingParamDto) {
-    if(meetingParamDto.getBeginDate().before(conf.getBeginDate())
-       || meetingParamDto.getBeginDate().after(conf.getEndDate())) {
+    if (meetingParamDto.getBeginDate().before(conf.getBeginDate())
+        || meetingParamDto.getBeginDate().after(conf.getEndDate())) {
       throw new IllegalArgumentException("conference.meeting.error.beginDateOutOfRange");
     }
-    if(meetingParamDto.getEndDate().before(conf.getBeginDate())
-       || meetingParamDto.getEndDate().after(conf.getEndDate())) {
+    if (meetingParamDto.getEndDate().before(conf.getBeginDate())
+        || meetingParamDto.getEndDate().after(conf.getEndDate())) {
       throw new IllegalArgumentException("conference.meeting.error.endDateOutOfRange");
     }
-    if(meetingParamDto.getBeginDate().after(meetingParamDto.getEndDate())) {
+    if (meetingParamDto.getBeginDate().after(meetingParamDto.getEndDate())) {
       throw new IllegalArgumentException("conference.meeting.error.beginDateAfterEndDate");
     }
   }
 
-  @Transactional
+
   public Boolean delete(Long id) {
+    log.info("Iniciando remoção da meeting com meetingId={}", id);
     Set<CheckedInAt> checkedInAt = this.findCheckedInAtByMeeting(id);
-    if(!checkedInAt.isEmpty()) {
+    log.info("Encontrado {} checkins para a meetingId={}", checkedInAt.size(), id);
+    if (!checkedInAt.isEmpty()) {
       throw new IllegalArgumentException("Meeting cannot be deleted as it has registration of participant(s)");
     }
     Meeting meeting = this.find(id);
+    log.info("Removendo meetingId={}", id);
     meetingRepository.delete(meeting);
     return true;
   }
 
-  @Transactional
+
   public CheckedInAt checkInOnMeeting(Long personId, Long meetingId, String timeZone) {
     Meeting meeting = this.find(meetingId);
     Person person = personService.find(personId);
-    if(person != null && meeting != null) {
+    if (person != null && meeting != null) {
       Optional<CheckedInAt> checkedInAt = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
-      if(!checkedInAt.isPresent()) {
-        CheckedInAt newParticipant = timeZone == null ? new CheckedInAt(person, meeting) : new CheckedInAt(person, meeting, timeZone);
+      if (!checkedInAt.isPresent()) {
+        CheckedInAt newParticipant = timeZone == null ? new CheckedInAt(person, meeting)
+            : new CheckedInAt(person, meeting, timeZone);
+            preRegistrationService.saveCheckIn(personId, meetingId);
+        log.info("Realizando checkin da personId={} na meetingId={} com timezone={}", personId, meetingId, timeZone);
         return checkedInAtRepository.save(newParticipant);
       }
-      throw new IllegalArgumentException("Person is already participating.");
+      throw new IllegalArgumentException("Esta pessoa já está participando neste encontro.");
     }
     throw new IllegalArgumentException("Person or Meeting not found.");
   }
 
   public Set<CheckedInAt> findCheckedInAtByMeeting(Long meetingId) {
     Meeting meeting = this.find(meetingId);
-    if(meeting != null) {
+    if (meeting != null) {
       return checkedInAtRepository.findByMeeting(meetingId);
     }
     return Collections.emptySet();
   }
 
-  @Transactional
+  public CheckedInAt findByPersonAndMeeting(Long personId, Long meetingId){
+    Optional<CheckedInAt> checkedInAt = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
+
+    if (checkedInAt.isPresent())
+      return checkedInAt.get();
+    return null;
+  }
+
+
   public Boolean deleteParticipation(Long personId, Long meetingId) {
     Meeting meeting = this.find(meetingId);
     Person person = personService.find(personId);
-    if(person != null && meeting != null) {
+    if (person != null && meeting != null) {
       Optional<CheckedInAt> checkedInAt = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
 
-      if(checkedInAt.isPresent()) {
+      if (checkedInAt.isPresent()) {
+        log.info("Removendo participação da personId={} na meetingId={}", personId, meetingId);
         checkedInAtRepository.delete(checkedInAt.get());
         return true;
       }
@@ -434,5 +497,47 @@ public class MeetingService {
 
   public List<CheckedInAt> findCheckedInMeetingsByPerson(Long id) {
     return this.meetingRepository.findAllPersonCheckedIn(id);
+  }
+
+  public String generateMeetingLink(Long id) {
+    Meeting meeting = this.find(id);
+    PortalServer portalMeeting = this.portalServerService.findByIdConference(meeting.getConference().getId()).get();
+    var urlMeeting = portalMeeting.getUrl() + "#/registration/"+ meeting.getConference().getId() +"/meeting/" + id;
+
+    return urlMeeting;
+  }
+
+  public String generateAutoCheckInLink(Long id) {
+    Meeting meeting = this.find(id);
+    PortalServer portalMeeting = this.portalServerService.findByIdConference(meeting.getConference().getId()).get();
+    var urlMeeting = portalMeeting.getUrl() + "#/self-check-in/"+ meeting.getConference().getId() +"/meeting/" + id;;
+
+    return urlMeeting;
+  }
+
+  public Boolean selfCheckInIsOpen(Long id){
+
+    Boolean selfCheckIn = meetingRepository.selfCheckInIsOpen(id);
+
+    if(selfCheckIn != null){
+      return selfCheckIn;
+    }else{
+      return false;
+    }
+  }
+
+  public Map<String, Boolean> preRegistrationIsOpenAndMeetingStarted(Long id){
+
+    Map<String, Boolean> preRegistration = new HashMap<>();
+
+    Boolean preRegistrationMeetingStarted = meetingRepository.preRegistrationIsOpenAndMeetingStarted(id);
+
+    Boolean preRegistrationMeetingClosed = meetingRepository.preRegistrationIsOpenAndMeetingClosed(id);
+    
+    preRegistration.put("preRegistrationMeetingStarted", preRegistrationMeetingStarted);
+    preRegistration.put("preRegistrationMeetingClosed", preRegistrationMeetingClosed);
+
+    return preRegistration;
+
   }
 }

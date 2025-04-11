@@ -12,6 +12,7 @@ public class ModerationResultDto {
 	private String text;
 	private String time;
 	private String type;
+	private String from;
 	private Long localityId;
 	private String localityName;
 	private Long planItemId;
@@ -29,6 +30,9 @@ public class ModerationResultDto {
 	private String structureItemName;
 	private Long areaEstrategicaId;
 	private String nameAreaEstrategica;
+	private Boolean duplicated;
+
+
 
 	public Long getCommentId() {
 		return commentId;
@@ -213,4 +217,41 @@ public class ModerationResultDto {
 	public void setConferenceId(Long conferenceId) {
 		this.conferenceId = conferenceId;
 	}
+
+	public Boolean getDuplicated() {
+		return duplicated;
+	}
+
+	public void setDuplicated(Boolean duplicated) {
+		this.duplicated = duplicated;
+	}
+
+    /**
+     * @return String return the from
+     */
+    public String getFrom() {
+        return from;
+    }
+
+    /**
+     * @param from the from to set
+     */
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    /**
+     * @return Boolean return the moderated
+     */
+    public Boolean isModerated() {
+        return moderated;
+    }
+
+    /**
+     * @return Boolean return the disableModerate
+     */
+    public Boolean isDisableModerate() {
+        return disableModerate;
+    }
+
 }

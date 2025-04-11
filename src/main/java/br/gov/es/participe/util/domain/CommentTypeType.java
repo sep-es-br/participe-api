@@ -1,8 +1,8 @@
 package br.gov.es.participe.util.domain;
 
 public enum CommentTypeType {
-    PRESENTIAL("Presential", "pre"),
-    REMOTE("Remote", "com");
+    PROPOSAL("Proposal", "prop"),
+    COMMENT("Comment", "com");
 
     public final String completeName;
     public final String leanName;

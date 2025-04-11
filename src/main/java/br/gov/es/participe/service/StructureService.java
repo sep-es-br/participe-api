@@ -46,7 +46,7 @@ public class StructureService {
     return structures;
   }
 
-  @Transactional
+
   public Structure save(Structure structureToSave) {
 
     validate(structureToSave);
@@ -58,6 +58,7 @@ public class StructureService {
     String newName = structureToSave.getName().trim().replaceAll(" +", " ");
     structureToSave.setName(newName);
   }
+
 
   public Structure update(StructureParamDto dto, Long id) {
     Structure structureToUpdate = this.structureRepository
@@ -86,7 +87,7 @@ public class StructureService {
              .orElseThrow(() -> new IllegalArgumentException("Structure not found: " + id));
   }
 
-  @Transactional
+  
   public void delete(Long id) {
     Structure structure = structureRepository
                             .findById(id)

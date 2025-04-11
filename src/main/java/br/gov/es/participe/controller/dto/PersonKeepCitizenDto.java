@@ -15,6 +15,8 @@ public class PersonKeepCitizenDto {
 
 	private List<LoginAccessDto> autentication;
 
+	private List<LoginAccessDto> autenticationIcon;
+
 	private Long localityId;
 
 	private String localityName;
@@ -32,6 +34,26 @@ public class PersonKeepCitizenDto {
 	private Boolean active;
 
 	private Boolean receiveInformational;
+
+	private List<String> ConferencesName;
+
+	private List<String> authName;
+
+    public List<String> getAuthName() {
+        return authName;
+    }
+
+    public void setAuthName(List<String> authName) {
+        this.authName = authName;
+    }
+
+	public List<String> getConferencesName() {
+		return ConferencesName;
+	}
+
+	public void setConferencesName(List<String> conferencesName) {
+		ConferencesName = conferencesName;
+	}
 
 	public Long getId() {
 		return id;
@@ -63,6 +85,14 @@ public class PersonKeepCitizenDto {
 
 	public void setAutentication(List<LoginAccessDto> autentication) {
 		this.autentication = autentication;
+	}
+
+	public List<LoginAccessDto> getAutenticationIcon() {
+		return autenticationIcon;
+	}
+
+	public void setAutenticationIcon(List<LoginAccessDto> autenticationIcon) {
+		this.autenticationIcon = autenticationIcon;
 	}
 
 	public Long getLocalityId() {

@@ -1,18 +1,18 @@
 package br.gov.es.participe.controller.dto;
 
+import br.gov.es.participe.model.ConferenceColor;
 import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
+@SuppressWarnings({ "unused" })
 public class ConferenceParamDto {
 
   private static final String formatDate = "dd/MM/yyyy HH:mm:ss";
@@ -32,6 +32,7 @@ public class ConferenceParamDto {
   private String subtitleRegionalization;
   private FileDto fileParticipation;
   private FileDto fileAuthentication;
+  private FileDto fileFooter;
   private LocalityTypeDto localityType;
   private List<MeetingDto> meeting;
   private List<SelfDeclarationDto> selfDeclaration;
@@ -46,9 +47,17 @@ public class ConferenceParamDto {
   private String externalLinksMenuLabel;
   private List<ExternalLinksDto> externalLinks;
   private List<FileDto> backgroundImages;
+  private List<FileDto> calendarImages;
   private String serverName;
   private boolean defaultServerConference;
+  private Boolean showStatistics;
+  private Boolean showCalendar;
+  private Boolean showStatisticsPanel;
+  private Boolean showProposalsPanel;
+  private Boolean showExternalLinks;
   private ResearchConfigurationParamDto researchConfiguration;
+  private ConferenceColorDto customProperties;
+  private EvaluationConfigurationDto evaluationConfiguration;
 
   public ConferenceParamDto() {
   }
@@ -67,6 +76,7 @@ public class ConferenceParamDto {
     titleRegionalization = conferenceDto.getTitleRegionalization();
     subtitleRegionalization = conferenceDto.getSubtitleRegionalization();
     fileParticipation = conferenceDto.getFileParticipation();
+    fileFooter = conferenceDto.getFileFooter();
     fileAuthentication = conferenceDto.getFileAuthentication();
     localityType = conferenceDto.getLocalityType();
     meeting = conferenceDto.getMeeting();
@@ -81,9 +91,17 @@ public class ConferenceParamDto {
     howItWork = conferenceDto.getHowItWork();
     externalLinks = conferenceDto.getExternalLinks();
     backgroundImages = conferenceDto.getBackgroundImages();
+    calendarImages = conferenceDto.getCalendarImages();
     serverName = conferenceDto.getServerName();
     defaultServerConference = conferenceDto.getDefaultServerConference();
+    showStatistics = conferenceDto.getShowStatistics();
+    showCalendar = conferenceDto.getShowCalendar();
+    showExternalLinks = conferenceDto.getShowExternalLinks();
+    showStatisticsPanel  = conferenceDto.getShowStatisticsPanel();
+    showProposalsPanel = conferenceDto.getShowProposalsPanel();
     researchConfiguration = new ResearchConfigurationParamDto(conferenceDto.getResearchConfiguration());
+    customProperties = conferenceDto.getCustomProperties();
+    evaluationConfiguration = conferenceDto.getEvaluationConfiguration();
   }
 
   public List<SelfDeclarationDto> getSelfDeclaration() {
@@ -211,6 +229,14 @@ public class ConferenceParamDto {
     this.fileParticipation = fileParticipation;
   }
 
+  public FileDto getFileFooter() {
+    return fileFooter;
+  }
+
+  public void setFileFooter(FileDto fileFooter) {
+    this.fileFooter = fileFooter;
+  }
+  
   public FileDto getFileAuthentication() {
     return fileAuthentication;
   }
@@ -307,6 +333,14 @@ public class ConferenceParamDto {
     this.backgroundImages = backgroundImages;
   }
 
+  public List<FileDto> getCalendarImages() {
+    return calendarImages;
+  }
+
+  public void setCalendarImages(List<FileDto> calendarImages) {
+    this.calendarImages = calendarImages;
+  }
+
   public String getServerName() {
     return serverName;
   }
@@ -323,6 +357,46 @@ public class ConferenceParamDto {
     this.defaultServerConference = defaultServerConference;
   }
 
+  public Boolean getShowStatistics() {
+    return showStatistics;
+  }
+
+  public void setShowStatistics(Boolean showStatistics) {
+    this.showStatistics = showStatistics;
+  }
+
+  public Boolean getShowCalendar() {
+    return showCalendar;
+  }
+
+  public void setShowCalendar(Boolean showCalendar) {
+    this.showCalendar = showCalendar;
+  }
+
+  public Boolean getShowStatisticsPanel () {
+    return showStatisticsPanel ;
+  }
+
+  public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
+    this.showStatisticsPanel  = showStatisticsPanel ;
+  }
+
+  public Boolean getShowProposalsPanel() {
+    return showProposalsPanel;
+  }
+
+  public void setShowProposalsPanel(Boolean showProposalsPanel) {
+    this.showProposalsPanel = showProposalsPanel;
+  }
+
+  public Boolean getShowExternalLinks() {
+    return showExternalLinks;
+  }
+
+  public void setShowExternalLinks(Boolean showExternalLinks) {
+    this.showExternalLinks = showExternalLinks;
+  }
+
   public ResearchConfigurationParamDto getResearchConfiguration() {
     return researchConfiguration;
   }
@@ -330,7 +404,6 @@ public class ConferenceParamDto {
   public void setResearchConfiguration(ResearchConfigurationParamDto researchConfiguration) {
     this.researchConfiguration = researchConfiguration;
   }
-
 
   public DisplayModeType getDisplayMode() {
     return displayMode;
@@ -346,6 +419,22 @@ public class ConferenceParamDto {
 
   public void setDisplayStatusConference(StatusConferenceType displayStatusConference) {
     this.displayStatusConference = displayStatusConference;
+  }
+
+  public ConferenceColorDto getCustomProperties() {
+    return customProperties;
+  }
+
+  public void setCustomProperties(ConferenceColorDto customProperties) {
+    this.customProperties = customProperties;
+  }
+
+  public EvaluationConfigurationDto getEvaluationConfiguration() {
+    return evaluationConfiguration;
+  }
+
+  public void setEvaluationConfiguration(EvaluationConfigurationDto evaluationConfiguration) {
+    this.evaluationConfiguration = evaluationConfiguration;
   }
 
 }

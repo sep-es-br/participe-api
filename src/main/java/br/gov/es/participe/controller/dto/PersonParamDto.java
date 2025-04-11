@@ -1,5 +1,8 @@
 package br.gov.es.participe.controller.dto;
 
+import java.util.Set;
+
+import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 
 public class PersonParamDto {
@@ -18,6 +21,8 @@ public class PersonParamDto {
   private boolean resetPassword;
   private boolean active;
   private boolean receiveInformational;
+  private Set<Meeting> welcomesMeetings;
+  private String sub;
 
   public PersonParamDto() {
   }
@@ -29,8 +34,8 @@ public class PersonParamDto {
     this.contactEmail = person.getContactEmail();
     this.cpf = person.getCpf();
     this.telephone = person.getTelephone();
+    setWelcomesMeetings(person.getWelcomesMeetings());
   }
-
 
   public Long getId() {
     return id;
@@ -142,5 +147,21 @@ public class PersonParamDto {
 
   public void setReceiveInformational(Boolean receiveInformational) {
     this.receiveInformational = receiveInformational;
+  }
+
+  public Set<Meeting> getWelcomesMeetings() {
+    return welcomesMeetings;
+  }
+
+  public void setWelcomesMeetings(Set<Meeting> welcomesMeetings) {
+    this.welcomesMeetings = welcomesMeetings;
+  }
+
+  public String getSub() {
+    return sub;
+  }
+
+  public void setSub(String sub) {
+    this.sub = sub;
   }
 }

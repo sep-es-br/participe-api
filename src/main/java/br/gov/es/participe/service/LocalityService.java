@@ -7,6 +7,8 @@ import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.LocalityType;
 import br.gov.es.participe.repository.LocalityRepository;
 import br.gov.es.participe.util.ParticipeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,7 @@ public class LocalityService {
     @Autowired
     private ParticipeUtils participeUtils;
 
+    private static final Logger log = LoggerFactory.getLogger(LocalityService.class);
     private static final String DOMAIN_ERROR_NOT_FOUND = "domain.error.not-found";
 
     public List<Locality> findAll() {
@@ -54,7 +58,7 @@ public class LocalityService {
                 .iterator()
                 .forEachRemaining(localities::add);
         if(!localities.isEmpty()) {
-        	localities.sort((l1, l2) -> l1.getName().trim().compareTo(l2.getName().trim()));
+          localities.sort((l1, l2) -> l1.getName().trim().compareTo(l2.getName().trim()));
         }
         return localities;
     }
@@ -70,25 +74,44 @@ public class LocalityService {
         return localities;
     }
 
-    @Transactional
+
     public Locality create(Locality locality) {
+
+        if (locality.getName()== null ||locality.getLatitudeLongitude()== null ) {
+            throw new IllegalArgumentException("Create:Locality object is null");
+        }
+
         if (isInvalidTypeLevel(locality)) {
             throw new IllegalArgumentException("domain.error.locality.invalid-type-level");
         }
 
         Locality existentLocality = find(locality.getName(), locality.getType().getId());
-
+        log.info(
+          "Locality encontrada utilizando os parâmetros localityName={} e localityId={}",
+          locality.getName(),
+          locality.getType().getId()
+        );
         if (existentLocality != null && locality.getType() != null && locality.getType().getId() != null
                 && locality.getType().getId().equals(existentLocality.getType().getId())) {
             Set<Domain> domains = new HashSet<>();
             for (Domain localityDomain : locality.getDomains()) {
+                log.info(
+                  "Relacionando domainId={} a localityId={}",
+                  localityDomain.getId(),
+                  locality.getId()
+                );
                 domains.add(domainService.find(localityDomain.getId()));
             }
             existentLocality.addDomains(domains);
 
             if (!locality.getParents().isEmpty()) {
-                for (Locality l : locality.getParents()) {
-                    existentLocality.addParent(l);
+                for (Locality localityParent : locality.getParents()) {
+                    log.info(
+                      "Relacionando localityId={} ao localityParentId={}",
+                      locality.getId(),
+                      localityParent.getId()
+                    );
+                    existentLocality.addParent(localityParent);
                 }
             }
             locality = existentLocality;
@@ -98,21 +121,43 @@ public class LocalityService {
         if (locality.getName() != null && !locality.getName().isEmpty()) {
             locality.setName(locality.getName().trim().replaceAll("\\s+", " "));
         }
-        return localityRepository.save(locality);
+
+      final var localityCreated = localityRepository.save(locality);
+      log.info(
+        "Locality criada/atualizada com localityId={} e localityName={}",
+        localityCreated.getId(),
+        localityCreated.getName()
+      );
+      return localityCreated;
     }
 
-    @Transactional
+
     public Locality update(Long id, LocalityParamDto dto) {
+
+        if (dto.getName()== null ||dto.getLatitudeLongitude()== null ) {
+            throw new IllegalArgumentException("Update: Locality object is null");
+        }
+
         Locality locality = find(id);
         String name = dto.getName();
 
         if (name != null && !name.isEmpty()) {
             name = name.trim().replaceAll("\\s+", " ");
         }
+        log.info(
+          "Alterando name de {} para {} e latitudeLongitude de {} para {} da localityId={}",
+          locality.getName(),
+          name,
+          locality.getLatitudeLongitude(),
+          dto.getLatitudeLongitude(),
+          locality.getId()
+        );
         locality.setName(name);
         locality.setLatitudeLongitude(dto.getLatitudeLongitude());
 
-        return localityRepository.save(locality);
+      final var updatedLocality = localityRepository.save(locality);
+      log.info("Dados de localityId={} atualizados com sucesso", locality.getId());
+      return updatedLocality;
     }
 
     public Locality find(Long id) {
@@ -289,14 +334,20 @@ public class LocalityService {
         return null;
     }
 
-    @Transactional
+
     public void delete(Long idLocality, Long idDomain) {
+        log.info("Iniciando remoção do localityId={} e domainId={}", idLocality, idDomain);
         Locality locality = find(idLocality);
         Domain domain = domainService.find(idDomain);
-
+        log.info("Encontrado localityId={} e domainId={}", idLocality, idDomain);
         if (locality.getChildren() != null && !locality.getChildren().isEmpty()) {
             List<Locality> childrenInDomain = localityRepository.findChildren(idDomain, locality.getId());
-
+            log.info(
+              "Foram encontrados {} filhos da localityId={} relacionados ao domainId={}",
+              Optional.ofNullable(childrenInDomain).map(List::size).orElse(0),
+              locality.getId(),
+              idDomain
+            );
             if (childrenInDomain != null && !childrenInDomain.isEmpty()) {
                 for (Locality child : childrenInDomain) {
                     delete(child.getId(), idDomain);
@@ -305,13 +356,22 @@ public class LocalityService {
         }
 
         if (locality.getDomains() != null && locality.getDomains().size() == 1) {
+            log.info(
+              "Locality com localityId={} possui apenas um domainId={} relacionado, apagando localityId={}...",
+              locality.getId(),
+              idDomain,
+              locality.getId()
+            );
             localityRepository.delete(locality);
             return;
         }
 
         locality.removeDomain(idDomain);
         domain.removeLocality(idLocality);
+
+        log.info("Removendo relacionamento entre localityId={} e domainId={}", idLocality, idDomain);
         localityRepository.save(locality);
+        log.info("Relacionamento entre localityId={} e domainId={} removido com sucesso", idLocality, idDomain);
     }
 
     private void loadAttributes(Locality locality) {

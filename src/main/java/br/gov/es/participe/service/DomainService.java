@@ -4,11 +4,14 @@ import br.gov.es.participe.model.Domain;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Plan;
 import br.gov.es.participe.repository.DomainRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +28,7 @@ public class DomainService {
     @Autowired
     private PlanService planService;
 
+    private static final Logger log = LoggerFactory.getLogger(DomainService.class);
     private static final String DOMAIN_ERROR_NOT_FOUND = "domain.error.not-found";
 
     public List<Domain> findAll(String query) {
@@ -45,13 +49,15 @@ public class DomainService {
         return domains;
     }
 
-    @Transactional
+
     public Domain save(Domain domain) {
         if(domain.getName() == null) {
             throw new IllegalArgumentException("Domain name is required");
         }
         domain.setName(domain.getName().trim().replaceAll("\\s+"," "));
-        return domainRepository.save(domain);
+      final var domainCreated = domainRepository.save(domain);
+      log.info("Domain criado com sucesso domainId={} domainName={}", domainCreated.getId(), domainCreated.getName());
+      return domainCreated;
     }
 
     public Domain find(Long id) {
@@ -68,12 +74,17 @@ public class DomainService {
                        .orElseThrow(() -> new IllegalArgumentException(DOMAIN_ERROR_NOT_FOUND));
     }
 
-    @Transactional
+
     public void delete(Long id) {
+        log.info("Iniciando remoção do Domain domainId={}", id);
         Domain domain = find(id);
 
-        List<Plan> plans = planService.findByDomain(domain.getId());
-
+        Collection<Plan> plans = planService.findByDomain(domain.getId());
+        log.info(
+          "Foi encontrado {} plans relacionado ao domainId={}",
+          Optional.ofNullable(plans).map(Collection::size).orElse(0),
+          domain.getId()
+        );
         if (plans != null && !plans.isEmpty()) {
             throw new IllegalArgumentException("This domain is in use by a plan");
         }
@@ -86,15 +97,26 @@ public class DomainService {
                     .filter(locality -> locality.getParents() == null || locality.getParents().isEmpty())
                     .collect(Collectors.toList());
 
+            log.info(
+              "Foi encontrado {} localities relacionado ao domainId={}",
+              localities.size(),
+              id
+            );
+
             for (Locality locality : localities) {
+                log.info(
+                  "Removendo localityId={} relacionado ao domainId={}",
+                  locality.getId(),
+                  domain.getId()
+                );
                 localityService.delete(locality.getId(), id);
             }
         }
-
+        log.info("Removendo domainId={}", domain.getId());
         domainRepository.delete(domain);
     }
 
-    @Transactional
+//    @Transactional
     public void deleteAll() {
         domainRepository.deleteAll();
     }

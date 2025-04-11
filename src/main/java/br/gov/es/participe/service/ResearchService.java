@@ -6,6 +6,7 @@ import br.gov.es.participe.util.*;
 import br.gov.es.participe.util.domain.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.logging.*;
@@ -28,6 +29,7 @@ public class ResearchService {
         researchRepository.save(research);
     }
 
+    @Transactional
     public void updateAutomaticResearchService() {
         List<Research> researches = researchRepository.findAllAutomatic();
         if (researches != null) {

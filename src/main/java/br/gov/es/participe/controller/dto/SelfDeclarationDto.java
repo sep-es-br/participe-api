@@ -8,7 +8,7 @@ public class SelfDeclarationDto {
 	private ConferenceDto conference;
 	private LocalityDto locality;
 	private PersonDto person;
-	
+
 	public SelfDeclarationDto() {
 	}
 	
@@ -58,4 +58,5 @@ public class SelfDeclarationDto {
 	public void setId(Long id) {
 		this.id = id;
 	}
+
 }

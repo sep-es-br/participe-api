@@ -6,6 +6,7 @@ import java.util.Set;
 
 public class PersonDto {
 
+  private String sub;
   private Long id;
   private String name;
   private String contactEmail;
@@ -28,12 +29,9 @@ public class PersonDto {
     this.telephone = person.getTelephone();
     this.roles = person.getRoles();
     this.active = person.getActive();
+    this.receiveInformational = person.getReceiveInformational();
   }
 
-  public PersonDto(Person person, Boolean receiveInformational) {
-    this(person);
-    this.receiveInformational = receiveInformational != null ? receiveInformational : true;
-  }
 
   public Long getId() {
     return id;
@@ -50,6 +48,16 @@ public class PersonDto {
   public void setName(String name) {
     this.name = name;
   }
+
+
+  public String getSub() {
+    return sub;
+  }
+
+  public void setSub(String sub) {
+    this.sub = sub;
+  }
+
 
   public String getContactEmail() {
     return contactEmail;
