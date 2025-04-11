@@ -246,90 +246,51 @@ public interface ControlPanelRepository extends Neo4jRepository<Conference, Long
 */
 
 @Query( 
-		" optional match (p:Person)-[:MADE]->(l:Login)-[:TO]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) , " +
-		" (p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co) " +
-		" ,(sd)-[:AS_BEING_FROM]->(cLoc:Locality)  " +
-		" where id(co) = $idConference " +
-		" AND m.attendanceListMode = 'MANUAL'   " +
-		" AND l.time >= m.beginDate and l.time <= m.endDate  " +
-		" AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
-		" WITH collect(p) as plogged  " +
-		" optional match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person),  " +
-		" (p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co), " +
-		" (sd)-[:AS_BEING_FROM]->(cLoc:Locality) " +
-		" where id(co) = $idConference  and  m.attendanceListMode = 'AUTO'   " +
-		" AND (($meetings IS NULL) OR (id(m) IN $meetings))  " +
-		" WITH plogged + collect(p) as allp  " +
-		" unwind allp as np  " +
-		" optional match(np)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co:Conference),(sd:SelfDeclaration)-[:AS_BEING_FROM]->(cLoc:Locality)  " +
-		" where id(co) = $idConference " +
-		" OPTIONAL MATCH(plt:LocalityType)<-[:OF_TYPE]-(loc:Locality)<-[:IS_LOCATED_IN *0..]-(cLoc),(loc)-[:IS_LOCATED_IN]->(pLoc) " +
-		" where id(plt) = $microregionChartAgroup  AND ($microregionLocalitySelected IS NULL OR id(pLoc) = $microregionLocalitySelected)  " +
-		" OPTIONAL MATCH planned = (np)<-[:MADE_BY|LIKED_BY]-(a:Attend)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES *0..]->(parentPlanItem:PlanItem), (a)-[:WHILE_IN]->(me)  " +
-		" WHERE id(parentPlanItem) = $structureItemPlanSelected " +
-		" OPTIONAL MATCH (pp:Person)  " +
-		" WHERE pp in nodes(planned)  " +
-		" WITH pp,np,loc,$structureItemPlanSelected AS  SelectedPlanItem_Id " +
-		" RETURN id(loc) as id,loc.latitudeLongitude as latitudeLongitude,loc.name as name, " +
-		" case SelectedPlanItem_Id  " +
-		" WHEN NULL THEN count(distinct np) " +
-		" ELSE count(distinct pp)  " +
-		" END as quantityParticipation ") 
+		" MATCH (p:Person)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co:Conference),\r\n" + //
+		"      (sd)-[:AS_BEING_FROM]->(cLoc:Locality)\r\n" + //
+		"WHERE id(co) = $idConference\r\n" + //
+		"\r\n" + //
+		"// Presença: Manual via Login OU Automática via Check-in\r\n" + //
+		"AND (\r\n" + //
+		"  EXISTS {\r\n" + //
+		"    MATCH (p)-[:MADE]->(l:Login)-[:TO]->(co)<-[:OCCURS_IN]-(m:Meeting)\r\n" + //
+		"    WHERE m.attendanceListMode = 'MANUAL'\r\n" + //
+		"      AND l.time >= m.beginDate AND l.time <= m.endDate\r\n" + //
+		"      AND ($meetings IS NULL OR id(m) IN $meetings)\r\n" + //
+		"  }\r\n" + //
+		"  OR EXISTS {\r\n" + //
+		"    MATCH (co)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p)\r\n" + //
+		"    WHERE m.attendanceListMode = 'AUTO'\r\n" + //
+		"      AND ($meetings IS NULL OR id(m) IN $meetings)\r\n" + //
+		"  }\r\n" + //
+		")\r\n" + //
+		"\r\n" + //
+		"// Localidade e Microregião\r\n" + //
+		"OPTIONAL MATCH (plt:LocalityType)<-[:OF_TYPE]-(loc:Locality)<-[:IS_LOCATED_IN *0..]-(cLoc),\r\n" + //
+		"               (loc)-[:IS_LOCATED_IN]->(pLoc)\r\n" + //
+		"WHERE id(plt) = $microregionChartAgroup\r\n" + //
+		"  AND ($microregionLocalitySelected IS NULL OR id(pLoc) = $microregionLocalitySelected)\r\n" + //
+		"\r\n" + //
+		"// Planejamento\r\n" + //
+		"OPTIONAL MATCH planned = (p)<-[:MADE_BY|LIKED_BY]-(a:Attend)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES *0..]->(parentPlanItem:PlanItem),\r\n" + //
+		"                       (a)-[:WHILE_IN]->(me)\r\n" + //
+		"WHERE id(parentPlanItem) = $structureItemPlanSelected\r\n" + //
+		"\r\n" + //
+		"OPTIONAL MATCH (pp:Person)\r\n" + //
+		"WHERE pp IN nodes(planned)\r\n" + //
+		"\r\n" + //
+		"WITH pp, p, loc, $structureItemPlanSelected AS SelectedPlanItem_Id\r\n" + //
+		"RETURN \r\n" + //
+		"  id(loc) AS id,\r\n" + //
+		"  loc.latitudeLongitude AS latitudeLongitude,\r\n" + //
+		"  loc.name AS name,\r\n" + //
+		"  CASE WHEN SelectedPlanItem_Id IS NULL \r\n" + //
+		"       THEN count(DISTINCT p)\r\n" + //
+		"       ELSE count(DISTINCT pp)\r\n" + //
+		"  END AS quantityParticipation") 
 	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationPresenteAgroup(
 		@Param("idConference") Long idConference, @Param("microregionChartAgroup") Long microregionChartAgroup, @Param("microregionLocalitySelected") Long microregionLocalitySelected,
 		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
-
-/* 
-
-	@Query(
-
-	" WITH" +
-			" $idConference AS Conference_Id," +
-			" $microregionLocalitySelected AS SelectedLocality_Id," +
-			" $structureItemPlanSelected AS SelectedPlanItem_Id," +
-			" $meetings AS Meeting_List" +
-
-			" MATCH" +
-			" (p:Person)<-[:MADE_BY|:LIKED_BY]-(a:Attend)-[:ABOUT]->(cPI:PlanItem)," +
-			" (cPI)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)<-[:OCCURS_IN]-(me:Meeting),"
-			+
-			" (p)-[:MADE]->(sd:SelfDeclaration)-[:AS_BEING_FROM]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)"
-			+
-
-			" WHERE" +
-			" ID(conf) = Conference_Id" +
-			" AND a.from = 'pres' " +
-			" AND (" +
-			" Meeting_List IS NULL" +
-			" OR" +
-			" id(me) IN Meeting_List" +
-			" )" +
-			" AND" +
-			" (" +
-			" SelectedPlanItem_Id IS NULL" +
-			" OR" +
-			" (id(planItem) = SelectedPlanItem_Id and id(cPI) <> SelectedPlanItem_Id)" +
-			" )" +
-			" AND" +
-			" (id(parentLoc) = SelectedLocality_Id OR id(loc) = SelectedLocality_Id OR SelectedLocality_Id IS NULL)" +
-
-			" RETURN" +
-			" CASE SelectedPlanItem_Id" +
-			" WHEN NULL THEN id(planItem)" +
-			" ELSE id(cPI)" +
-			" END as idPlanItem," +
-
-			" CASE SelectedPlanItem_Id" +
-			" WHEN NULL THEN planItem.name" +
-			" ELSE cPI.name" +
-			" END as planItemName," +
-
-			" count(distinct p)	as quantityParticipation")
-	List<MicroregionChartQueryDto> findDataMicroregionMapDashboardFromIdConferenceParticipationPresentePlanItemAgroup(
-		@Param("idConference") Long idConference, @Param("microregionLocalitySelected") Long microregionLocalitySelected, 
-		@Param("structureItemPlanSelected") Long structureItemPlanSelected, @Param("meetings") List<Long> meetings);
-*/
-
 
 @Query(	" match (p:Person)-[:MADE]->(l:Login)-[:TO]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) ,  " +
 		" (p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(co),(sd)-[:AS_BEING_FROM]->(cLoc:Locality) " +
