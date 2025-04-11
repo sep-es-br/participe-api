@@ -30,9 +30,9 @@ public class ModerationResultDto {
 	private String structureItemName;
 	private Long areaEstrategicaId;
 	private String nameAreaEstrategica;
+	private Boolean duplicated;
 
 
-	
 
 	public Long getCommentId() {
 		return commentId;
@@ -216,6 +216,14 @@ public class ModerationResultDto {
 
 	public void setConferenceId(Long conferenceId) {
 		this.conferenceId = conferenceId;
+	}
+
+	public Boolean getDuplicated() {
+		return duplicated;
+	}
+
+	public void setDuplicated(Boolean duplicated) {
+		this.duplicated = duplicated;
 	}
 
     /**

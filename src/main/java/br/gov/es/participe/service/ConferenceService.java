@@ -6,6 +6,7 @@ import br.gov.es.participe.repository.AttendRepository;
 import br.gov.es.participe.repository.ConferenceRepository;
 import br.gov.es.participe.util.ParticipeUtils;
 import br.gov.es.participe.util.domain.StatusConferenceType;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +24,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
 public class ConferenceService {
 
-  static Logger log = Logger.getLogger(ConferenceService.class.getName());
 
   @Autowired
   private ConferenceRepository conferenceRepository;
@@ -80,10 +79,17 @@ public class ConferenceService {
   private ResearchService researchService;
 
   @Autowired
+  private EvaluationService evaluationService;
+  
+  @Autowired
   private StructureService structureService;
 
   @Autowired
   private ParticipeUtils participeUtils;
+  @Autowired
+  private ConferenceColorService conferenceColorService;
+
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(ConferenceService.class);
 
   public void generateAuthenticationScreen(
     Long id,
@@ -95,19 +101,30 @@ public class ConferenceService {
       auth.setTitleAuthentication(conference.getTitleAuthentication());
       auth.setSubtitleAuthentication(conference.getSubtitleAuthentication());
       auth.setFileAuthentication(new FileDto(conference.getFileAuthentication()));
+      auth.setShowStatistics(conference.getShowStatistics());
+      auth.setShowCalendar(conference.getShowCalendar());
+      auth.setShowStatisticsPanel (conference.getShowStatisticsPanel());
+      auth.setShowProposalsPanel(conference.getShowProposalsPanel());
+      auth.setShowExternalLinks(conference.getShowExternalLinks());
 
       File backGroundImage = this.fileService.findRandomackGroundImage(id);
       auth.setBackgroundImageUrl(
         backGroundImage != null ? new FileDto(conference.getFileAuthentication()) : null);
 
       String url = uriComponentsBuilder.path("/files/").build().toUri().toString();
-      
+
       if (conference.getFileAuthentication() != null) {
         auth.getFileAuthentication().setUrl(url + conference.getFileAuthentication().getId());
       }
-      
+
       if(backGroundImage != null) {
         auth.getBackgroundImageUrl().setUrl(url + backGroundImage.getId());
+      }
+
+      File calendarImage = this.fileService.findRandomCalendarImage(id);
+      auth.setCalendarImageUrl( calendarImage != null ? new FileDto(conference.getFileAuthentication()) : null);
+      if(calendarImage  != null) {
+        auth.getCalendarImageUrl().setUrl(url + calendarImage.getId());
       }
 
       Plan plan = this.planService.findByConference(conference.getId());
@@ -116,10 +133,14 @@ public class ConferenceService {
       }
       auth.setBeginDate(conference.getBeginDate());
       auth.setEndDate(conference.getEndDate());
-      auth.setProposal(this.commentService.countCommentByConference(id));
-      auth.setHighlights(this.highlightService.countHighlightByConference(id));
-      auth.setParticipations(this.attendRepository.countParticipationByConference(conference.getId()));
-      auth.setNumberOfLocalities(this.localityService.countLocalitiesParticipation(conference.getId()));
+      //auth.setProposal(this.commentService.countCommentByConference(id));
+      //auth.setHighlights(this.highlightService.countHighlightByConference(id));
+      //auth.setParticipations(this.attendRepository.countParticipationByConference(conference.getId()));
+      //auth.setNumberOfLocalities(this.localityService.countLocalitiesParticipation(conference.getId()));
+      auth.setProposal(attendRepository.countCommentAllOriginsByConference(id));
+      auth.setHighlights(highlightService.countHighlightAllOriginsByConference(id));
+      auth.setParticipations(this.attendRepository.countParticipationAllOriginsByConference(conference.getId()));
+      auth.setNumberOfLocalities(attendRepository.countLocalityAllOriginsByConference(conference.getId()));
     });
   }
 
@@ -178,6 +199,7 @@ public class ConferenceService {
     final boolean adm = person.getRoles() != null && person.getRoles().contains("Administrator");
     List<ConferenceDto> conferences = new ArrayList<>();
     this.conferenceRepository.findAllActives(new Date(), activeConferences || !adm).forEach(conference -> {
+
       if(adm || (conference.getModerators() != null
                  && conference.getModerators().stream().anyMatch(m -> idPerson.equals(m.getId())))) {
         ConferenceDto dto = new ConferenceDto(conference);
@@ -199,6 +221,29 @@ public class ConferenceService {
     return conferences;
   }
 
+  public List<ConferenceDto> findAllActivesEvaluation(Boolean activeConferences) {
+    List<ConferenceDto> conferences = new ArrayList<>();
+    this.conferenceRepository.findAllActives(new Date(), activeConferences).forEach(conference -> {
+      Evaluation evaluation = conference.getId() == null ? new Evaluation()
+      : this.evaluationService.findByIdConference(conference.getId()).orElse(null);
+      
+      conference.setEvaluation(evaluation);
+      ConferenceDto dto = new ConferenceDto(conference);
+      dto.setPlan(null);
+      dto.setLocalityType(null);
+      dto.setFileAuthentication(null);
+      dto.setFileParticipation(null);
+      Date begin = this.getDate(dto.getBeginDate());
+      Date end = this.getDate(dto.getEndDate());
+      dto.setIsActive(this.participeUtils.isActive(begin, end));
+
+
+      conferences.add(dto);
+      
+    });
+    return conferences;
+  }
+
   private Date getDate(String date) {
     try {
       if(date == null) {
@@ -207,21 +252,27 @@ public class ConferenceService {
       return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(date);
     }
     catch(ParseException e) {
-      log.throwing(ConferenceParamDto.class.getName(), "getDate", e);
+      log.error("Erro ao converter Date", e);
     }
     return null;
   }
 
-  //@Transactional
   public ConferenceDto update(Long conferenceId, ConferenceParamDto conferenceParamDto) throws ParseException {
-    
-     
+
+
     if (conferenceParamDto.getName()== null)  {
       throw new IllegalArgumentException("Update: Conference object is null");
     }
-    
+
     Conference conferenceStored = this.conferenceRepository.findById(conferenceId)
       .orElseThrow(() -> new IllegalStateException("This conference not exist."));
+
+      ConferenceColor conferenceColor = conferenceColorService.findByConferenceColor(conferenceId);
+      if(conferenceColor != null){
+        conferenceColorService.update(conferenceColor, conferenceParamDto.getCustomProperties());
+      }else{
+        conferenceColorService.save(conferenceStored, conferenceParamDto.getCustomProperties());
+      }
 
     conferenceStored.update(conferenceParamDto);
 
@@ -230,13 +281,12 @@ public class ConferenceService {
     return ConferenceDto.createConferenceDtoWithoutMeeting(conferenceUpdated);
   }
 
-  //@Transactional
   public Conference save(Conference conference, ConferenceParamDto param) throws ParseException {
-    
+
     if (param.getName()== null)  {
       throw new IllegalArgumentException("Create: Conference object is null");
     }
-    
+
     this.validateConference(param);
     // clearAttributes(conference);
     this.loadAttributes(conference);
@@ -244,28 +294,33 @@ public class ConferenceService {
     if(param.getModerators() != null) {
       HashSet<Person> moderators = new HashSet<>();
       param.getModerators().forEach(p -> {
+        log.info("Consultando moderator com loginEmail={} relacionado a conferenceId={}", p.getContactEmail(), conference.getId());
         Optional<Person> find = this.personService.findByLoginEmail(p.getContactEmail());
-        moderators.add(find.orElseGet(() -> this.personService.save(new Person(p), true)));
+        final var moderator = find.orElseGet(() -> this.personService.save(new Person(p), true));
+        log.info("Relacionando moderatorId={} a conferenceId={}", moderator.getId(), conference.getId());
+        moderators.add(moderator);
       });
       conference.setModerators(moderators);
     }
 
     conference.setName(param.getName().trim().replaceAll(" +", " "));
 
-    
     this.loadAttributesFromParam(conference, param);
 
+    log.info("Persistindo conferenceId={}", conference.getId());
     this.conferenceRepository.save(conference);
 
     return conference;
   }
 
   private void loadAttributesFromParam(Conference conference, ConferenceParamDto param) throws ParseException {
+    this.loadEvaluation(conference, param);
     this.loadResearch(conference, param);
     this.loadSegmentation(conference, param);
     this.loadServe(conference, param);
     this.loadExternalLinks(conference, param);
     this.loadBackGroundImages(conference, param);
+    this.loadCalendarImages(conference, param);
     this.loadTopics(conference, param);
     if (param.getFileAuthentication() != null) {
       conference.setFileAuthentication(this.fileService.find(param.getFileAuthentication().getId()));
@@ -273,6 +328,22 @@ public class ConferenceService {
     if (param.getFileParticipation() != null) {
       conference.setFileParticipation(this.fileService.find(param.getFileParticipation().getId()));
     }
+    if (param.getFileFooter() != null) {
+      conference.setFileFooter(this.fileService.find(param.getFileFooter().getId()));
+    }
+  }
+
+  private void loadEvaluation(Conference conference, ConferenceParamDto param) throws ParseException{
+    Evaluation evaluation = conference.getId() == null ? new Evaluation()
+      : this.evaluationService.findByIdConference(conference.getId()).orElse(new Evaluation());
+
+    evaluation.setBeginDate(param.getEvaluationConfiguration().getBeginDate());
+    evaluation.setEndDate(param.getEvaluationConfiguration().getEndDate());
+    evaluation.setDisplayMode(param.getEvaluationConfiguration().getDisplayMode());
+    evaluation.setEvaluationDisplayStatus(param.getEvaluationConfiguration().getEvaluationDisplayStatus());
+    evaluation.setConference(conference);
+    this.evaluationService.save(evaluation);
+    log.info("Evaluation relacionado a conferenceId={} criado com sucesso com researchId={}", conference.getId(), evaluation.getId());
   }
 
   private void loadResearch(Conference conference, ConferenceParamDto param) throws ParseException {
@@ -289,6 +360,7 @@ public class ConferenceService {
     research.setStatusType(param.getResearchConfiguration().getResearchDisplayStatus());
     research.setConference(conference);
     this.researchService.save(research);
+    log.info("Research relacionado a conferenceId={} criado com sucesso com researchId={}", conference.getId(), research.getId());
   }
 
   private void loadSegmentation(Conference conference, ConferenceParamDto param) {
@@ -321,22 +393,72 @@ public class ConferenceService {
       }
     }
     this.portalServerService.save(portalServer);
+    log.info("PortalServer relacionado a conferenceId={} criado com sucesso com portalServerId={}", conference.getId(), portalServer.getId());
   }
 
   private void loadBackGroundImages(Conference conference, ConferenceParamDto param) {
     List<File> files = this.fileService.findAllBackGroundImageFromConference(conference.getId());
     if(param.getBackgroundImages() != null && !param.getBackgroundImages().isEmpty()) {
-      List<File> listFiles = param.getBackgroundImages().stream()
+
+      log.info("Foram informados {} backgroundImages relacionadas a conferenceId={}",
+              param.getBackgroundImages().size(),
+              conference.getId()
+      );
+
+      List<File> filesToSave = param.getBackgroundImages().stream()
         .map(f -> new File(f).setConferenceBackGround(conference)).collect(Collectors.toList());
-      if(!listFiles.isEmpty()) {
-        this.fileService.saveAll(listFiles);
+
+      log.info("Foram encontrados {} backgroundImages para serem adicionadas relacionadas a conferenceId={}", filesToSave.size(), conference.getId());
+
+      if(!filesToSave.isEmpty()) {
+        this.fileService.saveAll(filesToSave);
       }
 
-      files.stream().map(File::getId).filter(id -> listFiles.stream().noneMatch(file -> id.equals(file.getId())))
-        .forEach(this.fileService::delete);
+      final var filesToDelete = files.stream()
+              .map(File::getId)
+              .filter(id -> filesToSave.stream().noneMatch(file -> id.equals(file.getId())))
+              .collect(Collectors.toList());
+
+      log.info("Foram encontrados {} backgroundImages para serem removidas relacionadas a conferenceId={}", filesToDelete.size(), conference.getId());
+
+      filesToDelete.forEach(this.fileService::delete);
     }
     else if (files != null && !files.isEmpty()){
-      files.forEach(file -> fileService.delete(file.getId())); 
+      log.info("Não foi encontrado nenhuma backgroundImage, removendo todas relacionadas a conferenceId={}", conference.getId());
+      files.forEach(file -> fileService.delete(file.getId()));
+    }
+  }
+
+  private void loadCalendarImages(Conference conference, ConferenceParamDto param) {
+    List<File> files = this.fileService.findAllCalendarImageFromConference(conference.getId());
+    if(param.getCalendarImages() != null && !param.getCalendarImages().isEmpty()) {
+
+      log.info("Foram informados {} calendarImages relacionadas a conferenceId={}",
+              param.getCalendarImages().size(),
+              conference.getId()
+      );
+
+      List<File> filesToSave = param.getCalendarImages().stream()
+        .map(f -> new File(f).setConferenceCalendarImage(conference)).collect(Collectors.toList());
+
+      log.info("Foram encontrados {} getCalendarImages para serem adicionadas relacionadas a conferenceId={}", filesToSave.size(), conference.getId());
+
+      if(!filesToSave.isEmpty()) {
+        this.fileService.saveAll(filesToSave);
+      }
+
+      final var filesToDelete = files.stream()
+              .map(File::getId)
+              .filter(id -> filesToSave.stream().noneMatch(file -> id.equals(file.getId())))
+              .collect(Collectors.toList());
+
+      log.info("Foram encontrados {} getCalendarImages para serem removidas relacionadas a conferenceId={}", filesToDelete.size(), conference.getId());
+
+      filesToDelete.forEach(this.fileService::delete);
+    }
+    else if (files != null && !files.isEmpty()){
+      log.info("Não foi encontrado nenhuma getCalendarImages, removendo todas relacionadas a conferenceId={}", conference.getId());
+      files.forEach(file -> fileService.delete(file.getId()));
     }
   }
 
@@ -344,9 +466,11 @@ public class ConferenceService {
     List<Topic> topics = this.topicService.findAllByConference(conference.getId());
     if(param.getHowItWork() != null && !param.getHowItWork().isEmpty()) {
 
+      log.info("Foram encontrados {} topics relacionados a conferenceId={}", topics.size(), conference.getId());
+
       List<Topic> listToAdd = param.getHowItWork().stream()
         .map(work -> new Topic(work).setConferenceTopic(conference)).collect(Collectors.toList());
-
+      log.info("Foi encontrado {} topics para serem adicionados", listToAdd.size());
       if(!listToAdd.isEmpty()) {
         this.topicService.saveAll(listToAdd);
       }
@@ -354,17 +478,24 @@ public class ConferenceService {
       List<Topic> listToRemove = topics.stream().filter(
           filter -> param.getHowItWork().stream().noneMatch(work -> filter.getId().equals(work.getId())))
         .collect(Collectors.toList());
+      log.info("Foi encontrado {} topics para serem adicionados", listToAdd.size());
       if(!listToRemove.isEmpty()) {
         this.topicService.deleteAll(listToRemove);
       }
     }
     else {
+      log.info("Nenhum Topic informado, removendo todos os Topics relacionados a conferenceId={}", conference.getId());
       this.topicService.deleteAllByConference(conference);
     }
   }
 
   private void loadExternalLinks(Conference conference, ConferenceParamDto param) {
     if(param.getExternalLinks() != null && !param.getExternalLinks().isEmpty()) {
+
+      log.info("Foram informados {} ExternalLinks relacionados a conferenceId={}",
+              param.getExternalLinks().size(),
+              conference.getId()
+      );
 
       List<String> urlsToSaveOrEdit = param.getExternalLinks().stream()
         .map(ExternalLinksDto::getUrl)
@@ -384,9 +515,11 @@ public class ConferenceService {
       this.updateLinks(param.getExternalLinks(), linked, externalContents);
       this.createNewLinks(param.getExternalLinks(), linked, externalContents, conference);
 
+      log.info("Criando {} ExternalContents relacionados a conferenceId={}", linked.size(), conference.getId());
       this.isLinkedByService.saveAll(linked);
     }
     else {
+      log.info("Nenhum ExternalContent informado, removendo todos relacionamentos IsLinkedBy relacionados a conferenceId={}", conference.getId());
       this.removeAllLinkedFromConference(conference);
     }
   }
@@ -476,17 +609,21 @@ public class ConferenceService {
 
   private void loadAttributes(Conference conference) {
     if(conference.getPlan() != null && conference.getPlan().getId() != null) {
+      log.info("Consultando planId={} relacionado a conferenceId={}", conference.getPlan().getId(), conference.getId());
       conference.setPlan(this.planService.find(conference.getPlan().getId()));
     }
 
     if(conference.getFileAuthentication() != null && conference.getFileAuthentication().getId() != null) {
+      log.info("Consultando fileAuthenticationId={} relacionado a conferenceId={}", conference.getFileAuthentication().getId(), conference.getId());
       conference.setFileAuthentication(this.fileService.find(conference.getFileAuthentication().getId()));
     }
 
     if(conference.getFileParticipation() != null && conference.getFileParticipation().getId() != null) {
+      log.info("Consultando fileParticipationId={} relacionado a conferenceId={}", conference.getFileParticipation().getId(), conference.getId());
       conference.setFileParticipation(this.fileService.find(conference.getFileParticipation().getId()));
     }
     if(conference.getLocalityType() != null && conference.getLocalityType().getId() != null) {
+      log.info("Consultando localityTypeId={} relacionado a conferenceId={}", conference.getLocalityType().getId(), conference.getId());
       conference.setLocalityType(this.localityTypeService.find(conference.getLocalityType().getId()));
     }
   }
@@ -495,14 +632,6 @@ public class ConferenceService {
     if(conference.getPlan() == null || conference.getPlan().getId() == null) {
       throw new IllegalArgumentException("Plan is required");
     }
-
-//    if(conference.getFileAuthentication() == null || conference.getFileAuthentication().getId() == null) {
-//      throw new IllegalArgumentException("Authentication Image is required");
-//    }
-
-//    if(conference.getFileParticipation() == null || conference.getFileParticipation().getId() == null) {
-//      throw new IllegalArgumentException("Participation Image is required");
-//    }
 
     Conference c = this.conferenceRepository.findByNameIgnoreCase(conference.getName());
     if(c != null) {
@@ -517,7 +646,6 @@ public class ConferenceService {
     }
   }
 
-  @Transactional
   private void clearAttributes(Conference conference) {
     if(conference.getId() != null) {
       if(conference.getPlan() != null && conference.getPlan().getId() != null) {
@@ -564,16 +692,37 @@ public class ConferenceService {
       conference.setBackgroundImages(files.stream().map(FileDto::new).collect(Collectors.toList()));
     }
 
+    if(conference.getCalendarImages() == null || conference.getCalendarImages().isEmpty()) {
+      List<File> files = this.fileService.findAllCalendarImageFromConference(conference.getId());
+      conference.setCalendarImages(files.stream().map(FileDto::new).collect(Collectors.toList()));
+    }
+
     if(conference.getResearchConfiguration() == null) {
       conference.setResearchConfiguration(this.researchService.findByIdConference(conference.getId())
                                             .map(ResearchConfigurationDto::new).orElse(null));
     }
+    
+    if(conference.getEvaluationConfiguration() == null) {
+      conference.setEvaluationConfiguration(this.evaluationService.findByIdConference(conference.getId())
+                                            .map(EvaluationConfigurationDto::new).orElse(null));
+    }
+
+    if(conference.getCustomProperties() == null){
+      ConferenceColor cores = this.conferenceColorService.findByConferenceColor(conference.getId());
+      if(cores != null){
+        ConferenceColorDto coresDTO = new ConferenceColorDto(cores);
+        conference.setCustomProperties(coresDTO);
+      }
+    }
   }
 
-  @Transactional
+
   public Boolean delete(Long id) {
     boolean deleteConference = true;
+    log.info("Iniciando remoção da conferenceId={}", id);
     Conference conference = this.find(id);
+
+    log.info("conferenceId={} encontrada", id);
 
     if(conference.getPlan() != null && conference.getPlan().getId() != null) {
       List<PlanItem> planItens = this.planItemService.findAllByIdPlan(conference.getPlan().getId());
@@ -587,9 +736,14 @@ public class ConferenceService {
       }
     }
     if(deleteConference) {
+      log.info(
+        "Não foi encontrado nenhum Attend relacionado ao planId={} e conferenceId={}",
+        Optional.ofNullable(conference.getPlan()).map(Plan::getId).orElse(null),
+        conference.getId()
+      );
       this.conferenceRepository.delete(conference);
     }
-
+    log.info("conferenceId={} foi removido? {}", conference.getId(), deleteConference);
     return deleteConference;
   }
 
@@ -629,8 +783,16 @@ public class ConferenceService {
     }
   }
 
-  public List<Conference> findAllWithPresentialMeetings(Date date, Long idPerson) {
-    List<Conference> conferences = new ArrayList<>(this.conferenceRepository.findAllWithPresentialMeeting(date, idPerson));
+  public List<Conference> findAllOpenWithPresentialMeetings4Admins() {
+    List<Conference> conferences = new ArrayList<>(this.conferenceRepository.findAllOpenWithPresentialMeeting4Admins());
+
+    this.removeUnusableFields(conferences);
+
+    return conferences;
+  }
+
+  public List<Conference> findAllOpenWithPresentialMeetings4Receptionists(Date date, Long idPerson) {
+    List<Conference> conferences = new ArrayList<>(this.conferenceRepository.findAllOpenWithPresentialMeeting4Receptionists(date, idPerson));
 
     this.removeUnusableFields(conferences);
 
@@ -672,7 +834,7 @@ public class ConferenceService {
       conference.setStatusType(status);
     }
     catch(Exception e) {
-      log.throwing(Conference.class.getName(), "updateAutomaticConference", e);
+      log.info("Ocorreu um erro ao verificar o status da conferenceId={}", conference.getId());
     }
   }
 

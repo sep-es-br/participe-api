@@ -28,6 +28,8 @@ public class Person extends Entity implements UserDetails {
 
   private Boolean active;
 
+  private Boolean receiveInformational;
+
   @Relationship(type = "IS_AUTHENTICATED_BY")
   private Set<AuthService> authServices;
 
@@ -72,6 +74,7 @@ public class Person extends Entity implements UserDetails {
     this.name = person.getName().trim().replaceAll(" +", " ");
     this.cpf = person.getCpf();
     this.telephone = person.getTelephone();
+    this.receiveInformational = person.isReceiveInformational();
 
     if (person.getCpf() != null) {
       this.contactEmail = person.getCpf() + "@cpf";
@@ -115,6 +118,14 @@ public class Person extends Entity implements UserDetails {
 
   public void setCpf(String cpf) {
     this.cpf = cpf;
+  }
+
+  public Boolean getReceiveInformational() {
+    return receiveInformational;
+  }
+
+  public void setReceiveInformational(Boolean receiveInformational) {
+    this.receiveInformational = receiveInformational;
   }
 
   public Boolean getStatus() {
@@ -275,4 +286,22 @@ public class Person extends Entity implements UserDetails {
   public boolean isEnabled() {
     return true;
   }
+
+  @Override
+  public String toString() {
+    final StringBuffer sb = new StringBuffer("Person{");
+    sb.append("id='").append(getId()).append('\'');
+    sb.append("name='").append(name).append('\'');
+    sb.append(", contactEmail='").append(contactEmail).append('\'');
+    sb.append(", status=").append(status);
+    sb.append(", telephone='").append(telephone).append('\'');
+    final Set<Long> obj = Optional.ofNullable(selfDeclaretions).stream()
+      .flatMap(Collection::stream)
+      .map(SelfDeclaration::getId)
+      .collect(Collectors.toSet());
+    sb.append(", selfDeclarations=").append(obj);
+    sb.append('}');
+    return sb.toString();
+  }
+
 }

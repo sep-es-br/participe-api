@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -64,6 +65,7 @@ public class CitizenController {
   }
 
   @SuppressWarnings({ "rawtypes" })
+  @Transactional
   @PostMapping
   public ResponseEntity store(
       @RequestHeader("Authorization") String token,
@@ -76,8 +78,9 @@ public class CitizenController {
     }
   }
 
-  /* 
+
   @SuppressWarnings({ "rawtypes" })
+  @Transactional
   @DeleteMapping("/{id}")
   public ResponseEntity destroy(
       @RequestHeader(name = "Authorization") String token,
@@ -90,8 +93,9 @@ public class CitizenController {
       return ResponseEntity.status(401).body(null);
     }
   }
-*/
+
   @SuppressWarnings({ "rawtypes" })
+  @Transactional
   @PutMapping("/{id}")
   public ResponseEntity update(
       @RequestHeader(name = "Authorization") String token,

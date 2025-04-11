@@ -1,7 +1,5 @@
 package br.gov.es.participe.service;
 
-import br.gov.es.participe.configuration.GoogleProfileProperties;
-import br.gov.es.participe.configuration.GoogleProperties;
 import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
 import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
 import br.gov.es.participe.controller.dto.SigninDto;
@@ -11,7 +9,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,22 +20,27 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 @Service
-@PropertySource(name = "social", value = "classpath:/social-cfg.properties")
 public class GoogleService {
 
   private static final String SERVER = "Google";
 
-  @Value("#{environment.getProperty('google.client.id')}")
+  @Value("${spring.security.oauth2.client.registration.google.client-id}")
   private String googleId;
 
-  @Value("#{environment.getProperty('google.client.secret')}")
+  @Value("${spring.security.oauth2.client.registration.google.client-secret}")
   private String googleSecret;
 
-  @Value("#{environment.getProperty('google.scope')}")
+  @Value("${spring.security.oauth2.client.registration.google.scope}")
   private String googleScope;
 
-  @Value("#{environment.getProperty('google.client.user.info.uri')}")
+  @Value("${spring.security.oauth2.client.registration.google.user-info-uri}")
   private String googleUserInfoUri;
+
+  @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+  private String googleRedirectUri;
+
+  @Value("${spring.security.oauth2.client.registration.google-profile.redirect-uri}")
+  private String googleProfileRedirectUri;
 
   @Autowired
   private PersonService personService;
@@ -49,16 +51,10 @@ public class GoogleService {
   @Autowired
   private ObjectMapper objectMapper;
 
-  @Autowired
-  private GoogleProperties googleProperties;
-
-  @Autowired
-  private GoogleProfileProperties googleProfileProperties;
-
   public String googleAccessToken(String authorizationCode, HttpServletRequest request, String url) {
     return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
       authorizationCode,
-      googleProperties.getRedirecturi(),
+      googleRedirectUri,
       null
     ).getAccessToken();
   }
@@ -66,7 +62,7 @@ public class GoogleService {
   public String googleProfileAccessToken(String authorizationCode) {
     return createGoogleConnectionFactory().getOAuthOperations().exchangeForAccess(
         authorizationCode,
-        googleProfileProperties.getRedirecturi(),
+        googleProfileRedirectUri,
         null
     ).getAccessToken();
   }

@@ -1,5 +1,6 @@
 package br.gov.es.participe.controller.dto;
 
+import br.gov.es.participe.enumerator.AttendanceListEnum;
 import br.gov.es.participe.enumerator.TypeMeetingEnum;
 import br.gov.es.participe.model.Meeting;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -19,6 +20,8 @@ public class MeetingDto {
   private List<LocalityDto> localityCovers;
   private ConferenceDto conference;
   private TypeMeetingEnum typeMeetingEnum;
+  private AttendanceListEnum attendanceListMode;
+
 
   private String showChannels;
 
@@ -31,10 +34,14 @@ public class MeetingDto {
   private List<PersonDto> participants;
   private List<ChannelDto> channels;
   private List<PlanItemDto> segmentations;
+ 
 
   public MeetingDto() {
 
   }
+
+
+
 
   public MeetingDto(Meeting meeting) {
     loadMeetingDto(meeting, true);
@@ -54,6 +61,7 @@ public class MeetingDto {
     this.endDate = meeting.getEndDate();
     this.beginDate = meeting.getBeginDate();
     this.typeMeetingEnum = meeting.getTypeMeetingEnum();
+    this.attendanceListMode = meeting.getAttendanceListMode();
 
     if(loadConference && meeting.getConference() != null) {
       this.conference = new ConferenceDto(meeting.getConference());
@@ -196,6 +204,15 @@ public class MeetingDto {
 
   public void setTypeMeetingEnum(TypeMeetingEnum typeMeetingEnum) {
     this.typeMeetingEnum = typeMeetingEnum;
+  }
+
+
+  public AttendanceListEnum getAttendanceListMode() {
+    return attendanceListMode;
+  }
+
+  public void setAttendanceListMode(AttendanceListEnum attendanceListMode) {
+    this.attendanceListMode = attendanceListMode;
   }
 
   public String getShowChannels() {

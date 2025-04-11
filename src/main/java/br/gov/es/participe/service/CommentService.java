@@ -8,21 +8,16 @@ import static br.gov.es.participe.util.domain.CommentFromType.REMOTE;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.hibernate.validator.internal.util.stereotypes.ThreadSafe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -96,6 +91,8 @@ public class CommentService {
 
   @Autowired
   private ModeratedByRepository moderatedByRepository;
+
+  private static final Logger log = LoggerFactory.getLogger(CommentService.class);
 
   public List<Comment> findAll(Long idPerson, Long idConference) {
     List<Comment> comments = new ArrayList<>();
@@ -206,7 +203,7 @@ public class CommentService {
     return commentRepository.countCommentByConference(id);
   }
 
-  //@Transactional
+
   public Comment save(Comment comment, Long idPerson, Boolean usePlanItem) {
 
     if(comment.getConference() == null){
@@ -215,7 +212,11 @@ public class CommentService {
     if(comment.getLocality() == null){
       throw new IllegalArgumentException("Locality cannot be null:comment");
     }
-    
+
+    log.info("Consultando nós relacionados ao commentId={} feito por personId={}",
+      comment.getId(),
+      comment.getPersonMadeBy().getId()
+    );
     Meeting meeting = loadMeeting(comment);
     Person person = loadPerson(comment, idPerson);
     Locality locality = loadLocality(comment);
@@ -226,6 +227,7 @@ public class CommentService {
     comment.setMeeting(meeting);
     comment.setPlanItem(planItem);
     comment.setLocality(locality);
+
     if (comment.getType() == null || comment.getType().isEmpty()) {
       comment.setType("prop");
     }
@@ -237,7 +239,10 @@ public class CommentService {
         .findPersonIfParticipatingOnMeetingPresentially(person.getId(), date, conference.getId());
 
     if (personParticipating.isPresent()) {
-
+      log.info("A personId={} está participando presencialmente da meeting relacionada a conferenceId={}",
+              person.getId(),
+              conference.getId()
+      );
       Meeting meetingPresentially = this.meetingService
           .findCheckedInMeetingsByPerson(personParticipating.get().getId())
           .stream()
@@ -246,6 +251,10 @@ public class CommentService {
           .findFirst()
           .orElse(null);
 
+      log.info("Alterando meeting relacionado ao commentId={} para a meetingId={}",
+               comment.getId(),
+               Optional.ofNullable(meetingPresentially).map(Meeting::getId).orElse(null)
+      );
       comment.setMeeting(meetingPresentially);
       comment.setFrom("pres");
     } else {
@@ -260,14 +269,25 @@ public class CommentService {
     }
 
     Comment response = commentRepository.save(comment);
+    log.info("commentId={} persistido com sucesso", comment.getId());
 
+    log.info(
+      "Procurando um highlight com os parâmetros personId={}, planItemId={}, conferenceId={} e localityId={}",
+      person.getId(),
+      planItem.getId(),
+      comment.getConference().getId(),
+      Optional.ofNullable(locality).map(Locality::getId).orElse(null)
+    );
     Highlight highlight = highlightService.find(
         person.getId(),
         planItem.getId(),
         comment.getConference().getId(),
-        locality != null ? locality.getId() : null);
+        locality != null ? locality.getId() : null
+    );
 
     if (highlight == null) {
+      log.info("Não foi encontrado um Highlight relacionado ao commentId={}", comment.getId());
+
       highlight = new Highlight();
       highlight.setFrom(comment.getFrom());
       highlight.setMeeting(comment.getMeeting());
@@ -276,8 +296,20 @@ public class CommentService {
       highlight.setPersonMadeBy(person);
       highlight.setConference(conference);
 
+      log.info(
+        "Criando um novo highlight com os parâmetros from={}, meetingId={}, planItemId={}, localityId={}, personId={}, conferenceId={} extraídos do commentId={}",
+        comment.getFrom(),
+        Optional.ofNullable(comment.getMeeting()).map(Meeting::getId).orElse(null),
+        planItem.getId(),
+        Optional.ofNullable(locality).map(Locality::getId).orElse(null),
+        person.getId(),
+        conference.getId(),
+        comment.getId()
+      );
+
       highlightService.save(highlight, comment.getFrom());
     }
+
     return response;
   }
 
@@ -292,27 +324,34 @@ public class CommentService {
   private Meeting loadMeeting(Comment comment) {
     Meeting meeting = null;
     if (comment.getMeeting() != null) {
+      log.info("Consultando a entidade Meeting relacionado ao commentId={} com meetingId={}", comment.getId(), comment.getMeeting().getId());
       meeting = meetingService.find(comment.getMeeting().getId());
     }
+    log.info("Encontrou uma meeting relacionada ao commentId={} ? meeting != null = {}", comment.getId(), Objects.nonNull(meeting));
     return meeting;
   }
 
   public Conference loadConference(Comment comment) {
     Conference conference = null;
     if (comment.getConference() != null && comment.getConference().getId() != null) {
+      log.info("Consultando a entidade Conference relacionada ao commentId={} com conferenceId={}", comment.getId(), comment.getPlanItem().getId());
       conference = conferenceService.find(comment.getConference().getId());
     }
+    log.info("Encontrou uma conference relacionada ao commentId={} ? conference != null = {}", comment.getId(), Objects.nonNull(conference));
     return conference;
   }
 
   private PlanItem loadPlanItem(Comment comment, Boolean usePlanItem) {
     PlanItem planItem;
+    log.info("Consultando a entidade PlanItem relacionada ao commentId={} com planItemId={}", comment.getId(), comment.getPlanItem().getId());
     if (usePlanItem) {
+      log.info("Flag usePlanItem=true, realizando consulta do planItemId={} relacionado ao commentId={}", comment.getPlanItem().getId(), comment.getId());
       planItem = planItemService.find(comment.getPlanItem().getId());
     } else {
+      log.info("Flag usePlanItem=false, realizando consulta ao pai do planItemId={} relacionado ao commentId={}", comment.getPlanItem().getId(), comment.getId());
       planItem = planItemService.findFatherPlanItem(comment.getPlanItem().getId());
     }
-
+    log.info("Encontrou uma planItem relacionada ao commentId={} ? planItem != null = {}", comment.getId(), Objects.nonNull(planItem));
     return planItem;
   }
 
@@ -321,27 +360,38 @@ public class CommentService {
 
     Locality locality = null;
     if (localityId != null) {
+      log.info("Consultando a entidade Locality relacionada ao commentId={} com localityId={}", comment.getId(), comment.getLocality().getId());
       locality = localityService.find(comment.getLocality().getId());
     }
+    log.info("Encontrou uma locality relacionada ao commentId={} ? locality != null = {}", comment.getId(), Objects.nonNull(locality));
     return locality;
   }
 
   private Person loadPerson(Comment comment, Long idPerson) {
     Person person;
     if (idPerson == null) {
+      log.info(
+        "Parâmetro idPerson não foi informado utilizando personId={} contido no relacionamento PersonMadeBy do commentId={}",
+        comment.getPersonMadeBy().getId(),
+        comment.getId()
+      );
+      log.info("Consultando a entidade Person relacionado ao commentId={} com personId={}", comment.getId(), comment.getPersonMadeBy().getId());
       person = personService.find(comment.getPersonMadeBy().getId());
       comment.setPersonMadeBy(person);
     } else {
+      log.info("Consultando a entidade Person relacionado ao commentId={} com personId={}", comment.getId(), comment.getPersonMadeBy().getId());
       person = personService.find(idPerson);
     }
+    log.info("Encontrou uma person relacionada ao commentId={} ? person != null = {}", comment.getId(), Objects.nonNull(person));
     return person;
   }
 
-  @Transactional
   public void deleteAllByIdPerson(Long id) {
+    log.info("Consultando comments relacionados a personId={}", id);
     List<Comment> comments = commentRepository.findByIdPerson(id, null);
-
+    log.info("Foram encontrados {} comments relacionados a personId={}", comments.size(), id);
     commentRepository.deleteAll(comments);
+    log.info("Apagando {} comments relacionados a personId={}", comments.size(), id);
   }
 
   public Comment find(Long commentId) {
@@ -361,7 +411,22 @@ public class CommentService {
     return commentRepository.findAllCommentsByConference(idConference, status, text, localityIds, planItemIds, page);
   }
 
-  public List<ModerationResultDto> findAllByStatus(ModerationFilterDto moderationFilterDto) {
+  private Page<ModerationResultDto> filterCommentsByPage(List<ModerationResultDto> commentList, Integer page, Integer size) {
+    if (commentList.isEmpty()) {
+      return new PageImpl<>(commentList);
+    }
+    
+    Pageable pageRequest = PageRequest.of(page, size);
+
+    int start = (int) pageRequest.getOffset();
+    int end = Math.min((start + pageRequest.getPageSize()), commentList.size());
+
+    List<ModerationResultDto> content = commentList.subList(start, end);
+
+    return new PageImpl<>(content, pageRequest, commentList.size());
+  }
+
+  public Page<ModerationResultDto> findAllByStatus(ModerationFilterDto moderationFilterDto, Integer pageNumber, Integer rowsPerPage) {
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     StringUtils stringUtils = new StringUtils();
     Calendar endDatePlus1 = Calendar.getInstance();
@@ -410,7 +475,10 @@ public class CommentService {
         c.setDisableModerate(!c.getModeratorId().equals(moderator.getId()));
       }
     });
-    return response;
+
+    Page<ModerationResultDto> pagedResponse = filterCommentsByPage(response, pageNumber, rowsPerPage);
+
+    return pagedResponse;
   }
 
   public ModerationResultDto findModerationResultById(Long idComment, Long conferenceId) {
@@ -526,7 +594,7 @@ public class CommentService {
   }
  */
 
-  //@Transactional
+
   public ModerationResultDto begin(Long idComment, Long idModerator) {
 
       Comment comment = find(idComment);
@@ -538,6 +606,12 @@ public class CommentService {
           if (moderatedBy.getFinish() != null && !moderatedBy.getFinish() && !adm) {
             throw new IllegalArgumentException("moderation.comment.error.moderator");
           }
+          log.info(
+            "Removendo moderatedBy moderatedById={} relacionado ao commentId={} moderatorId={}",
+            moderatedBy.getId(),
+            comment.getId(),
+            moderatedBy.getPerson().getId()
+          );
           moderatedByRepository.delete(moderatedBy);
           moderatedBy = new ModeratedBy(false, new Date(), comment, moderator);
         }
@@ -546,11 +620,17 @@ public class CommentService {
       } else {
         moderatedBy = new ModeratedBy(false, new Date(), comment, moderator);
       }
-      
+
       moderatedBy = moderatedByRepository.save(moderatedBy);
-  
+      log.info(
+        "Criado novo moderatedBy moderatedById={} relacionado ao commentId={} moderatorId={}",
+        moderatedBy.getId(),
+        comment.getId(),
+        moderatedBy.getPerson().getId()
+      );
+
       return findModerationResultById(comment.getId(),comment.getConference().getId());
-    
+
   }
 
 
@@ -561,15 +641,22 @@ public class CommentService {
     if (moderatedBy != null && moderatedBy.getPerson().getId().equals(moderator.getId())) {
       moderatedBy.setFinish(true);
       moderatedBy.setTime(new Date());
+      log.info(
+        "Alterando moderatedBy moderatedById={} do commentId={} e moderatorId={} para finish=true",
+        moderatedBy.getId(),
+        moderatedBy.getComment().getId(),
+        moderator.getId()
+      );
       moderatedBy = moderatedByRepository.save(moderatedBy);
       return moderatedBy.getComment();
     }
+    log.info("O comment informado commentId={} não está relacionado ao moderatorId={} informado", comment.getId(), idModerator);
     return comment;
   }
 
   //@Transactional
   public Comment update(Comment comment, ModerationParamDto moderationParamDto, Long idModerator) {
-    
+
     if (comment == null) {
       throw new IllegalArgumentException("No comment found for given id.");
     }
@@ -578,7 +665,7 @@ public class CommentService {
 
     Long prevPlanItemID = (comment.getPlanItem() == null) ? -1 : comment.getPlanItem().getId();
     Long prevLocalityID = (comment.getLocality() == null) ? -1 : comment.getLocality().getId();
-    
+
     String prevStatus = (comment.getStatus() == null) ? "" : comment.getStatus();
     CommentStatusType moderationParamStatus = null;
     if (moderationParamDto.getStatus() != null) {
@@ -596,7 +683,7 @@ public class CommentService {
             moderator.getId())) {
       throw new IllegalArgumentException("moderation.error.moderator");
     }
-    
+
     validateComment(moderationParamDto, comment);
     loadComment(comment, moderationParamDto);
     Locality locality = null;
@@ -619,17 +706,24 @@ public class CommentService {
 
     moderatedBy.setFinish(true);
     moderatedByRepository.save(moderatedBy);
+    log.info(
+      "Criado ModeratedBy moderatedById={} relacionado ao commentId={} e moderatorId={}",
+      moderatedBy.getId(),
+      moderatedBy.getComment().getId(),
+      moderatedBy.getPerson().getId()
+    );
 
-    if ((moderationParamDto.getLocality() != null && prevLocalityID != moderationParamDto.getLocality())
-        || (moderationParamDto.getPlanItem() != null && prevPlanItemID != moderationParamDto.getPlanItem())
-        || (moderationParamStatus != null && prevStatus != moderationParamStatus.leanName)) {
+    if ((moderationParamDto.getLocality() != null && !prevLocalityID.equals(moderationParamDto.getLocality()))
+        || (moderationParamDto.getPlanItem() != null && !prevPlanItemID.equals(moderationParamDto.getPlanItem()))
+        || (moderationParamStatus != null && !prevStatus.equals(moderationParamStatus.leanName))) {
 
       // Try to remove previous highlight
       Highlight highlightDB = highlightService.find(
           comment.getPersonMadeBy().getId(),
           prevPlanItemID,
           comment.getConference().getId(),
-          prevLocalityID);
+          prevLocalityID
+      );
 
       if (highlightDB != null) {
         highlightService.removeHighlight(highlightDB);
@@ -646,12 +740,32 @@ public class CommentService {
         newHighlight.setPersonMadeBy(comment.getPersonMadeBy());
         newHighlight.setPlanItem(comment.getPlanItem());
         newHighlight.setTime(new Date());
+        log.info(
+          "Comment com status != rem, criando um novo highlight com os parâmetros conferenceId={}, from={}, localityId={}, meetingId={}, personMadeById={}, planItemId={}",
+          Optional.ofNullable(newHighlight.getConference()).map(Conference::getId).orElse(null),
+          newHighlight.getFrom(),
+          Optional.ofNullable(newHighlight.getLocality()).map(Locality::getId).orElse(null),
+          Optional.ofNullable(newHighlight.getMeeting()).map(Meeting::getId).orElse(null),
+          Optional.ofNullable(newHighlight.getPersonMadeBy()).map(Person::getId).orElse(null),
+          Optional.ofNullable(newHighlight.getPlanItem()).map(PlanItem::getId).orElse(null)
+        );
         highlightService.save(newHighlight, newHighlight.getFrom());
       }
 
     }
     comment.setConference(conferenceDB);
-    return commentRepository.save(comment);
+    final var commentCreated = commentRepository.save(comment);
+    log.info(
+      "Criando um novo comment com os parâmetros commentId={}, conferenceId={}, moderatorId={}, localityId={}, meetingId={}, personMadeById={} planItemId={}",
+      commentCreated.getId(),
+      Optional.ofNullable(commentCreated.getConference()).map(Conference::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getModerator()).map(Person::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getLocality()).map(Locality::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getMeeting()).map(Meeting::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getPersonMadeBy()).map(Person::getId).orElse(null),
+      Optional.ofNullable(commentCreated.getPlanItem()).map(PlanItem::getId).orElse(null)
+    );
+    return commentCreated;
   }
 
   private Comment loadComment(Comment comment, ModerationParamDto moderationParamDto) {
@@ -659,6 +773,8 @@ public class CommentService {
       comment.setLocality(null);
       comment = commentRepository.save(comment);
     }
+
+    comment.setDuplicated(moderationParamDto.getDuplicated());
 
     if (moderationParamDto.getPlanItem() != null) {
       comment.setPlanItem(null);

@@ -6,6 +6,8 @@ import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.service.MeetingService;
 import br.gov.es.participe.service.PersonService;
+import br.gov.es.participe.service.QRCodeService;
+
 import br.gov.es.participe.util.interfaces.ApiPageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,10 +18,30 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+/* Início das importações */
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.http.ContentDisposition;
+/* Fim das importações */
+import javax.imageio.ImageIO;
+
+import com.google.zxing.WriterException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+
 
 @RestController
 @CrossOrigin
@@ -31,6 +53,9 @@ public class MeetingController {
 
   @Autowired
   private PersonService personService;
+
+  @Autowired
+  private QRCodeService qrCodeService;
 
   @GetMapping("/{idConference}/page-number")
   public ResponseEntity<Object> findPageNumberByConference(
@@ -100,6 +125,8 @@ public class MeetingController {
     return ResponseEntity.status(200).body(response);
   }
 
+
+  @Transactional
   @PostMapping
   public ResponseEntity<MeetingDto> store(
       @RequestHeader(name = "Authorization") String token,
@@ -139,7 +166,8 @@ public class MeetingController {
     }
   }
 
-  /* 
+  
+  @Transactional
   @DeleteMapping("/{id}")
   public ResponseEntity<Boolean> destroy(
       @RequestHeader(name = "Authorization") String token,
@@ -150,7 +178,6 @@ public class MeetingController {
     Boolean response = meetingService.delete(id);
     return ResponseEntity.status(200).body(response);
   }
-*/
 
   @Transactional
   @PostMapping("/checkIn")
@@ -178,6 +205,40 @@ public class MeetingController {
     return ResponseEntity.noContent().build();
   }
 
+  @Transactional
+  @PostMapping("/selfcheckIn")
+  public ResponseEntity<CheckedInAtDto> selfCheckInOnMeeting(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestBody CheckInParamDto checkInParamDto) {
+
+    if (checkInParamDto == null ||
+        checkInParamDto.getPersonId() == null ||
+        checkInParamDto.getMeetingId() == null) {
+      throw new IllegalArgumentException("An object with Person Id and Meeting Id parameters must be informed.");
+    }
+
+    CheckedInAt checkedInAt = meetingService.checkInOnMeeting(
+        checkInParamDto.getPersonId(),
+        checkInParamDto.getMeetingId(),
+        checkInParamDto.getTimeZone());
+
+    if (checkedInAt != null) {
+      return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
+    }
+
+    return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/checkIn/{meetingId}")
+  public ResponseEntity<CheckedInAtDto> CheckInOnMeetingByPerson(@PathVariable Long meetingId,
+    @RequestParam(name = "personId", required = true) Long personId) {
+      CheckedInAt checkinAt = meetingService.findByPersonAndMeeting(personId, meetingId);
+      
+      return ResponseEntity.ok().body(new CheckedInAtDto(checkinAt));
+
+  }
+  
+
   @GetMapping("/{conferenceId}/targeted-by/plan-items")
   public ResponseEntity<List<PlanItemComboDto>> findAllItems(@PathVariable Long conferenceId) {
     List<PlanItemComboDto> response = meetingService.findPlanItemsFromConference(conferenceId);
@@ -186,20 +247,32 @@ public class MeetingController {
 
   @ApiPageable
   @GetMapping("/{meetingId}/participants")
-  public ResponseEntity<Page<PersonMeetingDto>> findMeetingParticipants(@PathVariable Long meetingId,
+  public ResponseEntity<Page<PersonMeetingFilteredDto>> findMeetingParticipants(@PathVariable Long meetingId,
       @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
-      @RequestParam(name = "name", required = false) String name, @ApiIgnore Pageable page) {
-    Page<PersonMeetingDto> personMeetingDto = personService.findPersonsCheckedInOnMeeting(meetingId, localities,
-        name, page);
-    return ResponseEntity.ok().body(personMeetingDto);
+      @RequestParam(name = "name", required = false) String name, 
+      @RequestParam(name = "filter", required = true) String filter,
+      @ApiIgnore Pageable page) {
+
+      Page<PersonMeetingFilteredDto> personMeetingFilteredDto = personService.findPersonOnMeetingByAttendanceFilterPaged(meetingId, localities, name, filter, page);
+
+      return ResponseEntity.ok().body(personMeetingFilteredDto);
+    
   }
 
-  @GetMapping("/{meetingId}/participants/total")
-  public ResponseEntity<Long> findMeetingParticipantsNumber(@PathVariable Long meetingId) {
-    Long participantsQuantity = personService.findPeopleQuantityOnMeeting(meetingId);
-    return ResponseEntity.ok().body(participantsQuantity);
-  }
+  @GetMapping("/{meetingId}/total")
+  public ResponseEntity<Map<String, Long>> countTotalParticipantsInMeeting(
+          @PathVariable Long meetingId,
+          @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
+          @RequestParam(name = "name", required = false) String name,
+          @RequestParam(name = "filter", required = true) String filter
+  ) {
 
+    Map<String, Long> totalParticipants = personService.countTotalParticipantsInMeeting(meetingId, localities, name, filter);
+
+    return ResponseEntity.ok().body(totalParticipants);
+
+  }
+  
   @Transactional
   @DeleteMapping("/{meetingId}/remove-participation/{personId}")
   public ResponseEntity<Boolean> removeMeetingParticipation(
@@ -218,11 +291,12 @@ public class MeetingController {
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long meetingId,
       @RequestParam(name = "name", required = false, defaultValue = "") String name,
-      Pageable pageable) {
+      Pageable pageable,
+      HttpSession session) {
     if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       return ResponseEntity.status(401).body(null);
     }
-    Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable);
+    Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable, session);
     return ResponseEntity.status(200).body(personMeetingDtoPage);
   }
 
@@ -239,4 +313,37 @@ public class MeetingController {
         person -> ResponseEntity.status(200).body(new PersonDto(person)))
         .orElseGet(() -> ResponseEntity.noContent().build());
   }
+
+  @GetMapping("/{meetingId}/generate-link-pre-registration")
+  @ResponseBody
+  public ResponseEntity  generateMeetingLink(@PathVariable Long meetingId){
+    String  UrlMeeting = meetingService.generateMeetingLink(meetingId);
+    Map<String, Object> meeting = new HashMap<>();
+    meeting.put("url",UrlMeeting);
+    return ResponseEntity.status(200).body(meeting);
+  }
+
+  @GetMapping("/{meetingId}/generate-qr-code-check-in")
+  public ResponseEntity<byte[]> getMethodName(@PathVariable Long meetingId) throws WriterException, IOException {
+    String UrlMeeting = meetingService.generateAutoCheckInLink(meetingId);
+    byte[] imageQR = qrCodeService.generateQRCode(UrlMeeting, 300, 300);
+    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageQR);
+    
+  }
+
+  @GetMapping("/{meetingId}/self-check-in")
+  public ResponseEntity<Boolean> selfCheckInOpen(@PathVariable Long meetingId) {
+
+        return ResponseEntity.ok(meetingService.selfCheckInIsOpen(meetingId));
+
+  }
+
+  @GetMapping("/{meetingId}/pre-registration")
+  public ResponseEntity<Map<String, Boolean>> preRegistrationOpen(@PathVariable Long meetingId) {
+
+    return ResponseEntity.ok(meetingService.preRegistrationIsOpenAndMeetingStarted(meetingId));
+
+  }
+  
+  
 }

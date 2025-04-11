@@ -141,7 +141,9 @@ public class LocalityController {
         LocalityDto response = new LocalityDto(localityService.update(id, localityParamDto), null, true, true);
         return ResponseEntity.status(200).body(response);
     }
-/* 
+
+
+    @Transactional
     @DeleteMapping("/{idLocality}/domain/{idDomain}")
     @SuppressWarnings("rawtypes")
     public ResponseEntity destroy(
@@ -154,5 +156,5 @@ public class LocalityController {
         localityService.delete(idLocality, idDomain);
         return ResponseEntity.status(200).build();
     }
-    */
+    
 }

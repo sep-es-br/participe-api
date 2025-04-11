@@ -7,6 +7,7 @@ import br.gov.es.participe.model.PortalServer;
 import br.gov.es.participe.service.*;
 import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -70,6 +74,14 @@ public class ConferenceController {
       @RequestParam(value = "id", required = false) Long id) {
     return ResponseEntity.status(200).body(conferenceService.validate(name, id));
   }
+ 
+
+  @GetMapping("/{id}")
+  public ResponseEntity<ConferenceDto> show(@PathVariable Long id) {
+    ConferenceDto response = new ConferenceDto(conferenceService.find(id));
+    conferenceService.loadOtherAttributes(response);
+    return ResponseEntity.status(200).body(response);
+  }
 
   @Transactional
   @PostMapping
@@ -105,7 +117,7 @@ public class ConferenceController {
     return ResponseEntity.status(200).body(response);
   }
 
-  /* 
+  @Transactional
   @DeleteMapping("/{id}")
   public ResponseEntity<Boolean> destroy(
       @RequestHeader("Authorization") String token,
@@ -116,7 +128,7 @@ public class ConferenceController {
     Boolean response = conferenceService.delete(id);
     return ResponseEntity.status(200).body(response);
   }
-*/
+
   @GetMapping("/AuthenticationScreen/{id}")
   public ResponseEntity<AuthenticationScreenDto> getAuthenticationScreen(@PathVariable Long id,
       UriComponentsBuilder uriComponentsBuilder) {
@@ -212,24 +224,24 @@ public class ConferenceController {
       @RequestHeader("Authorization") String token,
       @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date date) {
 
-    /* 
-      String[] keys = token.split(" ");
-      Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
-      Person person = personService.find(idPerson);
-      boolean adm = person.getRoles() != null &&
-      person.getRoles().contains("Administrator");
-     */
-
     List<Conference> conferences = new ArrayList<Conference>();
     if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
-      conferences = conferenceService.findAllWithPresentialMeetings(null, null);
+      conferences = conferenceService.findAllOpenWithPresentialMeetings4Admins();
     } else if (personService.hasOneOfTheRoles(token, new String[] { "Recepcionist" })) {
-      conferences = conferenceService.findAllWithPresentialMeetings(date, personService.getPerson(token).getId());
+      conferences = conferenceService.findAllOpenWithPresentialMeetings4Receptionists(date, personService.getPerson(token).getId());
     }
 
     List<ConferenceDto> response = new ArrayList<>();
     conferences.forEach(conference -> {
       ConferenceDto conferenceDto = new ConferenceDto(conference);
+      Collections.sort(conferenceDto.getMeeting(), new Comparator<MeetingDto>() {
+
+        @Override
+        public int compare(MeetingDto o1, MeetingDto o2) {
+          return o1.getName().compareTo(o2.getName());
+        }
+        
+      });
       conferenceDto.setPlan(null);
       conferenceDto.setLocalityType(null);
       conferenceDto.setFileAuthentication(null);

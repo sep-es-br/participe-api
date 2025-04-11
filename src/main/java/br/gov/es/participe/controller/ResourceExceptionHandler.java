@@ -1,6 +1,14 @@
 package br.gov.es.participe.controller;
 
+import br.gov.es.participe.exception.QRCodeGenerateException;
+
+import br.gov.es.participe.exception.ParticipeServiceException;
+import br.gov.es.participe.exception.ApiAcessoCidadaoException;
+import br.gov.es.participe.exception.ApiOrganogramaException;
+import br.gov.es.participe.exception.EvaluatorForbiddenException;
+import br.gov.es.participe.exception.NotFoundException;
 import br.gov.es.participe.util.dto.MessageDto;
+
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,5 +56,42 @@ public class ResourceExceptionHandler {
   public ResponseEntity<MessageDto> handleException(RuntimeException e, HttpServletRequest req) {
     log.error("Error", e);
     return ResponseEntity.status(500).body(new MessageDto(500, e.getMessage()));
+  }
+
+
+  @ExceptionHandler(QRCodeGenerateException.class)
+  public ResponseEntity<MessageDto> handleException(QRCodeGenerateException e, HttpServletRequest req) {
+    log.error("Error", e);
+    return ResponseEntity.status(400).body(new MessageDto(400, e.getMessage()));
+  }
+
+  @ExceptionHandler(ParticipeServiceException.class)
+  public ResponseEntity<MessageDto> participeServiceHandler(ParticipeServiceException e) {
+    log.error("Error", e);
+    return ResponseEntity.status(400).body(new MessageDto(400, e.getMessage()));
+  }
+
+  @ExceptionHandler(ApiAcessoCidadaoException.class)
+  public ResponseEntity<MessageDto> handleException(ApiAcessoCidadaoException e) {
+    log.error("Error", e);
+    return ResponseEntity.status(500).body(new MessageDto(500, e.getMessage()));
+  }
+
+  @ExceptionHandler(ApiOrganogramaException.class)
+  public ResponseEntity<MessageDto> handleException(ApiOrganogramaException e) {
+    log.error("Error", e);
+    return ResponseEntity.status(500).body(new MessageDto(500, e.getMessage()));
+  }
+
+  @ExceptionHandler(EvaluatorForbiddenException.class)
+  public ResponseEntity<MessageDto> handleException(EvaluatorForbiddenException e) {
+    log.error("Error", e);
+    return ResponseEntity.status(403).body(new MessageDto(403, e.getMessage()));
+  }
+
+  @ExceptionHandler(NotFoundException.class)
+  public ResponseEntity<MessageDto> handleException(NotFoundException e){
+    log.error("Error", e);
+    return ResponseEntity.status(404).body(new MessageDto(404, e.getMessage()));
   }
 }

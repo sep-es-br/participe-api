@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +52,8 @@ public class PlanItemController {
         return ResponseEntity.status(200).body(response);
     }
 
+
+    @Transactional
     @PostMapping
     @SuppressWarnings("rawtypes")
     public ResponseEntity store(
@@ -72,6 +75,8 @@ public class PlanItemController {
         return ResponseEntity.status(200).body(response);
     }
 
+
+    @Transactional
     @PutMapping("/{id}")
     @SuppressWarnings("rawtypes")
     public ResponseEntity update(
@@ -86,7 +91,7 @@ public class PlanItemController {
         return ResponseEntity.status(200).body(response);
     }
 
-    /* 
+    @Transactional
     @DeleteMapping("/{id}")
     @SuppressWarnings("rawtypes")
     public ResponseEntity destroy(
@@ -98,5 +103,5 @@ public class PlanItemController {
         planItemService.delete(id);
         return ResponseEntity.status(200).build();
     }
-    */
+    
 }

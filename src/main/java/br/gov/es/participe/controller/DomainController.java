@@ -68,6 +68,7 @@ public class DomainController {
         return ResponseEntity.status(200).body(response);
     }
 
+    @Transactional
     @PutMapping("/{id}")
     @SuppressWarnings({ "rawtypes" })
     public ResponseEntity update(
@@ -81,7 +82,9 @@ public class DomainController {
         DomainDto response = new DomainDto(domainService.save(domain), true);
         return ResponseEntity.status(200).body(response);
     }
-/*
+
+
+    @Transactional
     @DeleteMapping("/{id}")
     @SuppressWarnings({ "rawtypes" })
     public ResponseEntity destroy(
@@ -93,5 +96,5 @@ public class DomainController {
         domainService.delete(id);
         return ResponseEntity.status(200).build();
     }
-     */
+     
 }

@@ -87,7 +87,6 @@ Integer countLocalityByConferenceAndType(@Param("idConference")Long idConference
       + " OPTIONAL MATCH (at)-[al:ABOUT]->(loc:Locality)-[ot:OF_TYPE]->(lt:LocalityType) "
       + " WITH at, ap, al, loc, ot, lt, pi, p, conf "
       + " WHERE id(p)=$idPerson AND id(conf) = $idConference "
-      + " AND (at.status IS NULL OR NOT at.status IN ['rem', 'arq']) "
       + " OPTIONAL MATCH (pi)-[comp:COMPOSES*]->(pi2:PlanItem) "
       + " WITH p,at,conf,pi,loc,lt,pi2 "
       + " WHERE ($text IS NULL OR (at.text IS NOT NULL AND at.text CONTAINS ($text)) "
@@ -104,14 +103,13 @@ Integer countLocalityByConferenceAndType(@Param("idConference")Long idConference
           + " OPTIONAL MATCH (at)-[al:ABOUT]->(loc:Locality)-[ot:OF_TYPE]->(lt:LocalityType) "
           + " WITH at, ap, al, loc, ot, lt, pi, p, conf "
           + " WHERE id(p)=$idPerson AND id(conf) = $idConference "
-          + " AND (at.status IS NULL OR NOT at.status IN ['rem', 'arq']) "
 
           + " OPTIONAL MATCH (pi)-[comp:COMPOSES*]->(pi2:PlanItem) "
           + " WITH p,at,conf,pi,loc,lt,pi2 "
-          + " WHERE ($text IS NULL OR (at.text IS NOT NULL AND ext.translate(at.text) CONTAINS ext.translate($text)) "
-          + " OR (at.text IS NULL AND ext.translate(pi.name) CONTAINS ext.translate($text)) "
-          + " OR (at.text IS NULL AND ext.translate(loc.name) CONTAINS ext.translate($text)) "
-          + " OR (at.text IS NULL AND pi2 IS NOT NULL AND ext.translate(pi2.name) CONTAINS ext.translate($text))) "
+          + " WHERE ($text IS NULL OR (at.text IS NOT NULL AND apoc.text.clean(at.text) CONTAINS apoc.text.clean($text)) "
+          + " OR (at.text IS NULL AND apoc.text.clean(pi.name) CONTAINS apoc.text.clean($text)) "
+          + " OR (at.text IS NULL AND apoc.text.clean(loc.name) CONTAINS apoc.text.clean($text)) "
+          + " OR (at.text IS NULL AND pi2 IS NOT NULL AND apoc.text.clean(pi2.name) CONTAINS apoc.text.clean($text))) "
 
           + " OPTIONAL MATCH (at)-[mb:MODERATED_BY]->(m:Person) "
           + " RETURN count(DISTINCT id(at)) ")
@@ -127,15 +125,13 @@ Integer countLocalityByConferenceAndType(@Param("idConference")Long idConference
   Integer countParticipationAllOriginsByConference(Long idConference);
   */
   
-@Query(" match (p:Person)-[:MADE]->(lo:Login)-[:TO]->(co:Conference),(p)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) "+ 
-       " where id(co)=$idConference "+
-       " WITH collect(p) AS personLogin "+
-       " match (p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) "+  
-       " where id(co)=$idConference "+
-       " WITH collect(p) AS personCkeckedIn, personLogin "+
-       " WITH apoc.coll.toSet(personCkeckedIn + personLogin) AS person "+
-       " UNWIND person AS p "+
-       " RETURN count(DISTINCT p.contactEmail) as c ")
+@Query(" match (co:Conference)<-[:TO]-(s:SelfDeclaration)<-[:MADE]-(p:Person) " +
+       " where id(co) = $idConference " +
+       " optional match (p)-[:MADE]->(lo:Login)-[:TO]->(co) " +
+       " optional match (p)-[:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co) " +
+       " with count(lo) as countlo, count(m) as countm, p as participant " +
+       " where countlo > 0 or countm > 0 " +
+       " return count(distinct participant) ")
 Integer countParticipationAllOriginsByConference( @Param("idConference") Long idConference);
 
   
@@ -151,15 +147,30 @@ Integer countParticipationAllOriginsByConference( @Param("idConference") Long id
   Integer countParticipationRemoteOriginByConference( @Param("idConference") Long idConference);
   
   
-  @Query(" match (p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
+
+   //Total de participantes
+/*   @Query(" match (p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
   		"  where id(co) = $idConference AND (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
   		"  return count(distinct p) ")
 	  Integer countParticipationPresentialOriginByConference( @Param("idConference") Long idConference, @Param("meetings") List<Long> meetings );
-	  
-  
-  //destaques
-  
+	 */ 
+    @Query(" optional match (p:Person)-[:MADE]->(l:Login)-[:TO]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " +  
+          " where id(co) = $idConference " + 
+          " AND m.attendanceListMode = 'MANUAL'  " + 
+          " AND l.time >= m.beginDate and l.time <= m.endDate " + 
+          " AND (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
+          " with collect(p) as plogged " + 
+          " optional match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person) " + 
+          " where   id(co) = $idConference and  m.attendanceListMode = 'AUTO'  " + 
+          " AND (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
+          " with plogged + collect(p) as allp  " + 
+          " unwind allp as np " + 
+          " return count(DISTINCT np)  ")
+  Integer countParticipationPresentialOriginByConference( @Param("idConference") Long idConference, @Param("meetings") List<Long> meetings );
 
+
+
+  //Total de destaques
   @Query("  MATCH (co:Conference)<-[a:ABOUT]-(h:Highlight) " + 
   		"  WHERE id(co)=$idConference " + 
   		"  RETURN count(h) ")
@@ -196,12 +207,27 @@ Integer countParticipationAllOriginsByConference( @Param("idConference") Long id
 	  Integer countCommentRemoteOriginByConference( @Param("idConference") Long idConference);
   
   
- 
-  @Query(" match (m:Meeting)<-[:DURING]-(c:Comment)-[:ABOUT]->(co:Conference) " + 
+  // Total de propostas
+ /*  @Query(" match (m:Meeting)<-[:DURING]-(c:Comment)-[:ABOUT]->(co:Conference) " + 
 	  		"  where id(co) = $idConference AND c.from='pres' and c.status IN ['pub', 'arq'] AND (($meetings IS NULL) OR (id(m) IN $meetings))  " + 
 	  		"  return count (distinct c) ")
 		  Integer countCommentPresentialOriginByConference( @Param("idConference") Long idConference,  @Param("meetings") List<Long> meetings);
-  
+  */
+
+      @Query( " optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " + 
+              " where id(co) = $idConference AND " + 
+              " m.attendanceListMode = 'MANUAL'  AND " + 
+              " c.time >= m.beginDate and c.time <= m.endDate AND (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
+              " AND c.status IN ['pub', 'arq'] " + 
+              " with collect(c) as plogged  " + 
+              " optional match (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) " + 
+              " where id(co) = $idConference AND m.attendanceListMode = 'AUTO' AND  c.from='pres' and (m)<-[:DURING]-(c)  " + 
+              " AND c.status IN ['pub', 'arq']  " + 
+              " AND (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
+              " with plogged + collect(c) as allp  " + 
+              " unwind allp as np " + 
+              " return count (distinct np) ")
+    Integer countCommentPresentialOriginByConference( @Param("idConference") Long idConference,  @Param("meetings") List<Long> meetings);
 
   
 //locality 
@@ -219,14 +245,28 @@ Integer countParticipationAllOriginsByConference( @Param("idConference") Long id
   		"return count (distinct loc) ")
   Integer countLocalityRemoteOriginByConference( @Param("idConference") Long idConference);
   
-  
-  @Query(" match (l:Locality)<-[:AS_BEING_FROM]-(s:SelfDeclaration)<-[:MADE]-(p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
+  // Total de municipios
+ /*  @Query(" match (l:Locality)<-[:AS_BEING_FROM]-(s:SelfDeclaration)<-[:MADE]-(p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
   		"  where id(co) = $idConference AND (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
   		"  return count(distinct l) ")
 	  Integer countLocalityPresentialOriginByConference( @Param("idConference") Long idConference, @Param("meetings") List<Long> meetings );
 	  
-  
-  
+  */
+    
+  @Query( " optional match (l:Locality)<-[:AS_BEING_FROM]-(s:SelfDeclaration)<-[:MADE]-(p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
+          " where id(co) = $idConference  AND " + 
+          " (m.attendanceListMode = 'AUTO') and (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
+          " with collect(l) as plogged  " + 
+          " optional match (co:Conference)<-[:TO]-(lo:Login)<-[:MADE]-(p:Person)-[:MADE]->(s:SelfDeclaration)-[:TO]->(co) " + 
+          " ,(l:Locality)<-[:AS_BEING_FROM]-(s) " + 
+          " ,(co)<-[:OCCURS_IN]-(m:Meeting) " + 
+          " where id(co) = $idConference  AND " + 
+          " ((m.attendanceListMode = 'MANUAL' AND lo.time >= m.beginDate and lo.time <= m.endDate)) " + 
+          " AND (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
+          " with plogged + collect(l)  as allp  " + 
+          " unwind allp as np " + 
+          " return count (distinct np) ")
+  Integer countLocalityPresentialOriginByConference( @Param("idConference") Long idConference, @Param("meetings") List<Long> meetings );
   
   
 }

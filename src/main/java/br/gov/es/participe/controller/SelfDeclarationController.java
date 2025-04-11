@@ -66,7 +66,9 @@ public class SelfDeclarationController {
 			return ResponseEntity.status(401).body(null);
 		}
 	}
-/* 
+ 
+
+	@Transactional
 	@DeleteMapping("/{id}")
 	@SuppressWarnings("rawtypes")
 	public ResponseEntity delete(
@@ -81,5 +83,5 @@ public class SelfDeclarationController {
 			return ResponseEntity.status(401).body(null);
 		}
 	}
-	*/
+	
 }

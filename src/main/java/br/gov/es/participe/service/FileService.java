@@ -50,7 +50,6 @@ public class FileService {
         return new UrlResource(uri);
     }
 
-    //@Transactional
     public FileDto save(MultipartFile multipartFile) throws IOException {
         br.gov.es.participe.model.File file = new br.gov.es.participe.model.File();
         file.setName(multipartFile.getOriginalFilename());
@@ -72,7 +71,7 @@ public class FileService {
         }
     }
 
-    @Transactional
+   
     public void delete(Long id) {
         br.gov.es.participe.model.File file1 = fileRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Imagem id: " + id + " não encontrada."));
@@ -96,11 +95,19 @@ public class FileService {
         return fileRepository.findAllBackGroundImageFromIdConference(idConference);
     }
 
+    public List<br.gov.es.participe.model.File> findAllCalendarImageFromConference(Long idConference) {
+        return fileRepository.findAllCalendarImageFromIdConference(idConference);
+    }
+
     public void saveAll(List<br.gov.es.participe.model.File> listFiles) {
         fileRepository.saveAll(listFiles);
     }
 
     public br.gov.es.participe.model.File findRandomackGroundImage(Long idConference) {
         return fileRepository.findRandomackGroundImage(idConference);
+    }
+
+    public br.gov.es.participe.model.File findRandomCalendarImage(Long idConference) {
+        return fileRepository.findRandomCalendarImage(idConference);
     }
 }

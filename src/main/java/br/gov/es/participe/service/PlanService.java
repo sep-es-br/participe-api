@@ -2,6 +2,8 @@ package br.gov.es.participe.service;
 
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.PlanRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +12,7 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PlanService {
@@ -19,7 +22,7 @@ public class PlanService {
 
     @Autowired
     private LocalityTypeService localityTypeService;
-    
+
     @Autowired
     private StructureService structureService;
 
@@ -32,14 +35,16 @@ public class PlanService {
     @Autowired
     private ConferenceService conferenceService;
 
+    private static final Logger log = LoggerFactory.getLogger(PlanService.class);
+
     public List<Plan> findAll(String query) {
         List<Plan> plans = new ArrayList<>();
 
         if (query != null && !query.trim().isEmpty()) {
             query = query.replaceAll("[^a-zà-úA-ZÀ-Ú0-9ç]+", " ");
-        	query = query.trim().replaceAll(" +", " ");
-        	String newQuery = Normalizer.normalize(query, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", ""); 
-            
+          query = query.trim().replaceAll(" +", " ");
+          String newQuery = Normalizer.normalize(query, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+
             planRepository
                     .findByName(newQuery.trim())
                     .iterator()
@@ -55,40 +60,55 @@ public class PlanService {
     }
 
     public Plan findByConference(Long id) {
-    	return planRepository.findByConference(id);
+      return planRepository.findByConference(id);
     }
-    
+
     public Plan findByConferenceWithPlanItem(Long id) {
-    	return planRepository.findByConferenceWithPlanItem(id);
+      return planRepository.findByConferenceWithPlanItem(id);
     }
-    
+
     public Plan findByPlanItem(Long id) {
-    	return planRepository.findByPlanItem(id);
+      return planRepository.findByPlanItem(id);
     }
 
     public Collection<Plan> findByDomain(Long id) {
         return planRepository.findByDomain(id);
     }
-    
-    //@Transactional
+  
     public Plan save(Plan plan) {
         if (plan.getId() != null) {
             Plan oldPlan = find(plan.getId());
 
             if (!oldPlan.getStructure().getId().equals(plan.getStructure().getId())) {
                 oldPlan.getStructure().removePlan(plan.getId());
+                log.info(
+                  "Removendo structureId={} do planId={}" ,
+                  oldPlan.getStructure().getId(),
+                  oldPlan.getId()
+                );
                 structureService.save(oldPlan.getStructure());
             }
 
             if ( oldPlan.getDomain() != null && !oldPlan.getDomain().getId().equals(plan.getDomain().getId())) {
                 oldPlan.getDomain().removePlan(plan.getId());
+              log.info(
+                "Removendo domainId={} do planId={}" ,
+                oldPlan.getDomain().getId(),
+                oldPlan.getId()
+              );
                 domainService.save(oldPlan.getDomain());
             }
         }
 
         loadAttributes(plan);
-
-        return planRepository.save(plan);
+        final var createdPlan = planRepository.save(plan);
+        log.info("Salvando planId={} com domainId={}, structureId={}, localityTypeId={}",
+          createdPlan.getId(),
+          Optional.ofNullable(createdPlan.getDomain()).map(Domain::getId).orElse(null),
+          Optional.ofNullable(createdPlan.getStructure()).map(Structure::getId).orElse(null),
+          Optional.ofNullable(createdPlan.getlocalitytype()).map(LocalityType::getId).orElse(null)
+        );
+        return createdPlan;
     }
 
     public Plan find(Long id) {
@@ -97,12 +117,12 @@ public class PlanService {
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Plan not found: " + id));
     }
-    
+
     public Plan findFilesById(Long id) {
-    	return planRepository.findFilesById(id);
+      return planRepository.findFilesById(id);
     }
 
-    @Transactional
+
     public void delete(Long id) {
         Plan plan = find(id);
 
@@ -126,7 +146,7 @@ public class PlanService {
         loadDomain(plan);
         loadLocalityType(plan);
     }
-    
+
 
     private void loadStructure(Plan plan) {
         if (plan.getStructure() != null) {
@@ -136,16 +156,16 @@ public class PlanService {
             }
         }
     }
-    
+
     private void loadLocalityType(Plan plan) {
         if (plan.getlocalitytype() != null && plan.getlocalitytype().getId() !=null) {
-        	LocalityType type = localityTypeService.find(plan.getlocalitytype().getId());
+          LocalityType type = localityTypeService.find(plan.getlocalitytype().getId());
             if (type != null) {
                 plan.setlocalitytype(type);
             }
         }
     }
-    
+
 
     private void loadDomain(Plan plan) {
         if (plan.getDomain() != null) {

@@ -5,7 +5,6 @@ import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
 import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.service.AcessoCidadaoService;
 import br.gov.es.participe.service.CookieService;
-import br.gov.es.participe.service.FacebookService;
 import br.gov.es.participe.service.GoogleService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.util.dto.MessageDto;
@@ -13,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,9 +38,6 @@ public class SignInController {
   private AcessoCidadaoService acessoCidadaoService;
 
   @Autowired
-  private FacebookService facebookService;
-
-  @Autowired
   private GoogleService googleService;
 
   @Autowired
@@ -59,6 +56,7 @@ public class SignInController {
     return ResponseEntity.ok().body(signinDto);
   }
 
+  @Transactional
   @PostMapping
   @SuppressWarnings("rawtypes")
   public ResponseEntity signIn(@RequestBody PersonParamDto user,
@@ -108,58 +106,6 @@ public class SignInController {
     return new RedirectView(buildProfileCallbackUrl(request, response, valor));
   }
 
-  @GetMapping("/facebook")
-  public RedirectView indexFacebook(
-      @RequestParam("code") String authorizationCode,
-      HttpServletRequest request,
-      HttpServletResponse response) {
-    String accessToken = facebookService.facebookAccessToken(
-        authorizationCode,
-        request,
-        "/signin/facebook");
-    RedirectView redirectView = new RedirectView("facebook-response?access_token=" + accessToken);
-    redirectView.setPropagateQueryParams(true);
-    return redirectView;
-  }
-
-  @GetMapping("/facebook-profile")
-  public RedirectView indexFacebookProfile(
-      @RequestParam("code") String authorizationCode,
-      HttpServletRequest request,
-      HttpServletResponse response) {
-    String accessToken = facebookService.facebookAccessToken(
-        authorizationCode,
-        request,
-        "/signin/facebook-profile");
-    RedirectView redirectView = new RedirectView(
-        "facebook-profile-response?access_token=" + accessToken);
-    redirectView.setPropagateQueryParams(true);
-    return redirectView;
-  }
-
-  @GetMapping("/facebook-profile-response")
-  public RedirectView facebookProfileResponse(
-      @RequestParam(name = "access_token") String accessToken,
-      HttpServletRequest request,
-      HttpServletResponse response) throws JsonProcessingException {
-    PersonProfileSignInDto personProfileSignInDto = facebookService.authenticateProfile(
-        accessToken,
-        getConferenceId(request, response));
-    String valor = encode(personProfileSignInDto);
-    return new RedirectView(buildProfileCallbackUrl(request, response, valor));
-  }
-
-  @GetMapping("/facebook-response")
-  public RedirectView facebook(
-      @RequestParam(name = "access_token") String accessToken,
-      HttpServletRequest request,
-      HttpServletResponse response) throws JsonProcessingException {
-    SigninDto signinDto = facebookService.authenticate(accessToken,
-        getConferenceId(request, response));
-    String valor = encode(signinDto);
-    return new RedirectView(buildHomeCallbackUrl(request, response, valor));
-  }
-
   @GetMapping("/google")
   public RedirectView indexGoogle(
       @RequestParam("code") String authorizationCode,
@@ -175,10 +121,8 @@ public class SignInController {
   public RedirectView indexGoogleProfile(
       @RequestParam("code") String authorizationCode,
       HttpServletRequest request) {
-    String accessToken = googleService.googleAccessToken(
-        authorizationCode,
-        request,
-        "/signin/google-profile");
+    String accessToken = googleService.googleProfileAccessToken(
+        authorizationCode);
     return new RedirectView("google-profile-response?access_token=" + accessToken);
   }
 

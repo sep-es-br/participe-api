@@ -20,4 +20,12 @@ public interface FileRepository extends Neo4jRepository<File, Long> {
 
     @Query("MATCH (c:Conference)<-[:IS_BACKGROUND_IMAGE_OF]-(f:File) WHERE id(c)=$idConference with f, rand() AS r ORDER BY r RETURN f LIMIT 1")
     File findRandomackGroundImage( @Param("idConference") Long idConference);
+
+    @Query("MATCH (c:Conference)<-[:IS_CALENDAR_IMAGE_OF]-(f:File)" +
+    " WHERE id(c)=$idConference " +
+    " RETURN f")
+    List<File> findAllCalendarImageFromIdConference( @Param("idConference") Long idConference);
+
+    @Query("MATCH (c:Conference)<-[:IS_CALENDAR_IMAGE_OF]-(f:File) WHERE id(c)=$idConference with f, rand() AS r ORDER BY r RETURN f LIMIT 1")
+    File findRandomCalendarImage( @Param("idConference") Long idConference);
 }

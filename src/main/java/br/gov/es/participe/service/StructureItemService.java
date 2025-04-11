@@ -42,7 +42,6 @@ public class StructureItemService {
         return structureItems;
     }
 
-    //@Transactional
     public StructureItem create(StructureItem structureItem) {
         loadAttributes(structureItem);
 
@@ -57,7 +56,6 @@ public class StructureItemService {
         }
     }
 
-    //@Transactional
     public StructureItem update(Long id, StructureItemDto structureItemDto) {
         StructureItem structureItem = find(id);
 
@@ -96,7 +94,7 @@ public class StructureItemService {
     	return structureItemRepository.findChild(idParent);
     }
 
-    @Transactional
+ 
     public void delete(Long id) {
         StructureItem structureItem = find(id);
 

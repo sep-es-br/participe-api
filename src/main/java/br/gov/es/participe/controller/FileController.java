@@ -46,7 +46,8 @@ public class FileController {
 
     @SuppressWarnings("rawtypes")
     @Transactional
-    @PostMapping("/upload")
+
+    @PostMapping(headers = { "Content-Type=multipart/form-data" }, value = "/upload")
     public ResponseEntity upload(
             @RequestHeader(name = "Authorization") String token,
             @RequestParam("file") MultipartFile file) throws IOException {
@@ -56,8 +57,9 @@ public class FileController {
         FileDto fileDto = fileService.save(file);
         return ResponseEntity.status(HttpStatus.OK).body(fileDto);
     }
-/* 
+ 
     @SuppressWarnings("rawtypes")
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity delete(
             @RequestHeader(name = "Authorization") String token,
@@ -68,5 +70,4 @@ public class FileController {
         fileService.delete(idLocalidade);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-*/
 }

@@ -69,7 +69,8 @@ public class StructureController {
         StructureDto response = new StructureDto(structureService.update(structureParamDto, id), true);
         return ResponseEntity.status(200).body(response);
     }
-/*
+
+    @Transactional
     @DeleteMapping("/{id}")
     @SuppressWarnings("rawtypes")
     public ResponseEntity destroy(
@@ -81,6 +82,6 @@ public class StructureController {
         structureService.delete(id);
         return ResponseEntity.status(200).build();
     }
-     */
+     
 
 }

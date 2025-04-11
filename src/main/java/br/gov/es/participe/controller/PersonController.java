@@ -11,6 +11,7 @@ import br.gov.es.participe.util.dto.MessageDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -42,6 +43,8 @@ public class PersonController {
     }
   }
 
+
+  @Transactional
   @PostMapping("/operator")
   @SuppressWarnings("rawtypes")
   public ResponseEntity operator(
@@ -83,6 +86,8 @@ public class PersonController {
         .body(personService.validate(email, cpf, SERVER));
   }
 
+
+  @Transactional
   @PostMapping
   @SuppressWarnings("rawtypes")
   public ResponseEntity store(
@@ -90,6 +95,8 @@ public class PersonController {
     return personService.storePerson(personParam, false);
   }
 
+
+  @Transactional
   @PostMapping("/complement")
   @SuppressWarnings("rawtypes")
   public ResponseEntity complement(
@@ -105,7 +112,8 @@ public class PersonController {
       SelfDeclaration self = new SelfDeclaration(personParam.getSelfDeclaration());
       Person person = personService.complement(
           new Person(personParam),
-          self);
+          self
+      );
 
       PersonDto response = new PersonDto(person);
       response.setSelfDeclaretion(new SelfDeclarationDto(self, false));
@@ -116,26 +124,22 @@ public class PersonController {
 
   }
 
-  /*
-   * @DeleteMapping("/delete/{id}")
-   * 
-   * @SuppressWarnings("rawtypes")
-   * public ResponseEntity destroy(
-   * 
-   * @RequestHeader(name = "Authorization") String token,
-   * 
-   * @PathVariable Long id) {
-   * 
-   * if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))
-   * {
-   * personService.delete(id);
-   * return ResponseEntity.status(200).build();
-   * } else {
-   * return ResponseEntity.status(401).body(null);
-   * }
-   * 
-   * }
-   */
+  @Transactional
+  @DeleteMapping("/delete/{id}")
+  @SuppressWarnings("rawtypes")
+  public ResponseEntity destroy(@RequestHeader(name = "Authorization") String token,@PathVariable Long id) {
+
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+      personService.delete(id);
+      return ResponseEntity.status(200).build();
+    }
+    else {
+      return ResponseEntity.status(401).body(null);
+    }
+
+  }
+
+  @Transactional
   @PutMapping("/{personId}")
   @SuppressWarnings("rawtypes")
   public ResponseEntity update(
@@ -152,6 +156,8 @@ public class PersonController {
     }
   }
 
+
+  @Transactional
   @PostMapping("/forgot-password")
   @SuppressWarnings("rawtypes")
   public ResponseEntity forgotPassword(@RequestBody ForgotPasswordDto forgotPassword) {
