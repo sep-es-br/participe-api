@@ -20,6 +20,7 @@ public class Evaluates extends Entity {
 
     private Boolean includedInNextYearLOA;
     private String reason;
+    private String reasonDetail;
     private String budgetUnitId;
     private String budgetUnitName;
     private String budgetActionId;
@@ -44,6 +45,7 @@ public class Evaluates extends Entity {
         this.budgetActionName = proposalEvaluationRequestDto.getBudgetActionName();
         this.budgetPlan = proposalEvaluationRequestDto.getBudgetPlan();
         this.reason = proposalEvaluationRequestDto.getReason();
+        this.reasonDetail = proposalEvaluationRequestDto.getReasonDetail();
         this.representing = proposalEvaluationRequestDto.getRepresenting();
     }
 
@@ -150,5 +152,14 @@ public class Evaluates extends Entity {
     public void setDate(Date date) {
         this.date = date;
     }
+    
+    public String getReasonDetail() {
+        return reasonDetail;
+    }
+
+    public void setReasonDetail(String reasonDetail) {
+        this.reasonDetail = reasonDetail;
+    }
+
 
 }

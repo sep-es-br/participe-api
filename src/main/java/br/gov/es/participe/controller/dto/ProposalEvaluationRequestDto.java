@@ -5,6 +5,7 @@ public class ProposalEvaluationRequestDto {
     private Long proposalId;
     private Boolean includedInNextYearLOA;
     private String reason;
+    private String reasonDetail;
     private String budgetUnitId;
     private String budgetUnitName;
     private String budgetActionId;
@@ -15,6 +16,7 @@ public class ProposalEvaluationRequestDto {
     public ProposalEvaluationRequestDto() {
 
     }
+
     
     public Long getPersonId() {
         return personId;
@@ -94,5 +96,13 @@ public class ProposalEvaluationRequestDto {
 
     public void setRepresenting(String representing) {
         this.representing = representing;
+    }
+
+    public String getReasonDetail() {
+        return reasonDetail;
+    }
+
+    public void setReasonDetail(String reasonDetail) {
+        this.reasonDetail = reasonDetail;
     }
 }

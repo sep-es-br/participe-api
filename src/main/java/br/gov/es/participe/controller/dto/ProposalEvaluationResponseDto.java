@@ -12,6 +12,7 @@ public class ProposalEvaluationResponseDto {
     private Long id;
     private Boolean includedInNextYearLOA;
     private String reason;
+    private String reasonDetail;
     private String budgetUnitId;
     private String budgetUnitName;
     private String budgetActionId;
@@ -35,6 +36,7 @@ public class ProposalEvaluationResponseDto {
             this.budgetPlan = evaluatesRelationship.getBudgetPlan();
         } else {
             this.reason = evaluatesRelationship.getReason();
+            this.reasonDetail = evaluatesRelationship.getReasonDetail();
         }
         this.representing = evaluatesRelationship.getRepresenting();
         this.date = formatDate(evaluatesRelationship.getDate());
@@ -125,6 +127,18 @@ public class ProposalEvaluationResponseDto {
         Instant instantDate = date.toInstant();
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instantDate, ZoneId.systemDefault());
         return localDateTime.format(formatter);
+    }
+
+
+
+    public String getReasonDetail() {
+        return reasonDetail;
+    }
+
+
+
+    public void setReasonDetail(String reasonDetail) {
+        this.reasonDetail = reasonDetail;
     }
 
 }
