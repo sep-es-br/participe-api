@@ -263,7 +263,15 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     )
     List<PersonMeetingFilteredDto> findPersonsOnMeetingWithCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name);
 
-
+  
+    @Query(
+        " MATCH (conf: Conference)<-[:OCCURS_IN]-(m:Meeting)<-[cia:CHECKED_IN_AT]-(p:Person) " +
+        " WHERE id(p) = $idPerson AND id(conf) = $idConference " +
+        " AND m.beginDate < $date AND m.endDate > $date " +
+        " RETURN p"
+    )
+    Optional<Person> findPersonIfParticipatingOnMeetingPresentially(@Param("idPerson")Long idPerson, @Param("date")Date date, @Param("idConference") Long idConference);
+  
     @Query(
         value = "MATCH (m:Meeting) " + 
             "WHERE id(m) = $idMeeting " +
@@ -364,13 +372,6 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     )
     List<PersonMeetingFilteredDto> findPersonsOnMeetingWithCheckInAndNoPreRegistration(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name);
 
-    @Query(
-        " MATCH (conf: Conference)<-[:OCCURS_IN]-(m:Meeting)<-[cia:CHECKED_IN_AT]-(p:Person) " +
-        " WHERE id(p) = $idPerson AND id(conf) = $idConference " +
-        " AND m.beginDate < $date AND m.endDate > $date " +
-        " RETURN p"
-    )
-    Optional<Person> findPersonIfParticipatingOnMeetingPresentially(@Param("idPerson")Long idPerson, @Param("date")Date date, @Param("idConference") Long idConference);
   
     @Query("MATCH(person:Person)-[authBy:IS_AUTHENTICATED_BY]->(authService:AuthService) " +
            "WHERE id(person) = $idPerson " +
