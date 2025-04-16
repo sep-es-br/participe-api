@@ -84,6 +84,19 @@ public class PreRegistrationController {
     }
 
     @Transactional
+    @PostMapping("accreditation")
+    public ResponseEntity<AccreditationDto> meetAccreditation(
+        @RequestBody AcreditationParamDto accreditationDto) throws WriterException, IOException, MessagingException {
+ 
+      Person person = personService.find(accreditationDto.getPersonId());
+      Meeting meeting = meetingService.find(accreditationDto.getMeetingId());
+      String persoIdString = "PersonId:" + person.getId().toString();
+      byte[] imageQR = qrCodeService.generateQRCode(persoIdString, 300, 300);
+
+      return ResponseEntity.status(200).body(new AccreditationDto(person, meeting, imageQR) );
+    }
+
+    @Transactional
     @PostMapping("check-in")
     public ResponseEntity<CheckedInAtDto> preRegistrationCheckin(
       @RequestBody CheckInPreRegistrationParamDto checkInPreRegistationDto){
@@ -94,6 +107,24 @@ public class PreRegistrationController {
         return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
       }
       return ResponseEntity.noContent().build();
+    }
+
+    @Transactional
+    @PostMapping("accreditation-check-in")
+    public ResponseEntity<CheckedInAtDto> accreditationCheckin(
+      @RequestBody AcreditationParamDto checkInAccreditationDto){
+      Person person = personService.find(checkInAccreditationDto.getPersonId());
+      Meeting meeting = meetingService.find(checkInAccreditationDto.getMeetingId()); 
+      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(person.getId(), meeting.getId(),null);
+      if (checkedInAt != null) {
+        return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
+      }
+      return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{meetingId}/{personId}") 
+    public ResponseEntity getPreRegistration( @PathVariable Long meetingId, @PathVariable Long personId) throws WriterException, IOException, MessagingException  { 
+      return ResponseEntity.ok().body(preRegistrationService.getPreRegistrationByMeetingAndPerson(meetingId, personId));
     }
 
 }

@@ -17,7 +17,8 @@ public class Comment extends Attend {
 	private String status;
 	private String classification;
 	private Boolean moderated;
-	
+	private Boolean duplicated;
+
 	@Relationship(type = "LIKED_BY")
 	private Set<Person> personLiked;
 	
@@ -41,6 +42,7 @@ public class Comment extends Attend {
 		this.setFrom(comment.getFrom());
 		setTime(new Date());
 		this.moderated = false;
+		this.duplicated = false;
 	}
 	
 	public Comment(CommentParamDto comment) {
@@ -138,4 +140,11 @@ public class Comment extends Attend {
 		this.proposalEvaluator = proposalEvaluator;
 	}
 
+	public Boolean getDuplicated() {
+		return duplicated;
+	}
+
+	public void setDuplicated(Boolean duplicated) {
+		this.duplicated = duplicated;
+	}
 }

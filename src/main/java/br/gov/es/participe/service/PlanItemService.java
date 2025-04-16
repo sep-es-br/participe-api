@@ -80,6 +80,10 @@ public class PlanItemService {
                 .findByIdWithLocalities(id)
                 .orElseThrow(() -> new IllegalArgumentException(PLAN_ITEM_NOT_FOUND + id));
     }
+
+    public PlanItem findByPlanItemChildren(Long idPlanItem, Long idLocality){
+        return planItemRepository.findByPlanItemChildren(idPlanItem,idLocality).orElseThrow(() -> new IllegalArgumentException(PLAN_ITEM_NOT_FOUND + idPlanItem));
+    }
     
     public List<PlanItem> findChildren(Long idPlanItem){
     	return planItemRepository.findChildren(idPlanItem);

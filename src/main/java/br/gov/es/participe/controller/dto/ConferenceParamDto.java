@@ -32,6 +32,7 @@ public class ConferenceParamDto {
   private String subtitleRegionalization;
   private FileDto fileParticipation;
   private FileDto fileAuthentication;
+  private FileDto fileFooter;
   private LocalityTypeDto localityType;
   private List<MeetingDto> meeting;
   private List<SelfDeclarationDto> selfDeclaration;
@@ -51,11 +52,12 @@ public class ConferenceParamDto {
   private boolean defaultServerConference;
   private Boolean showStatistics;
   private Boolean showCalendar;
-  private Boolean showStatisticsPanel ;
+  private Boolean showStatisticsPanel;
+  private Boolean showProposalsPanel;
   private Boolean showExternalLinks;
   private ResearchConfigurationParamDto researchConfiguration;
   private ConferenceColorDto customProperties;
-
+  private EvaluationConfigurationDto evaluationConfiguration;
 
   public ConferenceParamDto() {
   }
@@ -74,6 +76,7 @@ public class ConferenceParamDto {
     titleRegionalization = conferenceDto.getTitleRegionalization();
     subtitleRegionalization = conferenceDto.getSubtitleRegionalization();
     fileParticipation = conferenceDto.getFileParticipation();
+    fileFooter = conferenceDto.getFileFooter();
     fileAuthentication = conferenceDto.getFileAuthentication();
     localityType = conferenceDto.getLocalityType();
     meeting = conferenceDto.getMeeting();
@@ -94,9 +97,11 @@ public class ConferenceParamDto {
     showStatistics = conferenceDto.getShowStatistics();
     showCalendar = conferenceDto.getShowCalendar();
     showExternalLinks = conferenceDto.getShowExternalLinks();
-    showStatisticsPanel  = conferenceDto.getShowStatisticsPanel ();
+    showStatisticsPanel  = conferenceDto.getShowStatisticsPanel();
+    showProposalsPanel = conferenceDto.getShowProposalsPanel();
     researchConfiguration = new ResearchConfigurationParamDto(conferenceDto.getResearchConfiguration());
     customProperties = conferenceDto.getCustomProperties();
+    evaluationConfiguration = conferenceDto.getEvaluationConfiguration();
   }
 
   public List<SelfDeclarationDto> getSelfDeclaration() {
@@ -224,6 +229,14 @@ public class ConferenceParamDto {
     this.fileParticipation = fileParticipation;
   }
 
+  public FileDto getFileFooter() {
+    return fileFooter;
+  }
+
+  public void setFileFooter(FileDto fileFooter) {
+    this.fileFooter = fileFooter;
+  }
+  
   public FileDto getFileAuthentication() {
     return fileAuthentication;
   }
@@ -368,6 +381,14 @@ public class ConferenceParamDto {
     this.showStatisticsPanel  = showStatisticsPanel ;
   }
 
+  public Boolean getShowProposalsPanel() {
+    return showProposalsPanel;
+  }
+
+  public void setShowProposalsPanel(Boolean showProposalsPanel) {
+    this.showProposalsPanel = showProposalsPanel;
+  }
+
   public Boolean getShowExternalLinks() {
     return showExternalLinks;
   }
@@ -406,6 +427,14 @@ public class ConferenceParamDto {
 
   public void setCustomProperties(ConferenceColorDto customProperties) {
     this.customProperties = customProperties;
+  }
+
+  public EvaluationConfigurationDto getEvaluationConfiguration() {
+    return evaluationConfiguration;
+  }
+
+  public void setEvaluationConfiguration(EvaluationConfigurationDto evaluationConfiguration) {
+    this.evaluationConfiguration = evaluationConfiguration;
   }
 
 }

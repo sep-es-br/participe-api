@@ -38,6 +38,7 @@ public class ConferenceColorService {
         conferenceColor.setCardBorderColor(conferenceColorDto.getCardBorderColor());
         conferenceColor.setBorderColor(conferenceColorDto.getBorderColor());
         conferenceColor.setTypeBackgroundColor(conferenceColorDto.getTypeBackgroundColor());
+        conferenceColor.setCardLoginColor(conferenceColorDto.getCardLoginColor());
 
         conferenceColorRepository.save(conferenceColor);
     }

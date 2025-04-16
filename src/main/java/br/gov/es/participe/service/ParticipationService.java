@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,6 +58,59 @@ public class ParticipationService {
   private PersonService personService;
 
   private static final Logger log = LoggerFactory.getLogger(ParticipationService.class);
+
+  public BodyParticipationDto bodyChildren(Long idPlanItem,
+  Long idLocality,
+  Long idConference,
+  Long idPerson,
+  String text,
+  UriComponentsBuilder uriComponentsBuilder){
+    StructureItem structureItem = null;
+    
+    List<PlanItemDto> itens = new ArrayList<>();
+    
+    PlanItem planI = planItemService.findByPlanItemChildren(idPlanItem,idLocality);
+    Set<PlanItem> planItems = planI.getChildren();
+
+    if (planItems != null) {
+      itens.addAll(getListPlanItemDto(planItems, text, idPerson, idConference, idLocality));
+      if (!itens.isEmpty()) {
+        structureItem = structureItemService.findByIdPlanItem(itens.get(0).getId());
+      }
+    } else if (planI != null) {
+        structureItem = structureItemService.findChild(planI.getStructureItem().getId());
+    }
+
+    StructureItemDto structureItemDto = new StructureItemDto(structureItem, null, false, false);
+
+    structureItemDto.setParent(null);
+    structureItemDto.setLocality(null);
+    structureItemDto.setStructure(null);
+
+    LinkParentDto link = new LinkParentDto();
+
+    if (structureItem != null && structureItem.getLink() != null && planI != null) {
+      link.setIdParent(planI.getId());
+      link.setTextLink(structureItem.getLink());
+      structureItemDto.setLink(null);
+      structureItemDto.setParentLink(link);
+    }
+
+    String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
+    itens.forEach(item -> {
+      if (structureItemDto.getLogo() && item.getFile() != null && item.getFile().getId() != null) {
+        item.setImage(url + item.getFile().getId());
+        item.setFile(null);
+      }
+    });
+
+    BodyParticipationDto body = new BodyParticipationDto();
+    body.setItens(itens);
+    body.setStructureitem(structureItemDto);
+
+    return body;
+
+  }
 
   public BodyParticipationDto body(
       Long idPlanItem,
@@ -211,6 +266,31 @@ public class ParticipationService {
     }
 
     return header;
+  }
+
+  public Map<String, String> webHeaderImage(Long id, UriComponentsBuilder uriComponentsBuilder) {
+    Map<String, String> image = new HashMap<>();
+    Conference conference = conferenceService.find(id);
+
+    String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
+    if (conference.getFileParticipation() != null) {
+      image.put("image", url + conference.getFileParticipation().getId());
+    }
+
+    return image;
+  }
+
+  public Map<String, String> footerImage (Long id, UriComponentsBuilder uriComponentsBuilder) {
+    Map<String, String> footerImage = new HashMap<>();
+    
+    Conference conference = conferenceService.find(id);
+
+    String url = uriComponentsBuilder.path(FILES).build().toUri().toString();
+    if (conference.getFileFooter() != null) {
+      footerImage.put("footerImage", url + conference.getFileFooter().getId());
+    }
+
+    return footerImage;
   }
 
   public ConferenceDto getConferenceDto(Long id, UriComponentsBuilder uriComponentsBuilder) {

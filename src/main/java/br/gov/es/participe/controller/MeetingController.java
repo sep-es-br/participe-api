@@ -25,6 +25,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.springframework.http.ContentDisposition;
 /* Fim das importações */
 import javax.imageio.ImageIO;
@@ -38,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 
 
 @RestController
@@ -245,20 +248,31 @@ public class MeetingController {
 
   @ApiPageable
   @GetMapping("/{meetingId}/participants")
-  public ResponseEntity<Page<PersonMeetingDto>> findMeetingParticipants(@PathVariable Long meetingId,
+  public ResponseEntity<Page<PersonMeetingFilteredDto>> findMeetingParticipants(@PathVariable Long meetingId,
       @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
-      @RequestParam(name = "name", required = false) String name, @ApiIgnore Pageable page) {
-    Page<PersonMeetingDto> personMeetingDto = personService.findPersonsCheckedInOnMeeting(meetingId, localities,
-        name, page);
-    return ResponseEntity.ok().body(personMeetingDto);
+      @RequestParam(name = "name", required = false) String name, 
+      @RequestParam(name = "filter", required = true) String filter,
+      @ApiIgnore Pageable page) {
+
+      Page<PersonMeetingFilteredDto> personMeetingFilteredDto = personService.findPersonOnMeetingByAttendanceFilterPaged(meetingId, localities, name, filter, page);
+
+      return ResponseEntity.ok().body(personMeetingFilteredDto);
+    
   }
 
-  @GetMapping("/{meetingId}/participants/total")
-  public ResponseEntity<Long> findMeetingParticipantsNumber(@PathVariable Long meetingId) {
-    Long participantsQuantity = personService.findPeopleQuantityOnMeeting(meetingId);
-    return ResponseEntity.ok().body(participantsQuantity);
-  }
+  @GetMapping("/{meetingId}/total")
+  public ResponseEntity<Map<String, Long>> countTotalParticipantsInMeeting(
+          @PathVariable Long meetingId,
+          @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
+          @RequestParam(name = "name", required = false) String name,
+          @RequestParam(name = "filter", required = true) String filter
+  ) {
 
+    Map<String, Long> totalParticipants = personService.countTotalParticipantsInMeeting(meetingId, localities, name, filter);
+
+    return ResponseEntity.ok().body(totalParticipants);
+
+  }
   
   @Transactional
   @DeleteMapping("/{meetingId}/remove-participation/{personId}")
@@ -278,11 +292,12 @@ public class MeetingController {
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long meetingId,
       @RequestParam(name = "name", required = false, defaultValue = "") String name,
-      Pageable pageable) {
+      Pageable pageable,
+      HttpSession session) {
     if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
       return ResponseEntity.status(401).body(null);
     }
-    Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable);
+    Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable, session);
     return ResponseEntity.status(200).body(personMeetingDtoPage);
   }
 
@@ -316,5 +331,20 @@ public class MeetingController {
     return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageQR);
     
   }
+
+  @GetMapping("/{meetingId}/self-check-in")
+  public ResponseEntity<Boolean> selfCheckInOpen(@PathVariable Long meetingId) {
+
+        return ResponseEntity.ok(meetingService.selfCheckInIsOpen(meetingId));
+
+  }
+
+  @GetMapping("/{meetingId}/pre-registration")
+  public ResponseEntity<Map<String, Boolean>> preRegistrationOpen(@PathVariable Long meetingId) {
+
+    return ResponseEntity.ok(meetingService.preRegistrationIsOpenAndMeetingStarted(meetingId));
+
+  }
+  
   
 }

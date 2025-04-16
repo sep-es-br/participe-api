@@ -14,17 +14,22 @@ public interface PlanItemRepository extends Neo4jRepository<PlanItem, Long> {
        @Query("MATCH (pi:PlanItem) WHERE pi.name CONTAINS ($name) RETURN pi")
        List<PlanItem> search( @Param("name") String name);
      
-       @Query("MATCH (con:Conference)-[trg:TARGETS]->(plan:Plan)-[ob:OBEYS]->(stt:Structure)<-[comp:COMPOSES]-(si:StructureItem)"
-              + "WHERE id(con)=$id "
-              + "OPTIONAL MATCH list=(plan)<-[comp2:COMPOSES]-(pi2:PlanItem) "
-              + "WITH con, trg, ob, stt, comp, si, plan, comp2, pi2 "
-              + "order by pi2.name asc "
-              + "RETURN id(con) AS conferenceId, con.description AS conferenceDescription, "
-              + "id(si) AS structureItemId, si.name AS structureItemName, "
-              + "collect({planItemId: id(pi2), planItemName: pi2.name}) AS planItems"
+       @Query("MATCH (con:Conference)-[trg:TARGETS]->(plan:Plan)-[ob:OBEYS]->(stt:Structure)<-[comp:COMPOSES]-(si2:StructureItem)<-[comp2:COMPOSES]-(si:StructureItem) "
+              + "WHERE id(con) =$id "
+              + "OPTIONAL MATCH (plan)<-[comp3:COMPOSES]-(pi:PlanItem) "
+              + "OPTIONAL MATCH (pi)<-[comp4:COMPOSES]-(pi2:PlanItem) "
+              + "WITH con, trg, ob, stt, comp, si, si2, plan, pi, collect({planItemId: id(pi2), planItemName: pi2.name}) AS planitemsChildren "
+              + "ORDER BY pi.name ASC "
+              + "RETURN id(con) AS conferenceId, "
+              + "con.description AS conferenceDescription, "
+              + "id(si2) AS structureItemId, "
+              + "si2.name AS structureItemName, "
+              + "id(si) AS structureItemChildrenId, "
+              + "si.name AS structureItemChildrenName, "
+              + "collect({planItemId: id(pi), planItemName: pi.name, planitemsChildren: planitemsChildren}) AS planItems"
        )
        LeanPlanItemResultDto findByConferenceIdWithDto( @Param("id") Long id);
-      
+
        @Query("MATCH(con:Conference)-[is:IS_SEGMENTABLE_BY]->(si:StructureItem)<-[ob:OBEYS]-(pi:PlanItem) WHERE id(con) = $idConference RETURN pi")
        List<PlanItem> findByIdConference( @Param("idConference") Long idConference);
      
@@ -34,6 +39,14 @@ public interface PlanItemRepository extends Neo4jRepository<PlanItem, Long> {
               + " [(pi)<-[com:COMPOSES*]-(child:PlanItem) | [com, child]],"
               + " [(child)<-[apt2:APPLIES_TO]-(l2:Locality) | [apt2, l2]]" + "]")
        Optional<PlanItem> findByIdWithLocalities( @Param("id") Long id);
+
+       @Query("MATCH (p:PlanItem)<-[com:COMPOSES*]-(child:PlanItem) " + 
+              " WHERE id(p) = $idPlanItem " + 
+              " AND ( NOT EXISTS {" + 
+              "  MATCH (child)<-[apt:APPLIES_TO]-(l:Locality)" + 
+              " } OR  EXISTS { MATCH (child)<-[apt]-(l) WHERE id(l)=$idLocality  }   )" + 
+              " RETURN p, [ child, com, [(pi)-[o1:OBEYS]->(s1:StructureItem) where id(pi)=$idPlanItem | [ o1, s1 ]] ]")
+       Optional<PlanItem> findByPlanItemChildren(@Param("idPlanItem") Long idPlanItem, @Param("idLocality") Long idLocality);
      
        @Query("MATCH(p:Plan)<-[co:COMPOSES]-(pi:PlanItem) " +
               "WHERE id(p)=$idPlan " +

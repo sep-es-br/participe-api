@@ -1,67 +1,65 @@
 package br.gov.es.participe.service;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
-import java.util.Optional;
-import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import br.gov.es.participe.controller.dto.BudgetOptionsDto;
+import br.gov.es.participe.controller.dto.DomainConfigurationDto;
+import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
+import br.gov.es.participe.controller.dto.LocalityInfoDto;
+import br.gov.es.participe.controller.dto.PlanItemComboDto;
+import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationDto;
-import br.gov.es.participe.model.Comment;
-import br.gov.es.participe.model.PlanItem;
-import br.gov.es.participe.model.ProposalEvaluation;
-import br.gov.es.participe.repository.CommentRepository;
-import br.gov.es.participe.repository.PlanItemRepository;
-import br.gov.es.participe.repository.ProposalEvaluationRepository;
+import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
+import br.gov.es.participe.controller.dto.ProposalEvaluationResponseDto;
 
-@Service
-public class ProposalEvaluationService {
-    
+public interface ProposalEvaluationServiceInterface {
 
-    @Autowired
-    private ProposalEvaluationRepository propEvalRepository;
+    String checkIsPersonEvaluator(Long personId);
 
-    @Autowired
-    private CommentRepository commentRepository;
+    Page<ProposalEvaluationCommentResultDto> findAllCommentsForEvaluation(
+        Boolean evaluationStatus, 
+        Long localityId, 
+        Long planItemAreaId, 
+        Long planItemId,
+        List<String> organizationGuid, 
+        Boolean loaIncluded, 
+        String commentText, 
+        Long conferenceId, 
+        Pageable pageable
+    );
 
-    @Autowired
-    private PlanItemRepository planItemRepository;
+    ProposalEvaluationResponseDto getProposalEvaluationData(Long proposalId, String guid);
 
-    private final static Logger log = LoggerFactory.getLogger(ProposalEvaluationService.class);
+    ProposalEvaluationResponseDto createProposalEvaluation(ProposalEvaluationRequestDto proposalEvaluationRequestDto);
 
-    // public ProposalEvaluation createProposalEvaluationFromComment(Comment comment) {
+    void deleteProposalEvaluation(ProposalEvaluationRequestDto proposalEvaluationRequestDto);
 
-    //     Boolean existsByCommentId = propEvalRepository.existsByCommentId(comment.getId());
+    List<LocalityInfoDto> getLocalityOptionsByConferenceId(Long conferenceId);
 
-    //     if(existsByCommentId == true){
-    //         return null;
-    //     }
+    List<PlanItemComboDto> getPlanItemOptionsByConferenceId(Long conferenceId);
 
-    //     ProposalEvaluation proposalEvaluation = new ProposalEvaluation(comment);
+    List<PlanItemComboDto> getPlanItemAreaOptionsByConferenceId(Long conferenceId);
 
-    //     Optional<PlanItem> planItemArea = planItemRepository.findFatherPlanItem(comment.getPlanItem().getId());
+    Boolean checkIsCommentEvaluated(Long commentId);
 
-    //     if(planItemArea.isPresent() == true){
-    //         proposalEvaluation.setPlanItemArea(planItemArea.get());
-    //     }
+    List<BudgetOptionsDto> fetchDataFromPentahoAPI();
 
-    //     propEvalRepository.save(proposalEvaluation);
+    DomainConfigurationDto getDomainConfiguration(Long conferenceId);
 
-    //     return proposalEvaluation;
-    // }
+    ByteArrayInputStream jasperXlsx(
+        Boolean evaluationStatus,
+        Long localityId,
+        Long planItemAreaId,
+        Long planItemId,
+        List<String> organizationGuid,
+        Boolean loaIncluded,
+        String commentText,
+        Long conferenceId
+    );
 
-    public List<ProposalEvaluationDto> listProposalEvaluationsByConferenceId(Long conferenceId) {
-
-        List<ProposalEvaluationDto> proposalEvaluationList = propEvalRepository.findAllByConferenceId(conferenceId);
-
-        // List<ProposalEvaluationDto> proposalEvaluationList = new ArrayList<ProposalEvaluationDto>();
-
-        // proposalEvaluationResultList.forEach((propEval) -> proposalEvaluationList.add(new ProposalEvaluationDto(propEval)));
-
-        return proposalEvaluationList;
-
-    }
+    List<ProposalEvaluationDto> listProposalEvaluationsByConferenceId(Long conferenceId);
 }

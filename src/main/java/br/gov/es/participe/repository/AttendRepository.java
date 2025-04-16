@@ -87,7 +87,6 @@ Integer countLocalityByConferenceAndType(@Param("idConference")Long idConference
       + " OPTIONAL MATCH (at)-[al:ABOUT]->(loc:Locality)-[ot:OF_TYPE]->(lt:LocalityType) "
       + " WITH at, ap, al, loc, ot, lt, pi, p, conf "
       + " WHERE id(p)=$idPerson AND id(conf) = $idConference "
-      + " AND (at.status IS NULL OR NOT at.status IN ['rem', 'arq']) "
       + " OPTIONAL MATCH (pi)-[comp:COMPOSES*]->(pi2:PlanItem) "
       + " WITH p,at,conf,pi,loc,lt,pi2 "
       + " WHERE ($text IS NULL OR (at.text IS NOT NULL AND at.text CONTAINS ($text)) "
@@ -104,7 +103,6 @@ Integer countLocalityByConferenceAndType(@Param("idConference")Long idConference
           + " OPTIONAL MATCH (at)-[al:ABOUT]->(loc:Locality)-[ot:OF_TYPE]->(lt:LocalityType) "
           + " WITH at, ap, al, loc, ot, lt, pi, p, conf "
           + " WHERE id(p)=$idPerson AND id(conf) = $idConference "
-          + " AND (at.status IS NULL OR NOT at.status IN ['rem', 'arq']) "
 
           + " OPTIONAL MATCH (pi)-[comp:COMPOSES*]->(pi2:PlanItem) "
           + " WITH p,at,conf,pi,loc,lt,pi2 "

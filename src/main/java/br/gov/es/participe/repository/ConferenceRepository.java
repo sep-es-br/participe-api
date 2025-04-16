@@ -31,7 +31,7 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         + " WHERE NOT $active OR (datetime(n.beginDate) <= datetime($date) "
                         + " AND datetime(n.endDate) >= datetime($date)) "
                         + " RETURN n, [(n)-[md:MODERATORS]->(p:Person) |[n, md, p] ] "
-                        + " ORDER BY n.beginDate")
+                        + " ORDER BY n.beginDate desc")
         Collection<Conference> findAllActives( @Param("date") Date date,  @Param("active") Boolean active);
 
         Conference findByNameIgnoreCase( @Param("name") String name);
@@ -84,6 +84,7 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         "  [ (n)<-[r_c1: CONFERENCE_COLOR]-(c1: ConferenceColor ) | [ r_c1, c1 ] ]  "+
                         ", [(n)-[r_f1: FEATURES_PARTICIPATION_IMAGE ]->(f1: File ) | [ r_f1, f1 ] ]" +
                         ", [ (n)-[r_f1: FEATURES_AUTHENTICATION_IMAGE ]->(f1: File ) | [ r_f1, f1 ] ]" +
+                        ", [(n)-[r_f1: FEATURES_FOOTER_IMAGE ]->(f1: File ) | [ r_f1, f1 ] ]" +
                         ", [ (n)<-[r_f2: IS_BACKGROUND_IMAGE_OF ]-(f2: File ) | [ r_f2, f2 ] ]" +
                         ", [ (n)<-[r_f3: IS_CALENDAR_IMAGE_OF ]-(f3: File ) | [ r_f3, f3 ] ]" +
                         ", [ (n)-[resea: APPLIES_TO ]-(research: Research) | [ resea, research ] ]" +

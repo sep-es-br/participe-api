@@ -48,6 +48,7 @@ public class Conference extends Entity implements Serializable {
   private Boolean showStatistics;
   private Boolean showCalendar;
   private Boolean showStatisticsPanel;
+  private Boolean showProposalsPanel;
   private Boolean showExternalLinks;
 
   @Relationship(type = "TARGETS")
@@ -55,6 +56,9 @@ public class Conference extends Entity implements Serializable {
 
   @Relationship(type = "FEATURES_PARTICIPATION_IMAGE")
   private File fileParticipation;
+
+  @Relationship(type = "FEATURES_FOOTER_IMAGE")
+  private File fileFooter;
 
   @Relationship(type = "FEATURES_AUTHENTICATION_IMAGE")
   private File fileAuthentication;
@@ -76,6 +80,9 @@ public class Conference extends Entity implements Serializable {
 
   @Relationship(type = "APPLIES_TO")
   private Research research;
+
+  @Relationship(type = "APPLIES_TO")
+  private Evaluation evaluation;
 
   @Relationship(type = "OCCURS_IN", direction = Relationship.INCOMING)
   private Set<Meeting> meeting;
@@ -118,6 +125,10 @@ public class Conference extends Entity implements Serializable {
 
     if(conferenceDto.getFileParticipation() != null && conferenceDto.getFileParticipation().getId() != null) {
       this.fileParticipation = new File(conferenceDto.getFileParticipation());
+    }
+
+    if(conferenceDto.getFileFooter() != null && conferenceDto.getFileFooter().getId() != null) {
+      this.fileFooter = new File(conferenceDto.getFileFooter());
     }
 
     if(conferenceDto.getFileAuthentication() != null && conferenceDto.getFileAuthentication().getId() != null) {
@@ -168,6 +179,11 @@ public class Conference extends Entity implements Serializable {
     if(conferenceParamDto.getFileParticipation() != null
        && conferenceParamDto.getFileParticipation().getId() != null) {
       this.fileParticipation = new File(conferenceParamDto.getFileParticipation());
+    }
+
+    if(conferenceParamDto.getFileFooter() != null
+       && conferenceParamDto.getFileFooter().getId() != null) {
+      this.fileFooter = new File(conferenceParamDto.getFileFooter());
     }
 
     if(conferenceParamDto.getFileAuthentication() != null
@@ -224,6 +240,7 @@ public class Conference extends Entity implements Serializable {
     this.showStatistics = conferenceParamDto.getShowStatistics();
     this.showCalendar = conferenceParamDto.getShowCalendar();
     this.showStatisticsPanel  = conferenceParamDto.getShowStatisticsPanel();
+    this.showProposalsPanel = conferenceParamDto.getShowProposalsPanel();
     this.showExternalLinks = conferenceParamDto.getShowExternalLinks();
 
     this.updateDisplayMode();
@@ -262,6 +279,15 @@ public class Conference extends Entity implements Serializable {
   public void setShowStatisticsPanel (Boolean showStatisticsPanel ) {
     this.showStatisticsPanel  = showStatisticsPanel ;
   }
+
+  public Boolean getShowProposalsPanel() {
+    return showProposalsPanel;
+  }
+
+  public void setShowProposalsPanel(Boolean showProposalsPanel) {
+    this.showProposalsPanel = showProposalsPanel;
+  }
+
 
   public Boolean getShowExternalLinks() {
     return showExternalLinks;
@@ -407,6 +433,14 @@ public class Conference extends Entity implements Serializable {
 
   public void setFileAuthentication(File fileAuthentication) {
     this.fileAuthentication = fileAuthentication;
+  }
+
+  public File getFileFooter() {
+    return fileFooter;
+  }
+
+  public void setFileFooter(File fileFooter) {
+    this.fileFooter = fileFooter;
   }
 
   public LocalityType getLocalityType() {
@@ -569,5 +603,13 @@ public class Conference extends Entity implements Serializable {
 
   public void setResearch(Research research) {
     this.research = research;
+  }
+
+  public Evaluation getEvaluation() {
+    return evaluation;
+  }
+
+  public void setEvaluation(Evaluation evaluation) {
+    this.evaluation = evaluation;
   }
 }

@@ -12,6 +12,7 @@ import br.gov.es.participe.util.domain.TokenType;
 import br.gov.es.participe.model.CheckedInAt;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -62,6 +63,27 @@ public class ParticipationController {
     return ResponseEntity.status(200).body(participations);
   }
 
+  @GetMapping("/plan-item-children/{idConference}")
+  public ResponseEntity<BodyParticipationDto> getBodyChildren(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestParam(name = "text", required = false, defaultValue = "") String text,
+      @RequestParam(name = "idLocality", required = false) Long idLocality,
+      @RequestParam(name = "idPlanItem", required = false) Long idPlanItem,
+      @PathVariable Long idConference,
+      UriComponentsBuilder uriComponentsBuilder
+  ) {
+    String[] keys = token.split(" ");
+    Long idPerson = tokenService.getPersonId(keys[1], TokenType.AUTHENTICATION);
+
+    BodyParticipationDto body = participationService.bodyChildren(idPlanItem, idLocality, idConference, idPerson, text, uriComponentsBuilder);
+
+    if (body.getItens() != null) {
+      body.getItens().sort((i1, i2) -> i1.getName().trim().compareToIgnoreCase(i2.getName().trim()));
+    }
+
+    return ResponseEntity.status(200).body(body);
+  }
+
   @GetMapping("/plan-item/{idConference}")
   public ResponseEntity<BodyParticipationDto> getBody(
       @RequestHeader(name = "Authorization") String token,
@@ -93,6 +115,22 @@ public class ParticipationController {
     PortalHeader header = participationService.header(idPerson, idConference, uriComponentsBuilder);
     return ResponseEntity.status(200).body(header);
   }
+
+  @GetMapping("/web-header/{idConference}")
+  public ResponseEntity<Map<String,String>> getWebHeader(@PathVariable Long idConference
+      , UriComponentsBuilder uriComponentsBuilder) {
+        Map<String,String> image = participationService.webHeaderImage(idConference, uriComponentsBuilder);
+    return ResponseEntity.status(200).body(image);
+  }
+
+  @GetMapping("/portal-footer-image/{idConference}")
+  public ResponseEntity<Map<String, String>> getfooterImage(@RequestHeader(name = "Authorization") String token
+      , @PathVariable Long idConference
+      , UriComponentsBuilder uriComponentsBuilder) {
+    Map<String, String> footerImage = participationService.footerImage(idConference, uriComponentsBuilder); 
+    return ResponseEntity.ok(footerImage);
+  }
+
  
 
   @Transactional
