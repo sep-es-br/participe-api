@@ -122,8 +122,15 @@ public class CommentService {
       proposal.setCommentid(comment.getId());
       proposal.setComment(comment.getText());
       if (comment.getLocality() != null) {
-        proposal.setLocalityName(comment.getLocality().getName());
-        proposal.setLocalityTypeName(comment.getLocality().getType().getName());
+        if(comment.getLocality().getParents() != null && !comment.getLocality().getParents().isEmpty()) {
+            proposal.setLocalityMicro(comment.getLocality().getParents().iterator().next().getName());
+            proposal.setLocalityName(comment.getLocality().getName());
+            proposal.setLocalityTypeName(comment.getLocality().getType().getName());
+        } else {
+            proposal.setLocalityMicro(comment.getLocality().getName());
+            proposal.setLocalityTypeName(comment.getLocality().getType().getName());
+            proposal.setLocalityName("Toda Microrregião");
+        }
       }
       PlanItem planItem = getPlanItemDto(plan.getItems(), comment.getPlanItem().getId());
       listPlanItem(planItem, itens);
