@@ -1,0 +1,13 @@
+{
+  "reportName": {
+    "pt": "Relatório de Audiência Pública",
+    "en": "Public Hearing Report"
+  },
+  "mainReport": "ProposeReport_main",
+  "params": [
+    {
+      "paramLabel": "Ano da Audiência",
+      "paramName": "ID_CONFERENCE"
+    }
+  ]
+}

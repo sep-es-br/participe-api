@@ -5,7 +5,6 @@
 package br.gov.es.participe.service;
 
 import Report.ReportConfig;
-import br.gov.es.participe.util.domain.report.RootFolderRepositoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,6 +20,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -49,6 +51,7 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.SimpleJasperReportsContext;
 import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.engine.util.JRSaver;
 import net.sf.jasperreports.repo.RepositoryService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +59,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 /**
@@ -65,9 +69,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportService {
         
-    @Value("${report.proposeReportFolder}")
-    private String proposeReportFolder;
-    
     
     @Value("${spring.data.neo4j.uri}")
     private String urlConnection;
@@ -77,62 +78,34 @@ public class ReportService {
 
     @Value("${spring.data.neo4j.password}")
     private String passwordNeo4j;
+    
+    @Autowired
+    private ResourcePatternResolver resourceResolver;
 
     
     public Resource generateProposeReport(int idConference) {
         
         try {
-            File reportFolder = new File(proposeReportFolder);
-            
-            File reportConfigFile = new File(reportFolder, "reportConfig.json");
-            ReportConfig reportConfig;
-            try (FileInputStream fis = new FileInputStream(reportConfigFile)) {
-                reportConfig = new ObjectMapper().readValue(
-                    fis,
-                    ReportConfig.class);
-            }
-            
+            Path tempDir = Files.createTempDirectory("ProposeReport_");
+            Path tempImgDir = tempDir.resolve("imgs");
+            Files.createDirectory(tempImgDir);
                         
+            Resource[] imgResources = resourceResolver.getResources("classpath:/jasper/ProposeReport/imgs/*");
+            
+            for(Resource resource : imgResources) {
+                try (InputStream is = resource.getInputStream()) {
+                    Files.copy(is, tempImgDir.resolve(resource.getFilename()), StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+                
             ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             
             List<Callable<Void>> taskList = new ArrayList<>();
-                        
-            for (File fileJrxml : Arrays.stream(reportFolder.listFiles())
-                                            .filter(file -> file.getName().endsWith(".jrxml") || file.getName().endsWith(".jxml") )
-                                            .collect(Collectors.toList())) {
-                
-                final String reportName = fileJrxml.getName().split("\\.")[0];
-                final File outFile = new File(reportFolder, reportName + ".jasper");
-                
-                final String hash;
-                try (FileInputStream fis = new FileInputStream(fileJrxml)) {
-                    hash = DigestUtils.sha256Hex(fis);
-                }
-                final File hashFile = new File(reportFolder, reportName + ".hash");
-                if(
-                    !outFile.exists() ||
-                    !hashFile.exists() ||
-                    !hash.equals(Files.readString(hashFile.toPath()))
-                ){
-                    taskList.add(() -> {
-                        
-                        try (
-                            FileInputStream fileIs = new FileInputStream(fileJrxml);
-                            FileOutputStream fileOs = new FileOutputStream(outFile)
-                        ) {
-                            JasperCompileManager.compileReportToStream(fileIs, fileOs);
-
-                            Files.writeString(hashFile.toPath(), hash, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-                        } catch (JRException | IOException ex){
-                            throw new RuntimeException(fileJrxml.getName() + ": " + ex.getLocalizedMessage(), ex);
-                        }
-                        
-                        return null;
-
-                    });
-                }
-                    
-                   
+            
+            Resource[] jrxmlResources = resourceResolver.getResources("classpath:/jasper/ProposeReport/*.jrxml");
+            
+            for(Resource resource : jrxmlResources) {
+                taskList.add(createJasperCompileTask(resource, tempDir));
             }
             
             try {
@@ -156,25 +129,20 @@ public class ReportService {
             this.userName,
             this.passwordNeo4j);
             
-            File reportMain = new File(proposeReportFolder + "/" + reportConfig.getMainReport() + ".jasper");
-            RootFolderRepositoryService repositoryService = new RootFolderRepositoryService(reportFolder);
             
-            SimpleJasperReportsContext ctx = new SimpleJasperReportsContext();
+            JasperReport report = (JasperReport) JRLoader.loadObject(tempDir.resolve("ProposeReport_main.jasper").toFile());
             
-            ctx.setExtensions(RepositoryService.class, Collections.singletonList(repositoryService));
-            
-            
-            JasperReport report = (JasperReport) JRLoader.loadObject(ctx, reportMain);
             
             Map<String, Object> params = new HashMap<>();
             params.put("ID_CONFERENCE", idConference);
             params.put("REPORT_CONNECTION", connection);
-            params.put("ROOT", proposeReportFolder);
+            params.put("ROOT", tempDir.toFile().getAbsolutePath());
             
             JasperPrint print = JasperFillManager.fillReport(
                 report, 
                 params, connection);
 
+            
             try (ByteArrayInputStream pdfIs = new ByteArrayInputStream(
                     JasperExportManager.exportReportToPdf(print)
             )) {
@@ -183,8 +151,31 @@ public class ReportService {
             
 
         } catch (JRException | SQLException | IOException e) {
+            
             throw new RuntimeException("Erro ao gerar Relatório", e);
         }
         
     }
+    
+    private Callable<Void> createJasperCompileTask(Resource jrxmlResource, Path tempDir){
+        return () -> {
+                
+            try(InputStream is = jrxmlResource.getInputStream()){
+                JasperReport jasperReport = JasperCompileManager.compileReport(is);
+
+                File jasperFile = tempDir.resolve(jrxmlResource.getFilename().replace(".jrxml", ".jasper")).toFile();
+                try (FileOutputStream fos = new FileOutputStream(jasperFile)) {
+                    JRSaver.saveObject(jasperReport, fos);
+                }
+            } catch (IOException | JRException ex) {
+                Logger.getGlobal().log(Level.SEVERE, jrxmlResource.getFilename() + ": " + ex.getLocalizedMessage(), ex);
+                throw new RuntimeException(ex);
+            }
+
+            return null;
+
+        };
+    }
+    
+    
 }

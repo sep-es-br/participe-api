@@ -1,0 +1,199 @@
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposeReport_general_results" language="java" columnCount="1" pageWidth="595" pageHeight="842" orientation="Landscape" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="0" uuid="9f099519-9274-4c19-ab17-bf237d267d8d">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="128"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="865"/>
+	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
+	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
+		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
+	</parameter>
+	<query language="SQL"><![CDATA[CALL {
+  CALL {
+    MATCH (p:Person)<-[:MADE_BY]-(h:Highlight)-[:ABOUT]->(co:Conference)
+    WHERE id(co) =  47114
+    RETURN p, co
+    UNION
+    MATCH (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)
+    WHERE id(co) =  47114
+    RETURN p, co
+	} WITH p
+	RETURN COUNT(DISTINCT p) AS remoteParticipation
+} 
+CALL {
+  match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person)
+  where   id(co) = 47114
+	return count(DISTINCT p) as presentialParticipation
+}
+CALL {
+	CALL {
+	    MATCH (p:Person)<-[:MADE_BY]-(h:Highlight)-[:ABOUT]->(co:Conference)
+	    WHERE id(co) = 47114
+	    RETURN p, co
+	
+	    UNION
+	
+	    MATCH (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)
+	    WHERE id(co) = 47114
+	    RETURN p, co
+	
+	    UNION
+	
+	    match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person)
+		where   id(co) = 47114
+		return p, co
+	} WITH p, co
+	MATCH (p)-[:MADE]->(sf:SelfDeclaration)-[:AS_BEING_FROM]->(loc:Locality),
+	    (sf)-[:TO]->(co)
+	RETURN count(DISTINCT loc) AS citiesParticipation
+}
+CALL {
+    MATCH (co:Conference)<-[a:ABOUT]-(comment:Comment)
+    WHERE id(co)= 47114  AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
+  	RETURN count(comment) AS consolidatedProposals
+}
+CALL {
+    MATCH (co:Conference)-[a:ABOUT]-(comment:Comment)-[:MADE_BY]->(:Person)
+    WHERE id(co)= 47114 AND comment.status IN  ['pub', 'arq']
+  	RETURN count(comment) AS registeredProposals
+}
+CALL {
+    MATCH (co:Conference)<-[a:ABOUT]-(comment:Comment)<-[e:EVALUATES]-(:Person)
+    WHERE id(co)= 47114  AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
+        AND e.includedInNextYearLOA AND e.active
+  	RETURN count(comment) AS includedProposals
+}
+RETURN remoteParticipation, presentialParticipation, citiesParticipation, consolidatedProposals, registeredProposals, includedProposals]]></query>
+	<field name="remoteParticipation" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="remoteParticipation"/>
+		<property name="com.jaspersoft.studio.field.label" value="remoteParticipation"/>
+	</field>
+	<field name="presentialParticipation" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="presentialParticipation"/>
+		<property name="com.jaspersoft.studio.field.label" value="presentialParticipation"/>
+	</field>
+	<field name="citiesParticipation" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="citiesParticipation"/>
+		<property name="com.jaspersoft.studio.field.label" value="citiesParticipation"/>
+	</field>
+	<field name="consolidatedProposals" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="consolidatedProposals"/>
+		<property name="com.jaspersoft.studio.field.label" value="consolidatedProposals"/>
+	</field>
+	<field name="registeredProposals" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="registeredProposals"/>
+		<property name="com.jaspersoft.studio.field.label" value="registeredProposals"/>
+	</field>
+	<field name="includedProposals" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="includedProposals"/>
+		<property name="com.jaspersoft.studio.field.label" value="includedProposals"/>
+	</field>
+	<background splitType="Stretch"/>
+	<title height="67">
+		<element kind="image" uuid="c6763e1e-acdd-444b-982c-41e18b9fee22" x="-20" y="-30" width="595" height="90">
+			<expression><![CDATA[$P{ROOT} + "/imgs/CabeçalhoResultadoGeral.png"]]></expression>
+		</element>
+		<element kind="staticText" uuid="4734b99c-59e5-43af-a94e-37846ce07240" x="10" y="-10" width="540" height="30" forecolor="#CC72C2" fontSize="22.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[RESULTADO GERAL]]></text>
+		</element>
+		<element kind="staticText" uuid="ba738e82-8966-4597-8bcf-0720d0cc17d0" x="10" y="15" width="540" height="30" forecolor="#FFFFFF" fontSize="12.0" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Participações totais computadas no site <orçamento.es.gov.br>]]></text>
+		</element>
+	</title>
+	<summary height="650" splitType="Stretch">
+		<element kind="rectangle" uuid="7ccba7ba-d708-4755-a7ca-e430a05c32cd" x="3" y="90" width="170" height="187" forecolor="#CC72C2" backcolor="rgba(255, 255, 255, 0.0)" radius="10">
+			<pen lineWidth="4.0"/>
+		</element>
+		<element kind="rectangle" uuid="e65eda54-7170-434e-96dd-5b1b143c2ad1" x="192" y="277" width="170" height="188" forecolor="#CC72C2" backcolor="rgba(255, 255, 255, 0.0)" radius="10">
+			<pen lineWidth="4.0"/>
+		</element>
+		<element kind="rectangle" uuid="45ce4d63-aef5-4fc1-8829-9f5956879313" x="381" y="90" width="170" height="187" forecolor="#CC72C2" backcolor="rgba(255, 255, 255, 0.0)" radius="10">
+			<pen lineWidth="4.0"/>
+		</element>
+		<element kind="rectangle" uuid="b9bd2197-06bd-4659-84d3-c00d4df74b42" x="381" y="465" width="170" height="185" forecolor="#CC72C2" backcolor="rgba(255, 255, 255, 0.0)" radius="10">
+			<pen lineWidth="4.0"/>
+		</element>
+		<element kind="rectangle" uuid="78c2bd9d-00eb-4bef-ba9b-e0ac57c50156" x="0" y="465" width="170" height="185" forecolor="#CC72C2" backcolor="rgba(255, 255, 255, 0.0)" radius="10">
+			<pen lineWidth="4.0"/>
+		</element>
+		<element kind="staticText" uuid="dcb07773-738f-4701-949b-006de0f6ba87" x="13" y="127" width="150" height="56" forecolor="#CC72C2" fontSize="16.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[Participantes
+Online]]></text>
+		</element>
+		<element kind="staticText" uuid="4272fa5a-d0d8-4fab-aca2-8744ab3a892c" x="391" y="127" width="150" height="56" forecolor="#CC72C2" fontSize="16.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[Participantes
+Presenciais]]></text>
+		</element>
+		<element kind="staticText" uuid="6ed3bd5b-eac0-45cc-9556-55cb556d1327" x="391" y="500" width="150" height="70" forecolor="#CC72C2" fontSize="16.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[Propostas
+Incorporadas ao
+Orçamento]]></text>
+		</element>
+		<element kind="staticText" uuid="cd5a8133-cf6b-4259-9f23-351f43e6fa41" x="10" y="500" width="150" height="56" forecolor="#CC72C2" fontSize="16.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[Propostas
+Consolidadas]]></text>
+		</element>
+		<element kind="staticText" uuid="2d78d3f6-4f64-4db7-8c05-3e97a02ef9ac" x="54" y="610" width="130" height="30" forecolor="#CC72C2" fontSize="10.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
+			<text><![CDATA[ propostas registradas]]></text>
+		</element>
+		<element kind="textField" uuid="1ce349fe-0caf-4e5f-9a45-81f9a9a7452a" x="-46" y="611" width="100" height="30" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA["*" + $F{registeredProposals}]]></expression>
+		</element>
+		<element kind="staticText" uuid="c298ce16-4721-4e7d-9656-1b147f417a3c" x="202" y="315" width="150" height="56" forecolor="#CC72C2" fontSize="16.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[Municípios
+Participantes]]></text>
+		</element>
+		<element kind="textField" uuid="f8f3195b-7d73-4fb7-ab64-f542160075b3" x="13" y="183" width="150" height="52" fontSize="33.0" textAdjust="ScaleFont" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<expression><![CDATA[$F{remoteParticipation}]]></expression>
+		</element>
+		<element kind="textField" uuid="04834733-026b-40f8-af78-a7602be0c33d" x="391" y="187" width="150" height="49" fontSize="33.0" textAdjust="ScaleFont" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<expression><![CDATA[$F{presentialParticipation}]]></expression>
+		</element>
+		<element kind="textField" uuid="11cbdd13-3ea8-4514-880f-0c22a5635b0f" x="391" y="554" width="150" height="74" fontSize="33.0" textAdjust="ScaleFont" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<expression><![CDATA[$F{includedProposals}]]></expression>
+		</element>
+		<element kind="textField" uuid="e6805f1c-0ab5-4156-8cd0-48250f644482" x="10" y="540" width="150" height="59" fontSize="33.0" textAdjust="ScaleFont" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<expression><![CDATA[$F{consolidatedProposals}]]></expression>
+		</element>
+		<element kind="textField" uuid="41a2ef77-d0a7-4612-8ccd-ef0c2cb15772" x="200" y="371" width="150" height="54" fontSize="33.0" textAdjust="ScaleFont" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<expression><![CDATA[$F{citiesParticipation}]]></expression>
+		</element>
+		<element kind="image" uuid="cc038207-959e-46c9-90bf-d530393372a0" x="431" y="56" width="70" height="70">
+			<expression><![CDATA[$P{ROOT} + "/imgs/PresencialIcon.png"]]></expression>
+			<property name="com.jaspersoft.studio.unit.width" value="px"/>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		</element>
+		<element kind="image" uuid="73b5baee-62eb-48a6-9a8b-9ad8ee76f17e" x="242" y="241" width="70" height="70">
+			<expression><![CDATA[$P{ROOT} + "/imgs/MunicipioIcon.png"]]></expression>
+			<property name="com.jaspersoft.studio.unit.width" value="px"/>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		</element>
+		<element kind="image" uuid="6b3f8d78-0eff-44f0-a8bf-4eab6d7ea013" x="50" y="430" width="70" height="70">
+			<expression><![CDATA[$P{ROOT} + "/imgs/ConsolidadasIcon.png"]]></expression>
+			<property name="com.jaspersoft.studio.unit.width" value="px"/>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		</element>
+		<element kind="image" uuid="aad0eceb-3090-43ca-8cf1-a8c643293c06" x="431" y="430" width="70" height="70">
+			<expression><![CDATA[$P{ROOT} + "/imgs/IncorporadasIcon.png"]]></expression>
+			<property name="com.jaspersoft.studio.unit.width" value="px"/>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<property name="com.jaspersoft.studio.unit.x" value="px"/>
+		</element>
+		<element kind="image" uuid="9735de3a-830d-48ba-8387-d72049c436b2" x="50" y="56" width="70" height="70">
+			<expression><![CDATA[$P{ROOT} + "/imgs/remotoIcon.png"]]></expression>
+			<property name="com.jaspersoft.studio.unit.width" value="px"/>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<property name="com.jaspersoft.studio.unit.y" value="px"/>
+			<property name="com.jaspersoft.studio.unit.x" value="px"/>
+		</element>
+	</summary>
+</jasperReport>

@@ -1,0 +1,64 @@
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposeReport_All_area" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="0f177f7f-c98d-4fb2-9e7d-b9e611cd30d8">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
+	<parameter name="ID_AREA" class="java.lang.Integer"/>
+	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
+		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
+	</parameter>
+	<query language="SQL"><![CDATA[WITH $P{ID_CONFERENCE} AS Conference_Id,
+	 $P{ID_AREA}  AS Area_Id
+MATCH (area:PlanItem)<-[:COMPOSES]-(:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(:Person)
+WHERE id(area) = Area_Id
+		AND (eval.active AND NOT eval.deleted)
+		AND NOT c.duplicated
+MATCH (microregiao:Locality)<-[:ABOUT]-(c)-[:ABOUT]->(co:Conference)
+WHERE id(co) = Conference_Id
+RETURN DISTINCT area.name as area, id(microregiao) as idMicroregion, microregiao.name as microregion
+ORDER BY microregion;]]></query>
+	<field name="area" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="area"/>
+		<property name="com.jaspersoft.studio.field.label" value="area"/>
+	</field>
+	<field name="idMicroregion" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="idMicroregion"/>
+		<property name="com.jaspersoft.studio.field.label" value="idMicroregion"/>
+	</field>
+	<field name="microregion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="microregion"/>
+		<property name="com.jaspersoft.studio.field.label" value="microregion"/>
+	</field>
+	<background splitType="Stretch"/>
+	<pageHeader height="102" splitType="Stretch">
+		<element kind="image" uuid="d14b0c46-1b85-4eb9-9000-83a454081e05" x="-20" y="-20" width="600" height="122">
+			<expression><![CDATA[$P{ROOT} + "/imgs/tema46988.png"]]></expression>
+		</element>
+		<element kind="staticText" uuid="f2f2a146-7f5e-417f-88cb-45feef384952" x="-3" y="0" width="548" height="30" forecolor="#FFFFFF" fontSize="22.0" bold="false" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[ÁREA TEMÁTICA]]></text>
+		</element>
+		<element kind="textField" uuid="7d3c8d3a-7f36-4676-9591-33f512a7fc1d" x="-3" y="30" width="548" height="30" forecolor="#FFFFFF" fontSize="22.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<expression><![CDATA[$F{area}]]></expression>
+		</element>
+	</pageHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<element kind="subreport" uuid="0914ac4b-d3f2-462b-a8e9-779bfbe28cd5" x="-3" y="0" width="200" height="30">
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<expression><![CDATA[$P{ROOT} + "/ProposeReport_All_microregion.jasper"]]></expression>
+				<parameter name="ID_MICROREGIAO">
+					<expression><![CDATA[$F{idMicroregion}]]></expression>
+				</parameter>
+				<parameter name="ID_CONFERENCE">
+					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
+				</parameter>
+				<parameter name="ID_AREA">
+					<expression><![CDATA[$P{ID_AREA}]]></expression>
+				</parameter>
+				<parameter name="ROOT">
+					<expression><![CDATA[$P{ROOT}]]></expression>
+				</parameter>
+			</element>
+		</band>
+	</detail>
+</jasperReport>

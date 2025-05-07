@@ -1,0 +1,42 @@
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposeReport_included" language="java" columnCount="1" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="d91be523-5994-486c-bdba-8e4fce4fdc3e">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="230"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="762"/>
+	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
+	<parameter name="ID_MICROREGION" class="java.lang.Integer"/>
+	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
+		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
+	</parameter>
+	<query language="SQL"><![CDATA[MATCH (co:Conference)<-[:ABOUT]-(:Comment)-[:ABOUT]->(microregiao:Locality)<-[:IS_LOCATED_IN]-(:Locality) 
+WHERE id(co) = $P{ID_CONFERENCE} 
+	AND id(microregiao) =  $P{ID_MICROREGION} 
+return distinct id(microregiao) as idMicroregion
+order by idMicroregion]]></query>
+	<field name="idMicroregion" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="idMicroregion"/>
+		<property name="com.jaspersoft.studio.field.label" value="idMicroregion"/>
+	</field>
+	<group name="Group1">
+		<expression><![CDATA[$F{idMicroregion}]]></expression>
+		<groupHeader>
+			<band height="140">
+				<element kind="subreport" uuid="d8b2c358-995c-48ee-b2ff-69c5857fc079" stretchType="NoStretch" x="-20" y="-20" width="595" height="160" runToBottom="true" usingCache="true">
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<expression><![CDATA[$P{ROOT} + "/ProposeReport_included_microregion.jasper"]]></expression>
+					<parameter name="ID_MICROREGIAO">
+						<expression><![CDATA[$F{idMicroregion}]]></expression>
+					</parameter>
+					<parameter name="ID_CONFERENCE">
+						<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
+					</parameter>
+					<parameter name="ROOT">
+						<expression><![CDATA[$P{ROOT}]]></expression>
+					</parameter>
+				</element>
+			</band>
+		</groupHeader>
+	</group>
+	<background splitType="Stretch"/>
+</jasperReport>
