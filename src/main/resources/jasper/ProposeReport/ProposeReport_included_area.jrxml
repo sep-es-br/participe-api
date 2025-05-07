@@ -54,10 +54,10 @@ return distinct id(area) as idArea, area.name as area, id(microregiao) as idMicr
 	<background splitType="Stretch"/>
 	<columnHeader height="107" splitType="Stretch">
 		<element kind="image" uuid="a17036e5-ae9a-4ce5-bc4d-c0588d067897" x="0" y="0" width="550" height="80">
-			<expression><![CDATA[$P{ROOT} + "/imgs/CabeçalhoResultadoGeral.png"]]></expression>
+			<expression><![CDATA["imgs/CabeçalhoResultadoGeral.png"]]></expression>
 		</element>
 		<element kind="image" uuid="058c17e7-bd54-4383-a717-a0538bee9614" x="0" y="1" width="550" height="69">
-			<expression><![CDATA[$P{ROOT} + "/imgs/area" + $F{idArea} + ".png"]]></expression>
+			<expression><![CDATA["imgs/area" + $F{idArea} + ".png"]]></expression>
 		</element>
 		<element kind="textField" uuid="a12eb0a5-606c-4a62-a0b2-535bd33a55d0" x="120" y="10" width="420" height="30" forecolor="#CC72C2" fontSize="16.0" textAdjust="ScaleFont" bold="true">
 			<expression><![CDATA[$F{area}.toUpperCase()]]></expression>
@@ -73,7 +73,7 @@ return distinct id(area) as idArea, area.name as area, id(microregiao) as idMicr
 		<band height="40" splitType="Prevent">
 			<element kind="subreport" uuid="bbfb2c28-11bb-4863-84bb-842936a1e562" x="-20" y="0" width="580" height="40" runToBottom="false" usingCache="false">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<expression><![CDATA[$P{ROOT} + "/ProposeReport_included_subareaAll.jasper"]]></expression>
+				<expression><![CDATA["ProposeReport_included_subareaAll.jasper"]]></expression>
 				<parameter name="MICROREGION_ID">
 					<expression><![CDATA[$P{ID_MICROREGIAO}]]></expression>
 				</parameter>

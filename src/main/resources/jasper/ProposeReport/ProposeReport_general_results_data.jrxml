@@ -100,7 +100,7 @@ RETURN remoteParticipation, presentialParticipation, citiesParticipation, consol
 	<background splitType="Stretch"/>
 	<title height="67">
 		<element kind="image" uuid="c6763e1e-acdd-444b-982c-41e18b9fee22" x="-20" y="-30" width="595" height="90">
-			<expression><![CDATA[$P{ROOT} + "/imgs/CabeçalhoResultadoGeral.png"]]></expression>
+			<expression><![CDATA["imgs/CabeçalhoResultadoGeral.png"]]></expression>
 		</element>
 		<element kind="staticText" uuid="4734b99c-59e5-43af-a94e-37846ce07240" x="10" y="-10" width="540" height="30" forecolor="#CC72C2" fontSize="22.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
 			<text><![CDATA[RESULTADO GERAL]]></text>
@@ -168,32 +168,35 @@ Participantes]]></text>
 			<expression><![CDATA[$F{citiesParticipation}]]></expression>
 		</element>
 		<element kind="image" uuid="cc038207-959e-46c9-90bf-d530393372a0" x="431" y="56" width="70" height="70">
-			<expression><![CDATA[$P{ROOT} + "/imgs/PresencialIcon.png"]]></expression>
+			<expression><![CDATA["imgs/PresencialIcon.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="image" uuid="73b5baee-62eb-48a6-9a8b-9ad8ee76f17e" x="242" y="241" width="70" height="70">
-			<expression><![CDATA[$P{ROOT} + "/imgs/MunicipioIcon.png"]]></expression>
+			<expression><![CDATA["imgs/MunicipioIcon.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="image" uuid="6b3f8d78-0eff-44f0-a8bf-4eab6d7ea013" x="50" y="430" width="70" height="70">
-			<expression><![CDATA[$P{ROOT} + "/imgs/ConsolidadasIcon.png"]]></expression>
+			<expression><![CDATA["imgs/ConsolidadasIcon.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="image" uuid="aad0eceb-3090-43ca-8cf1-a8c643293c06" x="431" y="430" width="70" height="70">
-			<expression><![CDATA[$P{ROOT} + "/imgs/IncorporadasIcon.png"]]></expression>
+			<expression><![CDATA["imgs/IncorporadasIcon.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<property name="com.jaspersoft.studio.unit.x" value="px"/>
 		</element>
 		<element kind="image" uuid="9735de3a-830d-48ba-8387-d72049c436b2" x="50" y="56" width="70" height="70">
-			<expression><![CDATA[$P{ROOT} + "/imgs/remotoIcon.png"]]></expression>
+			<expression><![CDATA["imgs/remotoIcon.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<property name="com.jaspersoft.studio.unit.y" value="px"/>
 			<property name="com.jaspersoft.studio.unit.x" value="px"/>
+		</element>
+		<element kind="textField" uuid="90dc4e6e-e24f-4832-9aaf-5e14286acd5b" x="138" y="29" width="100" height="30">
+			<expression><![CDATA[$P{ROOT}]]></expression>
 		</element>
 	</summary>
 </jasperReport>

@@ -5,6 +5,7 @@
 package br.gov.es.participe.service;
 
 import Report.ReportConfig;
+import br.gov.es.participe.util.domain.report.RootFolderRepositoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -52,6 +53,7 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.SimpleJasperReportsContext;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSaver;
+import net.sf.jasperreports.repo.FileRepositoryService;
 import net.sf.jasperreports.repo.RepositoryService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,15 +134,18 @@ public class ReportService {
             
             JasperReport report = (JasperReport) JRLoader.loadObject(tempDir.resolve("ProposeReport_main.jasper").toFile());
             
+           SimpleJasperReportsContext ctx = new SimpleJasperReportsContext();
+            
+            RootFolderRepositoryService fileRepositoryService = new RootFolderRepositoryService( ctx, tempDir);
+            ctx.setExtensions(RepositoryService.class, Collections.singletonList(fileRepositoryService));
+            report.setJasperReportsContext(ctx);
+            
             
             Map<String, Object> params = new HashMap<>();
             params.put("ID_CONFERENCE", idConference);
             params.put("REPORT_CONNECTION", connection);
-            params.put("ROOT", tempDir.toFile().getAbsolutePath());
             
-            JasperPrint print = JasperFillManager.fillReport(
-                report, 
-                params, connection);
+            JasperPrint print = JasperFillManager.getInstance(ctx).fill(report, params, connection);
 
             
             try (ByteArrayInputStream pdfIs = new ByteArrayInputStream(

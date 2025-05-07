@@ -20,7 +20,7 @@ RETURN id(m) AS idMeeting]]></query>
 		</element>
 		<element kind="subreport" uuid="6e94d476-760f-4254-8ef2-abc0427c161e" stretchType="ContainerBottom" x="-20" y="50" width="200" height="200" runToBottom="true" usingCache="true">
 			<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-			<expression><![CDATA[$P{ROOT} + "/ProposeReport_participation_remote.jasper"]]></expression>
+			<expression><![CDATA["ProposeReport_participation_remote.jasper"]]></expression>
 			<parameter name="ID_CONFERENCE">
 				<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 			</parameter>
@@ -36,7 +36,7 @@ RETURN id(m) AS idMeeting]]></query>
 		<band height="80" splitType="Stretch">
 			<element kind="subreport" uuid="6872e4bc-010d-46bf-845f-035f4bb59430" x="-20" y="0" width="200" height="80">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<expression><![CDATA[$P{ROOT} + "/ProposeReport_participation_presential_meeting.jasper"]]></expression>
+				<expression><![CDATA["ProposeReport_participation_presential_meeting.jasper"]]></expression>
 				<parameter name="ID_CONFERENCE">
 					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 				</parameter>

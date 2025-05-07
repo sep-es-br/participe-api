@@ -10,7 +10,7 @@
 	<title height="620">
 		<element kind="subreport" uuid="74ba84f7-1db0-4495-abf7-706dc135d38c" positionType="Float" stretchType="NoStretch" x="-20" y="0" width="200" height="200" runToBottom="true" usingCache="true">
 			<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-			<expression><![CDATA[$P{ROOT} + "/ProposeReport_general_results_data.jasper"]]></expression>
+			<expression><![CDATA["ProposeReport_general_results_data.jasper"]]></expression>
 			<parameter name="ID_CONFERENCE">
 				<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 			</parameter>
@@ -20,7 +20,7 @@
 		</element>
 		<element kind="subreport" uuid="228d9f6c-64b3-4d9a-a0c4-0a0c35ee882e" positionType="Float" stretchType="ElementGroupHeight" x="-20" y="200" width="200" height="200" runToBottom="true" usingCache="true">
 			<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-			<expression><![CDATA[$P{ROOT} + "/ProposeReport_general_results_graph.jasper"]]></expression>
+			<expression><![CDATA["ProposeReport_general_results_graph.jasper"]]></expression>
 			<parameter name="ID_CONFERENCE">
 				<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 			</parameter>
@@ -30,7 +30,7 @@
 		</element>
 		<element kind="subreport" uuid="bd011781-2eb1-4252-9f25-4f527c3ca48f" positionType="Float" stretchType="ContainerHeight" x="-20" y="420" width="200" height="200" runToBottom="true" usingCache="true">
 			<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-			<expression><![CDATA[$P{ROOT} + "/ProposeReport_microregionResults_microregion.jasper"]]></expression>
+			<expression><![CDATA["ProposeReport_microregionResults_microregion.jasper"]]></expression>
 			<parameter name="ID_CONFERENCE">
 				<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 			</parameter>
@@ -42,7 +42,7 @@
 	<summary height="616">
 		<element kind="subreport" uuid="66e443c7-383d-4fb3-9c4e-ea7c6fe9dfd7" positionType="Float" stretchType="NoStretch" x="-20" y="216" width="200" height="200" runToBottom="true" usingCache="true">
 			<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-			<expression><![CDATA[$P{ROOT} + "/ProposeReport_All.jasper"]]></expression>
+			<expression><![CDATA["ProposeReport_All.jasper"]]></expression>
 			<parameter name="ID_CONFERENCE">
 				<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 			</parameter>
@@ -52,7 +52,7 @@
 		</element>
 		<element kind="subreport" uuid="c295b515-9a58-4a20-84bb-3a8db05119d2" positionType="Float" stretchType="NoStretch" x="-20" y="416" width="200" height="200" runToBottom="true" usingCache="true">
 			<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-			<expression><![CDATA[$P{ROOT} + "/ProposeReport_participation_presential.jasper"]]></expression>
+			<expression><![CDATA["ProposeReport_participation_presential.jasper"]]></expression>
 			<parameter name="ID_CONFERENCE">
 				<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 			</parameter>

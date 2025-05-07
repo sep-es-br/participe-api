@@ -74,7 +74,7 @@ ORDER BY planItemName]]></query>
 	<background splitType="Stretch"/>
 	<title height="86" splitType="Stretch">
 		<element kind="image" uuid="3022d43f-16a9-4a1a-9183-8a85ebbbe9d1" x="-20" y="-20" width="595" height="91">
-			<expression><![CDATA[$P{ROOT} + "/imgs/CabeçalhoResultadoGeral.png"]]></expression>
+			<expression><![CDATA["imgs/CabeçalhoResultadoGeral.png"]]></expression>
 		</element>
 		<element kind="staticText" uuid="18b6d1fa-bec6-4b97-a1d9-a01c00f888ba" x="10" y="-5" width="540" height="30" forecolor="#CC72C2" fontSize="22.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
 			<text><![CDATA[RESULTADO GERAL]]></text>

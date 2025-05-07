@@ -32,7 +32,7 @@ ORDER BY microregion;]]></query>
 	<background splitType="Stretch"/>
 	<pageHeader height="102" splitType="Stretch">
 		<element kind="image" uuid="d14b0c46-1b85-4eb9-9000-83a454081e05" x="-20" y="-20" width="600" height="122">
-			<expression><![CDATA[$P{ROOT} + "/imgs/tema46988.png"]]></expression>
+			<expression><![CDATA["imgs/tema46988.png"]]></expression>
 		</element>
 		<element kind="staticText" uuid="f2f2a146-7f5e-417f-88cb-45feef384952" x="-3" y="0" width="548" height="30" forecolor="#FFFFFF" fontSize="22.0" bold="false" hTextAlign="Center" vTextAlign="Middle">
 			<text><![CDATA[ÁREA TEMÁTICA]]></text>
@@ -45,7 +45,7 @@ ORDER BY microregion;]]></query>
 		<band height="30" splitType="Stretch">
 			<element kind="subreport" uuid="0914ac4b-d3f2-462b-a8e9-779bfbe28cd5" x="-3" y="0" width="200" height="30">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<expression><![CDATA[$P{ROOT} + "/ProposeReport_All_microregion.jasper"]]></expression>
+				<expression><![CDATA["ProposeReport_All_microregion.jasper"]]></expression>
 				<parameter name="ID_MICROREGIAO">
 					<expression><![CDATA[$F{idMicroregion}]]></expression>
 				</parameter>

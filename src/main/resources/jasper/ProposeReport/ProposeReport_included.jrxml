@@ -24,7 +24,7 @@ order by idMicroregion]]></query>
 			<band height="140">
 				<element kind="subreport" uuid="d8b2c358-995c-48ee-b2ff-69c5857fc079" stretchType="NoStretch" x="-20" y="-20" width="595" height="160" runToBottom="true" usingCache="true">
 					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					<expression><![CDATA[$P{ROOT} + "/ProposeReport_included_microregion.jasper"]]></expression>
+					<expression><![CDATA["ProposeReport_included_microregion.jasper"]]></expression>
 					<parameter name="ID_MICROREGIAO">
 						<expression><![CDATA[$F{idMicroregion}]]></expression>
 					</parameter>

@@ -126,7 +126,7 @@ RETURN microregion.name as microregionName,
 	<background splitType="Stretch"/>
 	<title height="750">
 		<element kind="image" uuid="e5c7b770-5d4e-4bff-bd31-14b2e7d9f016" x="-20" y="-19" width="595" height="90">
-			<expression><![CDATA[$P{ROOT} + "/imgs/CabeçalhoResultadoGeral.png"]]></expression>
+			<expression><![CDATA["imgs/CabeçalhoResultadoGeral.png"]]></expression>
 		</element>
 		<element kind="textField" uuid="8bbb6931-d58a-4a23-91c7-1b22c0811638" x="10" y="-15" width="534" height="48" forecolor="#CC72C2" fontSize="29.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
 			<expression><![CDATA[$F{microregionName}.toUpperCase()]]></expression>
@@ -177,22 +177,22 @@ Orçamento]]></text>
 			<expression><![CDATA[$F{includedProposals}]]></expression>
 		</element>
 		<element kind="image" uuid="926c1bac-d80a-470e-b075-eb5e9276eb87" x="100" y="146" width="70" height="70">
-			<expression><![CDATA[$P{ROOT} + "/imgs/remotoIcon.png"]]></expression>
+			<expression><![CDATA["imgs/remotoIcon.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="image" uuid="7b09cbf7-9512-4350-a2fc-52b2a30e0f1c" x="393" y="146" width="70" height="70">
-			<expression><![CDATA[$P{ROOT} + "/imgs/RegistradasIcon.png"]]></expression>
+			<expression><![CDATA["imgs/RegistradasIcon.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="image" uuid="cff5f721-281e-40f8-a8fd-bb1dcaf8e578" x="100" y="456" width="70" height="70">
-			<expression><![CDATA[$P{ROOT} + "/imgs/ConsolidadasIcon.png"]]></expression>
+			<expression><![CDATA["imgs/ConsolidadasIcon.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
 		<element kind="image" uuid="efaa52df-98b5-483f-80bd-a8569d0f582a" x="393" y="455" width="70" height="70">
-			<expression><![CDATA[$P{ROOT} + "/imgs/IncorporadasIcon.png"]]></expression>
+			<expression><![CDATA["imgs/IncorporadasIcon.png"]]></expression>
 			<property name="com.jaspersoft.studio.unit.width" value="px"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</element>
