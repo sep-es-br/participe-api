@@ -15,7 +15,7 @@
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
 		<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
-		<query language="SQL"><![CDATA[WITH 47114 AS Conference_Id
+		<query language="SQL"><![CDATA[WITH $P{ID_CONFERENCE} AS Conference_Id
 CALL {
 	WITH Conference_Id
 	MATCH

@@ -20,36 +20,36 @@
 	<query language="SQL"><![CDATA[CALL {
   CALL {
     MATCH (p:Person)<-[:MADE_BY]-(h:Highlight)-[:ABOUT]->(co:Conference)
-    WHERE id(co) =  47114
+    WHERE id(co) = $P{ID_CONFERENCE} 
     RETURN p, co
     UNION
     MATCH (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)
-    WHERE id(co) =  47114
+    WHERE id(co) = $P{ID_CONFERENCE} 
     RETURN p, co
 	} WITH p
 	RETURN COUNT(DISTINCT p) AS remoteParticipation
 } 
 CALL {
   match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person)
-  where   id(co) = 47114
+  where   id(co) = $P{ID_CONFERENCE} 
 	return count(DISTINCT p) as presentialParticipation
 }
 CALL {
 	CALL {
 	    MATCH (p:Person)<-[:MADE_BY]-(h:Highlight)-[:ABOUT]->(co:Conference)
-	    WHERE id(co) = 47114
+	    WHERE id(co) = $P{ID_CONFERENCE} 
 	    RETURN p, co
 	
 	    UNION
 	
 	    MATCH (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference)
-	    WHERE id(co) = 47114
+	    WHERE id(co) = $P{ID_CONFERENCE} 
 	    RETURN p, co
 	
 	    UNION
 	
 	    match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person)
-		where   id(co) = 47114
+		where   id(co) = $P{ID_CONFERENCE} 
 		return p, co
 	} WITH p, co
 	MATCH (p)-[:MADE]->(sf:SelfDeclaration)-[:AS_BEING_FROM]->(loc:Locality),
