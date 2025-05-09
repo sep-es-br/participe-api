@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ProposalEvaluation" pageWidth="1500" pageHeight="595" orientation="Landscape" columnWidth="1460" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" isIgnorePagination="true" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce">
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposalEvaluation" language="java" pageWidth="1500" pageHeight="595" orientation="Landscape" columnWidth="1460" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce" ignorePagination="true">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapter.jrdax"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -12,20 +11,19 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<parameter name="localityId" class="java.lang.Long" isForPrompting="false"/>
-	<parameter name="evaluationStatus" class="java.lang.Boolean" isForPrompting="false"/>
-	<parameter name="planItemAreaId" class="java.lang.Long" isForPrompting="false"/>
-	<parameter name="planItemId" class="java.lang.Long" isForPrompting="false"/>
-	<parameter name="organizationGuid" class="java.util.List" nestedType="java.lang.String" isForPrompting="false">
-		<parameterDescription><![CDATA[]]></parameterDescription>
+	<parameter name="localityId" forPrompting="false" class="java.lang.Long"/>
+	<parameter name="evaluationStatus" forPrompting="false" class="java.lang.Boolean"/>
+	<parameter name="planItemAreaId" forPrompting="false" class="java.lang.Long"/>
+	<parameter name="planItemId" forPrompting="false" class="java.lang.Long"/>
+	<parameter name="organizationGuid" forPrompting="false" class="java.util.List" nestedType="java.lang.String">
+		<description><![CDATA[]]></description>
 	</parameter>
-	<parameter name="loaIncluded" class="java.lang.Boolean" isForPrompting="false"/>
-	<parameter name="commentText" class="java.lang.String" isForPrompting="false"/>
-	<parameter name="conferenceId" class="java.lang.Long" isForPrompting="false"/>
-	<parameter name="localityTypeName" class="java.lang.String" nestedType="" isForPrompting="false"/>
-	<parameter name="structureItemName" class="java.lang.String" nestedType="" isForPrompting="false"/>
-	<queryString>
-		<![CDATA[MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference),  
+	<parameter name="loaIncluded" forPrompting="false" class="java.lang.Boolean"/>
+	<parameter name="commentText" forPrompting="false" class="java.lang.String"/>
+	<parameter name="conferenceId" forPrompting="false" class="java.lang.Long"/>
+	<parameter name="localityTypeName" forPrompting="false" class="java.lang.String" nestedType=""/>
+	<parameter name="structureItemName" forPrompting="false" class="java.lang.String" nestedType=""/>
+	<query language="sql"><![CDATA[MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference),  
 (comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) 
 WHERE id(conference) = $P!{conferenceId}
 AND comment.type = 'prop' 
@@ -74,8 +72,7 @@ AND comment.status = 'pub'
             finalResult.evaluationStatus AS evaluationStatus, 
             finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList, 
 finalResult.evaluatorName AS evaluatorName 
-ORDER BY area.name asc, planItemName asc,locality.name asc;]]>
-	</queryString>
+ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 	<field name="commentId" class="java.lang.Object">
 		<property name="com.jaspersoft.studio.field.name" value="commentId"/>
 		<property name="com.jaspersoft.studio.field.label" value="commentId"/>
@@ -108,72 +105,41 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]>
 		<property name="com.jaspersoft.studio.field.name" value="evaluatorName"/>
 		<property name="com.jaspersoft.studio.field.label" value="evaluatorName"/>
 	</field>
-	<title>
-		<band height="30" splitType="Stretch">
-			<property name="com.jaspersoft.studio.unit.height" value="px"/>
-			<staticText>
-				<reportElement x="582" y="0" width="774" height="30" uuid="3ddced7c-9617-4799-879b-f17e758ca228"/>
-				<textElement>
-					<font size="12" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Descrição]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="-20" y="0" width="270" height="30" uuid="a89a6800-8a39-49da-928e-a9f6becc7cdf"/>
-				<textElement>
-					<font size="12" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{structureItemName}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="1356" y="0" width="124" height="30" uuid="a0cb26b3-5dd9-4764-8f2f-d40187b155ad"/>
-				<textElement>
-					<font size="12" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{localityTypeName}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="250" y="0" width="332" height="30" uuid="7868c665-3320-48e2-b145-6be315496209"/>
-				<textElement>
-					<font size="12" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Subárea]]></text>
-			</staticText>
-		</band>
+	<title height="30" splitType="Stretch">
+		<element kind="staticText" uuid="3ddced7c-9617-4799-879b-f17e758ca228" x="582" y="0" width="774" height="30" fontSize="12.0" bold="true">
+			<text><![CDATA[Descrição]]></text>
+		</element>
+		<element kind="textField" uuid="a89a6800-8a39-49da-928e-a9f6becc7cdf" x="-20" y="0" width="270" height="30" fontSize="12.0" bold="true">
+			<expression><![CDATA[$P{structureItemName}]]></expression>
+		</element>
+		<element kind="textField" uuid="a0cb26b3-5dd9-4764-8f2f-d40187b155ad" x="1356" y="0" width="124" height="30" fontSize="12.0" bold="true">
+			<expression><![CDATA[$P{localityTypeName}]]></expression>
+		</element>
+		<element kind="staticText" uuid="7868c665-3320-48e2-b145-6be315496209" x="250" y="0" width="332" height="30" fontSize="12.0" bold="true">
+			<text><![CDATA[Subárea]]></text>
+		</element>
+		<property name="com.jaspersoft.studio.unit.height" value="px"/>
 	</title>
 	<detail>
 		<band height="30" splitType="Stretch">
-			<textField textAdjust="ScaleFont">
-				<reportElement x="-20" y="0" width="270" height="30" uuid="bf0ae18c-1d37-449f-98dd-1449e73fe0a9">
-					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
-				</reportElement>
-				<textElement>
-					<paragraph rightIndent="4"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{planItemAreaName}]]></textFieldExpression>
-			</textField>
-			<textField textAdjust="ScaleFont">
-				<reportElement x="582" y="0" width="774" height="30" uuid="d901e148-1f3a-44b2-8911-eaf0a1266f13">
-					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
-				</reportElement>
-				<textElement>
-					<paragraph rightIndent="4"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement mode="Transparent" x="1356" y="0" width="124" height="30" uuid="dcfbb0df-c3f2-4e44-a9f0-e4b04e6e84a4"/>
-				<textFieldExpression><![CDATA[$F{localityName}]]></textFieldExpression>
-			</textField>
-			<textField textAdjust="ScaleFont">
-				<reportElement x="250" y="0" width="332" height="30" uuid="a754fd91-3072-4740-a763-692a1556761d">
-					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
-				</reportElement>
-				<textElement>
-					<paragraph rightIndent="4"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{planItemName}]]></textFieldExpression>
-			</textField>
+			<element kind="textField" uuid="bf0ae18c-1d37-449f-98dd-1449e73fe0a9" x="-20" y="0" width="270" height="30" textAdjust="ScaleFont">
+				<paragraph rightIndent="4"/>
+				<expression><![CDATA[$F{planItemAreaName}]]></expression>
+				<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+			</element>
+			<element kind="textField" uuid="d901e148-1f3a-44b2-8911-eaf0a1266f13" x="582" y="0" width="774" height="30" textAdjust="ScaleFont">
+				<paragraph rightIndent="4"/>
+				<expression><![CDATA[$F{description}]]></expression>
+				<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+			</element>
+			<element kind="textField" uuid="dcfbb0df-c3f2-4e44-a9f0-e4b04e6e84a4" mode="Transparent" x="1356" y="0" width="124" height="30">
+				<expression><![CDATA[$F{localityName}]]></expression>
+			</element>
+			<element kind="textField" uuid="a754fd91-3072-4740-a763-692a1556761d" x="250" y="0" width="332" height="30" textAdjust="ScaleFont">
+				<paragraph rightIndent="4"/>
+				<expression><![CDATA[$F{planItemName}]]></expression>
+				<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+			</element>
 		</band>
 	</detail>
 </jasperReport>
