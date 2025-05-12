@@ -19,6 +19,7 @@ public class ProposalEvaluationResponseDto {
     private String budgetActionName;
     private String budgetPlan;
     private String representing;
+    private String evaluatorName;
     private String date;
 
     public ProposalEvaluationResponseDto() {
@@ -40,8 +41,17 @@ public class ProposalEvaluationResponseDto {
         }
         this.representing = evaluatesRelationship.getRepresenting();
         this.date = formatDate(evaluatesRelationship.getDate());
+        this.evaluatorName = evaluatesRelationship.getPerson().getName();
     }
 
+    public String getEvaluatorName() {
+        return evaluatorName;
+    }
+
+    public void setEvaluatorName(String evaluatorName) {
+        this.evaluatorName = evaluatorName;
+    }
+    
     public Long getId() {
         return id;
     }
