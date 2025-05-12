@@ -53,6 +53,7 @@ dependencies {
 	implementation 'com.github.librepdf:openpdf:1.3.30'
 	implementation 'com.lowagie:itext:2.1.7'
 	implementation 'org.neo4j:neo4j-jdbc-driver:4.0.0'
+        implementation 'org.eclipse.jdt:ecj:3.41.0'
 
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
