@@ -150,7 +150,7 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 			</element>
 			<element kind="textField" uuid="f1c1c4e1-eeae-43ad-8c4e-8466188489c8" x="-20" y="0" width="270" height="30" textAdjust="ScaleFont">
 				<paragraph rightIndent="4"/>
-				<expression><![CDATA[$F{representingName} == null ? "" : $F{representingName}]]></expression>
+				<expression><![CDATA[$F{representingName}]]></expression>
 				<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 			</element>
 		</band>
