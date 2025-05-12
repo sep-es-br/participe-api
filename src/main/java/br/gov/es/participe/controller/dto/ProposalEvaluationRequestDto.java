@@ -12,11 +12,28 @@ public class ProposalEvaluationRequestDto {
     private String budgetActionName;
     private String budgetPlan;
     private String representing;
+    private String representingOrgTag;
+    private String representingOrgName;
 
     public ProposalEvaluationRequestDto() {
 
     }
 
+    public String getRepresentingOrgTag() {
+        return representingOrgTag;
+    }
+
+    public void setRepresentingOrgTag(String representingOrgTag) {
+        this.representingOrgTag = representingOrgTag;
+    }
+
+    public String getRepresentingOrgName() {
+        return representingOrgName;
+    }
+
+    public void setRepresentingOrgName(String representingOrgName) {
+        this.representingOrgName = representingOrgName;
+    }
     
     public Long getPersonId() {
         return personId;
