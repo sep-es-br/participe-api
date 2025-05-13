@@ -125,7 +125,6 @@ public class ReportService {
             Map<String, Object> params = new HashMap<>();
             params.put("ID_CONFERENCE", idConference);
             params.put("REPORT_CONNECTION", connection);
-            params.put("ROOT", tempDir.toFile().getAbsolutePath());
             
             JasperPrint print = JasperFillManager.getInstance(ctx).fill(report, params, connection);
 
