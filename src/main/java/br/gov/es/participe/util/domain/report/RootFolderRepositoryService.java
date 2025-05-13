@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.jasperreports.engine.JasperReportsContext;
@@ -32,9 +33,11 @@ public class RootFolderRepositoryService extends DefaultRepositoryService {
     @Override
     public <K extends Resource> K getResource(RepositoryContext context, String uri, Class<K> resourceType) {
         
-        Path filePath = this.root.resolve(uri);
+        String fileName = Paths.get(uri).getFileName().toString();  // resolve C:\abc\xyz.jasper -> xyz.jasper
+        Path filePath = this.root.resolve(fileName);
         
         Logger.getGlobal().log(Level.INFO, uri);
+        Logger.getGlobal().log(Level.INFO, "filepath: " + filePath);
         Logger.getGlobal().log(Level.INFO, resourceType.getSimpleName());
         Logger.getGlobal().log(Level.INFO, String.valueOf(InputStreamResource.class.isAssignableFrom(resourceType)));
         
