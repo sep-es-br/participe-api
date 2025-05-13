@@ -98,59 +98,15 @@ public class ReportService {
                     Files.copy(is, tempImgDir.resolve(resource.getFilename()), StandardCopyOption.REPLACE_EXISTING);
                 }
             }
-                
-            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+                      
+            Resource[] jrxmlResources = resourceResolver.getResources("classpath:/jasper/ProposeReport/*.jasper");
             
-            List<Resource> resources = new ArrayList<>();
-            
-            // É manual? pra caramba, mas precisa garantir a ordem de execução das compilações,
-            // se fizer tudo em paralelo, um executa antes do outro e dá erro
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_general_results_data.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_general_results_graph.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_microregionResults_microregion_data.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_microregionResults_microregion_graph.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_Included_subArea.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included_subareaAll.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included_area.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included_microregion.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_microregionResults_microregion.jrxml"));
-                        
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_All_microregion.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_All_area.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_All.jrxml"));
-            
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_participation_remote.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_participation_presential_meeting.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_participation_presential.jrxml"));
-            
-            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_main.jrxml"));
-            
-            for(Resource resource : resources) {
-                try(InputStream is = resource.getInputStream(); var fos = new FileOutputStream(resource.getFilename().replace(".jrxml", ".jasper"))){
-                    JasperCompileManager.compileReportToStream(is, fos);
-                    
-                } catch (IOException | JRException ex) {
-                    Logger.getGlobal().log(Level.SEVERE, resource.getFilename() + ": " + ex.getLocalizedMessage(), ex);
-                    throw new RuntimeException(ex);
+            for(Resource resource : jrxmlResources) {
+                try (InputStream is = resource.getInputStream()) {
+                    Files.copy(is, tempDir.resolve(resource.getFilename()), StandardCopyOption.REPLACE_EXISTING);
                 }
             }
-                        
+                                    
             Connection connection = DriverManager.getConnection(
             "jdbc:neo4j:" + this.urlConnection,
             this.userName,
@@ -186,16 +142,6 @@ public class ReportService {
             throw new RuntimeException("Erro ao gerar Relatório", e);
         }
         
-    }
-    
-    private Callable<Void> createJasperCompileTask(Resource jrxmlResource, Path tempDir){
-        return () -> {
-                
-            
-
-            return null;
-
-        };
     }
     
     
