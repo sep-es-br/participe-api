@@ -34,6 +34,11 @@ public class RootFolderRepositoryService extends DefaultRepositoryService {
         
         Path filePath = this.root.resolve(uri);
         
+        Logger.getGlobal().log(Level.INFO, uri);
+        Logger.getGlobal().log(Level.INFO, resourceType.getSimpleName());
+        Logger.getGlobal().log(Level.INFO, String.valueOf(InputStreamResource.class.isAssignableFrom(resourceType)));
+        
+        
         if(InputStreamResource.class.isAssignableFrom(resourceType)) {
             try {
                 InputStreamResource resource = new InputStreamResource();
