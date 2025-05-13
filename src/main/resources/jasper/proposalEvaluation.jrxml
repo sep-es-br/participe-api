@@ -110,7 +110,7 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="evaluatorName"/>
 		<property name="com.jaspersoft.studio.field.label" value="evaluatorName"/>
 	</field>
-	<title height="35" splitType="Stretch">
+	<title height="30" splitType="Stretch">
 		<element kind="staticText" uuid="3ddced7c-9617-4799-879b-f17e758ca228" x="852" y="0" width="774" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Descrição]]></text>
 		</element>
@@ -129,7 +129,7 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<property name="com.jaspersoft.studio.unit.height" value="px"/>
 	</title>
 	<detail>
-		<band height="35" splitType="Stretch">
+		<band height="30" splitType="Stretch">
 			<element kind="textField" uuid="bf0ae18c-1d37-449f-98dd-1449e73fe0a9" x="250" y="0" width="270" height="30" textAdjust="ScaleFont">
 				<paragraph rightIndent="4"/>
 				<expression><![CDATA[$F{planItemAreaName}]]></expression>
