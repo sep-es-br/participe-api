@@ -101,65 +101,52 @@ public class ReportService {
                 
             ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             
-            List<Callable<Void>> taskList = new ArrayList<>();
+            List<Resource> resources = new ArrayList<>();
             
             // É manual? pra caramba, mas precisa garantir a ordem de execução das compilações,
             // se fizer tudo em paralelo, um executa antes do outro e dá erro
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_general_results_data.jrxml"), tempDir));
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_general_results_graph.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_general_results_data.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_microregionResults_microregion_data.jrxml"), tempDir));
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_microregionResults_microregion_graph.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_general_results_graph.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_Included_subArea.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_microregionResults_microregion_data.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included_subareaAll.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_microregionResults_microregion_graph.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included_area.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_Included_subArea.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included_microregion.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included_subareaAll.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included_area.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_microregionResults_microregion.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included_microregion.jrxml"));
+            
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_included.jrxml"));
+            
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_microregionResults_microregion.jrxml"));
                         
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_All_microregion.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_All_microregion.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_All_area.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_All_area.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_All.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_All.jrxml"));
             
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_participation_remote.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_participation_remote.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_participation_presential_meeting.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_participation_presential_meeting.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_participation_presential.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_participation_presential.jrxml"));
             
-            taskList.add(createJasperCompileTask(
-                resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_main.jrxml"), tempDir));
+            resources.add(resourceResolver.getResource("classpath:/jasper/ProposeReport/ProposeReport_main.jrxml"));
             
-            for(Callable<Void> call : taskList) {
-                try {
-                    call.call();
-                } catch (Exception ex) {
+            for(Resource resource : resources) {
+                try(InputStream is = resource.getInputStream(); var fos = new FileOutputStream(resource.getFilename().replace(".jrxml", ".jasper"))){
+                    JasperCompileManager.compileReportToStream(is, fos);
+                    
+                } catch (IOException | JRException ex) {
+                    Logger.getGlobal().log(Level.SEVERE, resource.getFilename() + ": " + ex.getLocalizedMessage(), ex);
                     throw new RuntimeException(ex);
                 }
             }
@@ -204,17 +191,7 @@ public class ReportService {
     private Callable<Void> createJasperCompileTask(Resource jrxmlResource, Path tempDir){
         return () -> {
                 
-            try(InputStream is = jrxmlResource.getInputStream()){
-                JasperReport jasperReport = JasperCompileManager.compileReport(is);
-
-                File jasperFile = tempDir.resolve(jrxmlResource.getFilename().replace(".jrxml", ".jasper")).toFile();
-                try (FileOutputStream fos = new FileOutputStream(jasperFile)) {
-                    JRSaver.saveObject(jasperReport, fos);
-                }
-            } catch (IOException | JRException ex) {
-                Logger.getGlobal().log(Level.SEVERE, jrxmlResource.getFilename() + ": " + ex.getLocalizedMessage(), ex);
-                throw new RuntimeException(ex);
-            }
+            
 
             return null;
 
