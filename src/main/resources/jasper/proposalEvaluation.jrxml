@@ -65,7 +65,7 @@ AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR
     END AS finalResult 
     RETURN DISTINCT 
     id(comment) AS commentId, 
-    eval.representingOrgTag + " - " + eval.representingOrgName AS representingName,
+    COALESCE(eval.representingOrgTag + " - " + eval.representingOrgName, "")  AS representingName,
     locality.name AS localityName, 
     planItem.name AS planItemName, 
     area.name AS planItemAreaName, 
