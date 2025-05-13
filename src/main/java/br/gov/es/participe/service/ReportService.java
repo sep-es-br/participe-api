@@ -4,7 +4,6 @@
  */
 package br.gov.es.participe.service;
 
-import Report.ReportConfig;
 import br.gov.es.participe.util.domain.report.RootFolderRepositoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
@@ -144,6 +143,7 @@ public class ReportService {
             Map<String, Object> params = new HashMap<>();
             params.put("ID_CONFERENCE", idConference);
             params.put("REPORT_CONNECTION", connection);
+            params.put("ROOT", tempDir.toFile().getAbsolutePath());
             
             JasperPrint print = JasperFillManager.getInstance(ctx).fill(report, params, connection);
 
