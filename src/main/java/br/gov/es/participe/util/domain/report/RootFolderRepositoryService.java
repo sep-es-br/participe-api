@@ -7,6 +7,7 @@ package br.gov.es.participe.util.domain.report;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
@@ -35,6 +36,15 @@ public class RootFolderRepositoryService extends DefaultRepositoryService {
         
         String fileName = Paths.get(uri).getFileName().toString();  // resolve C:\abc\xyz.jasper -> xyz.jasper
         Path filePath = this.root.resolve(fileName);
+
+        if (!Files.exists(filePath)) {
+        Path imgPath = this.root.resolve("imgs").resolve(fileName);
+        if (Files.exists(imgPath)) {
+            filePath = imgPath;
+        } else {
+            Logger.getGlobal().warning("File not found: " + fileName);
+        }
+    }
         
         Logger.getGlobal().log(Level.INFO, uri);
         Logger.getGlobal().log(Level.INFO, "filepath: " + filePath);
