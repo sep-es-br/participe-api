@@ -697,15 +697,17 @@ public class CommentService {
     PlanItem planItem = null;
     if (moderationParamDto.getLocality() != null) {
       locality = localityService.find(moderationParamDto.getLocality());
+    } else {
+      locality = localityService.find(prevLocalityID);
     }
 
     if (moderationParamDto.getPlanItem() != null) {
       planItem = planItemService.find(moderationParamDto.getPlanItem());
     }
 
-    if (locality != null) {
-      comment.setLocality(locality);
-    }
+    comment.setLocality(locality);
+    
+    
     if (planItem != null) {
       comment.setPlanItem(planItem);
     }
@@ -776,7 +778,7 @@ public class CommentService {
   }
 
   private Comment loadComment(Comment comment, ModerationParamDto moderationParamDto) {
-    if (moderationParamDto.getLocality() != null) {
+    if (moderationParamDto.getLocality() != null && moderationParamDto.getLocality() != null) {
       comment.setLocality(null);
       comment = commentRepository.save(comment);
     }
