@@ -45,47 +45,42 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
     )
     List<ProposalEvaluationDto> findAllByConferenceId(@Param("conferenceId") Long conferenceId);
 
-    @Query(value = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference),  " +
-            "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
-            "WHERE id(conference) = $conferenceId " +
-            "AND comment.type = 'prop' " +
-            "AND comment.status = 'pub' " +
-            "AND (comment.duplicated = false OR comment.duplicated IS NULL) " +
-            "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
-            "WITH comment, locality, planItem, area, eval, person " +
-            SEARCH_FILTER +
-            "WITH comment, locality, planItem, area, " +
-            "CASE  " +
-            "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN true  " +
-            "ELSE false  " +
-            "END AS evaluationStatus, " +
-            "CASE  " +
-            "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, loaIncluded: eval.includedInNextYearLOA}) " +
-            "ELSE NULL  " +
-            "END AS evaluatorOrgsNameAndLoaIncludedList, " +
-            "CASE  " +
-            "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN person.name  " +
-            "ELSE NULL  " +
-            "END AS evaluatorName " +
-            "WITH comment, locality, planItem, area, " +
-            "[result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList, evaluatorName: evaluatorName}) " +
-            "WHERE result.evaluationStatus = true] AS trueResults, " +
-            "[result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList, evaluatorName: evaluatorName}) " +
-            "WHERE result.evaluationStatus = false] AS falseResults " +
-            "WITH comment, locality, planItem, area, " +
-            "CASE " +
-            "WHEN SIZE(trueResults) > 0 THEN HEAD(trueResults) " +
-            "ELSE HEAD(falseResults) " +
-            "END AS finalResult " +
-            "RETURN DISTINCT " +
-            "id(comment) AS commentId, " +
-            "locality.name AS localityName, " +
-            "planItem.name AS planItemName, " +
-            "area.name AS planItemAreaName, " +
-            "comment.text AS description, " +
-            "finalResult.evaluationStatus AS evaluationStatus, " +
-            "finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList, " +
-            "finalResult.evaluatorName AS evaluatorName ", 
+    @Query(value = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference),  \r\n" + //
+                "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) \r\n" + //
+                "WHERE id(conference) = $conferenceId\r\n" + //
+                "\tAND comment.type = 'prop' \r\n" + //
+                "\tAND comment.status = 'pub' \r\n" + //
+                "\tAND (comment.duplicated = false OR comment.duplicated IS NULL) \r\n" + //
+                "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) \r\n" + //
+                "WITH comment, locality, planItem, area, eval, person \r\n" + //
+                 SEARCH_FILTER + //
+                "WITH comment, locality, planItem, area, \r\n" + //
+                "CASE  \r\n" + //
+                "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN true  \r\n" + //
+                "ELSE false  \r\n" + //
+                "END AS evaluationStatus, \r\n" + //
+                "CASE  \r\n" + //
+                "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, loaIncluded: eval.includedInNextYearLOA, evaluatorName: person.name}) \r\n" + //
+                "ELSE NULL  \r\n" + //
+                "END AS evaluatorOrgsNameAndLoaIncludedList\r\n" + //
+                "WITH comment, locality, planItem, area, \r\n" + //
+                "[result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList}) \r\n" + //
+                "WHERE result.evaluationStatus = true] AS trueResults, \r\n" + //
+                "[result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList}) \r\n" + //
+                "WHERE result.evaluationStatus = false] AS falseResults \r\n" + //
+                "WITH comment, locality, planItem, area, \r\n" + //
+                "CASE \r\n" + //
+                "WHEN SIZE(trueResults) > 0 THEN HEAD(trueResults) \r\n" + //
+                "ELSE HEAD(falseResults) \r\n" + //
+                "END AS finalResult \r\n" + //
+                "RETURN DISTINCT \r\n" + //
+                "id(comment) AS commentId, \r\n" + //
+                "locality.name AS localityName, \r\n" + //
+                "planItem.name AS planItemName, \r\n" + //
+                "area.name AS planItemAreaName, \r\n" + //
+                "comment.text AS description, \r\n" + //
+                "finalResult.evaluationStatus AS evaluationStatus, \r\n" + //
+                "finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList", 
             countQuery = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
                     "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
                     "WHERE id(conference) = $conferenceId " +

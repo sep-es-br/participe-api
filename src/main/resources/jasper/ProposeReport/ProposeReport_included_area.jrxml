@@ -1,0 +1,89 @@
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposeReport_included_area" language="java" columnCount="1" pageWidth="595" pageHeight="842" orientation="Landscape" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="0" uuid="38b6e115-5d53-4ede-b5d0-2df47230d794" summaryWithPageHeaderAndFooter="true">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="ID_MICROREGIAO" class="java.lang.Integer"/>
+	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
+	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
+		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
+	</parameter>
+	<query language="SQL"><![CDATA[MATCH (area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(:Person), (c)-[:ABOUT]->(microregiao:Locality) 
+where (eval.active AND NOT eval.deleted) and not c.duplicated
+    AND eval.includedInNextYearLOA
+    AND id(microregiao) = $P{ID_MICROREGIAO} 
+MATCH (c)-[:ABOUT]->(co:Conference)
+    WHERE id(co) = $P{ID_CONFERENCE} 
+return distinct id(area) as idArea, area.name as area, id(microregiao) as idMicroregiao, microregiao.name as microregiao order by idMicroregiao, idArea;]]></query>
+	<field name="idArea" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="idArea"/>
+		<property name="com.jaspersoft.studio.field.label" value="idArea"/>
+	</field>
+	<field name="area" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="area"/>
+		<property name="com.jaspersoft.studio.field.label" value="area"/>
+	</field>
+	<field name="idMicroregiao" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="idMicroregiao"/>
+		<property name="com.jaspersoft.studio.field.label" value="idMicroregiao"/>
+	</field>
+	<field name="microregiao" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="microregiao"/>
+		<property name="com.jaspersoft.studio.field.label" value="microregiao"/>
+	</field>
+	<group name="idArea">
+		<expression><![CDATA[$F{idArea}]]></expression>
+	</group>
+	<group name="area">
+		<expression><![CDATA[$F{area}]]></expression>
+	</group>
+	<group name="idMicroregiao">
+		<expression><![CDATA[$F{idMicroregiao}]]></expression>
+	</group>
+	<group name="microregiao">
+		<expression><![CDATA[$F{microregiao}]]></expression>
+	</group>
+	<background splitType="Stretch"/>
+	<columnHeader height="107" splitType="Stretch">
+		<element kind="image" uuid="a17036e5-ae9a-4ce5-bc4d-c0588d067897" x="0" y="0" width="550" height="80">
+			<expression><![CDATA["imgs/CabeçalhoResultadoGeral.png"]]></expression>
+		</element>
+		<element kind="image" uuid="058c17e7-bd54-4383-a717-a0538bee9614" x="0" y="1" width="550" height="69">
+			<expression><![CDATA["imgs/area" + $F{idArea} + ".png"]]></expression>
+		</element>
+		<element kind="textField" uuid="a12eb0a5-606c-4a62-a0b2-535bd33a55d0" x="120" y="10" width="420" height="30" forecolor="#CC72C2" fontSize="16.0" textAdjust="ScaleFont" bold="true">
+			<expression><![CDATA[$F{area}.toUpperCase()]]></expression>
+		</element>
+		<element kind="staticText" uuid="31851770-5da0-410d-bb5d-dca54b1aa926" x="120" y="40" width="100" height="25" forecolor="#4B96D4" fontSize="11.0">
+			<text><![CDATA[MICRORREGIÃO: ]]></text>
+		</element>
+		<element kind="textField" uuid="ed6a0410-06ec-41de-92e5-cbabb524d53b" x="212" y="40" width="180" height="25" forecolor="#4B96D4" fontSize="11.0" textAdjust="ScaleFont">
+			<expression><![CDATA[$F{microregiao}.toUpperCase()]]></expression>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="40" splitType="Prevent">
+			<element kind="subreport" uuid="bbfb2c28-11bb-4863-84bb-842936a1e562" x="-20" y="0" width="580" height="40" runToBottom="false" usingCache="false">
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<expression><![CDATA["ProposeReport_included_subareaAll.jasper"]]></expression>
+				<parameter name="MICROREGION_ID">
+					<expression><![CDATA[$P{ID_MICROREGIAO}]]></expression>
+				</parameter>
+				<parameter name="AREA_ID">
+					<expression><![CDATA[$F{idArea}]]></expression>
+				</parameter>
+				<parameter name="CONFERENCE_ID">
+					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
+				</parameter>
+			</element>
+		</band>
+	</detail>
+</jasperReport>
