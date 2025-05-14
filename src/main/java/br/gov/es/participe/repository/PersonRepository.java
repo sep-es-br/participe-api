@@ -263,7 +263,6 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     )
     List<PersonMeetingFilteredDto> findPersonsOnMeetingWithCheckIn(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name);
 
-  
     @Query(
         " MATCH (conf: Conference)<-[:OCCURS_IN]-(m:Meeting)<-[cia:CHECKED_IN_AT]-(p:Person) " +
         " WHERE id(p) = $idPerson AND id(conf) = $idConference " +
@@ -271,6 +270,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
         " RETURN p"
     )
     Optional<Person> findPersonIfParticipatingOnMeetingPresentially(@Param("idPerson")Long idPerson, @Param("date")Date date, @Param("idConference") Long idConference);
+
   
     @Query(
         value = "MATCH (m:Meeting) " + 
@@ -296,6 +296,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "RETURN COUNT(*)"
     )
     List<PersonMeetingFilteredDto> findPersonsOnMeetingWithPreRegistration(@Param("idMeeting") Long idMeeting, @Param("localities") List<Long> localities, @Param("name") String name);
+
 
     @Query(
         value = "MATCH (m:Meeting) " + 

@@ -11,10 +11,12 @@ import org.springframework.data.repository.query.Param;
 
 import br.gov.es.participe.controller.dto.DomainConfigurationDto;
 import br.gov.es.participe.controller.dto.ProposalEvaluationCommentResultDto;
+import br.gov.es.participe.controller.dto.ProposalEvaluationDto;
 import br.gov.es.participe.controller.dto.StructureItemAndLocalityTypeDto;
 import br.gov.es.participe.model.Evaluates;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.PlanItem;
+import br.gov.es.participe.model.ProposalEvaluation;
 
 public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates, Long> {
 
@@ -27,6 +29,21 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         + "AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $organizationGuid) OR $organizationGuid = []) "
         + "AND ((eval.includedInNextYearLOA IS NOT NULL AND eval.includedInNextYearLOA = $loaIncluded) OR $loaIncluded IS NULL) "
         + "AND apoc.text.clean(comment.text) CONTAINS apoc.text.clean($commentText) ";
+
+    @Query(
+        "MATCH (comment:Comment) " +
+        "WHERE id(comment)=$commentId " +
+        "RETURN exists((comment)<-[:EVALUATES]-())"
+    )
+    Boolean existsRelationshipByCommentId(@Param("commentId") Long commentId);
+
+    @Query(
+        "MATCH (person:Person)-[eval:EVALUATES]->(comment:Comment)-[:ABOUT]->(conference:Conference) " +
+        "WHERE id(conference)=$conferenceId " +
+        "RETURN person.name AS personName, comment.text AS description " +
+        "LIMIT 20"
+    )
+    List<ProposalEvaluationDto> findAllByConferenceId(@Param("conferenceId") Long conferenceId);
 
     @Query(value = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference),  \r\n" + //
                 "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) \r\n" + //
