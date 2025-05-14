@@ -33,19 +33,6 @@ public class ProposalEvaluationController {
     @Autowired
     private ConferenceService conferenceService;
 
-    // Versão anterior do GET básico (List simples)
-    @GetMapping("/simple")
-    public ResponseEntity<List<ProposalEvaluationDto>> listProposalEvaluationsByConferenceId(
-        @RequestHeader(name = "Authorization") String token,
-        @RequestParam(value = "conferenceId", required = true) Long conferenceId
-    ) {
-        if (!personService.hasOneOfTheRoles(token, new String[]{"Administrator", "Moderator"})) {
-            return ResponseEntity.status(401).body(null);
-        }
-
-        List<ProposalEvaluationDto> response = proposalEvaluationService.listProposalEvaluationsByConferenceId(conferenceId);
-        return ResponseEntity.status(200).body(response);
-    }
 
     @GetMapping("/is-evaluator/{personId}")
     public ResponseEntity<String> checkIsPersonEvaluator(@PathVariable(name = "personId") Long personId) throws IOException {
