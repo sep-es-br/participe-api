@@ -38,20 +38,14 @@ public class RootFolderRepositoryService extends DefaultRepositoryService {
         Path filePath = this.root.resolve(fileName);
 
         if (!Files.exists(filePath)) {
-        Path imgPath = this.root.resolve("imgs").resolve(fileName);
-        if (Files.exists(imgPath)) {
-            filePath = imgPath;
-        } else {
-            Logger.getGlobal().warning("File not found: " + fileName);
+            Path imgPath = this.root.resolve("imgs").resolve(fileName);
+            if (Files.exists(imgPath)) {
+                filePath = imgPath;
+            } else {
+                Logger.getGlobal().warning("File not found: " + fileName);
+            }
         }
-    }
-        
-        Logger.getGlobal().log(Level.INFO, uri);
-        Logger.getGlobal().log(Level.INFO, "filepath: " + filePath);
-        Logger.getGlobal().log(Level.INFO, resourceType.getSimpleName());
-        Logger.getGlobal().log(Level.INFO, String.valueOf(InputStreamResource.class.isAssignableFrom(resourceType)));
-        
-        
+               
         if(InputStreamResource.class.isAssignableFrom(resourceType)) {
             try {
                 InputStreamResource resource = new InputStreamResource();
