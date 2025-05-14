@@ -1,0 +1,82 @@
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposeReport_participation_presential_microregion" language="java" columnCount="1" pageWidth="595" pageHeight="842" orientation="Landscape" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" uuid="b3aa5a62-e215-48b6-8d54-48649d3a38e8">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
+	<parameter name="ID_MEETING" class="java.lang.Integer"/>
+	<query language="sql"><![CDATA[match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person),
+    (p)-[:MADE]->(s:SelfDeclaration)-[:AS_BEING_FROM]->(loc:Locality),
+    (s)-[:TO]->(co)
+where   id(co) = $P{ID_CONFERENCE}  AND id(m) = $P{ID_MEETING} 
+return DISTINCT m.name AS meeting, apoc.text.clean(p.name) as cleanName , p.name AS person, loc.name AS city  
+ORDER BY cleanName]]></query>
+	<field name="meeting" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="meeting"/>
+		<property name="com.jaspersoft.studio.field.label" value="meeting"/>
+	</field>
+	<field name="cleanName" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="cleanName"/>
+		<property name="com.jaspersoft.studio.field.label" value="cleanName"/>
+	</field>
+	<field name="person" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="person"/>
+		<property name="com.jaspersoft.studio.field.label" value="person"/>
+	</field>
+	<field name="city" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="city"/>
+		<property name="com.jaspersoft.studio.field.label" value="city"/>
+	</field>
+	<background splitType="Stretch"/>
+	<title height="22">
+		<element kind="textField" uuid="675cbc54-14a7-4985-b685-8b1519fd8108" x="0" y="0" width="544" height="22" forecolor="#CC72C2" fontSize="12.0" bold="true">
+			<expression><![CDATA[$F{meeting}]]></expression>
+		</element>
+	</title>
+	<columnHeader height="39" splitType="Stretch">
+		<element kind="staticText" uuid="aaf8a495-81d3-4b6e-b83b-bc1b88b95837" x="20" y="12" width="100" height="27" forecolor="#1F90FF" fontSize="13.0" bold="true">
+			<text><![CDATA[Participante]]></text>
+		</element>
+		<element kind="staticText" uuid="27364200-4366-4ba3-ace6-adfdbd525826" x="290" y="12" width="100" height="27" forecolor="#1F90FF" fontSize="13.0" bold="true">
+			<text><![CDATA[Município]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="31" splitType="Stretch">
+			<element kind="staticText" uuid="f6ba3d4d-99c4-4761-ab01-06d54d189f49" x="0" y="0" width="561" height="11">
+				<text><![CDATA[Static Text]]></text>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="dc5aaaa3-8c2a-4bd6-bc85-6011dd7f238d" x="30" y="10" width="270" height="20">
+				<expression><![CDATA[$F{person}.toUpperCase()]]></expression>
+			</element>
+			<element kind="textField" uuid="097728ba-db49-449f-9bbc-35043fe1496b" x="300" y="11" width="250" height="19">
+				<expression><![CDATA[$F{city}]]></expression>
+			</element>
+			<element kind="staticText" uuid="c7f01d7f-6496-4701-9649-ada03fcc1c35" x="0" y="20" width="561" height="11">
+				<text><![CDATA[Static Text]]></text>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+		</band>
+	</detail>
+</jasperReport>

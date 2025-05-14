@@ -1,0 +1,45 @@
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposeReport_All" language="java" columnCount="1" pageWidth="595" pageHeight="842" orientation="Landscape" columnWidth="575" leftMargin="20" rightMargin="0" topMargin="0" bottomMargin="20" uuid="65680b8c-7e79-4cc6-8b1e-8703c40a567a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
+	<query language="SQL"><![CDATA[WITH $P{ID_CONFERENCE} AS Conference_Id
+MATCH (area:PlanItem)<-[:COMPOSES]-(:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(:Person)
+WHERE  (eval.active AND NOT eval.deleted) AND NOT c.duplicated
+MATCH (c)-[:ABOUT]->(co:Conference)
+WHERE id(co) = Conference_Id
+RETURN DISTINCT id(area) as idArea, area.name as area
+ORDER BY area;]]></query>
+	<field name="idArea" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="idArea"/>
+		<property name="com.jaspersoft.studio.field.label" value="idArea"/>
+	</field>
+	<field name="area" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="area"/>
+		<property name="com.jaspersoft.studio.field.label" value="area"/>
+	</field>
+	<background splitType="Stretch"/>
+	<detail>
+		<band height="200">
+			<element kind="subreport" uuid="6ddbd6f6-b3a6-4770-bb4f-9845c6280187" x="-20" y="0" width="200" height="200" runToBottom="true" usingCache="true">
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<expression><![CDATA["ProposeReport_All_area.jasper"]]></expression>
+				<parameter name="ID_CONFERENCE">
+					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
+				</parameter>
+				<parameter name="ID_AREA">
+					<expression><![CDATA[$F{idArea}]]></expression>
+				</parameter>
+			</element>
+		</band>
+	</detail>
+</jasperReport>

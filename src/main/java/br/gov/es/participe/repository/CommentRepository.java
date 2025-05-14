@@ -19,7 +19,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
             + "id(conference)=$idConference "
             + "AND comment.status CONTAINS $status "
             + "AND (id(parent) IN $planItemIds OR id(child) IN $planItemIds OR NOT $planItemIds) "
-            + "AND (id(locality) IN $localityIds OR NOT $localityIds) "
+            + "AND (id(localityMicro) IN $localityIds OR id(locality) IN $localityIds OR NOT $localityIds) "
             + "AND (((child)-[:ABOUT]-(comment)) OR ((parent)-[:ABOUT]-(comment))) ";
     String WHERE_TEXT_FILTER = "WHERE apoc.text.clean(comment.text) CONTAINS apoc.text.clean($text) "
             + "OR apoc.text.clean(person.name) CONTAINS apoc.text.clean($text) "
@@ -53,7 +53,8 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
             + "(conference)-[target:TARGETS]-(plan:Plan), "
             + "(comment)-[ab1:ABOUT]->(child:PlanItem)-[composesChild:COMPOSES*0..]->(parent:PlanItem) "
             + "OPTIONAL MATCH (comment)-[aboutLocality:ABOUT]->(locality:Locality)-[ofType:OF_TYPE]->(localityType) "
-            + "WITH locality, aboutLocality, comment, plan, parent, composesChild, child, ofType, localityType, conference "
+            + "OPTIONAL MATCH (locality)-[locOfCity:IS_LOCATED_IN]->(localityMicro:Locality) "
+            + "WITH locality, aboutLocality, comment, plan, parent, composesChild, child, ofType, localityType, locOfCity, localityMicro, conference "
             + WHERE_FILTER
             + "MATCH (comment)-[madeBy:MADE_BY]->(person:Person)-[made:MADE]->(selfDeclaration:SelfDeclaration) "
             + "MATCH (comment)-[aboutPlanItem:ABOUT]->(planItem:PlanItem) "
@@ -61,15 +62,16 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
             + "OPTIONAL MATCH (planItem:PlanItem)-[obeys:OBEYS]->(structureItem:StructureItem) "
             + "OPTIONAL MATCH (comment)-[likedBy:LIKED_BY]->(personLikedBy:Person) "
             + "OPTIONAL MATCH (planItem)-[:COMPOSES*]->(pi3:PlanItem)-[:COMPOSES]->(plan) "
-            + "WITH likedBy, personLikedBy, locality, aboutLocality, comment, madeBy, person, planItem, collect(pi3) AS listPi3, "
+            + "WITH likedBy, personLikedBy, locality, aboutLocality, locOfCity, localityMicro, comment, madeBy, person, planItem, collect(pi3) AS listPi3, "
             + "aboutPlanItem, plan, obeys, structureItem, ofType, localityType, made, localitySD, asBeingFrom, selfDeclaration, to, conference "
             + WHERE_TEXT_FILTER
-            + "RETURN comment, aboutLocality, locality, person, madeBy, ofType, localityType, "
+            + "RETURN comment, aboutLocality, locality, person, madeBy, ofType, localityType, locOfCity, localityMicro, "
             + "aboutPlanItem, planItem, obeys, structureItem, likedBy, personLikedBy, made,  localitySD, asBeingFrom, selfDeclaration, to, conference ", countQuery = "MATCH (comment:Comment)-[:ABOUT]->(conference:Conference), "
                     + "(conference)-[target:TARGETS]-(plan:Plan), "
                     + "(comment)-[ab1:ABOUT]->(child:PlanItem)-[composesChild:COMPOSES*]->(parent:PlanItem) "
                     + "OPTIONAL MATCH (comment)-[aboutLocality:ABOUT]->(locality:Locality)-[ofType:OF_TYPE]->(localityType) "
-                    + "WITH locality, aboutLocality, comment, plan, parent, composesChild, child, ofType, localityType, conference "
+                    + "OPTIONAL MATCH (locality)-[:IS_LOCATED_IN]->(localityMicro:Locality) "
+                    + "WITH locality, aboutLocality, comment, plan, parent, composesChild, child, ofType, localityType, localityMicro, conference "
                     + WHERE_FILTER
                     + "MATCH (comment)-[madeBy:MADE_BY]->(person:Person)-[made:MADE]->(selfDeclaration:SelfDeclaration) "
                     + "MATCH (comment)-[aboutPlanItem:ABOUT]->(planItem:PlanItem) "

@@ -11,6 +11,7 @@ public class ProposalDto {
 	private String personName;
 	private String localityPerson;
 	private String localityName;
+        private String localityMicro;
 	private String localityTypeName;
 	private String time;
 
@@ -28,6 +29,14 @@ public class ProposalDto {
 	public Long getPersonId() {
 		return personId;
 	}
+
+    public String getLocalityMicro() {
+        return localityMicro;
+    }
+
+    public void setLocalityMicro(String localityMicro) {
+        this.localityMicro = localityMicro;
+    }
 
 	/**
 	 * @param personId the personId to set

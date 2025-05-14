@@ -40,7 +40,7 @@ public interface PlanItemRepository extends Neo4jRepository<PlanItem, Long> {
               + " [(child)<-[apt2:APPLIES_TO]-(l2:Locality) | [apt2, l2]]" + "]")
        Optional<PlanItem> findByIdWithLocalities( @Param("id") Long id);
 
-       @Query("MATCH (p:PlanItem)<-[com:COMPOSES*]-(child:PlanItem) " + 
+       @Query("MATCH (p:PlanItem)<-[com:COMPOSES*]-(child:PlanItem)-[:OBEYS]->(si:StructureItem) " + 
               " WHERE id(p) = $idPlanItem " + 
               " AND ( NOT EXISTS {" + 
               "  MATCH (child)<-[apt:APPLIES_TO]-(l:Locality)" + 

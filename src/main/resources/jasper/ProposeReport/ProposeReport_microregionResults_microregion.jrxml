@@ -1,0 +1,82 @@
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposeReport_microregionResults_microregion" language="java" columnCount="1" pageWidth="595" pageHeight="842" orientation="Landscape" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="065a4dd7-ec56-4ad0-830f-686b02eb98dc">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
+	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
+		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
+	</parameter>
+	<query language="SQL"><![CDATA[MATCH 
+    (conf:Conference)<-[:ABOUT]-(c:Comment)-[:ABOUT]->(loc:Locality)
+WHERE
+    id(conf) = $P{ID_CONFERENCE} 
+RETURN 
+    DISTINCT id(loc) as idMicroregion, apoc.text.clean(loc.name) as microregion
+ORDER BY
+    microregion]]></query>
+	<field name="idMicroregion" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="idMicroregion"/>
+		<property name="com.jaspersoft.studio.field.label" value="idMicroregion"/>
+	</field>
+	<field name="microregion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="microregion"/>
+		<property name="com.jaspersoft.studio.field.label" value="microregion"/>
+	</field>
+	<background splitType="Stretch"/>
+	<detail>
+		<band height="220" splitType="Stretch">
+			<element kind="subreport" uuid="925842e8-7cef-452e-a9bf-583658661edd" x="-20" y="20" width="200" height="200">
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<expression><![CDATA["ProposeReport_microregionResults_microregion_data.jasper"]]></expression>
+				<parameter name="ID_CONFERENCE">
+					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
+				</parameter>
+				<parameter name="ID_MICROREGION">
+					<expression><![CDATA[$F{idMicroregion}]]></expression>
+				</parameter>
+				<parameter name="ROOT">
+					<expression><![CDATA[$P{ROOT}]]></expression>
+				</parameter>
+			</element>
+		</band>
+		<band height="220">
+			<element kind="subreport" uuid="a75afeee-2397-4a94-bdcc-1e739e835523" x="-20" y="20" width="200" height="200">
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<expression><![CDATA["ProposeReport_microregionResults_microregion_graph.jasper"]]></expression>
+				<parameter name="ID_CONFERENCE">
+					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
+				</parameter>
+				<parameter name="ID_MICROREGION">
+					<expression><![CDATA[$F{idMicroregion}]]></expression>
+				</parameter>
+				<parameter name="ROOT">
+					<expression><![CDATA[$P{ROOT}]]></expression>
+				</parameter>
+			</element>
+		</band>
+		<band height="222">
+			<element kind="subreport" uuid="4b1f2c70-52eb-4a93-ad18-ddd2579e4a2b" x="-20" y="22" width="200" height="200">
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<expression><![CDATA["ProposeReport_included.jasper"]]></expression>
+				<parameter name="ID_CONFERENCE">
+					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
+				</parameter>
+				<parameter name="ID_MICROREGION">
+					<expression><![CDATA[$F{idMicroregion}]]></expression>
+				</parameter>
+				<parameter name="ROOT">
+					<expression><![CDATA[$P{ROOT}]]></expression>
+				</parameter>
+			</element>
+		</band>
+	</detail>
+</jasperReport>

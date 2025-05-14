@@ -20,12 +20,15 @@ public class Evaluates extends Entity {
 
     private Boolean includedInNextYearLOA;
     private String reason;
+    private String reasonDetail;
     private String budgetUnitId;
     private String budgetUnitName;
     private String budgetActionId;
     private String budgetActionName;
     private String budgetPlan;
     private String representing;
+    private String representingOrgTag;
+    private String representingOrgName;
     private Boolean active;
     private Boolean deleted;
 
@@ -44,7 +47,10 @@ public class Evaluates extends Entity {
         this.budgetActionName = proposalEvaluationRequestDto.getBudgetActionName();
         this.budgetPlan = proposalEvaluationRequestDto.getBudgetPlan();
         this.reason = proposalEvaluationRequestDto.getReason();
+        this.reasonDetail = proposalEvaluationRequestDto.getReasonDetail();
         this.representing = proposalEvaluationRequestDto.getRepresenting();
+        this.representingOrgTag = proposalEvaluationRequestDto.getRepresentingOrgTag();
+        this.representingOrgName = proposalEvaluationRequestDto.getRepresentingOrgName();
     }
 
     public Person getPerson() {
@@ -150,5 +156,14 @@ public class Evaluates extends Entity {
     public void setDate(Date date) {
         this.date = date;
     }
+    
+    public String getReasonDetail() {
+        return reasonDetail;
+    }
+
+    public void setReasonDetail(String reasonDetail) {
+        this.reasonDetail = reasonDetail;
+    }
+
 
 }

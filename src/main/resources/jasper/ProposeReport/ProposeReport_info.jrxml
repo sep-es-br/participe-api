@@ -1,0 +1,20 @@
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposeReport_info" language="java" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c421b28e-0f8e-4a5f-b2b4-448469dc3f6a" titleNewPage="true">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<query language="sql"><![CDATA[return "teste" as teste]]></query>
+	<background splitType="Stretch"/>
+	<title height="180" splitType="Stretch">
+		<element kind="staticText" uuid="f719b741-be84-4503-bc2b-43bf14bbdc90" x="0" y="30" width="550" height="50" forecolor="#1F90FF" fontSize="18.0" bold="true">
+			<text><![CDATA[ANEXO I: PROPOSTAS POPULARES REGISTRADAS NO SITE <ORCAMENTO.ES.GOV.BR>  ]]></text>
+		</element>
+		<element kind="staticText" uuid="d0d3a3bd-c5fc-4b7c-a685-9e98b98457bf" x="0" y="80" width="550" height="100" fontSize="12.0" hTextAlign="Justified">
+			<text><![CDATA[Todas as propostas populares recebidas por meio do site durante as audiências públicas foram registradas e analisadas pela equipe da Secretaria de Economia e Planejamento.
+
+Todas as demandas recebidas, já em seu formato consolidado, estão disponíveis neste anexo. Foram divididas, primeiramente, por área temática/ e, em segundo lugar, pela microrregião que realizou a solicitação.]]></text>
+		</element>
+		<element kind="staticText" uuid="abfdd946-4aba-48db-ab1e-819424e7247c" x="0" y="0" width="100" height="30" forecolor="#1F90FF" fontName="Calibri" fontSize="21.0" bold="true">
+			<text><![CDATA[>>>>]]></text>
+		</element>
+	</title>
+</jasperReport>

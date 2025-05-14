@@ -1,0 +1,48 @@
+<!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
+<jasperReport name="ProposeReport_ All" language="java" columnCount="1" pageWidth="595" pageHeight="842" columnWidth="575" leftMargin="20" rightMargin="0" topMargin="0" bottomMargin="0" uuid="6166a07f-4515-4eac-b848-c34a691bcdbf">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="ID_MICROREGIAO" class="java.lang.Integer"/>
+	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
+	<parameter name="ID_AREA" class="java.lang.Integer"/>
+	<query language="sql"><![CDATA[WITH $P{ID_CONFERENCE}  AS Conference_Id,
+	$P{ID_MICROREGIAO} AS Microregion_Id,
+	$P{ID_AREA} AS Area_Id
+MATCH (area:PlanItem)<-[:COMPOSES]-(:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(:Person)
+WHERE id(area) = Area_Id
+		AND (eval.active AND NOT eval.deleted)
+		AND NOT c.duplicated
+MATCH (c)-[:ABOUT]->(microregiao:Locality) 
+WHERE id(microregiao) = Microregion_Id
+MATCH (c)-[:ABOUT]->(co:Conference)
+WHERE id(co) = Conference_Id
+return microregiao.name as microregion, c.text as propose 
+ORDER BY microregiao.name, area.name;]]></query>
+	<field name="microregion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="microregion"/>
+		<property name="com.jaspersoft.studio.field.label" value="microregion"/>
+	</field>
+	<field name="propose" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="propose"/>
+		<property name="com.jaspersoft.studio.field.label" value="propose"/>
+	</field>
+	<pageHeader height="24">
+		<element kind="staticText" uuid="f3e026f5-93b1-4202-b1c0-06252567583e" x="0" y="10" width="100" height="14" forecolor="#CC72C2" backcolor="#CC72C2" bold="true">
+			<text><![CDATA[MICRORREGIÃO: ]]></text>
+		</element>
+		<element kind="textField" uuid="aad25ae1-1fa3-4683-aac2-e4da0d04dffc" x="87" y="10" width="170" height="14" forecolor="#CC72C2" backcolor="#CC72C2" bold="true">
+			<expression><![CDATA[$F{microregion}.toUpperCase()]]></expression>
+		</element>
+	</pageHeader>
+	<detail>
+		<band height="26" splitType="Stretch">
+			<element kind="ellipse" uuid="e69ff765-470e-4413-aaba-16e2e0a114d7" x="30" y="10" width="5" height="5" forecolor="#CC72C2" backcolor="#CC72C2">
+				<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			</element>
+			<element kind="textField" uuid="54ee84db-53c1-4f25-a040-cd208ff900fa" x="40" y="7" width="460" height="13" textAdjust="StretchHeight">
+				<expression><![CDATA[$F{propose}]]></expression>
+			</element>
+		</band>
+	</detail>
+</jasperReport>

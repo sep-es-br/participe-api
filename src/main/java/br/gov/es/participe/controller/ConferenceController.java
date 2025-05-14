@@ -74,8 +74,7 @@ public class ConferenceController {
       @RequestParam(value = "id", required = false) Long id) {
     return ResponseEntity.status(200).body(conferenceService.validate(name, id));
   }
- 
-
+   
   @GetMapping("/{id}")
   public ResponseEntity<ConferenceDto> show(@PathVariable Long id) {
     ConferenceDto response = new ConferenceDto(conferenceService.find(id));
