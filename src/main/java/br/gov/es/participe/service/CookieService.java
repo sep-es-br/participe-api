@@ -47,5 +47,13 @@ public class CookieService {
         }
         throw new IllegalArgumentException("Cookie ".concat(name).concat(" not found."));
     }
+    
+    public boolean exists(HttpServletRequest request, String name) {
+        if (request.getCookies() != null) {
+            Optional<Cookie> filter = Arrays.stream(request.getCookies()).filter(c -> c.getName().equals(name)).findAny();
+            return filter.isPresent();
+        }
+        return false;
+    }
 
 }

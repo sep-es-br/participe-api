@@ -5,6 +5,7 @@ import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
 import br.gov.es.participe.controller.dto.SigninDto;
 import br.gov.es.participe.service.AcessoCidadaoService;
 import br.gov.es.participe.service.CookieService;
+import br.gov.es.participe.service.MeetingService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.util.dto.MessageDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,12 +39,16 @@ public class SignInController {
 
   @Autowired
   private CookieService cookieService;
+  
+  @Autowired
+  private MeetingService meetingService;
 
   @Autowired
   private PersonService personService;
 
   private static final String FRONT_CALLBACK_URL = "front_callback_url";
   private static final String FRONT_CONFERENCE_ID = "front_conference_id";
+  private static final String FRONT_MEETING_ID = "front_meeting_id";
 
   @GetMapping("/refresh")
   public ResponseEntity<SigninDto> refresh(@RequestParam(name = "refreshToken") String refreshToken) {
@@ -103,13 +108,24 @@ public class SignInController {
   }
 
   private String buildHomeCallbackUrl(HttpServletRequest request, HttpServletResponse response, String value) {
+    
     Cookie cookie = cookieService.findCookie(request, FRONT_CALLBACK_URL);
     cookieService.deleteCookie(request, response, FRONT_CALLBACK_URL, "/participe");
     String url = cookie.getValue();
     if (url.contains("?")) {
       url = url.substring(0, url.indexOf('?'));
     }
-    return url.concat("/#/home?signinDto=".concat(value));
+    
+    if(cookieService.exists(request, FRONT_MEETING_ID)){
+        Cookie meetingCookie = cookieService.findCookie(request, FRONT_MEETING_ID);
+        cookieService.deleteCookie(request, response, FRONT_MEETING_ID, "/participe");
+        String meetingId = meetingCookie.getValue();
+        
+        return String.format("%s/#/authority-credential/%s?signinDto=%s", url, meetingId, value);
+    } else {
+        return url.concat("/#/home?signinDto=".concat(value));
+    }
+    
   }
 
   private String buildProfileCallbackUrl(
@@ -127,12 +143,17 @@ public class SignInController {
 
   private Long getConferenceId(HttpServletRequest request, HttpServletResponse response) {
     if (request.getCookies() != null) {
-      Optional<Cookie> filter = Arrays.stream(request.getCookies()).filter(
-          c -> c.getName().equals(FRONT_CONFERENCE_ID)).findFirst();
-      if (filter.isPresent()) {
-        cookieService.deleteCookie(request, response, FRONT_CONFERENCE_ID, "/participe");
-        return Long.valueOf(filter.get().getValue());
-      }
+        
+        if(cookieService.exists(request, FRONT_CONFERENCE_ID)){
+            String conferenceId = cookieService.findCookie(request, FRONT_CONFERENCE_ID).getValue();
+            cookieService.deleteCookie(request, response, FRONT_CONFERENCE_ID, "/participe");
+            return Long.valueOf(conferenceId);
+        } else if(cookieService.exists(request, FRONT_MEETING_ID)){
+            String meetingId = cookieService.findCookie(request, FRONT_MEETING_ID).getValue();
+            cookieService.deleteCookie(request, response, FRONT_MEETING_ID, "/participe");
+            return meetingService.findById(Long.valueOf(meetingId)).getConference().getId();
+        }
+        
     }
     return null;
   }

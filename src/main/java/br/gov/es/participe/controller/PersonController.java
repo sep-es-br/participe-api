@@ -3,11 +3,16 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.ForgotPasswordDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
+import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
+import br.gov.es.participe.controller.dto.UnitRolesDto;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.SelfDeclaration;
+import br.gov.es.participe.service.AcessoCidadaoService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.util.dto.MessageDto;
+import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
+import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +34,9 @@ public class PersonController {
 
   @Autowired
   private PersonService personService;
+  
+  @Autowired
+  private AcessoCidadaoService acService;
 
   @GetMapping
   @SuppressWarnings("rawtypes")
@@ -42,7 +51,64 @@ public class PersonController {
       return ResponseEntity.status(401).body(null);
     }
   }
-
+  
+  @GetMapping("{idPerson}/ACRole")
+  public ResponseEntity<?> getACRole(
+          @PathVariable Long idPerson
+  ){
+      
+      String sub = personService.getSubById(idPerson);
+      
+      if(sub == null) return ResponseEntity.ok(null);
+      
+      UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub);
+      if(role == null) return ResponseEntity.ok(null);
+      
+      AcSectionInfoDto sectionInfoDto = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
+      if(sectionInfoDto == null) return ResponseEntity.ok(null);
+      
+      AcOrganizationInfoDto organizationInfoDto = acService.findOrganizationInfoFromOrganogramaAPI(sectionInfoDto.getGuidOrganizacao());
+      if(organizationInfoDto == null) return ResponseEntity.ok(null);
+      
+      
+      HashMap<String, Object> acRole = new HashMap<>();
+      acRole.put("organization", organizationInfoDto.getRazaoSocial());
+      acRole.put("role", role.getNome());     
+      
+      
+      return ResponseEntity.ok(acRole);
+  }
+  
+  @GetMapping("subById/{idPerson}")
+  public ResponseEntity<?> getSubById(
+          @PathVariable Long idPerson
+  ){
+      return ResponseEntity.ok(personService.getSubById(idPerson));
+      
+  }
+  
+  @GetMapping("{cpf}/ACInfoByCpf")
+  public ResponseEntity<?> getACInfoByCpf(
+          @PathVariable String cpf
+  ){
+      
+      PublicAgentDto publicAgentDto = acService.findSubFromPersonInAcessoCidadaoAPIByCpf(cpf);
+      String sub = publicAgentDto.getSub();
+                
+      HashMap<String, Object> acInfo = new HashMap<>();
+      
+      PublicAgentDto maybePublicAgentDto = acService.findAgentPublicBySubInAcessoCidadaoAPI(sub);
+      if(maybePublicAgentDto != null) {
+          acInfo.put("name", maybePublicAgentDto.getName());
+          UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub);
+          if(role != null) acInfo.put("role", role.getNome());
+      } else {
+          String email = acService.findUserEmailInAcessoCidadao(sub);
+          acInfo.put("name", email == null ? null : email.split("@")[0]);
+      }
+            
+      return ResponseEntity.ok(acInfo);
+  }
 
   @Transactional
   @PostMapping("/operator")
