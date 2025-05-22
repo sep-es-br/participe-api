@@ -16,6 +16,14 @@ public class PreRegistration extends Entity implements Serializable {
 
     @Relationship(type = "PRE_REGISTRATION", direction = Relationship.OUTGOING)
     private Person person;
+    
+    @Relationship(type = "MADE_BY", direction = Relationship.OUTGOING)
+    private Person madeBy;
+    
+    private Boolean isAuthority;
+    
+    private String organization;
+    private String role;
 
     @DateString
     private Date created;
@@ -38,6 +46,17 @@ public class PreRegistration extends Entity implements Serializable {
     public PreRegistration(Meeting meeting, Person person ){
         this.meeting = meeting;
         this.person = person;
+        this.created = new Date();
+
+    }
+
+    public PreRegistration(Meeting meeting, Person madeByPerson, Person representingPerson, String organization, String role ){
+        this.isAuthority = true;
+        this.meeting = meeting;
+        this.madeBy = madeByPerson;
+        this.person = representingPerson;
+        this.organization = organization;
+        this.role = role;
         this.created = new Date();
 
     }

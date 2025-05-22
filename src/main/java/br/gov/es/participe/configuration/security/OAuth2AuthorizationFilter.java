@@ -35,6 +35,7 @@ public class OAuth2AuthorizationFilter implements Filter {
     
     private static final String FRONT_CALLBACK_URL = "front_callback_url";
     private static final String FRONT_CONFERENCE_ID = "front_conference_id";
+    private static final String FRONT_MEETING_ID = "front_meeting_id";
 
 
     @Override
@@ -63,6 +64,14 @@ public class OAuth2AuthorizationFilter implements Filter {
                 			response,
                 			FRONT_CONFERENCE_ID,
                 			params.get(FRONT_CONFERENCE_ID),
+                			"/participe"
+        			);
+                }
+                if (params.get(FRONT_MEETING_ID) != null) {
+                	cookieService.createCookie(
+                			response,
+                			FRONT_MEETING_ID,
+                			params.get(FRONT_MEETING_ID),
                 			"/participe"
         			);
                 }

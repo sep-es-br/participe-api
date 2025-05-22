@@ -74,7 +74,7 @@ public class EvaluatorsService {
             }
 
         }
-        if(!organizationGuids.isEmpty()){
+        if(!organizationGuids.isEmpty()){;
             return String.join(",", organizationGuids);
         }else{
             throw new EvaluatorForbiddenException();

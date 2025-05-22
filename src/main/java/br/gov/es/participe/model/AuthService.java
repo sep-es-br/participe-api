@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @NodeEntity
 public class AuthService extends Entity implements Serializable {
+    
+    public static final String ACESSO_CIDADAO = "AcessoCidadao";
 
     private String server;
 

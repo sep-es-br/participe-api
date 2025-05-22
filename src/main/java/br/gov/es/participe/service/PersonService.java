@@ -1447,4 +1447,16 @@ public class PersonService {
         Matcher matcher = pattern.matcher(string);
         return matcher.matches();
     }
+  
+  public String getSubById(Long idPerson){
+      List<AuthService> auths = authServiceRepository.findAllByIdPerson(idPerson);
+      
+      AuthService acAuthService = auths.stream().filter(as -> as.getServer().equals(AuthService.ACESSO_CIDADAO)).findFirst().orElse(null);
+      
+      if(acAuthService == null) {
+          return null;
+      } else {
+          return acAuthService.getServerId();
+      }
+  }
 }
