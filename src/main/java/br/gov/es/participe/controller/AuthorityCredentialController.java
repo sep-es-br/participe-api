@@ -4,6 +4,7 @@ import br.gov.es.participe.controller.dto.AuthorityCredentialRequest;
 import br.gov.es.participe.controller.dto.ForgotPasswordDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
+import br.gov.es.participe.controller.dto.PreRegistrationAuthorityDto;
 import br.gov.es.participe.controller.dto.PreRegistrationDto;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
@@ -59,7 +60,7 @@ public class AuthorityCredentialController {
     
     
   @PutMapping
-  public ResponseEntity<PreRegistrationDto> registerAuthority(
+  public ResponseEntity<PreRegistrationAuthorityDto> registerAuthority(
       @RequestHeader(name = "Authorization") String token,
       @RequestBody AuthorityCredentialRequest credentialRequest
           ) {
@@ -96,7 +97,7 @@ public class AuthorityCredentialController {
         String to = madeByPerson.getContactEmail();
         String title =  meeting.getConference().getName()+" - Pré-Credenciamento de Autoridade";
         emailService.sendEmailPreRegistration(to, title, emailBody, imageQR);
-        return ResponseEntity.status(200).body(new PreRegistrationDto(savedPreRegistration,imageQR) );
+        return ResponseEntity.status(200).body(new PreRegistrationAuthorityDto(savedPreRegistration,imageQR) );
       }catch (IOException | WriterException | MessagingException ex) {
           throw new RuntimeException(ex);
       }

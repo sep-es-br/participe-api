@@ -13,6 +13,7 @@ import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import jdk.jfr.ContentType;
 
@@ -62,7 +64,7 @@ public class PersonController {
       
       if(sub == null) return ResponseEntity.ok(null);
       
-      UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub, true);
+      UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub, false);
       if(role == null) return ResponseEntity.ok(null);
       
       AcSectionInfoDto sectionInfoDto = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
@@ -84,10 +86,7 @@ public class PersonController {
   public ResponseEntity<?> getSubById(
           @PathVariable Long idPerson
   ){
-      return ResponseEntity.
-              ok().
-              contentType(MediaType.TEXT_PLAIN).
-              body(personService.getSubById(idPerson));
+      return ResponseEntity.ok(Map.of("sub", personService.getSubById(idPerson)));
       
   }
   
