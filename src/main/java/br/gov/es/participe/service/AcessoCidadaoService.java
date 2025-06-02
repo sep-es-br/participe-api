@@ -845,11 +845,13 @@ public class AcessoCidadaoService {
         List<UnitRolesDto> unitRolesDtos =  mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {
         });
         
-        if(prioritario) {
-            return unitRolesDtos.stream().filter(role -> role.isPrioritario()).findFirst().orElse(null);
-        } else {
-            return unitRolesDtos.stream().findFirst().orElse(null);
-        }
+        return unitRolesDtos.stream().filter(role -> role.isPrioritario()).findFirst()
+                .orElseGet(() -> {
+                    if(prioritario) return null;
+                    
+                    return unitRolesDtos.stream().findFirst().orElse(null);
+                });
+        
         
 
 //        

@@ -61,6 +61,40 @@ public class PreRegistration extends Entity implements Serializable {
 
     }
 
+    public Person getMadeBy() {
+        return madeBy;
+    }
+
+    public void setMadeBy(Person madeBy) {
+        this.madeBy = madeBy;
+    }
+
+    public Boolean getIsAuthority() {
+        return isAuthority;
+    }
+
+    public void setIsAuthority(Boolean isAuthority) {
+        this.isAuthority = isAuthority;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+    
+    
+
     public Person getPerson() {
         return person;
     }
