@@ -11,6 +11,7 @@ public class PreRegistrationAuthorityDto {
     private Long id;
     private MeetingDto meeting;
     private PersonDto person;
+    private PersonDto madeByPerson;
     private String organization;
     private String role;
     private Date checkInDate;
@@ -26,6 +27,7 @@ public class PreRegistrationAuthorityDto {
         this.id = preRegistration.getId();
         this.meeting = new MeetingDto(preRegistration.getMeeting(),false);
         this.person = new PersonDto(preRegistration.getPerson());
+        this.madeByPerson = new PersonDto(preRegistration.getMadeBy());
         this.checkInDate = preRegistration.getCheckIn();
         this.preRegistrationDate = preRegistration.getPreRegistration();
         this.qrcode = Base64.getEncoder().encodeToString(qrcode);
@@ -48,9 +50,14 @@ public class PreRegistrationAuthorityDto {
     public void setRole(String role) {
         this.role = role;
     }
-    
-    
 
+    public PersonDto getMadeByPerson() {
+        return madeByPerson;
+    }
+
+    public void setMadeByPerson(PersonDto madeByPerson) {
+        this.madeByPerson = madeByPerson;
+    }
 
     public Long getId() {
         return id;

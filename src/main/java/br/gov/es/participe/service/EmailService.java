@@ -93,6 +93,31 @@ public class EmailService {
 
 		mailSender.send(message);
 	}
+
+	public void sendEmailPreRegistration(String[] to, String title, Map<String, String> data, byte[] imageQR) throws MessagingException {
+		MimeMessage message = mailSender.createMimeMessage();
+		
+		MimeMessageHelper helper = new MimeMessageHelper(message, true);
+		String body = null;
+		
+		try {
+			body = generateBodyPreRegistration(data);
+			helper.setFrom(from);
+			helper.setTo(to);
+			helper.setText(body, true);
+			helper.setSubject(title);
+			this.base64ToImage(imageQR);
+			FileSystemResource qrCode = new FileSystemResource("qrcode.png");
+			FileSystemResource poweredBy = new FileSystemResource("brasao_white.png");
+			helper.addAttachment("QRCODE.png", qrCode);
+			helper.addInline("poweredBy", poweredBy);
+			helper.addInline("qrCode", qrCode);
+		} catch (Exception e ) {
+			log.error("Error template email", e);
+		}
+
+		mailSender.send(message);
+	}
 	
 	private String generateBody(Map<String, String> data) throws IOException, TemplateException {
 		freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/static");

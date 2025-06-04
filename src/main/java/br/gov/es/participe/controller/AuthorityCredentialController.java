@@ -94,7 +94,7 @@ public class AuthorityCredentialController {
           byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
 
         Map<String, String> emailBody = preRegistrationService.buildEmailBody(meeting);
-        String to = madeByPerson.getContactEmail();
+        String[] to = new String[]{madeByPerson.getContactEmail(), representedByPerson.getContactEmail()};
         String title =  meeting.getConference().getName()+" - Pré-Credenciamento de Autoridade";
         emailService.sendEmailPreRegistration(to, title, emailBody, imageQR);
         return ResponseEntity.status(200).body(new PreRegistrationAuthorityDto(savedPreRegistration,imageQR) );
