@@ -75,7 +75,7 @@ public class PersonController {
       String sub = personService.getSubById(idPerson);
       if(sub == null) return ResponseEntity.ok(null);
       
-      
+      acRole.put("sub", sub);  
       
       UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub, false);
       if(role != null) acRole.put("role", role.getNome());  
@@ -120,11 +120,13 @@ public class PersonController {
           @PathVariable String cpf,
           @PathVariable Long conferenceId
   ){
+      HashMap<String, Object> acInfo = new HashMap<>();
       
       PublicAgentDto publicAgentDto = acService.findSubFromPersonInAcessoCidadaoAPIByCpf(cpf);
       String sub = publicAgentDto.getSub();
+      
+      acInfo.put("authoritySub", sub);
                 
-      HashMap<String, Object> acInfo = new HashMap<>();
       
       PublicAgentDto maybePublicAgentDto = acService.findAgentPublicBySubInAcessoCidadaoAPI(sub);
       if(maybePublicAgentDto != null) {
@@ -132,25 +134,24 @@ public class PersonController {
           UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub, false);
           if(role != null) acInfo.put("role", role.getNome());
                
-          PublicAgentDto person = new PublicAgentDto();
-          person.setSub(sub);
-          person = acService.findThePersonEmailBySubInAcessoCidadaoAPI(person);
-          
-          if(person.getEmail() != null) acInfo.put("email", person.getEmail());
-          
-          Optional<Person> optPerson = personService.findByContactEmail(sub);
-          
-          optPerson.ifPresent(p -> {
-              SelfDeclaration sd = selfDeclarationService.findByPersonAndConference(p.getId(), conferenceId);
-              
-              if(sd != null) {
-                  acInfo.put("localityId", sd.getLocality().getId());
-              }
-              
-          });
-          
-          
       }
+      
+        Optional<Person> optPerson = personService.getBySub(sub);
+
+        optPerson.ifPresent(p -> {
+            SelfDeclaration sd = selfDeclarationService.findByPersonAndConference(p.getId(), conferenceId);
+
+            if(sd != null) {
+                acInfo.put("localityId", sd.getLocality().getId());
+            }
+
+        });
+      
+        PublicAgentDto person = new PublicAgentDto();
+        person.setSub(sub);
+        person = acService.findThePersonEmailBySubInAcessoCidadaoAPI(person);
+
+        if(person.getEmail() != null) acInfo.put("email", person.getEmail());
             
       return ResponseEntity.ok(acInfo);
   }

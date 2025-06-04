@@ -612,6 +612,11 @@ public class PersonService {
 
     return personCitizen;
   }
+  
+  public Optional<Person> getBySub(String sub){
+      return personRepository.findBySub(sub)
+                .flatMap(p -> personRepository.findById(p.getId()));
+  }
 
   private PersonKeepCitizenDto getPersonKeepCitizenDto(Person person) {
     PersonKeepCitizenDto personCitizen = new PersonKeepCitizenDto();
@@ -898,6 +903,8 @@ public class PersonService {
 
     return ResponseEntity.status(400).body(msg);
   }
+  
+  
 
   private Person createAcessoCidadaoLogin(PersonParamDto personParam, Boolean makeLogin, Boolean typeAuthenticationCpf){
     Person person = this.save(new Person(personParam, typeAuthenticationCpf), false);
@@ -1142,6 +1149,8 @@ public class PersonService {
       }
     }
   }
+  
+ 
 
   private void typeAuthenticationEmailValidation(PersonParamDto personParam) {
     if (personParam.getContactEmail() == null || personParam.getConfirmEmail().isEmpty()) {

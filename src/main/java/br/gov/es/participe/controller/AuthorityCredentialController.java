@@ -7,14 +7,17 @@ import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.PreRegistrationAuthorityDto;
 import br.gov.es.participe.controller.dto.PreRegistrationDto;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
+import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
 import br.gov.es.participe.controller.dto.UnitRolesDto;
+import br.gov.es.participe.model.AuthService;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PreRegistration;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.service.AcessoCidadaoService;
+import br.gov.es.participe.service.AuthServiceService;
 import br.gov.es.participe.service.EmailService;
 import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.MeetingService;
@@ -67,6 +70,12 @@ public class AuthorityCredentialController {
     @Autowired
     private LocalityService localityService;
     
+    @Autowired
+    private AcessoCidadaoService acService;
+    
+    @Autowired
+    private AuthServiceService asService;
+    
     
   @PutMapping
   public ResponseEntity<PreRegistrationAuthorityDto> registerAuthority(
@@ -85,21 +94,24 @@ public class AuthorityCredentialController {
         representedByPerson = madeByPerson;
       } else {
         
-        Optional<Person> optReprPerson = personService.findByContactEmail(credentialRequest.getRepresentedByEmail());
+        Optional<Person> optReprPerson = personService.getBySub(credentialRequest.getRepresentedBySub());
         
         representedByPerson = optReprPerson.orElseGet(() -> {
             Person reprPerson = new Person();
-            reprPerson.setCpf(credentialRequest.getRepresentedByCpf());
             reprPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
             reprPerson.setName(credentialRequest.getRepresentedByName());
-                        
-            return reprPerson;
+            
+            AuthService as = new AuthService();
+            as.setPerson(reprPerson);
+            as.setServer(AcessoCidadaoService.SERVER);
+            as.setServerId(credentialRequest.getRepresentedBySub());
+            
+            reprPerson.addAuthService(as);
+            
+            return personService.save(reprPerson, true);
         });
                 
-        representedByPerson = personService.save(representedByPerson, true);
-        
         SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
-        
         
         sfd = Optional.ofNullable(sfd)
                 .map(sf -> {
