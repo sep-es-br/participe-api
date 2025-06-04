@@ -6,10 +6,13 @@ import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
 import br.gov.es.participe.controller.dto.UnitRolesDto;
+import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.service.AcessoCidadaoService;
+import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.PersonService;
+import br.gov.es.participe.service.SelfDeclarationService;
 import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
@@ -40,6 +43,12 @@ public class PersonController {
   
   @Autowired
   private AcessoCidadaoService acService;
+  
+  @Autowired
+  private LocalityService localityService;
+  
+  @Autowired
+  private SelfDeclarationService selfDeclarationService;
 
   @GetMapping
   @SuppressWarnings("rawtypes")
@@ -55,30 +64,46 @@ public class PersonController {
     }
   }
   
-  @GetMapping("{idPerson}/ACRole")
+  @GetMapping("{idPerson}/ACRole/{idConference}")
   public ResponseEntity<?> getACRole(
-          @PathVariable Long idPerson
+          @PathVariable Long idPerson,
+          @PathVariable Long idConference
   ){
       
-      String sub = personService.getSubById(idPerson);
+      HashMap<String, Object> acRole = new HashMap<>();
       
+      String sub = personService.getSubById(idPerson);
       if(sub == null) return ResponseEntity.ok(null);
       
+      
+      
       UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub, false);
-      if(role == null) return ResponseEntity.ok(null);
+      if(role != null) acRole.put("role", role.getNome());  
       
-      AcSectionInfoDto sectionInfoDto = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
-      if(sectionInfoDto == null) return ResponseEntity.ok(null);
-      
-      AcOrganizationInfoDto organizationInfoDto = acService.findOrganizationInfoFromOrganogramaAPI(sectionInfoDto.getGuidOrganizacao());
-      if(organizationInfoDto == null) return ResponseEntity.ok(null);
-      
-      
-      HashMap<String, Object> acRole = new HashMap<>();
-      acRole.put("organization", organizationInfoDto.getRazaoSocial());
-      acRole.put("role", role.getNome());     
+      if(role != null){
+        AcSectionInfoDto sectionInfoDto = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
+        if(sectionInfoDto != null) {
+            AcOrganizationInfoDto organizationInfoDto = acService.findOrganizationInfoFromOrganogramaAPI(sectionInfoDto.getGuidOrganizacao());
+            if(organizationInfoDto != null) acRole.put("organization", organizationInfoDto.getRazaoSocial());
+        }
+      }
       
       
+      PublicAgentDto paDto = new PublicAgentDto();
+      paDto.setSub(sub);
+      
+      paDto = acService.findThePersonEmailBySubInAcessoCidadaoAPI(paDto);
+      
+      SelfDeclaration sf = selfDeclarationService.findByPersonAndConference(idPerson, idConference);
+      
+      Optional.ofNullable(sf).ifPresent(_sf -> {
+        acRole.put("localityId", _sf.getLocality().getId());
+      });
+     
+      Optional.ofNullable(paDto).ifPresent(_paDto -> {
+          acRole.put("email", _paDto.getEmail());
+      });
+        
       return ResponseEntity.ok(acRole);
   }
   
@@ -90,9 +115,10 @@ public class PersonController {
       
   }
   
-  @GetMapping("{cpf}/ACInfoByCpf")
+  @GetMapping("{cpf}/ACInfoByCpf/{conferenceId}")
   public ResponseEntity<?> getACInfoByCpf(
-          @PathVariable String cpf
+          @PathVariable String cpf,
+          @PathVariable Long conferenceId
   ){
       
       PublicAgentDto publicAgentDto = acService.findSubFromPersonInAcessoCidadaoAPIByCpf(cpf);
@@ -111,6 +137,18 @@ public class PersonController {
           person = acService.findThePersonEmailBySubInAcessoCidadaoAPI(person);
           
           if(person.getEmail() != null) acInfo.put("email", person.getEmail());
+          
+          Optional<Person> optPerson = personService.findByContactEmail(sub);
+          
+          optPerson.ifPresent(p -> {
+              SelfDeclaration sd = selfDeclarationService.findByPersonAndConference(p.getId(), conferenceId);
+              
+              if(sd != null) {
+                  acInfo.put("localityId", sd.getLocality().getId());
+              }
+              
+          });
+          
           
       }
             

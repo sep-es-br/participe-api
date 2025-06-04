@@ -16,6 +16,26 @@ public class AuthorityCredentialRequest {
     private Long meetingId;
     private String organization;
     private String role;
+    private String email;
+    private Long localityId;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Long getLocalityId() {
+        return localityId;
+    }
+
+    public void setLocalityId(Long localityId) {
+        this.localityId = localityId;
+    }
+    
+    
 
     public Long getMadeBy() {
         return madeBy;

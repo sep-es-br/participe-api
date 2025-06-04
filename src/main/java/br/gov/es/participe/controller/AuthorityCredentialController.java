@@ -9,16 +9,19 @@ import br.gov.es.participe.controller.dto.PreRegistrationDto;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
 import br.gov.es.participe.controller.dto.UnitRolesDto;
+import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PreRegistration;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.service.AcessoCidadaoService;
 import br.gov.es.participe.service.EmailService;
+import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.MeetingService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.PreRegistrationService;
 import br.gov.es.participe.service.QRCodeService;
+import br.gov.es.participe.service.SelfDeclarationService;
 import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
@@ -58,6 +61,12 @@ public class AuthorityCredentialController {
     @Autowired
     private EmailService emailService;
     
+    @Autowired
+    private SelfDeclarationService selfDeclarationService;
+    
+    @Autowired
+    private LocalityService localityService;
+    
     
   @PutMapping
   public ResponseEntity<PreRegistrationAuthorityDto> registerAuthority(
@@ -67,7 +76,11 @@ public class AuthorityCredentialController {
       
       Person madeByPerson = personService.find(credentialRequest.getMadeBy());
       
-      Person representedByPerson = null;
+      Meeting meeting = meetingService.find(credentialRequest.getMeetingId());
+      
+      Locality locality = localityService.find(credentialRequest.getLocalityId());
+      
+      Person representedByPerson;
       if(credentialRequest.getRepresentedByCpf() == null) {
         representedByPerson = madeByPerson;
       } else {
@@ -79,13 +92,26 @@ public class AuthorityCredentialController {
             reprPerson.setCpf(credentialRequest.getRepresentedByCpf());
             reprPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
             reprPerson.setName(credentialRequest.getRepresentedByName());
-            
+                        
             return reprPerson;
         });
-        
+                
         representedByPerson = personService.save(representedByPerson, true);
+        
+        SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
+        
+        
+        sfd = Optional.ofNullable(sfd)
+                .map(sf -> {
+                    sf.setLocality(locality);
+                    return sf;
+                })
+                .orElse(new SelfDeclaration(meeting.getConference(), locality, representedByPerson));
+        
+        
+        selfDeclarationService.save(sfd);
+        
       }
-      Meeting meeting = meetingService.find(credentialRequest.getMeetingId());
       PreRegistration preRegistration = new PreRegistration(
               meeting, madeByPerson, representedByPerson, 
               credentialRequest.getOrganization(), credentialRequest.getRole());

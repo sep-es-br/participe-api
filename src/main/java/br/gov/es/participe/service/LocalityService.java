@@ -62,6 +62,7 @@ public class LocalityService {
         }
         return localities;
     }
+    
 
     public List<Locality> search(String query, Long type) {
         List<Locality> localities = new ArrayList<>();

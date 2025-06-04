@@ -477,6 +477,8 @@ public class AcessoCidadaoService {
   }
   
   public AcSectionInfoDto findSectionInfoFromOrganogramaAPI(String guid) {
+    if(guid == null) return null;
+      
     String token = getClientToken();
     String url = String.format("%s/unidades/%s/info", organogramaUriWebapi, guid);
     
