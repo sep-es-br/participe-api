@@ -600,12 +600,6 @@ public class PersonService {
       personCitizen.setLocalityName(recentLocality.getLocalityName());
     }
 
-    isAuthenticatedByRepository.findAllByIdPerson(personId)
-        .stream()
-        .filter(a -> a.getName().equals(SERVER))
-        .map(IsAuthenticatedBy::getPassword)
-        .forEach(personCitizen::setPassword);
-
     personCitizen.setActive(person.getActive() == null || person.getActive());
 
     personCitizen.setAuthName(personRepository.findPersonAutenticated(personId));
