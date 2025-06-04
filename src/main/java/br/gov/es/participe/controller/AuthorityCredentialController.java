@@ -17,7 +17,6 @@ import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PreRegistration;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.service.AcessoCidadaoService;
-import br.gov.es.participe.service.AuthServiceService;
 import br.gov.es.participe.service.EmailService;
 import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.MeetingService;
@@ -72,10 +71,7 @@ public class AuthorityCredentialController {
     
     @Autowired
     private AcessoCidadaoService acService;
-    
-    @Autowired
-    private AuthServiceService asService;
-    
+        
     
   @PutMapping
   public ResponseEntity<PreRegistrationAuthorityDto> registerAuthority(
