@@ -105,7 +105,8 @@ public class AuthorityCredentialController {
             reprPerson.addAuthService(as);
             
             return personService.save(reprPerson, true);
-        });     
+        });
+           
         
       }
       SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
@@ -116,6 +117,7 @@ public class AuthorityCredentialController {
         () -> {
             selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson));
         }); 
+        
       PreRegistration preRegistration = new PreRegistration(
               meeting, madeByPerson, representedByPerson, 
               credentialRequest.getOrganization(), credentialRequest.getRole());
