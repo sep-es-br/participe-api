@@ -106,20 +106,16 @@ public class AuthorityCredentialController {
             
             return personService.save(reprPerson, true);
         });
-                
-        SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
-        
-        sfd = Optional.ofNullable(sfd)
-                .map(sf -> {
-                    sf.setLocality(locality);
-                    return sf;
-                })
-                .orElse(new SelfDeclaration(meeting.getConference(), locality, representedByPerson));
-        
-        
-        selfDeclarationService.save(sfd);
         
       }
+      SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
+        
+        Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
+            selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
+        }, 
+        () -> {
+            selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson));
+        }); 
       PreRegistration preRegistration = new PreRegistration(
               meeting, madeByPerson, representedByPerson, 
               credentialRequest.getOrganization(), credentialRequest.getRole());
