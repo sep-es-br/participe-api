@@ -146,14 +146,12 @@ public class AcessoCidadaoService {
     } else {
       email = userInfo.getString(FIELD_EMAIL);
     }
-    Optional<Person> findPerson = personService.findByLoginEmail(email);
+    Optional<Person> findPerson = personService.findByLoginSub(userInfo.getString(FIELD_SUB_NOVO));
 
     if (findPerson.isPresent()) {
       Person person = findPerson.get();
       person.setAccessToken(token);
-      if (person.getContactEmail() == null) {
-        person.setContactEmail(email);
-      }
+      person.setContactEmail(email);
       person.setRoles(getRoles(userInfo));
 
       return makeAuthServiceRelationship(conferenceId, persistRelationship, userInfo, person);

@@ -253,6 +253,7 @@ public class PersonService {
     IsAuthenticatedBy authenticatedBy = getIsAuthenticatedBy(person.getId(), server);
 
     if (authenticatedBy != null) {
+      authenticatedBy.setEmail(person.getContactEmail());
       authService = authenticatedBy.getAuthService();
       newAuthService = false;
     }
@@ -714,6 +715,10 @@ public class PersonService {
 
   public Optional<Person> findByLoginEmail(String email) {
     return personRepository.findByLoginEmail(email);
+  }
+
+  public Optional<Person> findByLoginSub(String sub) {
+    return personRepository.findByLoginSub(sub);
   }
 
   private Date expirationTime(Long hours) {
