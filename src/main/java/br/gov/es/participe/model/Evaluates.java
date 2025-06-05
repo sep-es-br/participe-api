@@ -165,5 +165,23 @@ public class Evaluates extends Entity {
         this.reasonDetail = reasonDetail;
     }
 
+    public String getRepresentingOrgTag() {
+        return representingOrgTag;
+    }
+
+    public void setRepresentingOrgTag(String representingOrgTag) {
+        this.representingOrgTag = representingOrgTag;
+    }
+
+    public String getRepresentingOrgName() {
+        return representingOrgName;
+    }
+
+    public void setRepresentingOrgName(String representingOrgName) {
+        this.representingOrgName = representingOrgName;
+    }
+    
+    
+
 
 }
