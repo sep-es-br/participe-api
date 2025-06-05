@@ -134,6 +134,11 @@ public class PersonController {
           UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub, false);
           if(role != null) acInfo.put("role", role.getNome());
                
+      } else {
+          personService.getBySub(sub).ifPresent(person -> {
+              acInfo.put("name", person.getName());
+          });
+          
       }
       
         Optional<Person> optPerson = personService.getBySub(sub);
