@@ -601,17 +601,16 @@ public class PersonService {
       personCitizen.setLocalityName(recentLocality.getLocalityName());
     }
 
-    isAuthenticatedByRepository.findAllByIdPerson(personId)
-        .stream()
-        .filter(a -> a.getName().equals(SERVER))
-        .map(IsAuthenticatedBy::getPassword)
-        .forEach(personCitizen::setPassword);
-
     personCitizen.setActive(person.getActive() == null || person.getActive());
 
     personCitizen.setAuthName(personRepository.findPersonAutenticated(personId));
 
     return personCitizen;
+  }
+  
+  public Optional<Person> getBySubEmail(final String sub, final String acEmail){
+      return personRepository.findBySubEmail(sub, acEmail)
+                .flatMap(p -> personRepository.findById(p.getId()));
   }
 
   private PersonKeepCitizenDto getPersonKeepCitizenDto(Person person) {
@@ -903,6 +902,8 @@ public class PersonService {
 
     return ResponseEntity.status(400).body(msg);
   }
+  
+  
 
   private Person createAcessoCidadaoLogin(PersonParamDto personParam, Boolean makeLogin, Boolean typeAuthenticationCpf){
     Person person = this.save(new Person(personParam, typeAuthenticationCpf), false);
@@ -1147,6 +1148,8 @@ public class PersonService {
       }
     }
   }
+  
+ 
 
   private void typeAuthenticationEmailValidation(PersonParamDto personParam) {
     if (personParam.getContactEmail() == null || personParam.getConfirmEmail().isEmpty()) {

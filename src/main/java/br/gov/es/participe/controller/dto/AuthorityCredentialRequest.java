@@ -13,18 +13,18 @@ public class AuthorityCredentialRequest {
     private String representedByCpf;
     private String representedByEmail;
     private String representedByName;
+    private String representedBySub;
     private Long meetingId;
     private String organization;
     private String role;
-    private String email;
     private Long localityId;
 
-    public String getEmail() {
-        return email;
+    public String getRepresentedBySub() {
+        return representedBySub;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setRepresentedBySub(String representedBySub) {
+        this.representedBySub = representedBySub;
     }
 
     public Long getLocalityId() {

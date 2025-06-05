@@ -62,7 +62,7 @@ import java.util.Set;
 @Service
 public class AcessoCidadaoService {
 
-  private static final String SERVER = "AcessoCidadao";
+  public static final String SERVER = "AcessoCidadao";
   private static final String FIELD_EMAIL = "email";
   private static final String FIELD_SUB_NOVO = "subNovo";
   private static final String FIELD_ROLE = "role";
