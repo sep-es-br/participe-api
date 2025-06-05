@@ -67,6 +67,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // files
                 .antMatchers(HttpMethod.GET, "/files/**").permitAll()
                 // .antMatchers("/files/**").hasRole("Administrator")
+                
+//                // authority-credential
+//                .antMatchers("/meetings/**").permitAll()
 
                 // signin
                 .antMatchers("/signin/acesso-cidadao")

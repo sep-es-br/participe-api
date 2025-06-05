@@ -31,6 +31,11 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
         + " WHERE p.contactEmail=$email "
         + " RETURN p ")
     Optional<Person> findByContactEmail(@Param("email")String email);
+    
+    @Query("MATCH (:AuthService{serverId:$sub})<-[:IS_AUTHENTICATED_BY]-(p:Person)\n" +
+            "WHERE ($acEmail IS NULL OR p.contactEmail = $acEmail)\n" +
+            "RETURN p")
+    Optional<Person> findBySubEmail(final String sub, final String acEmail);
   
   
     @Query("MATCH (p:Person) "
@@ -51,6 +56,14 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     "RETURN person"
   )
   Optional<Person> findByLoginEmail(@Param("email")String email);
+
+    @Query("MATCH (l:Login)<-[:MADE]-(person:Person)-[authBy:IS_AUTHENTICATED_BY]->(authService:AuthService)\n" +
+    "    WHERE authService.serverId=$sub \n" +
+    "    RETURN person\n" +
+    "    order by l.time desc\n" +
+    "    limit 1"
+        )
+    Optional<Person> findByLoginSub(@Param("sub")String sub);
   
      
     @Query(" MATCH (p:Person) "

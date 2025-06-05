@@ -253,6 +253,7 @@ public class PersonService {
     IsAuthenticatedBy authenticatedBy = getIsAuthenticatedBy(person.getId(), server);
 
     if (authenticatedBy != null) {
+      authenticatedBy.setEmail(person.getContactEmail());
       authService = authenticatedBy.getAuthService();
       newAuthService = false;
     }
@@ -600,17 +601,16 @@ public class PersonService {
       personCitizen.setLocalityName(recentLocality.getLocalityName());
     }
 
-    isAuthenticatedByRepository.findAllByIdPerson(personId)
-        .stream()
-        .filter(a -> a.getName().equals(SERVER))
-        .map(IsAuthenticatedBy::getPassword)
-        .forEach(personCitizen::setPassword);
-
     personCitizen.setActive(person.getActive() == null || person.getActive());
 
     personCitizen.setAuthName(personRepository.findPersonAutenticated(personId));
 
     return personCitizen;
+  }
+  
+  public Optional<Person> getBySubEmail(final String sub, final String acEmail){
+      return personRepository.findBySubEmail(sub, acEmail)
+                .flatMap(p -> personRepository.findById(p.getId()));
   }
 
   private PersonKeepCitizenDto getPersonKeepCitizenDto(Person person) {
@@ -714,6 +714,10 @@ public class PersonService {
 
   public Optional<Person> findByLoginEmail(String email) {
     return personRepository.findByLoginEmail(email);
+  }
+
+  public Optional<Person> findByLoginSub(String sub) {
+    return personRepository.findByLoginSub(sub);
   }
 
   private Date expirationTime(Long hours) {
@@ -898,6 +902,8 @@ public class PersonService {
 
     return ResponseEntity.status(400).body(msg);
   }
+  
+  
 
   private Person createAcessoCidadaoLogin(PersonParamDto personParam, Boolean makeLogin, Boolean typeAuthenticationCpf){
     Person person = this.save(new Person(personParam, typeAuthenticationCpf), false);
@@ -1142,6 +1148,8 @@ public class PersonService {
       }
     }
   }
+  
+ 
 
   private void typeAuthenticationEmailValidation(PersonParamDto personParam) {
     if (personParam.getContactEmail() == null || personParam.getConfirmEmail().isEmpty()) {
@@ -1447,4 +1455,16 @@ public class PersonService {
         Matcher matcher = pattern.matcher(string);
         return matcher.matches();
     }
+  
+  public String getSubById(Long idPerson){
+      List<AuthService> auths = authServiceRepository.findAllByIdPerson(idPerson);
+      
+      AuthService acAuthService = auths.stream().filter(as -> as.getServer().equals(AuthService.ACESSO_CIDADAO)).findFirst().orElse(null);
+      
+      if(acAuthService == null) {
+          return null;
+      } else {
+          return acAuthService.getServerId();
+      }
+  }
 }

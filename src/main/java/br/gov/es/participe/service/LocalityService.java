@@ -62,6 +62,7 @@ public class LocalityService {
         }
         return localities;
     }
+    
 
     public List<Locality> findByIdConference(Long id, Long localizationId) {
         List<Locality> localities = new ArrayList<>();

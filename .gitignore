@@ -34,3 +34,5 @@ out/
 
 ### Application ###
 src/main/resources/application.properties
+
+qrcode.png

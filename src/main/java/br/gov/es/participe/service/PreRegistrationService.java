@@ -45,10 +45,17 @@ public class PreRegistrationService {
         PreRegistration preRegistrationStored =  preRegistrationRepository.findByMeetingAndPerson(preRegistration.getMeeting().getId(), preRegistration.getPerson().getId());
 
         if(preRegistrationStored != null){
+            
+            if(preRegistrationStored.getMadeBy() == null) {
+                preRegistrationStored.setMadeBy(preRegistration.getMadeBy());
+                preRegistrationStored = preRegistrationRepository.save(preRegistrationStored);
+            }
+            
+            
             return preRegistrationStored;
         }
-
         loadAttributes(preRegistration);
+
 
         final var createdPreRegistration = preRegistrationRepository.save(preRegistration);
 
@@ -68,6 +75,13 @@ public class PreRegistrationService {
         if(person != null){
             preRegistration.setPerson(person);
         }
+        if(preRegistration.getMadeBy() != null) {
+            Person madeByPerson = personService.find(preRegistration.getMadeBy().getId());
+            if(madeByPerson != null) {
+                preRegistration.setMadeBy(madeByPerson);
+            }
+        }
+        
 
     }
 

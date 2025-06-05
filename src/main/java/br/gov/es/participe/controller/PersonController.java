@@ -3,11 +3,20 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.ForgotPasswordDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
+import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
+import br.gov.es.participe.controller.dto.UnitRolesDto;
+import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.SelfDeclaration;
+import br.gov.es.participe.service.AcessoCidadaoService;
+import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.PersonService;
+import br.gov.es.participe.service.SelfDeclarationService;
 import br.gov.es.participe.util.dto.MessageDto;
+import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
+import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +25,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import jdk.jfr.ContentType;
 
 @RestController
 @CrossOrigin
@@ -28,6 +40,15 @@ public class PersonController {
 
   @Autowired
   private PersonService personService;
+  
+  @Autowired
+  private AcessoCidadaoService acService;
+  
+  @Autowired
+  private LocalityService localityService;
+  
+  @Autowired
+  private SelfDeclarationService selfDeclarationService;
 
   @GetMapping
   @SuppressWarnings("rawtypes")
@@ -42,7 +63,105 @@ public class PersonController {
       return ResponseEntity.status(401).body(null);
     }
   }
+  
+  @GetMapping("{idPerson}/ACRole/{idConference}")
+  public ResponseEntity<?> getACRole(
+          @PathVariable Long idPerson,
+          @PathVariable Long idConference
+  ){
+      
+      HashMap<String, Object> acRole = new HashMap<>();
+      
+      String sub = personService.getSubById(idPerson);
+      if(sub == null) return ResponseEntity.ok(null);
+      
+      acRole.put("sub", sub);  
+      
+      UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub, false);
+      if(role != null) acRole.put("role", role.getNome());  
+      
+      if(role != null){
+        AcSectionInfoDto sectionInfoDto = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
+        if(sectionInfoDto != null) {
+            AcOrganizationInfoDto organizationInfoDto = acService.findOrganizationInfoFromOrganogramaAPI(sectionInfoDto.getGuidOrganizacao());
+            if(organizationInfoDto != null) acRole.put("organization", organizationInfoDto.getRazaoSocial());
+        }
+      }
+      
+      
+      PublicAgentDto paDto = new PublicAgentDto();
+      paDto.setSub(sub);
+      
+      paDto = acService.findThePersonEmailBySubInAcessoCidadaoAPI(paDto);
+      
+      SelfDeclaration sf = selfDeclarationService.findByPersonAndConference(idPerson, idConference);
+      
+      Optional.ofNullable(sf).ifPresent(_sf -> {
+        acRole.put("localityId", _sf.getLocality().getId());
+      });
+     
+      Optional.ofNullable(paDto).ifPresent(_paDto -> {
+          acRole.put("email", _paDto.getEmail());
+      });
+        
+      return ResponseEntity.ok(acRole);
+  }
+  
+  @GetMapping("subById/{idPerson}")
+  public ResponseEntity<?> getSubById(
+          @PathVariable Long idPerson
+  ){
+      return ResponseEntity.ok(Map.of("sub", personService.getSubById(idPerson)));
+      
+  }
+  
+  @GetMapping("{cpf}/ACInfoByCpf/{conferenceId}")
+  public ResponseEntity<?> getACInfoByCpf(
+          @PathVariable String cpf,
+          @PathVariable Long conferenceId
+  ){
+      HashMap<String, Object> acInfo = new HashMap<>();
+      
+      PublicAgentDto publicAgentDto = acService.findSubFromPersonInAcessoCidadaoAPIByCpf(cpf);
+      String sub = publicAgentDto.getSub();
+      
+      acInfo.put("authoritySub", sub);
+      
+      
+        PublicAgentDto person = new PublicAgentDto();
+        person.setSub(sub);
+        person = acService.findThePersonEmailBySubInAcessoCidadaoAPI(person);
 
+        if(person.getEmail() != null) acInfo.put("email", person.getEmail());
+                
+      
+      PublicAgentDto maybePublicAgentDto = acService.findAgentPublicBySubInAcessoCidadaoAPI(sub);
+      if(maybePublicAgentDto != null) {
+          acInfo.put("name", maybePublicAgentDto.getName());
+          UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub, false);
+          if(role != null) acInfo.put("role", role.getNome());
+               
+      } else {
+          personService.getBySubEmail(sub, person.getEmail()).ifPresent(_person -> {
+              acInfo.put("name", _person.getName());
+          });
+          
+      }
+      
+        Optional<Person> optPerson = personService.getBySubEmail(sub, person.getEmail());
+
+        optPerson.ifPresent(p -> {
+            SelfDeclaration sd = selfDeclarationService.findByPersonAndConference(p.getId(), conferenceId);
+
+            if(sd != null) {
+                acInfo.put("localityId", sd.getLocality().getId());
+            }
+
+        });
+      
+            
+      return ResponseEntity.ok(acInfo);
+  }
 
   @Transactional
   @PostMapping("/operator")

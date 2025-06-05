@@ -17,6 +17,8 @@ import br.gov.es.participe.model.Person;
 import br.gov.es.participe.util.ParticipeUtils;
 import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
+import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
+import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
 
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
@@ -60,7 +62,7 @@ import java.util.Set;
 @Service
 public class AcessoCidadaoService {
 
-  private static final String SERVER = "AcessoCidadao";
+  public static final String SERVER = "AcessoCidadao";
   private static final String FIELD_EMAIL = "email";
   private static final String FIELD_SUB_NOVO = "subNovo";
   private static final String FIELD_ROLE = "role";
@@ -144,14 +146,12 @@ public class AcessoCidadaoService {
     } else {
       email = userInfo.getString(FIELD_EMAIL);
     }
-    Optional<Person> findPerson = personService.findByLoginEmail(email);
+    Optional<Person> findPerson = personService.findByLoginSub(userInfo.getString(FIELD_SUB_NOVO));
 
     if (findPerson.isPresent()) {
       Person person = findPerson.get();
       person.setAccessToken(token);
-      if (person.getContactEmail() == null) {
-        person.setContactEmail(email);
-      }
+      person.setContactEmail(email);
       person.setRoles(getRoles(userInfo));
 
       return makeAuthServiceRelationship(conferenceId, persistRelationship, userInfo, person);
@@ -304,7 +304,7 @@ public class AcessoCidadaoService {
     return roles;
   }
 
-  private String findUserEmailInAcessoCidadao(String sub) throws IOException {
+  public String findUserEmailInAcessoCidadao(String sub) {
     String token = getClientToken();
     if (token != null) {
       String uri = acessocidadaoUriWebApi.concat("cidadao/").concat(sub).concat("/email");
@@ -315,13 +315,15 @@ public class AcessoCidadaoService {
           JSONObject result = new JSONObject(EntityUtils.toString(response.getEntity()));
           return result.getString(FIELD_EMAIL);
         }
+      } catch (IOException ex) {
+          throw new RuntimeException(ex);
       }
     }
 
     return null;
   }
 
-  private String getClientToken() throws IOException {
+  private String getClientToken() {
     String basicToken = clientId + ":" + clientSecret;
     HttpPost postRequest = new HttpPost(acessocidadaoUriToken);
 
@@ -338,6 +340,8 @@ public class AcessoCidadaoService {
         JSONObject result = new JSONObject(EntityUtils.toString(response.getEntity()));
         return result.getString("access_token");
       }
+    } catch (IOException ex){
+        throw new RuntimeException(ex);
     }
 
     return null;
@@ -469,6 +473,65 @@ public class AcessoCidadaoService {
         throw new ApiOrganogramaException("Erro ao buscar lista de unidades da organização.");
     }
   }
+  
+  public AcSectionInfoDto findSectionInfoFromOrganogramaAPI(String guid) {
+    if(guid == null) return null;
+      
+    String token = getClientToken();
+    String url = String.format("%s/unidades/%s/info", organogramaUriWebapi, guid);
+    
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        AcSectionInfoDto sectionDto = mapper.readValue(response.body(), new TypeReference<AcSectionInfoDto>() {});
+
+        return sectionDto;
+
+      } else {
+        logger.error("Não foi possível buscar a lista de unidades da organização.");
+        throw new ApiOrganogramaException(STATUS + response.statusCode());
+      }
+    } catch (IOException | InterruptedException e) {
+        Thread.currentThread().interrupt();
+        logger.error(e.getMessage());
+        throw new ApiOrganogramaException("Erro ao buscar lista de unidades da organização.");
+    }
+  }
+
+  public AcOrganizationInfoDto findOrganizationInfoFromOrganogramaAPI(String guid) {
+    String token = getClientToken();
+    String url = String.format("%s/organizacoes/%s/info", organogramaUriWebapi, guid);
+    
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+        .header(AUTHORIZATION, BEARER + token)
+        .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 200) {
+        AcOrganizationInfoDto organizationDto = mapper.readValue(response.body(), new TypeReference<AcOrganizationInfoDto>() {});
+
+        return organizationDto;
+
+      } else {
+        logger.error("Não foi possível buscar a lista de unidades da organização.");
+        throw new ApiOrganogramaException(STATUS + response.statusCode());
+      }
+    } catch (IOException | InterruptedException e) {
+        Thread.currentThread().interrupt();
+        logger.error(e.getMessage());
+        throw new ApiOrganogramaException("Erro ao buscar lista de unidades da organização.");
+    }
+  }
 
   public List<EvaluatorOrganizationDto> findOrganizationsFromOrganogramaAPI() throws IOException {
     String token = getClientToken();
@@ -510,7 +573,7 @@ public class AcessoCidadaoService {
 
     try {
       token = getClientToken();
-    } catch (IOException e) {
+    } catch (RuntimeException e) {
       throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
     }
 
@@ -547,7 +610,7 @@ public class AcessoCidadaoService {
 
     try {
       token = getClientToken();
-    } catch (IOException e) {
+    } catch (RuntimeException e) {
       throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
     }
 
@@ -582,7 +645,7 @@ public class AcessoCidadaoService {
 
     try {
       token = getClientToken();
-    } catch (IOException e) {
+    } catch (RuntimeException e) {
       throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
     }
 
@@ -617,7 +680,7 @@ public class AcessoCidadaoService {
 
     try {
       token = getClientToken();
-    } catch (IOException e) {
+    } catch (RuntimeException e) {
       throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
     }
 
@@ -657,7 +720,7 @@ public class AcessoCidadaoService {
 
     try {
       token = getClientToken();
-    } catch (IOException e) {
+    } catch (RuntimeException e) {
       throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
     }
 
@@ -717,7 +780,7 @@ public class AcessoCidadaoService {
 
     try {
       token = getClientToken();
-    } catch (IOException e) {
+    } catch (RuntimeException e) {
       throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
     }
     
@@ -744,6 +807,54 @@ public class AcessoCidadaoService {
         });
 
         return evaluatorRolesDto;
+
+      } else {
+        logger.error("Não foi possível buscar o papel atrelado ao sub do agente.");
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+      }
+    } catch (IOException | InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Erro ao buscar o papel atrelado ao sub do agente.");
+    }
+  }
+  
+  
+  public UnitRolesDto findPriorityRoleFromAcessoCidadaoAPIBySub(String sub, boolean prioritario) {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (RuntimeException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+    
+    String url = acessocidadaoUriWebApi.concat("/agentepublico/" + sub + "/papeis");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+      .header(AUTHORIZATION, BEARER + token)
+      .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+      if(response.statusCode() == 200) {
+
+        List<UnitRolesDto> unitRolesDtos =  mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {
+        });
+        
+        return unitRolesDtos.stream().filter(role -> role.isPrioritario()).findFirst()
+                .orElseGet(() -> {
+                    if(prioritario) return null;
+                    
+                    return unitRolesDtos.stream().findFirst().orElse(null);
+                });
+        
+        
+
+//        
 
       } else {
         logger.error("Não foi possível buscar o papel atrelado ao sub do agente.");

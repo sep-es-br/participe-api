@@ -16,6 +16,14 @@ public class PreRegistration extends Entity implements Serializable {
 
     @Relationship(type = "PRE_REGISTRATION", direction = Relationship.OUTGOING)
     private Person person;
+    
+    @Relationship(type = "MADE_BY", direction = Relationship.OUTGOING)
+    private Person madeBy;
+    
+    private Boolean isAuthority;
+    
+    private String organization;
+    private String role;
 
     @DateString
     private Date created;
@@ -41,6 +49,51 @@ public class PreRegistration extends Entity implements Serializable {
         this.created = new Date();
 
     }
+
+    public PreRegistration(Meeting meeting, Person madeByPerson, Person representingPerson, String organization, String role ){
+        this.isAuthority = true;
+        this.meeting = meeting;
+        this.madeBy = madeByPerson;
+        this.person = representingPerson;
+        this.organization = organization;
+        this.role = role;
+        this.created = new Date();
+
+    }
+
+    public Person getMadeBy() {
+        return madeBy;
+    }
+
+    public void setMadeBy(Person madeBy) {
+        this.madeBy = madeBy;
+    }
+
+    public Boolean getIsAuthority() {
+        return isAuthority;
+    }
+
+    public void setIsAuthority(Boolean isAuthority) {
+        this.isAuthority = isAuthority;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+    
+    
 
     public Person getPerson() {
         return person;
