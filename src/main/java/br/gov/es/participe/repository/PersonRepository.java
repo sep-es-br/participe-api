@@ -50,10 +50,12 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
   )
   Optional<Person> findByLoginEmail(@Param("email")String email);
 
-    @Query("MATCH (person:Person)-[authBy:IS_AUTHENTICATED_BY]->(authService:AuthService) " +
-    "WHERE authService.serverId=$sub " +
-    "RETURN person"
-    )
+    @Query("MATCH (l:Login)<-[:MADE]-(person:Person)-[authBy:IS_AUTHENTICATED_BY]->(authService:AuthService)\n" +
+    "    WHERE authService.serverId=$sub \n" +
+    "    RETURN person\n" +
+    "    order by l.time desc\n" +
+    "    limit 1"
+        )
     Optional<Person> findByLoginSub(@Param("sub")String sub);
   
      
