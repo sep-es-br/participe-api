@@ -105,7 +105,7 @@ public class AuthorityCredentialController {
             reprPerson.addAuthService(as);
             
             return personService.save(reprPerson, true);
-        });
+        });     
         
       }
       SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
