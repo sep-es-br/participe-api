@@ -126,6 +126,13 @@ public class PersonController {
       String sub = publicAgentDto.getSub();
       
       acInfo.put("authoritySub", sub);
+      
+      
+        PublicAgentDto person = new PublicAgentDto();
+        person.setSub(sub);
+        person = acService.findThePersonEmailBySubInAcessoCidadaoAPI(person);
+
+        if(person.getEmail() != null) acInfo.put("email", person.getEmail());
                 
       
       PublicAgentDto maybePublicAgentDto = acService.findAgentPublicBySubInAcessoCidadaoAPI(sub);
@@ -135,13 +142,13 @@ public class PersonController {
           if(role != null) acInfo.put("role", role.getNome());
                
       } else {
-          personService.getBySub(sub).ifPresent(person -> {
-              acInfo.put("name", person.getName());
+          personService.getBySubEmail(sub, person.getEmail()).ifPresent(_person -> {
+              acInfo.put("name", _person.getName());
           });
           
       }
       
-        Optional<Person> optPerson = personService.getBySub(sub);
+        Optional<Person> optPerson = personService.getBySubEmail(sub, person.getEmail());
 
         optPerson.ifPresent(p -> {
             SelfDeclaration sd = selfDeclarationService.findByPersonAndConference(p.getId(), conferenceId);
@@ -152,11 +159,6 @@ public class PersonController {
 
         });
       
-        PublicAgentDto person = new PublicAgentDto();
-        person.setSub(sub);
-        person = acService.findThePersonEmailBySubInAcessoCidadaoAPI(person);
-
-        if(person.getEmail() != null) acInfo.put("email", person.getEmail());
             
       return ResponseEntity.ok(acInfo);
   }

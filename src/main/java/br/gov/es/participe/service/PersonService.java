@@ -607,8 +607,8 @@ public class PersonService {
     return personCitizen;
   }
   
-  public Optional<Person> getBySub(String sub){
-      return personRepository.findBySub(sub)
+  public Optional<Person> getBySubEmail(final String sub, final String acEmail){
+      return personRepository.findBySubEmail(sub, acEmail)
                 .flatMap(p -> personRepository.findById(p.getId()));
   }
 

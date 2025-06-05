@@ -90,7 +90,7 @@ public class AuthorityCredentialController {
         representedByPerson = madeByPerson;
       } else {
         
-        Optional<Person> optReprPerson = personService.getBySub(credentialRequest.getRepresentedBySub());
+        Optional<Person> optReprPerson = personService.getBySubEmail(credentialRequest.getRepresentedBySub(), credentialRequest.getRepresentedByEmail());
         
         representedByPerson = optReprPerson.orElseGet(() -> {
             Person reprPerson = new Person();

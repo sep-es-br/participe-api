@@ -17,7 +17,6 @@ public class AuthorityCredentialRequest {
     private Long meetingId;
     private String organization;
     private String role;
-    private String email;
     private Long localityId;
 
     public String getRepresentedBySub() {
@@ -26,16 +25,6 @@ public class AuthorityCredentialRequest {
 
     public void setRepresentedBySub(String representedBySub) {
         this.representedBySub = representedBySub;
-    }
-
-    
-    
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public Long getLocalityId() {
