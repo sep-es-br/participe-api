@@ -29,6 +29,8 @@ public class Evaluates extends Entity {
     private String representing;
     private String representingOrgTag;
     private String representingOrgName;
+    private Boolean haveCost;
+    private Boolean newRequest;
     private Boolean active;
     private Boolean deleted;
 
@@ -51,8 +53,26 @@ public class Evaluates extends Entity {
         this.representing = proposalEvaluationRequestDto.getRepresenting();
         this.representingOrgTag = proposalEvaluationRequestDto.getRepresentingOrgTag();
         this.representingOrgName = proposalEvaluationRequestDto.getRepresentingOrgName();
+        this.haveCost = proposalEvaluationRequestDto.getHaveCost();
+        this.newRequest = proposalEvaluationRequestDto.getNewRequest();
     }
 
+    public Boolean getHaveCost() {
+        return haveCost;
+    }
+
+    public void setHaveCost(Boolean haveCost) {
+        this.haveCost = haveCost;
+    }
+
+    public Boolean getNewRequest() {
+        return newRequest;
+    }
+
+    public void setNewRequest(Boolean newRequest) {
+        this.newRequest = newRequest;
+    }
+    
     public Person getPerson() {
         return person;
     }
@@ -164,6 +184,24 @@ public class Evaluates extends Entity {
     public void setReasonDetail(String reasonDetail) {
         this.reasonDetail = reasonDetail;
     }
+
+    public String getRepresentingOrgTag() {
+        return representingOrgTag;
+    }
+
+    public void setRepresentingOrgTag(String representingOrgTag) {
+        this.representingOrgTag = representingOrgTag;
+    }
+
+    public String getRepresentingOrgName() {
+        return representingOrgName;
+    }
+
+    public void setRepresentingOrgName(String representingOrgName) {
+        this.representingOrgName = representingOrgName;
+    }
+    
+    
 
 
 }

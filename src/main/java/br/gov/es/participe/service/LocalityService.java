@@ -64,6 +64,19 @@ public class LocalityService {
     }
     
 
+    public List<Locality> findByIdConference(Long id, Long localizationId) {
+        List<Locality> localities = new ArrayList<>();
+        localityRepository.findCardsByIdConference(id)
+                .stream()
+                .filter(l -> l.getParents().isEmpty())
+                .iterator()
+                .forEachRemaining(localities::add);
+        if(!localities.isEmpty()) {
+          localities.sort((l1, l2) -> l1.getName().trim().compareTo(l2.getName().trim()));
+        }
+        return localities;
+    }
+
     public List<Locality> search(String query, Long type) {
         List<Locality> localities = new ArrayList<>();
 

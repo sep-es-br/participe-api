@@ -222,23 +222,29 @@ public class ModerationController {
     if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
       return ResponseEntity.status(401).body(null);
     }
-
-    List<Locality> localities = localityService.findByIdConference(id);
-
-    List<LocalityDto> localitiesDto = new ArrayList<>();
-    localities.forEach(locality -> {
-      LocalityDto dto = new LocalityDto(locality, null, false, false);
-      localitiesDto.add(dto);
-    });
-
+    
     LeanLocalityResultDto response = new LeanLocalityResultDto();
-    response.setLocalities(localitiesDto);
-
+    
     Conference conference = conferenceService.find(id);
     Plan plan = planService.find(conference.getPlan().getId());
     if (plan.getlocalitytype() != null) {
       response.setRegionalizable(plan.getlocalitytype().getName());
     }
+
+    List<Locality> localities = localityService.findByIdConference(id);
+
+    List<LocalityDto> localitiesDto = new ArrayList<>();
+    localities.forEach(locality -> {
+      locality.getChildren().forEach(childLocality -> {
+        LocalityDto dto = new LocalityDto(childLocality, null, false, false);
+        localitiesDto.add(dto);
+      });
+      
+    });
+
+    response.setLocalities(localitiesDto);
+
+    
 
     return ResponseEntity.status(200).body(response);
   }

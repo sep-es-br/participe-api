@@ -20,6 +20,8 @@ public class ProposalEvaluationResponseDto {
     private String budgetPlan;
     private String representing;
     private String evaluatorName;
+    private Boolean haveCost;
+    private Boolean newRequest;
     private String date;
 
     public ProposalEvaluationResponseDto() {
@@ -35,13 +37,31 @@ public class ProposalEvaluationResponseDto {
             this.budgetActionId = evaluatesRelationship.getBudgetActionId();
             this.budgetActionName = evaluatesRelationship.getBudgetActionName();
             this.budgetPlan = evaluatesRelationship.getBudgetPlan();
+            this.haveCost = evaluatesRelationship.getHaveCost();
+            this.newRequest = evaluatesRelationship.getNewRequest();
         } else {
             this.reason = evaluatesRelationship.getReason();
-            this.reasonDetail = evaluatesRelationship.getReasonDetail();
         }
+        this.reasonDetail = evaluatesRelationship.getReasonDetail();
         this.representing = evaluatesRelationship.getRepresenting();
         this.date = formatDate(evaluatesRelationship.getDate());
         this.evaluatorName = evaluatesRelationship.getPerson().getName();
+    }
+
+    public Boolean getHaveCost() {
+        return haveCost;
+    }
+
+    public void setHaveCost(Boolean haveCost) {
+        this.haveCost = haveCost;
+    }
+
+    public Boolean getNewRequest() {
+        return newRequest;
+    }
+
+    public void setNewRequest(Boolean newRequest) {
+        this.newRequest = newRequest;
     }
 
     public String getEvaluatorName() {

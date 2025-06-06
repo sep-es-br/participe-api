@@ -40,7 +40,7 @@ public class Person extends Entity implements UserDetails {
   private Set<Comment> comments;
 
   @Relationship(type = "MADE_BY", direction = Relationship.INCOMING)
-  private Set<Attend> attends;
+  private List<Attend> attends;
 
   @Relationship(type = "MODERATED_BY")
   private Set<Comment> moderatedComments;
@@ -188,11 +188,11 @@ public class Person extends Entity implements UserDetails {
     this.comments = comments;
   }
 
-  public Set<Attend> getAttends() {
+  public List<Attend> getAttends() {
     return attends;
   }
 
-  public void setAttends(Set<Attend> attends) {
+  public void setAttends(List<Attend> attends) {
     this.attends = attends;
   }
 
