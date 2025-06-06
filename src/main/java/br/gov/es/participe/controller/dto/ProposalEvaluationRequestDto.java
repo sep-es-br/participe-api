@@ -14,10 +14,30 @@ public class ProposalEvaluationRequestDto {
     private String representing;
     private String representingOrgTag;
     private String representingOrgName;
+    private Boolean haveCost;
+    private Boolean newRequest;
 
     public ProposalEvaluationRequestDto() {
 
     }
+
+    public Boolean getHaveCost() {
+        return haveCost;
+    }
+
+    public void setHaveCost(Boolean haveCost) {
+        this.haveCost = haveCost;
+    }
+
+    public Boolean getNewRequest() {
+        return newRequest;
+    }
+
+    public void setNewRequest(Boolean newRequest) {
+        this.newRequest = newRequest;
+    }
+    
+    
 
     public String getRepresentingOrgTag() {
         return representingOrgTag;
