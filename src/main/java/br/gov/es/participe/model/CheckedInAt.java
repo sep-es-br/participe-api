@@ -27,17 +27,11 @@ public class CheckedInAt extends Entity {
     private Boolean isAuthority;
     private String organization;
     private String role;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 
     private Boolean isAuthority;
     private Boolean isAnnounced;
     private String organization;
     private String role;
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
     public CheckedInAt() {
     }
@@ -87,11 +81,6 @@ public class CheckedInAt extends Entity {
         this.meeting = meeting;
     }
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
     public Boolean getIsAnnounced() {
         return isAnnounced;
     }
@@ -100,35 +89,6 @@ public class CheckedInAt extends Entity {
         this.isAnnounced = isAnnounced;
     }
 
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-    public Boolean getIsAuthority() {
-        return isAuthority;
-    }
-
-    public void setIsAuthority(Boolean isAuthority) {
-        this.isAuthority = isAuthority;
-    }
-
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 
     public Boolean getIsAnnounced() {
         return isAnnounced;
@@ -138,8 +98,4 @@ public class CheckedInAt extends Entity {
         this.isAnnounced = isAnnounced;
     }
     
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 }
