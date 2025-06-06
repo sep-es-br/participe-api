@@ -4,6 +4,9 @@ public class CheckInParamDto {
     private Long personId;
     private Long meetingId;
     private String timeZone;
+    private Boolean isAuthority;
+    private String organization;
+    private String role;
 
     public CheckInParamDto() {
     }
@@ -36,4 +39,30 @@ public class CheckInParamDto {
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
+
+    public Boolean getIsAuthority() {
+        return isAuthority;
+    }
+
+    public void setIsAuthority(Boolean isAuthority) {
+        this.isAuthority = isAuthority;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    
 }

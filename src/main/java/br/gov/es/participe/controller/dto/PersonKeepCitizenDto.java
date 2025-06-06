@@ -39,6 +39,12 @@ public class PersonKeepCitizenDto {
 
 	private List<String> authName;
 
+	private Boolean isAuthority;
+
+    private String organization;
+
+    private String role;
+
     public List<String> getAuthName() {
         return authName;
     }
@@ -166,4 +172,30 @@ public class PersonKeepCitizenDto {
 	public void setReceiveInformational(Boolean receiveInformational) {
 		this.receiveInformational = receiveInformational;
 	}
+
+	public Boolean getIsAuthority() {
+		return isAuthority;
+	}
+
+	public void setIsAuthority(Boolean isAuthority) {
+		this.isAuthority = isAuthority;
+	}
+
+	public String getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(String organization) {
+		this.organization = organization;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	
 }
