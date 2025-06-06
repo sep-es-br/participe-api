@@ -14,14 +14,19 @@ import java.util.Date;
 @RelationshipEntity(type = "CHECKED_IN_AT")
 public class CheckedInAt extends Entity {
 
-    @DateString
-    private Date time;
-
     @StartNode
     private Person person;
 
     @EndNode
     private Meeting meeting;
+    
+    @DateString
+    private Date time;
+    
+    private Boolean isAnnounced;
+    private Boolean isAuthority;
+    private String organization;
+    private String role;
 
     private Boolean isAuthority;
     private Boolean isAnnounced;

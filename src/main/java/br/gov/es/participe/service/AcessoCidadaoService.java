@@ -17,6 +17,7 @@ import br.gov.es.participe.model.Person;
 import br.gov.es.participe.util.ParticipeUtils;
 import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
+import br.gov.es.participe.util.dto.acessoCidadao.AcGrupoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
 
@@ -58,6 +59,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.http.client.ClientProtocolException;
 
 @Service
 public class AcessoCidadaoService {
@@ -97,6 +99,9 @@ public class AcessoCidadaoService {
 
   @Value("${api.acessocidadao.recepcionist.profile.id}")
   private String recepcionistProfileId;
+  
+  @Value("${acessocidadao.group.announcer.guid}")
+  private String announcerGuid;
 
   @Value("${api.acessocidadao.grant_type}")
   private String grantType;
@@ -195,6 +200,12 @@ public class AcessoCidadaoService {
     } else {
       return findAllRoles(userInfo.getString(FIELD_SUB_NOVO));
     }
+    
+        List<AcGrupoDto> grupos = findAcGroupsBySub(userInfo.getString(FIELD_SUB_NOVO));
+    
+    if(grupos.stream().filter(acg -> acg.getGuid().equalsIgnoreCase(this.announcerGuid)).count() > 0)
+        roles.add("Annoucer");
+    
     return roles;
   }
 
@@ -433,7 +444,7 @@ public class AcessoCidadaoService {
         throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
       }
     } catch (IOException | InterruptedException e) {
-        Thread.currentThread().interrupt();
+        
         logger.error(e.getMessage());
         throw new ApiAcessoCidadaoException("Erro ao buscar lista de papéis da unidade.");
     }
@@ -468,7 +479,7 @@ public class AcessoCidadaoService {
         throw new ApiOrganogramaException(STATUS + response.statusCode());
       }
     } catch (IOException | InterruptedException e) {
-        Thread.currentThread().interrupt();
+        
         logger.error(e.getMessage());
         throw new ApiOrganogramaException("Erro ao buscar lista de unidades da organização.");
     }
@@ -499,7 +510,7 @@ public class AcessoCidadaoService {
         throw new ApiOrganogramaException(STATUS + response.statusCode());
       }
     } catch (IOException | InterruptedException e) {
-        Thread.currentThread().interrupt();
+        
         logger.error(e.getMessage());
         throw new ApiOrganogramaException("Erro ao buscar lista de unidades da organização.");
     }
@@ -527,7 +538,7 @@ public class AcessoCidadaoService {
         throw new ApiOrganogramaException(STATUS + response.statusCode());
       }
     } catch (IOException | InterruptedException e) {
-        Thread.currentThread().interrupt();
+        
         logger.error(e.getMessage());
         throw new ApiOrganogramaException("Erro ao buscar lista de unidades da organização.");
     }
@@ -562,7 +573,7 @@ public class AcessoCidadaoService {
         throw new ApiOrganogramaException(STATUS + response.statusCode());
       }
     } catch (IOException | InterruptedException e) {
-        Thread.currentThread().interrupt();
+        
         logger.error(e.getMessage());
         throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
     }
@@ -599,7 +610,7 @@ public class AcessoCidadaoService {
         throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
       }
     } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
+      
       logger.error(e.getMessage());
       throw new ApiAcessoCidadaoException("Não foi possível buscar os agentes publicos atrelado ao Guid GOVES.");
     }
@@ -634,7 +645,7 @@ public class AcessoCidadaoService {
         return new PublicAgentDto();
       }
     } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
+      
       logger.error(e.getMessage());
       throw new ApiAcessoCidadaoException("Não foi possível buscar o sub do agente publicos atrelado ao CPF.");
     }
@@ -669,7 +680,7 @@ public class AcessoCidadaoService {
         return null;
       }
     } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
+      
       logger.error(e.getMessage());
       throw new ApiAcessoCidadaoException("Não foi possível buscar o agente publicos atrelado a esse sub.");
     }
@@ -709,7 +720,7 @@ public class AcessoCidadaoService {
         throw new ApiAcessoCidadaoException("Não foi possível buscar o email do cidadão atrelado a esse sub.");
       }
     } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
+      
       logger.error(e.getMessage());
       throw new ApiAcessoCidadaoException("Não foi possível buscar o email do cidadão atrelado a esse sub.");
     }
@@ -768,7 +779,7 @@ public class AcessoCidadaoService {
         throw new ApiAcessoCidadaoException(responseString);
       }
     } catch (IOException e) {
-      Thread.currentThread().interrupt();
+      
       logger.error(e.getMessage());
       throw new ApiAcessoCidadaoException("Não foi possível buscar o cidadão atrelado ao CPF.");
     }
@@ -813,12 +824,42 @@ public class AcessoCidadaoService {
         throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
       }
     } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
+      
       logger.error(e.getMessage());
       throw new ApiAcessoCidadaoException("Erro ao buscar o papel atrelado ao sub do agente.");
     }
   }
   
+  public List<AcGrupoDto> findAcGroupsBySub(final String sub) {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (RuntimeException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+    
+    String url = String.format("%s/agentepublico/%s/grupos", acessocidadaoUriWebApi, sub);
+
+    
+    HttpGet postRequest = new HttpGet(url);
+    postRequest.addHeader(AUTHORIZATION, BEARER + token);
+
+    try (CloseableHttpResponse response = HttpClients.createDefault().execute(postRequest)) {
+      if (response.getStatusLine().getStatusCode() == 200) {
+        String result = EntityUtils.toString(response.getEntity());
+        logger.info(result);
+        return new ObjectMapper().readValue(result, new TypeReference<List<AcGrupoDto>>(){});
+          
+      } else {
+         logger.error("Não foi possível buscar os grupos atrelado ao sub do agente.");
+        throw new ApiAcessoCidadaoException(STATUS + response.getStatusLine().getStatusCode());
+      }
+    } catch (IOException e) {
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Erro ao buscar os grupos atrelados ao sub do agente.");
+    }
+  }
   
   public UnitRolesDto findPriorityRoleFromAcessoCidadaoAPIBySub(String sub, boolean prioritario) {
     String token = null;
@@ -828,6 +869,7 @@ public class AcessoCidadaoService {
     } catch (RuntimeException e) {
       throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
     }
+    
     
     String url = acessocidadaoUriWebApi.concat("/agentepublico/" + sub + "/papeis");
 
@@ -861,7 +903,7 @@ public class AcessoCidadaoService {
         throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
       }
     } catch (IOException | InterruptedException e) {
-      Thread.currentThread().interrupt();
+      
       logger.error(e.getMessage());
       throw new ApiAcessoCidadaoException("Erro ao buscar o papel atrelado ao sub do agente.");
     }
