@@ -55,10 +55,12 @@ public class CitizenController {
   public ResponseEntity<PersonKeepCitizenDto> getCitizenById(
       @RequestHeader("Authorization") String token,
       @PathVariable Long personId,
-      @RequestParam Long conferenceId) {
+      @RequestParam Long conferenceId,
+      @RequestParam Long meetingId,
+      @RequestParam Boolean isEdit) {
 
     if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
-      PersonKeepCitizenDto citizen = personService.findCitizenById(personId, conferenceId);
+      PersonKeepCitizenDto citizen = personService.findCitizenById(personId, conferenceId, meetingId, isEdit);
       return ResponseEntity.status(200).body(citizen);
     } else {
       return ResponseEntity.status(401).body(null);
