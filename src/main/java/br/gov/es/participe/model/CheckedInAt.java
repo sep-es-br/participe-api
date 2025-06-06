@@ -23,11 +23,6 @@ public class CheckedInAt extends Entity {
     @DateString
     private Date time;
     
-    private Boolean isAnnounced;
-    private Boolean isAuthority;
-    private String organization;
-    private String role;
-
     private Boolean isAuthority;
     private Boolean isAnnounced;
     private String organization;
@@ -89,13 +84,31 @@ public class CheckedInAt extends Entity {
         this.isAnnounced = isAnnounced;
     }
 
-
-    public Boolean getIsAnnounced() {
-        return isAnnounced;
+    public Boolean getIsAuthority() {
+        return isAuthority;
     }
 
-    public void setIsAnnounced(Boolean isAnnounced) {
-        this.isAnnounced = isAnnounced;
+    public void setIsAuthority(Boolean isAuthority) {
+        this.isAuthority = isAuthority;
     }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    
+
     
 }
