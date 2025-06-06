@@ -14,19 +14,30 @@ import java.util.Date;
 @RelationshipEntity(type = "CHECKED_IN_AT")
 public class CheckedInAt extends Entity {
 
-    @DateString
-    private Date time;
-
     @StartNode
     private Person person;
 
     @EndNode
     private Meeting meeting;
+    
+    @DateString
+    private Date time;
+    
+    private Boolean isAnnounced;
+    private Boolean isAuthority;
+    private String organization;
+    private String role;
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
     private Boolean isAuthority;
     private Boolean isAnnounced;
     private String organization;
     private String role;
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 
     public CheckedInAt() {
     }
@@ -76,6 +87,23 @@ public class CheckedInAt extends Entity {
         this.meeting = meeting;
     }
 
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+=======
+>>>>>>> Stashed changes
+    public Boolean getIsAnnounced() {
+        return isAnnounced;
+    }
+
+    public void setIsAnnounced(Boolean isAnnounced) {
+        this.isAnnounced = isAnnounced;
+    }
+
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     public Boolean getIsAuthority() {
         return isAuthority;
     }
@@ -99,6 +127,8 @@ public class CheckedInAt extends Entity {
     public void setRole(String role) {
         this.role = role;
     }
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
     public Boolean getIsAnnounced() {
         return isAnnounced;
@@ -108,4 +138,8 @@ public class CheckedInAt extends Entity {
         this.isAnnounced = isAnnounced;
     }
     
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 }
