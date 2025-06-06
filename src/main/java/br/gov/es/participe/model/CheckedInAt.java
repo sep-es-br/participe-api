@@ -23,6 +23,11 @@ public class CheckedInAt extends Entity {
     @EndNode
     private Meeting meeting;
 
+    private Boolean isAuthority;
+    private Boolean isAnnounced;
+    private String organization;
+    private String role;
+
     public CheckedInAt() {
     }
 
@@ -70,4 +75,37 @@ public class CheckedInAt extends Entity {
     public void setMeeting(Meeting meeting) {
         this.meeting = meeting;
     }
+
+    public Boolean getIsAuthority() {
+        return isAuthority;
+    }
+
+    public void setIsAuthority(Boolean isAuthority) {
+        this.isAuthority = isAuthority;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Boolean getIsAnnounced() {
+        return isAnnounced;
+    }
+
+    public void setIsAnnounced(Boolean isAnnounced) {
+        this.isAnnounced = isAnnounced;
+    }
+    
 }
