@@ -26,11 +26,20 @@ public class CheckedInAt extends Entity {
     private Boolean isAuthority;
     private Boolean isAnnounced;
     private String organization;
+    private String organizationShort;
     private String role;
 
     public CheckedInAt() {
     }
 
+    public String getOrganizationShort() {
+        return organizationShort;
+    }
+
+    public void setOrganizationShort(String organizationShort) {
+        this.organizationShort = organizationShort;
+    }
+    
     public CheckedInAt(Person person, Meeting meeting) {
         this.time = new Date();
         this.person = person;

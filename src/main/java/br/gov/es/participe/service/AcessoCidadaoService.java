@@ -710,6 +710,7 @@ public class AcessoCidadaoService {
         PublicAgentDto PersonApiDto = mapper.readValue(response.body(), new TypeReference<PublicAgentDto>() {
         });
         personDto.setEmail(PersonApiDto.getEmail());
+        personDto.setCorporativo(PersonApiDto.getCorporativo());
         return personDto;
       } else {
         logger.error("Não foi possível buscar o email do cidadão atrelado a esse sub.");

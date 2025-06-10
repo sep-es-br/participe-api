@@ -40,16 +40,17 @@ public class PreRegistrationService {
     @Autowired
     private QRCodeService qrCodeService;
 
-    public PreRegistration save(PreRegistration preRegistration){
+    public PreRegistration save(PreRegistration preRegistration, boolean update){
 
         PreRegistration preRegistrationStored =  preRegistrationRepository.findByMeetingAndPerson(preRegistration.getMeeting().getId(), preRegistration.getPerson().getId());
 
-        if(preRegistrationStored != null){
+        if(preRegistrationStored != null && !update){
             
             if(preRegistrationStored.getMadeBy() == null) {
                 preRegistrationStored.setMadeBy(preRegistration.getMadeBy());
                 preRegistrationStored = preRegistrationRepository.save(preRegistrationStored);
             }
+            
             
             
             return preRegistrationStored;
@@ -60,6 +61,12 @@ public class PreRegistrationService {
         final var createdPreRegistration = preRegistrationRepository.save(preRegistration);
 
         return createdPreRegistration;
+    }
+    
+    
+    public PreRegistration save(PreRegistration preRegistration){
+
+        return this.save(preRegistration, false);
     }
 
     public PreRegistration findByMeetingAndPerson(Long meetingId, Long personId) {
