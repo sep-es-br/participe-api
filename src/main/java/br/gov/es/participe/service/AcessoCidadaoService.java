@@ -201,10 +201,6 @@ public class AcessoCidadaoService {
       return findAllRoles(userInfo.getString(FIELD_SUB_NOVO));
     }
     
-        List<AcGrupoDto> grupos = findAcGroupsBySub(userInfo.getString(FIELD_SUB_NOVO));
-    
-    if(grupos.stream().filter(acg -> acg.getGuid().equalsIgnoreCase(this.announcerGuid)).count() > 0)
-        roles.add("Annoucer");
     
     return roles;
   }

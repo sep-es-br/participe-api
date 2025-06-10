@@ -1248,6 +1248,10 @@ public class PersonService {
     msg.setCode(422);
     return ResponseEntity.status(422).body(msg);
   }
+  
+  public List<AuthorityMeetingDto> findAuthorityForMeeting(final Long meetingId, final String name) {
+      return personRepository.findAuthorityByNameForMeeting(meetingId, name);
+  }
 
   public Page<PersonMeetingDto> findPersonForMeeting(Long meetingId, String name, Pageable pageable,
       HttpSession session) {
