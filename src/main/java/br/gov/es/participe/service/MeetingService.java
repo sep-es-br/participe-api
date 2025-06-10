@@ -474,19 +474,18 @@ public class MeetingService {
     Person person = personService.find(personId);
     if (person != null && meeting != null) {
       Optional<CheckedInAt> checkedInAt = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
-      if (!checkedInAt.isPresent()) {
-        CheckedInAt newParticipant = timeZone == null ? new CheckedInAt(person, meeting)
-            : new CheckedInAt(person, meeting, timeZone);
-            newParticipant.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
-            newParticipant.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
-            newParticipant.setOrganization(organization);
-            newParticipant.setRole(role);
+      return checkedInAt.orElseGet(() -> {
+                     CheckedInAt newParticipant = timeZone == null ? new CheckedInAt(person, meeting)
+                    : new CheckedInAt(person, meeting, timeZone);
+                    newParticipant.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
+                    newParticipant.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
+                    newParticipant.setOrganization(organization);
+                    newParticipant.setRole(role);
 
-            preRegistrationService.saveCheckIn(personId, meetingId);
-        log.info("Realizando checkin da personId={} na meetingId={} com timezone={}", personId, meetingId, timeZone);
-        return checkedInAtRepository.save(newParticipant);
-      }
-      throw new IllegalArgumentException("Esta pessoa já está participando neste encontro.");
+                    preRegistrationService.saveCheckIn(personId, meetingId);
+                log.info("Realizando checkin da personId={} na meetingId={} com timezone={}", personId, meetingId, timeZone);
+                return checkedInAtRepository.save(newParticipant);
+            });
     }
     throw new IllegalArgumentException("Person or Meeting not found.");
   }
