@@ -63,6 +63,18 @@ public class PreRegistrationController {
     @Autowired
     private EmailService emailService;
 
+    @GetMapping("/{idPreregistration}")
+    public ResponseEntity<PreRegistrationDto> getPreregistration(
+            @PathVariable Long idPreregistration
+    ) {
+        
+        return ResponseEntity.of(Optional.ofNullable(preRegistrationService.find(idPreregistration))
+                                    .map(PreRegistrationDto::new));
+        
+        
+        
+    }
+    
     @Transactional
     @PostMapping()
     public ResponseEntity<PreRegistrationDto> meetPreRegistration(
