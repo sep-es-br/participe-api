@@ -14,23 +14,32 @@ import java.util.Date;
 @RelationshipEntity(type = "CHECKED_IN_AT")
 public class CheckedInAt extends Entity {
 
-    @DateString
-    private Date time;
-
     @StartNode
     private Person person;
 
     @EndNode
     private Meeting meeting;
-
+    
+    @DateString
+    private Date time;
+    
     private Boolean isAuthority;
     private Boolean isAnnounced;
     private String organization;
+    private String organizationShort;
     private String role;
 
     public CheckedInAt() {
     }
 
+    public String getOrganizationShort() {
+        return organizationShort;
+    }
+
+    public void setOrganizationShort(String organizationShort) {
+        this.organizationShort = organizationShort;
+    }
+    
     public CheckedInAt(Person person, Meeting meeting) {
         this.time = new Date();
         this.person = person;
@@ -76,6 +85,14 @@ public class CheckedInAt extends Entity {
         this.meeting = meeting;
     }
 
+    public Boolean getIsAnnounced() {
+        return isAnnounced;
+    }
+
+    public void setIsAnnounced(Boolean isAnnounced) {
+        this.isAnnounced = isAnnounced;
+    }
+
     public Boolean getIsAuthority() {
         return isAuthority;
     }
@@ -100,12 +117,7 @@ public class CheckedInAt extends Entity {
         this.role = role;
     }
 
-    public Boolean getIsAnnounced() {
-        return isAnnounced;
-    }
+    
 
-    public void setIsAnnounced(Boolean isAnnounced) {
-        this.isAnnounced = isAnnounced;
-    }
     
 }

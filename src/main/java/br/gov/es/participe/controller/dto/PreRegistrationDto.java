@@ -18,6 +18,16 @@ public class PreRegistrationDto {
     public PreRegistrationDto() {
     }
 
+    public PreRegistrationDto(PreRegistration preRegistration) {
+        if (preRegistration == null) return;
+
+        this.id = preRegistration.getId();
+        this.meeting = new MeetingDto(preRegistration.getMeeting(),false);
+        this.person = new PersonDto(preRegistration.getPerson());
+        this.checkInDate = preRegistration.getCheckIn();
+        this.preRegistrationDate = preRegistration.getPreRegistration();
+    }
+
     public PreRegistrationDto(PreRegistration preRegistration,byte[] qrcode) {
         if (preRegistration == null) return;
 

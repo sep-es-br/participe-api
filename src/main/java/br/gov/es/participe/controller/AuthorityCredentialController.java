@@ -1,6 +1,7 @@
 package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.AuthorityCredentialRequest;
+import br.gov.es.participe.controller.dto.CheckedInAtDto;
 import br.gov.es.participe.controller.dto.ForgotPasswordDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
@@ -17,6 +18,7 @@ import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PreRegistration;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.service.AcessoCidadaoService;
+import br.gov.es.participe.service.AuthorityCredentialService;
 import br.gov.es.participe.service.EmailService;
 import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.MeetingService;
@@ -71,6 +73,9 @@ public class AuthorityCredentialController {
     
     @Autowired
     private AcessoCidadaoService acService;
+    
+    @Autowired
+    private AuthorityCredentialService authcSrv;
         
     
   @PutMapping
@@ -115,13 +120,15 @@ public class AuthorityCredentialController {
             selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
         }, 
         () -> {
-            selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson));
+            representedByPerson.addSelfDeclaration(
+                    selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
+            );
         }); 
         
       PreRegistration preRegistration = new PreRegistration(
               meeting, madeByPerson, representedByPerson, 
               credentialRequest.getOrganization(), credentialRequest.getRole());
-      PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration);
+      PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration, true);
       try {
           byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
 
@@ -133,14 +140,21 @@ public class AuthorityCredentialController {
       }catch (IOException | WriterException | MessagingException ex) {
           throw new RuntimeException(ex);
       }
-      
-
-
-      
+            
       
   }
-  
-  
-      
+
+    @PutMapping("{idCheckedIn}/toggleAnnounced")
+    public ResponseEntity<?> toggleAnnounced(
+            @PathVariable Long idCheckedIn
+    ) {
+        
+        return ResponseEntity.of(
+                authcSrv
+                .toggleAnnounced(idCheckedIn)
+                .map(CheckedInAtDto::new)
+        );
+        
+    }
 
 }

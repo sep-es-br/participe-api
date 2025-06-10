@@ -8,6 +8,13 @@ public class CheckedInAtDto {
 	private PersonDto person;
 	private MeetingDto meeting;
 	private Date time;
+        
+        
+    
+        private Boolean isAuthority;
+        private Boolean isAnnounced;
+        private String organization;
+        private String role;
 	
 	public CheckedInAtDto (){
 	}
@@ -17,6 +24,11 @@ public class CheckedInAtDto {
 			return;
 
 		this.time = checkedInAt.getTime();
+                this.isAuthority = checkedInAt.getIsAuthority();
+                this.isAnnounced = checkedInAt.getIsAnnounced();
+                this.organization = checkedInAt.getOrganization();
+                this.role = checkedInAt.getRole();
+                
 		if(checkedInAt.getPerson() != null) {
 			this.person = new PersonDto(checkedInAt.getPerson());
 		}
@@ -26,6 +38,40 @@ public class CheckedInAtDto {
 			this.meeting.setReceptionists(null);
 		}
 	}
+
+    public Boolean getIsAuthority() {
+        return isAuthority;
+    }
+
+    public void setIsAuthority(Boolean isAuthority) {
+        this.isAuthority = isAuthority;
+    }
+
+    public Boolean getIsAnnounced() {
+        return isAnnounced;
+    }
+
+    public void setIsAnnounced(Boolean isAnnounced) {
+        this.isAnnounced = isAnnounced;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+        
+        
 
 	public PersonDto getPerson() {
 		return person;

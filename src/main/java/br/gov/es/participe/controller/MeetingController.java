@@ -324,6 +324,7 @@ public class MeetingController {
     Boolean response = meetingService.deleteParticipation(personId, meetingId);
     return ResponseEntity.ok().body(response);
   }
+  
   @ApiPageable
   @GetMapping("/{meetingId}/persons")
   public ResponseEntity<Page<PersonMeetingDto>> findPersonForMeeting(
@@ -337,6 +338,21 @@ public class MeetingController {
     }
     Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable, session);
     return ResponseEntity.status(200).body(personMeetingDtoPage);
+  }
+  
+  @ApiPageable
+  @GetMapping("/{meetingId}/authorities")
+  public ResponseEntity<?> findAuthorityForMeeting(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long meetingId,
+      @RequestParam(name = "name", required = false, defaultValue = "") String name,
+      Pageable pageable,
+      HttpSession session) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Presenter" })) {
+      return ResponseEntity.status(401).body(null);
+    }
+    List<AuthorityMeetingDto> authorityMeetingDto = personService.findAuthorityForMeeting(meetingId, name);
+    return ResponseEntity.status(200).body(authorityMeetingDto);
   }
 
   @GetMapping("/receptionistByEmail")
