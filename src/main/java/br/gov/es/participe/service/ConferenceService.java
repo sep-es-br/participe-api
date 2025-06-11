@@ -793,6 +793,14 @@ public class ConferenceService {
     return conferences;
   }
 
+  public List<Conference> findAllOpenWithPresentialMeetings(Date date) {
+    List<Conference> conferences = new ArrayList<>(this.conferenceRepository.findAllOpenWithPresentialMeeting(date));
+
+    this.removeUnusableFields(conferences);
+
+    return conferences;
+  }
+
   public List<Conference> findAllOpenWithPresentialMeetings4Receptionists(Date date, Long idPerson) {
     List<Conference> conferences = new ArrayList<>(this.conferenceRepository.findAllOpenWithPresentialMeeting4Receptionists(date, idPerson));
 
