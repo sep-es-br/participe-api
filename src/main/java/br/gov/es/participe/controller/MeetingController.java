@@ -179,6 +179,36 @@ public class MeetingController {
     return ResponseEntity.status(200).body(response);
   }
 
+  @PutMapping("/checkIn")
+  @Transactional
+  public ResponseEntity<CheckedInAtDto> editCheckIn(
+      @RequestHeader(name = "Authorization") String token,
+      @RequestBody CheckInParamDto checkInParamDto) {
+
+    if (!personService.hasOneOfTheRoles(token, new String[]{"Administrator", "Recepcionist"})) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    if (checkInParamDto == null ||
+        checkInParamDto.getPersonId() == null ||
+        checkInParamDto.getMeetingId() == null) {
+      throw new IllegalArgumentException("Person Id and Meeting Id must be provided.");
+    }
+
+    CheckedInAt updatedCheckIn = meetingService.editCheckInOnMeeting(
+        checkInParamDto.getPersonId(),
+        checkInParamDto.getMeetingId(),
+        checkInParamDto.getTimeZone(),
+        checkInParamDto.getIsAuthority(),
+        checkInParamDto.getOrganization(),
+        checkInParamDto.getRole());
+
+    if (updatedCheckIn != null) {
+      return ResponseEntity.ok(new CheckedInAtDto(updatedCheckIn));
+    }
+
+    return ResponseEntity.noContent().build();
+  }
 
   @Transactional
   @PostMapping("/checkIn")
@@ -197,7 +227,12 @@ public class MeetingController {
     CheckedInAt checkedInAt = meetingService.checkInOnMeeting(
         checkInParamDto.getPersonId(),
         checkInParamDto.getMeetingId(),
-        checkInParamDto.getTimeZone());
+        checkInParamDto.getTimeZone(),
+        checkInParamDto.getIsAuthority(),
+        checkInParamDto.getOrganization(),
+        checkInParamDto.getRole());
+
+
 
     if (checkedInAt != null) {
       return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
@@ -221,7 +256,10 @@ public class MeetingController {
     CheckedInAt checkedInAt = meetingService.checkInOnMeeting(
         checkInParamDto.getPersonId(),
         checkInParamDto.getMeetingId(),
-        checkInParamDto.getTimeZone());
+        checkInParamDto.getTimeZone(),
+        checkInParamDto.getIsAuthority(),
+        checkInParamDto.getOrganization(),
+        checkInParamDto.getRole());
 
     if (checkedInAt != null) {
       return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
@@ -286,6 +324,7 @@ public class MeetingController {
     Boolean response = meetingService.deleteParticipation(personId, meetingId);
     return ResponseEntity.ok().body(response);
   }
+  
   @ApiPageable
   @GetMapping("/{meetingId}/persons")
   public ResponseEntity<Page<PersonMeetingDto>> findPersonForMeeting(
@@ -299,6 +338,21 @@ public class MeetingController {
     }
     Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable, session);
     return ResponseEntity.status(200).body(personMeetingDtoPage);
+  }
+  
+  @ApiPageable
+  @GetMapping("/{meetingId}/authorities")
+  public ResponseEntity<?> findAuthorityForMeeting(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long meetingId,
+      @RequestParam(name = "name", required = false, defaultValue = "") String name,
+      Pageable pageable,
+      HttpSession session) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Presenter" })) {
+      return ResponseEntity.status(401).body(null);
+    }
+    List<AuthorityMeetingDto> authorityMeetingDto = personService.findAuthorityForMeeting(meetingId, name);
+    return ResponseEntity.status(200).body(authorityMeetingDto);
   }
 
   @GetMapping("/receptionistByEmail")

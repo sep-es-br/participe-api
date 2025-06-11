@@ -11,10 +11,16 @@ import java.util.Set;
 public interface CheckedInAtRepository extends Neo4jRepository<CheckedInAt, Long> {
         @Query("MATCH (p:Person)-[part:CHECKED_IN_AT]->(m:Meeting) "
         +"Where id(m)=$meetingId Return p, part, m")
-Set<CheckedInAt> findByMeeting(@Param("meetingId") Long meetingId);
+    Set<CheckedInAt> findByMeeting(@Param("meetingId") Long meetingId);
 
-@Query("MATCH (p:Person)-[part:CHECKED_IN_AT]->(m:Meeting) "
-        +"Where id(p)=$personId AND id(m)=$meetingId Return p, part, m, [(m)-[tp:TAKES_PLACE_AT]->(lp:Locality) | [tp, lp] ]")
-Optional<CheckedInAt> findByPersonAndMeeting( @Param("personId") Long personId, @Param("meetingId") Long meetingId);
+    @Query("MATCH (p:Person)-[part:CHECKED_IN_AT]->(m:Meeting) "
+            +"Where id(p)=$personId AND id(m)=$meetingId Return p, part, m, [(m)-[tp:TAKES_PLACE_AT]->(lp:Locality) | [tp, lp] ]")
+    Optional<CheckedInAt> findByPersonAndMeeting( @Param("personId") Long personId, @Param("meetingId") Long meetingId);
+    
+    @Query("match (p:Person)-[ci:CHECKED_IN_AT]->(m:Meeting)\n" +
+            "where id(ci) = $checkedAtId\n" +
+            "set ci.isAnnounced = not ci.isAnnounced\n" +
+            "return p, ci, m")
+    Optional<CheckedInAt> toggleAnnounced(Long checkedAtId);
 }
 

@@ -234,7 +234,30 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
                "       COLLECT(DISTINCT au.server) AS authName " +
                "ORDER BY name ASC")
     List<PersonMeetingDto> findPersonByNameForMeeting(@Param("idMeeting")Long idMeeting, @Param("name")String name, @Param("sub")String sub, @Param("cEmail")String cEmail);
-  
+      
+  @Query(
+    "match (p:Person)-[ci:CHECKED_IN_AT{isAuthority: true}]->(m:Meeting)\n" +
+    "where id(m) = $idMeeting\n" +
+    "return distinct\n" +
+    "    id(p) as idPerson,\n" +
+    "    id(ci) as idCheckIn,\n" +
+    "    ci.time as checkInTime,\n" +
+    "    ci.isAnnounced as announced, \n" +
+    "    p.name as name, \n" +
+    "    ci.role as role, \n" +
+    "    ci.organization as organization,\n" +
+    "    ci\n" +
+    "ORDER BY \n" +
+    "    apoc.coll.max([\n" +
+    "        apoc.text.levenshteinSimilarity($name, p.name),\n" +
+    "        apoc.text.levenshteinSimilarity($name, ci.role),\n" +
+    "        apoc.text.levenshteinSimilarity($name, ci.organization)\n" +
+    "    ]) DESC, \n" +
+    "    (CASE WHEN ci IS NOT NULL THEN 0 ELSE 1 END) ASC,\n" +
+    "    (CASE WHEN NOT coalesce(ci.isAnnounced, false) THEN 0 ELSE 1 END) ASC,\n" +
+    "    ci.time ASC")
+    List<AuthorityMeetingDto> findAuthorityByNameForMeeting(Long idMeeting, String name);
+      
     @Query(
       "MATCH (m:Meeting)-[:OCCURS_IN]->(c:Conference) " +
           "WHERE id(m)=$idMeeting " +

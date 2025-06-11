@@ -86,6 +86,12 @@ public class PersonService {
   @Autowired
   private AcessoCidadaoService acessoCidadaoService;
 
+  @Autowired
+  private PreRegistrationService preRegistrationService;
+
+  @Autowired
+  private CheckedInAtRepository checkedInAtRepository;
+
   public Boolean forgotPassword(String email, Long conferenceId, String server) {
     Optional<Person> person = this.havePersonWithLoginEmail(email, server, null);
 
@@ -565,7 +571,7 @@ public class PersonService {
         () -> new IllegalArgumentException(PERSON_ERROR_NOT_FOUND));
   }
 
-  public PersonKeepCitizenDto findCitizenById(Long personId, Long conferenceId) {
+  public PersonKeepCitizenDto findCitizenById(Long personId, Long conferenceId, Long meetingId, Boolean isEdit) {
     Person person = Optional.ofNullable(find(personId))
         .orElseThrow(() -> new IllegalArgumentException(PERSON_ERROR_NOT_FOUND));
     log.info("PersonId={} encontrada", person.getId());
@@ -582,6 +588,44 @@ public class PersonService {
     SelfDeclaration selfDeclaration = this.selfDeclarationService.findByPersonAndConference(personId, conferenceId);
 
     PersonKeepCitizenDto personCitizen = getPersonKeepCitizenDto(person);
+
+    if(isEdit){
+      Optional<CheckedInAt> optionalCheckIn = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
+
+      if (optionalCheckIn.isPresent()) {
+          CheckedInAt checkedInAt = optionalCheckIn.get();
+  
+          if (checkedInAt.getIsAuthority() != null) {
+              personCitizen.setIsAuthority(Boolean.TRUE.equals(checkedInAt.getIsAuthority()) ? true : null);
+          }
+  
+          if (checkedInAt.getOrganization() != null) {
+              personCitizen.setOrganization(checkedInAt.getOrganization());
+          }
+  
+          if (checkedInAt.getRole() != null) {
+              personCitizen.setRole(checkedInAt.getRole());
+          }
+      }
+    } else {
+      PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meetingId, personId);
+  
+      if (preRegistration != null) {
+        if (preRegistration.getIsAuthority() != null) {
+            personCitizen.setIsAuthority(Boolean.TRUE.equals(preRegistration.getIsAuthority()) ? true : null);
+        }
+  
+        if (preRegistration.getOrganization() != null) {
+            personCitizen.setOrganization(preRegistration.getOrganization());
+        }
+  
+        if (preRegistration.getRole() != null) {
+            personCitizen.setRole(preRegistration.getRole());
+        }
+      }
+    }
+
+
 
     personCitizen.setAutentication(loginAccessDtos);
 
@@ -1203,6 +1247,10 @@ public class PersonService {
     msg.setMessage(PERSON_ERROR_PASS_NOT_MATCHING);
     msg.setCode(422);
     return ResponseEntity.status(422).body(msg);
+  }
+  
+  public List<AuthorityMeetingDto> findAuthorityForMeeting(final Long meetingId, final String name) {
+      return personRepository.findAuthorityByNameForMeeting(meetingId, name);
   }
 
   public Page<PersonMeetingDto> findPersonForMeeting(Long meetingId, String name, Pageable pageable,
