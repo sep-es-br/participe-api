@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +124,9 @@ public class AuthorityCredentialController {
             representedByPerson.addSelfDeclaration(
                     selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
             );
-        }); 
+        });
+        
+        
         
       PreRegistration preRegistration = new PreRegistration(
               meeting, madeByPerson, representedByPerson, 
