@@ -1398,35 +1398,9 @@ public class PersonService {
       throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
     }
 
-    List<PersonMeetingFilteredDto> personMeetingFilteredDtoList;
-
-    switch (filter) {
-      case "pres":
-       personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithCheckIn(
-         meetingId,
-         localities, name);
-        break;
-
-      case "prereg":
-        personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithPreRegistration(meetingId, localities, name);
-        break;
-      
-      case "prereg_pres":
-        personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithPreRegistrationAndCheckIn(meetingId, localities, name);
-        break;
-      
-      case "prereg_notpres":
-        personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithPreRegistrationAndNoCheckIn(meetingId, localities, name);
-        break;
-        
-      case "notprereg_pres":
-        personMeetingFilteredDtoList = personRepository.findPersonsOnMeetingWithCheckInAndNoPreRegistration(meetingId, localities, name);
-        break;
-      
-      default:
-        personMeetingFilteredDtoList = null;
-        break;
-    }
+    List<PersonMeetingFilteredDto> personMeetingFilteredDtoList = 
+            personRepository.findPersonsOnMeeting(meetingId, localities, name, filter);
+    
 
 	  assert personMeetingFilteredDtoList != null;
 

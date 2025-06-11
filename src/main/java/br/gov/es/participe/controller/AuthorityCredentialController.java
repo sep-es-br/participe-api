@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,11 +124,25 @@ public class AuthorityCredentialController {
             representedByPerson.addSelfDeclaration(
                     selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
             );
-        }); 
+        });
         
-      PreRegistration preRegistration = new PreRegistration(
-              meeting, madeByPerson, representedByPerson, 
-              credentialRequest.getOrganization(), credentialRequest.getRole());
+        PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
+        
+        preRegistration = Optional.ofNullable(preRegistration)
+                                    .map(pr -> {
+                                        
+                                       pr.setPreRegistration(new Date());
+                                       pr.setOrganization(credentialRequest.getOrganization());
+                                       pr.setRole(credentialRequest.getRole());
+                                       pr.setMadeBy(madeByPerson);
+                                        
+                                        return pr;
+                                    })
+                                    .orElse(new PreRegistration(
+                                        meeting, madeByPerson, representedByPerson, 
+                                        credentialRequest.getOrganization(), credentialRequest.getRole()));
+        
+        
       PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration, true);
       try {
           byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
