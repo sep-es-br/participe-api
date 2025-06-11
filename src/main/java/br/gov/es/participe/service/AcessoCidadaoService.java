@@ -100,9 +100,6 @@ public class AcessoCidadaoService {
   @Value("${api.acessocidadao.recepcionist.profile.id}")
   private String recepcionistProfileId;
   
-  @Value("${acessocidadao.group.announcer.guid}")
-  private String announcerGuid;
-
   @Value("${api.acessocidadao.grant_type}")
   private String grantType;
 
@@ -191,7 +188,7 @@ public class AcessoCidadaoService {
 
   private Set<String> getRoles(JSONObject userInfo) throws IOException {
     Set<String> roles = new HashSet<>();
-    if (!userInfo.isNull(FIELD_ROLE)) {
+    if (!userInfo.isNull(FIELD_ROLE)) {;;
       if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
         userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));
       } else {
@@ -201,6 +198,7 @@ public class AcessoCidadaoService {
       return findAllRoles(userInfo.getString(FIELD_SUB_NOVO));
     }
     
+//    roles.add("Presenter");
     
     return roles;
   }
