@@ -73,7 +73,7 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                 "AND (meeting.typeMeetingEnum <> 'VIRTUAL') " +
                 "AND ($date >= left(meeting.beginDate,10) AND $date <= meeting.endDate) " +
                 " " +
-                "RETURN conference, occurs_in, meeting, tpa, locality, person " +
+                "RETURN conference, occurs_in, meeting, tpa, locality " +
                 "ORDER BY conference.name ")
         Collection<Conference> findAllOpenWithPresentialMeeting( @Param("date") Date date);
 
