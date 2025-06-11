@@ -84,7 +84,10 @@ public class PersonController {
         AcSectionInfoDto sectionInfoDto = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
         if(sectionInfoDto != null) {
             AcOrganizationInfoDto organizationInfoDto = acService.findOrganizationInfoFromOrganogramaAPI(sectionInfoDto.getGuidOrganizacao());
-            if(organizationInfoDto != null) acRole.put("organization", organizationInfoDto.getRazaoSocial());
+            if(organizationInfoDto != null) {
+                acRole.put("organization", organizationInfoDto.getRazaoSocial());
+                acRole.put("organizationShort", organizationInfoDto.getSigla());
+            }
         }
       }
       

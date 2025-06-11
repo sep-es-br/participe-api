@@ -16,8 +16,19 @@ public class AuthorityCredentialRequest {
     private String representedBySub;
     private Long meetingId;
     private String organization;
+    private String organizationShort;
     private String role;
     private Long localityId;
+
+    public String getOrganizationShort() {
+        return organizationShort;
+    }
+
+    public void setOrganizationShort(String organizationShort) {
+        this.organizationShort = organizationShort;
+    }
+    
+    
 
     public String getRepresentedBySub() {
         return representedBySub;

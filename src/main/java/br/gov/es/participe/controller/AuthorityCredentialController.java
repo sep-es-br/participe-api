@@ -127,7 +127,7 @@ public class AuthorityCredentialController {
         
       PreRegistration preRegistration = new PreRegistration(
               meeting, madeByPerson, representedByPerson, 
-              credentialRequest.getOrganization(), credentialRequest.getRole());
+              credentialRequest.getOrganization(), credentialRequest.getOrganizationShort(), credentialRequest.getRole());
       PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration, true);
       try {
           byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);

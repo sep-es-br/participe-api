@@ -23,6 +23,7 @@ public class PreRegistration extends Entity implements Serializable {
     private Boolean isAuthority;
     
     private String organization;
+    private String organizationShort;
     private String role;
 
     @DateString
@@ -50,15 +51,24 @@ public class PreRegistration extends Entity implements Serializable {
 
     }
 
-    public PreRegistration(Meeting meeting, Person madeByPerson, Person representingPerson, String organization, String role ){
+    public PreRegistration(Meeting meeting, Person madeByPerson, Person representingPerson, String organization, String organizationShort, String role ){
         this.isAuthority = true;
         this.meeting = meeting;
         this.madeBy = madeByPerson;
         this.person = representingPerson;
         this.organization = organization;
+        this.organizationShort = organizationShort;
         this.role = role;
         this.created = new Date();
 
+    }
+
+    public String getOrganizationShort() {
+        return organizationShort;
+    }
+
+    public void setOrganizationShort(String organizationShort) {
+        this.organizationShort = organizationShort;
     }
 
     public Person getMadeBy() {

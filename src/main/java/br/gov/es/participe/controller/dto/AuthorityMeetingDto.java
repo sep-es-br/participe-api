@@ -19,7 +19,16 @@ public class AuthorityMeetingDto {
     private String name;
     private String role;
     private String organization;
+    private String organizationShort;
 
+    public String getOrganizationShort() {
+        return organizationShort;
+    }
+
+    public void setOrganizationShort(String organizationShort) {
+        this.organizationShort = organizationShort;
+    }
+    
     public Long getIdPerson() {
         return idPerson;
     }
