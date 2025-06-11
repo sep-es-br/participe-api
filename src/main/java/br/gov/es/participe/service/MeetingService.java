@@ -474,7 +474,19 @@ public class MeetingService {
     Person person = personService.find(personId);
     if (person != null && meeting != null) {
       Optional<CheckedInAt> checkedInAt = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
-      return checkedInAt.orElseGet(() -> {
+      
+      
+      
+      return checkedInAt
+              .map(checkIn -> {
+                  checkIn.setIsAuthority(isAuthority);
+                  checkIn.setOrganization(organization);
+                  checkIn.setRole(role);
+                  
+                  return checkedInAtRepository.save(checkIn);
+              
+              })
+              .orElseGet(() -> {
                      CheckedInAt newParticipant = timeZone == null ? new CheckedInAt(person, meeting)
                     : new CheckedInAt(person, meeting, timeZone);
                     newParticipant.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
