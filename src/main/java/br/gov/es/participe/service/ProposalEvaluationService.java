@@ -109,7 +109,7 @@ public class ProposalEvaluationService {
         IsAuthenticatedBy authRelationship = personService.getIsAuthenticatedBy(personId, "AcessoCidadao");
 
         log.info("Buscando papel na API do Acesso Cidadao");
-        List<EvaluatorRoleDto> evaluatorRoleDto = acessoCidadaoService.findRoleFromAcessoCidadaoAPIByAgentePublicoSub(authRelationship.getIdByAuth());
+        List<EvaluatorRoleDto> evaluatorRoleDto = acessoCidadaoService.findRoleFromAcessoCidadaoAPIByAgentePublicoSub(authRelationship.getAuthService().getServerId());
 
         return evaluatorsService.findOrganizationGuidBySectionOrRole(evaluatorRoleDto);
 
