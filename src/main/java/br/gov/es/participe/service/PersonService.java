@@ -589,43 +589,42 @@ public class PersonService {
 
     PersonKeepCitizenDto personCitizen = getPersonKeepCitizenDto(person);
 
-    if(isEdit){
-      Optional<CheckedInAt> optionalCheckIn = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
+    
+     Optional<CheckedInAt> optionalCheckIn = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
+     optionalCheckIn.ifPresentOrElse(
+             checkin -> {
+  
+                if (checkin.getIsAuthority() != null) {
+                    personCitizen.setIsAuthority(Boolean.TRUE.equals(checkin.getIsAuthority()));
+                }
 
-      if (optionalCheckIn.isPresent()) {
-          CheckedInAt checkedInAt = optionalCheckIn.get();
-  
-          if (checkedInAt.getIsAuthority() != null) {
-              personCitizen.setIsAuthority(Boolean.TRUE.equals(checkedInAt.getIsAuthority()) ? true : null);
-          }
-  
-          if (checkedInAt.getOrganization() != null) {
-              personCitizen.setOrganization(checkedInAt.getOrganization());
-          }
-  
-          if (checkedInAt.getRole() != null) {
-              personCitizen.setRole(checkedInAt.getRole());
-          }
-      }
-    } else {
-      PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meetingId, personId);
-  
-      if (preRegistration != null) {
-        if (preRegistration.getIsAuthority() != null) {
-            personCitizen.setIsAuthority(Boolean.TRUE.equals(preRegistration.getIsAuthority()) ? true : null);
-        }
-  
-        if (preRegistration.getOrganization() != null) {
-            personCitizen.setOrganization(preRegistration.getOrganization());
-        }
-  
-        if (preRegistration.getRole() != null) {
-            personCitizen.setRole(preRegistration.getRole());
-        }
-      }
-    }
+                if (checkin.getOrganization() != null) {
+                    personCitizen.setOrganization(checkin.getOrganization());
+                }
 
+                if (checkin.getRole() != null) {
+                    personCitizen.setRole(checkin.getRole());
+                }
+             },
+             () -> {
+                 PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meetingId, personId);
+                 if (preRegistration != null) {
+                    if (preRegistration.getIsAuthority() != null) {
+                        personCitizen.setIsAuthority(Boolean.TRUE.equals(preRegistration.getIsAuthority()) ? true : null);
+                    }
 
+                    if (preRegistration.getOrganization() != null) {
+                        personCitizen.setOrganization(preRegistration.getOrganization());
+                    }
+
+                    if (preRegistration.getRole() != null) {
+                        personCitizen.setRole(preRegistration.getRole());
+                    }
+                }         
+             });
+    
+     
+    
 
     personCitizen.setAutentication(loginAccessDtos);
 
