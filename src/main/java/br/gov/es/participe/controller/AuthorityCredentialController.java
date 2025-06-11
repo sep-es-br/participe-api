@@ -125,9 +125,6 @@ public class AuthorityCredentialController {
                     selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
             );
         });
-        
-        
-        
       PreRegistration preRegistration = new PreRegistration(
               meeting, madeByPerson, representedByPerson, 
               credentialRequest.getOrganization(), credentialRequest.getOrganizationShort(), credentialRequest.getRole());
