@@ -20,7 +20,36 @@ public class PersonMeetingDto {
     private String cpf;
     private Boolean isAuthTypeCpf;
     private List<String> authName;
+    private Boolean isAuthority;
+    private String role;
+    private String organization;
     private String sub;
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    
+    
+    public Boolean getIsAuthority() {
+        return isAuthority;
+    }
+
+    public void setIsAuthority(Boolean isAuthority) {
+        this.isAuthority = isAuthority;
+    }
 
     public List<String> getAuthName() {
         return authName;
