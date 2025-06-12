@@ -1357,8 +1357,10 @@ public class PersonService {
 }
 
 
-  public Page<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilterPaged(Long meetingId, List<Long> localities, String name, String filter, Pageable pageable) {
-    List<PersonMeetingFilteredDto> fullList = findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filter);
+  public Page<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilterPaged(
+          Long meetingId, List<Long> localities, String name, String filterBy, Boolean filterByIsAuthority , Pageable pageable
+  ) {
+    List<PersonMeetingFilteredDto> fullList = findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filterBy, filterByIsAuthority);
 
     int start = (int) pageable.getOffset();
     int end = Math.min((start + pageable.getPageSize()), fullList.size());
@@ -1369,10 +1371,10 @@ public class PersonService {
   }
 
 
-  public Map<String, Long> countTotalParticipantsInMeeting(Long meetingId, List<Long> localities, String name, String filter) {
+  public Map<String, Long> countTotalParticipantsInMeeting(Long meetingId, List<Long> localities, String name, String filter, Boolean filterIsAuthority) {
     Map<String, Long> count = new HashMap<>();
 
-    List<PersonMeetingFilteredDto> personMeetingFilteredDtoList = findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filter);
+    List<PersonMeetingFilteredDto> personMeetingFilteredDtoList = findPersonOnMeetingByAttendanceFilter(meetingId, localities, name, filter, filterIsAuthority);
 
     final long[] totalCheckedIn = {0L};
 
@@ -1393,13 +1395,13 @@ public class PersonService {
     return count;
   }
 
-  private List<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilter(Long meetingId, List<Long> localities, String name, String filter) {
+  private List<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilter(Long meetingId, List<Long> localities, String name, String filter, Boolean filterIsAuthority) {
     if (meetingId == null) {
       throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
     }
 
     List<PersonMeetingFilteredDto> personMeetingFilteredDtoList = 
-            personRepository.findPersonsOnMeeting(meetingId, localities, name, filter);
+            personRepository.findPersonsOnMeeting(meetingId, localities, name, filter, filterIsAuthority);
     
 
 	  assert personMeetingFilteredDtoList != null;
