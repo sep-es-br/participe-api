@@ -284,45 +284,57 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
 
     @Query(
         value = 
-            "CALL {\n" +
-            "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\n" +
-            "  WHERE id(m) = $idMeeting and\n" +
-            "        ($name IS NULL OR apoc.text.clean(p.name) CONTAINS apoc.text.clean($name))\n" +
-            "  OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m)\n" +
-            "  OPTIONAL MATCH (p)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m)\n" +
-            "  RETURN *\n" +
-            "} WITH *\n" +
-            "WHERE case\n" +
-            "    when $filter = 'prereg_or_pres' then cia is not null or pr is not null \n" +
-            "    when $filter = 'pres' then cia is not null\n" +
-            "    when $filter = 'prereg' then pr is not null\n" +
-            "    when $filter = 'prereg_pres' then cia is not null and pr is not null\n" +
-            "    when $filter = 'prereg_notpres' then cia is null and pr is not null\n" +
-            "    when $filter = 'notprereg_pres' then cia is not null and pr is null\n" +
-            "    else false end\n" +
-            "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\n" +
-            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
-            "RETURN DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telehpone AS telephone, " +
-            "cia.time AS checkedInDate, pr.created AS preRegisteredDate",
+            "CALL {\r\n" + //
+            "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\r\n" + //
+            "  WHERE id(m) = $idMeeting AND\r\n" + //
+            "        ($name IS NULL OR apoc.text.clean(p.name) CONTAINS apoc.text.clean($name))\r\n" + //
+            "  OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m)\r\n" + //
+            "  OPTIONAL MATCH (p)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m)\r\n" + //
+            "  RETURN *\r\n" + //
+            "}\r\n" + //
+            "WITH *\r\n" + //
+            "WHERE (CASE\r\n" + //
+            "    WHEN $filter = 'prereg_or_pres' THEN cia IS NOT NULL OR pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'pres' THEN cia IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'prereg' THEN pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'prereg_pres' THEN cia IS NOT NULL AND pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'prereg_notpres' THEN cia IS NULL AND pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'notprereg_pres' THEN cia IS NOT NULL AND pr IS NULL\r\n" + //
+            "    ELSE FALSE end) and\r\n" + //
+            "    ($filterIsAuthotity is null or $filterIsAuthotity = coalesce(cia.isAuthority, pr.isAuthority, false))\r\n" + //
+            "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\r\n" + //
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
+            "RETURN DISTINCT \r\n" + //
+            "  id(p) AS personId,\r\n" + //
+            "  toLower(p.name) AS name,\r\n" + //
+            "  p.contactEmail AS email,\r\n" + //
+            "  p.telehpone AS telephone,\r\n" + //
+            "  cia.time AS checkedInDate,\r\n" + //
+            "  coalesce(cia.isAuthority, pr.isAuthority, false) as isAuthority,\r\n" + //
+            "  coalesce(cia.role, pr.role) as role,\r\n" + //
+            "  coalesce(cia.organization, pr.organization) as organization,\r\n" + //
+            "  pr.created AS preRegisteredDate",
         countQuery = 
-            "CALL {\n" +
-            "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\n" +
-            "  WHERE id(m) = $idMeeting and\n" +
-            "        ($name IS NULL OR apoc.text.clean(p.name) CONTAINS apoc.text.clean($name))\n" +
-            "  OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m)\n" +
-            "  OPTIONAL MATCH (p)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m)\n" +
-            "  RETURN *\n" +
-            "} WITH *\n" +
-            "WHERE case\n" +
-            "    when $filter = 'prereg_or_pres' then cia is not null or pr is not null \n" +
-            "    when $filter = 'pres' then cia is not null\n" +
-            "    when $filter = 'prereg' then pr is not null\n" +
-            "    when $filter = 'prereg_pres' then cia is not null and pr is not null\n" +
-            "    when $filter = 'prereg_notpres' then cia is null and pr is not null\n" +
-            "    when $filter = 'notprereg_pres' then cia is not null and pr is null\n" +
-            "    else false end\n" +
-            "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\n" +
-            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities) " +
+            "CALL {\r\n" + //
+            "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\r\n" + //
+            "  WHERE id(m) = $idMeeting AND\r\n" + //
+            "        ($name IS NULL OR apoc.text.clean(p.name) CONTAINS apoc.text.clean($name))\r\n" + //
+            "  OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m)\r\n" + //
+            "  OPTIONAL MATCH (p)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m)\r\n" + //
+            "  RETURN *\r\n" + //
+            "}\r\n" + //
+            "WITH *\r\n" + //
+            "WHERE (CASE\r\n" + //
+            "    WHEN $filter = 'prereg_or_pres' THEN cia IS NOT NULL OR pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'pres' THEN cia IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'prereg' THEN pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'prereg_pres' THEN cia IS NOT NULL AND pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'prereg_notpres' THEN cia IS NULL AND pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'notprereg_pres' THEN cia IS NOT NULL AND pr IS NULL\r\n" + //
+            "    ELSE FALSE end) and\r\n" + //
+            "    ($filterIsAuthotity is null or $filterIsAuthotity = coalesce(cia.isAuthority, pr.isAuthority, false))\r\n" + //
+            "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\r\n" + //
+            "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
             "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telehpone AS telephone, " +
             "cia.time AS checkedInDate, pr.created AS preRegisteredDate " +
             "RETURN COUNT(*)"
@@ -331,7 +343,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             Long idMeeting, 
             List<Long> localities, 
             String name,
-            String filter
+            String filter,
+            Boolean filterIsAuthotity
     );
   
     @Query("MATCH(person:Person)-[authBy:IS_AUTHENTICATED_BY]->(authService:AuthService) " +

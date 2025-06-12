@@ -289,10 +289,13 @@ public class MeetingController {
   public ResponseEntity<Page<PersonMeetingFilteredDto>> findMeetingParticipants(@PathVariable Long meetingId,
       @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
       @RequestParam(name = "name", required = false) String name, 
-      @RequestParam(name = "filter", required = true) String filter,
+      @RequestParam(name = "filterBy", required = true) String filterBy,
+      @RequestParam(name = "filterByIsAuthority", required = false) Boolean filterByIsAuthority,
       @ApiIgnore Pageable page) {
+      
 
-      Page<PersonMeetingFilteredDto> personMeetingFilteredDto = personService.findPersonOnMeetingByAttendanceFilterPaged(meetingId, localities, name, filter, page);
+      Page<PersonMeetingFilteredDto> personMeetingFilteredDto = 
+              personService.findPersonOnMeetingByAttendanceFilterPaged(meetingId, localities, name, filterBy, filterByIsAuthority, page);
 
       return ResponseEntity.ok().body(personMeetingFilteredDto);
     
@@ -303,10 +306,11 @@ public class MeetingController {
           @PathVariable Long meetingId,
           @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
           @RequestParam(name = "name", required = false) String name,
-          @RequestParam(name = "filter", required = true) String filter
+        @RequestParam(name = "filterBy", required = true) String filterBy,
+        @RequestParam(name = "filterByIsAuthority", required = false) Boolean filterByIsAuthority
   ) {
-
-    Map<String, Long> totalParticipants = personService.countTotalParticipantsInMeeting(meetingId, localities, name, filter);
+      
+    Map<String, Long> totalParticipants = personService.countTotalParticipantsInMeeting(meetingId, localities, name, filterBy, filterByIsAuthority);
 
     return ResponseEntity.ok().body(totalParticipants);
 
