@@ -201,7 +201,8 @@ public class MeetingController {
         checkInParamDto.getTimeZone(),
         checkInParamDto.getIsAuthority(),
         checkInParamDto.getOrganization(),
-        checkInParamDto.getRole());
+        checkInParamDto.getRole(),
+        checkInParamDto.getToAnnounce());
 
     if (updatedCheckIn != null) {
       return ResponseEntity.ok(new CheckedInAtDto(updatedCheckIn));

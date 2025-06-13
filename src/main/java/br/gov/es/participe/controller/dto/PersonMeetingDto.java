@@ -21,9 +21,35 @@ public class PersonMeetingDto {
     private Boolean isAuthTypeCpf;
     private List<String> authName;
     private Boolean isAuthority;
+    private Boolean isAnnounced;
+    private Boolean toAnnounce;
     private String role;
     private String organization;
     private String sub;
+
+    public Boolean getIsAuthTypeCpf() {
+        return isAuthTypeCpf;
+    }
+
+    public void setIsAuthTypeCpf(Boolean isAuthTypeCpf) {
+        this.isAuthTypeCpf = isAuthTypeCpf;
+    }
+
+    public Boolean getIsAnnounced() {
+        return isAnnounced;
+    }
+
+    public void setIsAnnounced(Boolean isAnnounced) {
+        this.isAnnounced = isAnnounced;
+    }
+
+    public Boolean getToAnnounce() {
+        return toAnnounce;
+    }
+
+    public void setToAnnounce(Boolean toAnnounce) {
+        this.toAnnounce = toAnnounce;
+    }
 
     public String getRole() {
         return role;
