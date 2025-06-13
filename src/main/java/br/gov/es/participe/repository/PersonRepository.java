@@ -313,6 +313,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "  coalesce(cia.isAuthority, pr.isAuthority, false) as isAuthority,\r\n" + //
             "  coalesce(cia.role, pr.role) as role,\r\n" + //
             "  coalesce(cia.organization, pr.organization) as organization,\r\n" + //
+            "  cia.isAnnounced as isAnnounced,\r\n" + //
+            "  cia.toAnnounce as toAnnounce,\r\n" + //
             "  pr.created AS preRegisteredDate",
         countQuery = 
             "CALL {\r\n" + //

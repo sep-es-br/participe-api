@@ -445,7 +445,10 @@ public class MeetingService {
     return true;
   }
 
-  public CheckedInAt editCheckInOnMeeting(Long personId, Long meetingId, String timeZone, Boolean isAuthority, String organization, String role) {
+  public CheckedInAt editCheckInOnMeeting(
+    Long personId, Long meetingId, String timeZone, Boolean isAuthority, String organization, String role,
+    Boolean toAnnounce
+    ) {
     Meeting meeting = this.find(meetingId);
     Person person = personService.find(personId);
 
@@ -458,6 +461,7 @@ public class MeetingService {
             checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
             checkIn.setOrganization(organization);
             checkIn.setRole(role);
+            checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
 
             return checkedInAtRepository.save(checkIn);
         } else {
