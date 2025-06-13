@@ -9,6 +9,8 @@ import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.QRCodeService;
 
 import br.gov.es.participe.util.interfaces.ApiPageable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,7 @@ import org.springframework.http.ContentDisposition;
 /* Fim das importações */
 import javax.imageio.ImageIO;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.WriterException;
 
 import java.io.IOException;
@@ -290,15 +293,20 @@ public class MeetingController {
   public ResponseEntity<Page<PersonMeetingFilteredDto>> findMeetingParticipants(@PathVariable Long meetingId,
       @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
       @RequestParam(name = "name", required = false) String name, 
+      @RequestParam(name = "sort", required = true) String sort,
       @RequestParam(name = "filterBy", required = true) String filterBy,
       @RequestParam(name = "filterByIsAuthority", required = false) Boolean filterByIsAuthority,
+      @RequestParam(name = "filterByStatus", required = false) String filterByStatus,
       @ApiIgnore Pageable page) {
-      
+              
+        Page<PersonMeetingFilteredDto> personMeetingFilteredDto = 
+                personService.findPersonOnMeetingByAttendanceFilterPaged(
+                        meetingId, localities, name, sort, filterBy, 
+                        filterByIsAuthority, filterByStatus, page
+                );
 
-      Page<PersonMeetingFilteredDto> personMeetingFilteredDto = 
-              personService.findPersonOnMeetingByAttendanceFilterPaged(meetingId, localities, name, filterBy, filterByIsAuthority, page);
+        return ResponseEntity.ok().body(personMeetingFilteredDto);
 
-      return ResponseEntity.ok().body(personMeetingFilteredDto);
     
   }
 
@@ -307,11 +315,15 @@ public class MeetingController {
           @PathVariable Long meetingId,
           @RequestParam(name = "localities", required = false, defaultValue = "") List<Long> localities,
           @RequestParam(name = "name", required = false) String name,
+        @RequestParam(name = "sort", required = true) String sort,
         @RequestParam(name = "filterBy", required = true) String filterBy,
-        @RequestParam(name = "filterByIsAuthority", required = false) Boolean filterByIsAuthority
+        @RequestParam(name = "filterByIsAuthority", required = false) Boolean filterByIsAuthority,
+      @RequestParam(name = "filterByStatus", required = false) String filterByStatus
   ) {
       
-    Map<String, Long> totalParticipants = personService.countTotalParticipantsInMeeting(meetingId, localities, name, filterBy, filterByIsAuthority);
+    Map<String, Long> totalParticipants = personService.countTotalParticipantsInMeeting(
+            meetingId, localities, name, sort, filterBy, filterByIsAuthority, filterByStatus
+    );
 
     return ResponseEntity.ok().body(totalParticipants);
 
