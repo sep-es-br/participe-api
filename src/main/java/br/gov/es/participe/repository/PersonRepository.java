@@ -236,7 +236,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     List<PersonMeetingDto> findPersonByNameForMeeting(@Param("idMeeting")Long idMeeting, @Param("name")String name, @Param("sub")String sub, @Param("cEmail")String cEmail);
       
   @Query(
-    "match (p:Person)-[ci:CHECKED_IN_AT{isAuthority: true}]->(m:Meeting)\n" +
+    "match (p:Person)-[ci:CHECKED_IN_AT{isAuthority: true, toAnnounce: true}]->(m:Meeting)\n" +
     "where id(m) = $idMeeting\n" +
     "return distinct\n" +
     "    id(p) as idPerson,\n" +
@@ -294,13 +294,18 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "}\r\n" + //
             "WITH *\r\n" + //
             "WHERE (CASE\r\n" + //
-            "    WHEN $filter = 'prereg_or_pres' THEN cia IS NOT NULL OR pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'pres' THEN cia IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg' THEN pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg_pres' THEN cia IS NOT NULL AND pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg_notpres' THEN cia IS NULL AND pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'notprereg_pres' THEN cia IS NOT NULL AND pr IS NULL\r\n" + //
             "    ELSE FALSE end) and\r\n" + //
+            "  ( case\n" +
+            "    when $status = 'screening' then (cia.isAuthority and not coalesce(cia.toAnnounce, false))\n" +
+            "    when $status = 'toAnnounce' then (coalesce(cia.toAnnounce, false) and not coalesce(cia.isAnnounced, false))\n" +
+            "    when $status = 'announced' then coalesce(cia.isAnnounced, false)\n" +
+            "    else true end\n" +
+            "  ) and\r\n" + //
             "    ($filterIsAuthotity is null or $filterIsAuthotity = coalesce(cia.isAuthority, pr.isAuthority, false))\r\n" + //
             "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\r\n" + //
             "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
@@ -313,7 +318,21 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "  coalesce(cia.isAuthority, pr.isAuthority, false) as isAuthority,\r\n" + //
             "  coalesce(cia.role, pr.role) as role,\r\n" + //
             "  coalesce(cia.organization, pr.organization) as organization,\r\n" + //
-            "  pr.created AS preRegisteredDate",
+            "  cia.isAnnounced as isAnnounced,\r\n" + //
+            "  cia.toAnnounce as toAnnounce,\r\n" + //
+            "  pr.created AS preRegisteredDate\r\n" + //
+            "order by (\r\n" + //
+            "  case\r\n" + //
+            "    when $sort = 'name' then apoc.text.clean(name)\r\n" + //
+            "    when $sort = 'checkedInDate' then checkedInDate\r\n" + //
+            "    when $sort = 'status' then (\r\n" + //
+            "      case\r\n" + //
+            "        when isAuthority and not toAnnounce then 0\r\n" + //
+            "        when toAnnounce and not isAnnounced then 1\r\n" + //
+            "        when toAnnounce and isAnnounced then 2\r\n" + //
+            "        else 3 end\r\n" + //
+            "    ) end \r\n" + //
+            ") asc",
         countQuery = 
             "CALL {\r\n" + //
             "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\r\n" + //
@@ -325,13 +344,18 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "}\r\n" + //
             "WITH *\r\n" + //
             "WHERE (CASE\r\n" + //
-            "    WHEN $filter = 'prereg_or_pres' THEN cia IS NOT NULL OR pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'pres' THEN cia IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg' THEN pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg_pres' THEN cia IS NOT NULL AND pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg_notpres' THEN cia IS NULL AND pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'notprereg_pres' THEN cia IS NOT NULL AND pr IS NULL\r\n" + //
-            "    ELSE FALSE end) and\r\n" + //
+            "    ELSE FALSE end) and  \n" +
+            "  ( case\n" +
+            "    when $status = 'screening' then (cia.isAuthority and not coalesce(cia.toAnnounce, false))\n" +
+            "    when $status = 'toAnnounce' then (coalesce(cia.toAnnounce, false) and not coalesce(cia.isAnnounced, false))\n" +
+            "    when $status = 'announced' then coalesce(cia.isAnnounced, false)\n" +
+            "    else true end\n" +
+            "  ) and\r\n" + //
             "    ($filterIsAuthotity is null or $filterIsAuthotity = coalesce(cia.isAuthority, pr.isAuthority, false))\r\n" + //
             "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\r\n" + //
             "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
@@ -343,8 +367,10 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             Long idMeeting, 
             List<Long> localities, 
             String name,
+            String sort,
             String filter,
-            Boolean filterIsAuthotity
+            Boolean filterIsAuthotity,
+            String status
     );
   
     @Query("MATCH(person:Person)-[authBy:IS_AUTHENTICATED_BY]->(authService:AuthService) " +

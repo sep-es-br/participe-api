@@ -25,11 +25,20 @@ public class CheckedInAt extends Entity {
     
     private Boolean isAuthority;
     private Boolean isAnnounced;
+    private Boolean toAnnounce;
     private String organization;
     private String organizationShort;
     private String role;
 
     public CheckedInAt() {
+    }
+
+    public Boolean getToAnnounce() {
+        return toAnnounce;
+    }
+
+    public void setToAnnounce(Boolean toAnnounce) {
+        this.toAnnounce = toAnnounce;
     }
 
     public String getOrganizationShort() {
