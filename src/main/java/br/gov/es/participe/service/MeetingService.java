@@ -447,7 +447,7 @@ public class MeetingService {
 
   public CheckedInAt editCheckInOnMeeting(
     Long personId, Long meetingId, String timeZone, Boolean isAuthority, String organization, String role,
-    Boolean toAnnounce
+    Boolean toAnnounce, Boolean announced
     ) {
     Meeting meeting = this.find(meetingId);
     Person person = personService.find(personId);
@@ -462,6 +462,7 @@ public class MeetingService {
             checkIn.setOrganization(organization);
             checkIn.setRole(role);
             checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
+            checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? announced : null);
 
             return checkedInAtRepository.save(checkIn);
         } else {

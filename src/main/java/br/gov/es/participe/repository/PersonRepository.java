@@ -311,6 +311,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
             "RETURN DISTINCT \r\n" + //
             "  id(p) AS personId,\r\n" + //
+            "  id(cia) AS checkInId,\r\n" + //
             "  toLower(p.name) AS name,\r\n" + //
             "  p.contactEmail AS email,\r\n" + //
             "  p.telehpone AS telephone,\r\n" + //
@@ -318,8 +319,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "  coalesce(cia.isAuthority, pr.isAuthority, false) as isAuthority,\r\n" + //
             "  coalesce(cia.role, pr.role) as role,\r\n" + //
             "  coalesce(cia.organization, pr.organization) as organization,\r\n" + //
-            "  cia.isAnnounced as isAnnounced,\r\n" + //
-            "  cia.toAnnounce as toAnnounce,\r\n" + //
+            "  coalesce(cia.isAnnounced, false) as isAnnounced,\r\n" + //
+            "  coalesce(cia.toAnnounce, false) as toAnnounce,\r\n" + //
             "  pr.created AS preRegisteredDate\r\n" + //
             "order by (\r\n" + //
             "  case\r\n" + //
@@ -327,12 +328,12 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    when $sort = 'checkedInDate' then checkedInDate\r\n" + //
             "    when $sort = 'status' then (\r\n" + //
             "      case\r\n" + //
-            "        when isAuthority and not toAnnounce then 0\r\n" + //
-            "        when toAnnounce and not isAnnounced then 1\r\n" + //
-            "        when toAnnounce and isAnnounced then 2\r\n" + //
+            "        when (isAuthority and not toAnnounce) then 0\r\n" + //
+            "        when (toAnnounce and not isAnnounced) then 1\r\n" + //
+            "        when (toAnnounce and isAnnounced) then 2\r\n" + //
             "        else 3 end\r\n" + //
             "    ) end \r\n" + //
-            ") asc",
+            ") asc, cia.time ASC",
         countQuery = 
             "CALL {\r\n" + //
             "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\r\n" + //

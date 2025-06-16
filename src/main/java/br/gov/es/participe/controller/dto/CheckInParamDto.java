@@ -8,6 +8,7 @@ public class CheckInParamDto {
     private String organization;
     private String role;
     private Boolean toAnnounce;
+    private Boolean announced;
 
     public CheckInParamDto() {
     }
@@ -17,6 +18,15 @@ public class CheckInParamDto {
         this.meetingId = meetingId;
     }
 
+    public Boolean getAnnounced() {
+        return announced;
+    }
+
+    public void setAnnounced(Boolean announced) {
+        this.announced = announced;
+    }
+    
+    
     
 
     public Long getPersonId() {
