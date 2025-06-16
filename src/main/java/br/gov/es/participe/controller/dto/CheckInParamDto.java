@@ -7,6 +7,8 @@ public class CheckInParamDto {
     private Boolean isAuthority;
     private String organization;
     private String role;
+    private Boolean toAnnounce;
+    private Boolean announced;
 
     public CheckInParamDto() {
     }
@@ -15,6 +17,17 @@ public class CheckInParamDto {
         this.personId = personId;
         this.meetingId = meetingId;
     }
+
+    public Boolean getAnnounced() {
+        return announced;
+    }
+
+    public void setAnnounced(Boolean announced) {
+        this.announced = announced;
+    }
+    
+    
+    
 
     public Long getPersonId() {
         return personId;
@@ -62,6 +75,14 @@ public class CheckInParamDto {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Boolean getToAnnounce() {
+        return toAnnounce;
+    }
+
+    public void setToAnnounce(Boolean toAnnounce) {
+        this.toAnnounce = toAnnounce;
     }
 
     

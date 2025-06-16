@@ -8,6 +8,7 @@ import java.util.List;
 @QueryResult
 public class PersonMeetingDto {
     private Long personId;
+    private Long checkInId;
     private String name;
     private String email;
     private String telephone;
@@ -20,7 +21,70 @@ public class PersonMeetingDto {
     private String cpf;
     private Boolean isAuthTypeCpf;
     private List<String> authName;
+    private Boolean isAuthority;
+    private Boolean isAnnounced;
+    private Boolean toAnnounce;
+    private String role;
+    private String organization;
     private String sub;
+
+    public Long getCheckInId() {
+        return checkInId;
+    }
+
+    public void setCheckInId(Long checkInId) {
+        this.checkInId = checkInId;
+    }
+
+    public Boolean getIsAuthTypeCpf() {
+        return isAuthTypeCpf;
+    }
+
+    public void setIsAuthTypeCpf(Boolean isAuthTypeCpf) {
+        this.isAuthTypeCpf = isAuthTypeCpf;
+    }
+
+    public Boolean getIsAnnounced() {
+        return isAnnounced;
+    }
+
+    public void setIsAnnounced(Boolean isAnnounced) {
+        this.isAnnounced = isAnnounced;
+    }
+
+    public Boolean getToAnnounce() {
+        return toAnnounce;
+    }
+
+    public void setToAnnounce(Boolean toAnnounce) {
+        this.toAnnounce = toAnnounce;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    
+    
+    public Boolean getIsAuthority() {
+        return isAuthority;
+    }
+
+    public void setIsAuthority(Boolean isAuthority) {
+        this.isAuthority = isAuthority;
+    }
 
     public List<String> getAuthName() {
         return authName;

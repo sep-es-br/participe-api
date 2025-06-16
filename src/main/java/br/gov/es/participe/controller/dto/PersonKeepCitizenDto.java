@@ -41,11 +41,33 @@ public class PersonKeepCitizenDto {
 
 	private Boolean isAuthority;
 
+	private Boolean toAnnounce;
+        
+        private Boolean announced;
+
     private String organization;
 
     private String role;
 
-    public List<String> getAuthName() {
+    public Boolean getAnnounced() {
+        return announced;
+    }
+
+    public void setAnnounced(Boolean announced) {
+        this.announced = announced;
+    }
+    
+    
+
+    public Boolean getToAnnounce() {
+		return toAnnounce;
+	}
+
+	public void setToAnnounce(Boolean toAnnounce) {
+		this.toAnnounce = toAnnounce;
+	}
+
+	public List<String> getAuthName() {
         return authName;
     }
 

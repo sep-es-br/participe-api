@@ -172,4 +172,17 @@ public class AuthorityCredentialController {
         
     }
 
+    @PutMapping("{idCheckedIn}/toggleToAnnounce")
+    public ResponseEntity<?> toggleToAnnounce(
+            @PathVariable Long idCheckedIn
+    ) {
+        
+        return ResponseEntity.of(
+                authcSrv
+                .toggleToAnnounce(idCheckedIn)
+                .map(CheckedInAtDto::new)
+        );
+        
+    }
+
 }
