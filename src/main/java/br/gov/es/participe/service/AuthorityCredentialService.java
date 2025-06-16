@@ -24,4 +24,10 @@ public class AuthorityCredentialService {
         return checkedInAtRepository.toggleAnnounced(idCheckedIn);
     }
     
+    public Optional<CheckedInAt> toggleToAnnounce(final Long idCheckedIn) {
+        return checkedInAtRepository.toggleToAnnounce(idCheckedIn);
+    }
+    
+    
+    
 }

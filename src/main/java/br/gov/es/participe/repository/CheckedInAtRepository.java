@@ -19,8 +19,14 @@ public interface CheckedInAtRepository extends Neo4jRepository<CheckedInAt, Long
     
     @Query("match (p:Person)-[ci:CHECKED_IN_AT]->(m:Meeting)\n" +
             "where id(ci) = $checkedAtId\n" +
-            "set ci.isAnnounced = not ci.isAnnounced\n" +
+            "set ci.isAnnounced = not coalesce(ci.isAnnounced, false)\n" +
             "return p, ci, m")
     Optional<CheckedInAt> toggleAnnounced(Long checkedAtId);
+    
+    @Query("match (p:Person)-[ci:CHECKED_IN_AT]->(m:Meeting)\n" +
+            "where id(ci) = $checkedAtId\n" +
+            "set ci.toAnnounce = not coalesce(ci.toAnnounce, false)\n" +
+            "return p, ci, m")
+    Optional<CheckedInAt> toggleToAnnounce(Long checkedAtId);
 }
 

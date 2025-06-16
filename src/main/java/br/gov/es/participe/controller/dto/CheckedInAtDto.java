@@ -12,6 +12,7 @@ public class CheckedInAtDto {
         
     
         private Boolean isAuthority;
+        private Boolean toAnnounce;
         private Boolean isAnnounced;
         private String organization;
         private String role;
@@ -26,6 +27,7 @@ public class CheckedInAtDto {
 		this.time = checkedInAt.getTime();
                 this.isAuthority = checkedInAt.getIsAuthority();
                 this.isAnnounced = checkedInAt.getIsAnnounced();
+                this.toAnnounce = checkedInAt.getToAnnounce();
                 this.organization = checkedInAt.getOrganization();
                 this.role = checkedInAt.getRole();
                 
@@ -41,6 +43,14 @@ public class CheckedInAtDto {
 
     public Boolean getIsAuthority() {
         return isAuthority;
+    }
+
+    public Boolean getToAnnounce() {
+        return toAnnounce;
+    }
+
+    public void setToAnnounce(Boolean toAnnounce) {
+        this.toAnnounce = toAnnounce;
     }
 
     public void setIsAuthority(Boolean isAuthority) {
