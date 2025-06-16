@@ -609,6 +609,10 @@ public class PersonService {
                 if(checkin.getToAnnounce() != null) {
                   personCitizen.setToAnnounce(checkin.getToAnnounce());
                 }
+                
+                if(checkin.getIsAnnounced() != null) {
+                    personCitizen.setAnnounced(checkin.getIsAnnounced());
+                }
              },
              () -> {
                  PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meetingId, personId);

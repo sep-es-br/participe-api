@@ -8,6 +8,7 @@ import java.util.List;
 @QueryResult
 public class PersonMeetingDto {
     private Long personId;
+    private Long checkInId;
     private String name;
     private String email;
     private String telephone;
@@ -26,6 +27,14 @@ public class PersonMeetingDto {
     private String role;
     private String organization;
     private String sub;
+
+    public Long getCheckInId() {
+        return checkInId;
+    }
+
+    public void setCheckInId(Long checkInId) {
+        this.checkInId = checkInId;
+    }
 
     public Boolean getIsAuthTypeCpf() {
         return isAuthTypeCpf;

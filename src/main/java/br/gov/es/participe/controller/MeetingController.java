@@ -205,7 +205,9 @@ public class MeetingController {
         checkInParamDto.getIsAuthority(),
         checkInParamDto.getOrganization(),
         checkInParamDto.getRole(),
-        checkInParamDto.getToAnnounce());
+        checkInParamDto.getToAnnounce(),
+        checkInParamDto.getAnnounced()
+    );
 
     if (updatedCheckIn != null) {
       return ResponseEntity.ok(new CheckedInAtDto(updatedCheckIn));
