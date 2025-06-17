@@ -2,7 +2,6 @@ package br.gov.es.participe.controller.dto;
 
 import org.springframework.data.neo4j.annotation.QueryResult;
 
-import br.gov.es.participe.model.ProposalEvaluation;
 
 // import java.util.Optional;
 

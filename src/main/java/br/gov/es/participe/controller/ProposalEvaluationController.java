@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import br.gov.es.participe.controller.dto.*;
-import br.gov.es.participe.model.ProposalEvaluation;
 import br.gov.es.participe.service.ConferenceService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.ProposalEvaluationService;
