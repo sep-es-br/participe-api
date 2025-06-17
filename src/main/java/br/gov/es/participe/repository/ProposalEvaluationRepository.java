@@ -16,7 +16,6 @@ import br.gov.es.participe.controller.dto.StructureItemAndLocalityTypeDto;
 import br.gov.es.participe.model.Evaluates;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.PlanItem;
-import br.gov.es.participe.model.ProposalEvaluation;
 
 public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates, Long> {
 
