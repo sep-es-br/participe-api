@@ -316,11 +316,11 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "  p.contactEmail AS email,\r\n" + //
             "  p.telehpone AS telephone,\r\n" + //
             "  cia.time AS checkedInDate,\r\n" + //
-            "  coalesce(cia.isAuthority, pr.isAuthority, false) as isAuthority,\r\n" + //
-            "  coalesce(cia.role, pr.role) as role,\r\n" + //
-            "  coalesce(cia.organization, pr.organization) as organization,\r\n" + //
-            "  coalesce(cia.isAnnounced, false) as isAnnounced,\r\n" + //
-            "  coalesce(cia.toAnnounce, false) as toAnnounce,\r\n" + //
+            "  coalesce(coalesce(cia, pr).isAuthority, false) AS isAuthority,\r\n" + //
+            "  coalesce(coalesce(cia, pr).role, '') AS role,\r\n" + //
+            "  coalesce(coalesce(cia, pr).organization, '') AS organization,\r\n" + //
+            "  coalesce(coalesce(cia, pr).isAnnounced, false) AS isAnnounced,  \r\n" + //
+            "  coalesce(coalesce(cia, pr).toAnnounce, false) AS toAnnounce,\r\n" + //
             "  pr.created AS preRegisteredDate\r\n" + //
             "order by (\r\n" + //
             "  case\r\n" + //
