@@ -1,5 +1,7 @@
 package br.gov.es.participe.controller;
 
+import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
+import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.ForgotPasswordDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
@@ -29,7 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import jdk.jfr.ContentType;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @CrossOrigin
@@ -292,6 +296,36 @@ public class PersonController {
         "Hummm... Não encontramos esse e-mail em nossos registros. Talvez você tenha se cadastrado com outro endereço ou utilizado o Acesso Cidadão, Google ou Facebook");
     msg.setCode(403);
     return ResponseEntity.status(403).body(msg);
+  }
+
+  @GetMapping("/{sub}/papeisBySub")
+  public ResponseEntity<?> rolesBySub(
+          @PathVariable String sub
+  ) {
+      
+      List<UnitRolesDto> roles = acService.findPapeisFromAcessoCidadaoAPIByAgentePublicoSub(sub);
+      
+      List<Map<String, Object>> result = Optional.ofNullable(roles).orElse(List.of()).stream()
+                                            .map(evalRole -> {
+                                                
+                                                HashMap<String, Object> entry = new HashMap<>();
+                                                
+                                                entry.put("role", evalRole.getNome());
+                                                
+                                                if(evalRole.getLotacaoGuid() != null){
+                                                    AcSectionInfoDto unitInfo = acService.findSectionInfoFromOrganogramaAPI(evalRole.getLotacaoGuid());
+                                                    if(unitInfo.getGuidOrganizacao() != null) {
+                                                        AcOrganizationInfoDto orgInfo = acService.findOrganizationInfoFromOrganogramaAPI(unitInfo.getGuidOrganizacao());
+                                                        entry.put("organization", orgInfo.getNomeFantasia());
+                                                        entry.put("organizationSh", orgInfo.getSigla());
+                                                    }
+                                                }
+                                                
+                                                return entry;
+                                            }).collect(Collectors.toList());
+      
+      
+      return ResponseEntity.ok(result);
   }
 
 }

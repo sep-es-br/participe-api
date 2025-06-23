@@ -188,16 +188,16 @@ public class AcessoCidadaoService {
 
   private Set<String> getRoles(JSONObject userInfo) throws IOException {
     Set<String> roles = new HashSet<>();
-    if (!userInfo.isNull(FIELD_ROLE)) {
-      if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
-        userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));
-      } else {
-        roles.add(userInfo.getString(FIELD_ROLE));
-      }
-    }
-    
-    // roles.add("Administrator");
-    // roles.add("Presenter");
+//    if (!userInfo.isNull(FIELD_ROLE)) {
+//      if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
+//        userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));
+//      } else {
+//        roles.add(userInfo.getString(FIELD_ROLE));
+//      }
+//    }
+//    
+     roles.add("Administrator");;
+     roles.add("Presenter");
     
     return roles;
   }
@@ -812,6 +812,45 @@ public class AcessoCidadaoService {
         });
 
         return evaluatorRolesDto;
+
+      } else {
+        logger.error("Não foi possível buscar o papel atrelado ao sub do agente.");
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+      }
+    } catch (IOException | InterruptedException e) {
+      
+      logger.error(e.getMessage());
+      throw new ApiAcessoCidadaoException("Erro ao buscar o papel atrelado ao sub do agente.");
+    }
+  }
+
+
+  public List<UnitRolesDto> findPapeisFromAcessoCidadaoAPIByAgentePublicoSub(String sub) {
+    String token = null;
+
+    try {
+      token = getClientToken();
+    } catch (RuntimeException e) {
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+    }
+    
+    String url = acessocidadaoUriWebApi.concat("/agentepublico/" + sub + "/papeis");
+
+    HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+      .header(AUTHORIZATION, BEARER + token)
+      .GET().build();
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+
+    try {
+      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+      if(response.statusCode() == 200) {
+        
+        List<UnitRolesDto> unitRolesDtos =  mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {
+        });
+
+        return unitRolesDtos;
 
       } else {
         logger.error("Não foi possível buscar o papel atrelado ao sub do agente.");
