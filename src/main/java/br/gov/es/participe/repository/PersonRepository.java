@@ -284,16 +284,21 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
 
     @Query(
         value = 
-            "CALL {\r\n" + //
+            " CALL {\r\n" + //
             "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\r\n" + //
-            "  WHERE id(m) = $idMeeting AND\r\n" + //
-            "        ($name IS NULL OR apoc.text.clean(p.name) CONTAINS apoc.text.clean($name))\r\n" + //
+            "  WHERE id(m) = $idMeeting \r\n" + //
             "  OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m)\r\n" + //
             "  OPTIONAL MATCH (p)<-[prrel1:PRE_REGISTRATION]-(pr:PreRegistration)-[prrel2:PRE_REGISTRATION]->(m)\r\n" + //
             "  RETURN *\r\n" + //
-            "}\r\n" + //
-            "WITH *\r\n" + //
-            "WHERE (CASE\r\n" + //
+            "} WITH *\r\n" + //
+            "WHERE \r\n" + //
+            "  (\r\n" + //
+            "    $name IS NULL OR\r\n" + //
+            "    apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)  OR\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($name) OR\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
+            "  ) AND\r\n" + //
+            "  (CASE\r\n" + //
             "    WHEN $filter = 'pres' THEN cia IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg' THEN pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg_pres' THEN cia IS NOT NULL AND pr IS NOT NULL\r\n" + //
