@@ -1,5 +1,5 @@
 <!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
-<jasperReport name="ProposalEvaluation" language="java" pageWidth="2000" pageHeight="595" orientation="Landscape" columnWidth="1960" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce" ignorePagination="true">
+<jasperReport name="ProposalEvaluation" language="java" pageWidth="5000" pageHeight="595" orientation="Landscape" columnWidth="4960" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce" ignorePagination="true">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -66,6 +66,10 @@ AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR
     RETURN DISTINCT 
     id(comment) AS commentId, 
     COALESCE(eval.representingOrgTag + " - " + eval.representingOrgName, "")  AS representingName,
+    CASE WHEN COALESCE(eval.haveCost, false) THEN "Sim" ELSE "Não" END AS haveCost,
+    CASE WHEN COALESCE(eval.newRequest, false) THEN "Sim" ELSE "Não" END AS newRequest,
+    COALESCE(eval.reasonDetail, "") AS reasonDetail,
+    COALESCE(eval.reason, "") AS reason,
     locality.name AS localityName, 
     planItem.name AS planItemName, 
     area.name AS planItemAreaName, 
@@ -81,6 +85,22 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 	<field name="representingName" class="java.lang.Object">
 		<property name="com.jaspersoft.studio.field.name" value="representingName"/>
 		<property name="com.jaspersoft.studio.field.label" value="representingName"/>
+	</field>
+	<field name="haveCost" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="haveCost"/>
+		<property name="com.jaspersoft.studio.field.label" value="haveCost"/>
+	</field>
+	<field name="newRequest" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="newRequest"/>
+		<property name="com.jaspersoft.studio.field.label" value="newRequest"/>
+	</field>
+	<field name="reasonDetail" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="reasonDetail"/>
+		<property name="com.jaspersoft.studio.field.label" value="reasonDetail"/>
+	</field>
+	<field name="reason" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="reason"/>
+		<property name="com.jaspersoft.studio.field.label" value="reason"/>
 	</field>
 	<field name="localityName" class="java.lang.Object">
 		<property name="com.jaspersoft.studio.field.name" value="localityName"/>
@@ -110,7 +130,7 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="evaluatorName"/>
 		<property name="com.jaspersoft.studio.field.label" value="evaluatorName"/>
 	</field>
-	<title height="30" splitType="Stretch">
+	<title height="35" splitType="Stretch">
 		<element kind="staticText" uuid="3ddced7c-9617-4799-879b-f17e758ca228" x="852" y="0" width="774" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Descrição]]></text>
 		</element>
@@ -126,10 +146,22 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<element kind="staticText" uuid="e6955ee0-0750-453b-af01-8fd8d9ac07dc" x="-20" y="0" width="270" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Orgão Avaliador]]></text>
 		</element>
+		<element kind="staticText" uuid="668e1ac4-1dfd-49b5-9188-a66c97b36092" x="1750" y="0" width="124" height="30" fontSize="12.0" bold="true">
+			<text><![CDATA[Possui custo?]]></text>
+		</element>
+		<element kind="staticText" uuid="db50cbae-10de-4a13-9bfc-0632afcdfd53" x="1874" y="0" width="124" height="30" fontSize="12.0" bold="true">
+			<text><![CDATA[Iniciativa nova?]]></text>
+		</element>
+		<element kind="staticText" uuid="63b3c331-bbd5-4bff-8476-676c59822e92" x="1998" y="0" width="362" height="30" fontSize="12.0" bold="true">
+			<text><![CDATA[Motivo da não inclusão]]></text>
+		</element>
+		<element kind="staticText" uuid="d164b0b2-effd-46dd-a96c-afe603c0cce2" x="2360" y="0" width="774" height="30" fontSize="12.0" bold="true">
+			<text><![CDATA[Observação]]></text>
+		</element>
 		<property name="com.jaspersoft.studio.unit.height" value="px"/>
 	</title>
 	<detail>
-		<band height="30" splitType="Stretch">
+		<band height="35" splitType="Stretch">
 			<element kind="textField" uuid="bf0ae18c-1d37-449f-98dd-1449e73fe0a9" x="250" y="0" width="270" height="30" textAdjust="ScaleFont">
 				<paragraph rightIndent="4"/>
 				<expression><![CDATA[$F{planItemAreaName}]]></expression>
@@ -151,6 +183,20 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 			<element kind="textField" uuid="f1c1c4e1-eeae-43ad-8c4e-8466188489c8" x="-20" y="0" width="270" height="30" textAdjust="ScaleFont">
 				<paragraph rightIndent="4"/>
 				<expression><![CDATA[$F{representingName}]]></expression>
+				<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+			</element>
+			<element kind="textField" uuid="a980bcc5-a729-45c8-a4d6-9710f910153e" mode="Transparent" x="1750" y="0" width="124" height="30">
+				<expression><![CDATA[$F{haveCost}]]></expression>
+			</element>
+			<element kind="textField" uuid="3780d058-1e38-4832-9ea3-49ba6e221d6e" mode="Transparent" x="1874" y="0" width="124" height="30">
+				<expression><![CDATA[$F{newRequest}]]></expression>
+			</element>
+			<element kind="textField" uuid="552ee862-2cdc-4b41-990b-d7abf25ef8b2" mode="Transparent" x="1998" y="0" width="362" height="30">
+				<expression><![CDATA[$F{reason}]]></expression>
+			</element>
+			<element kind="textField" uuid="d7e39ca0-9d0c-4a1e-a37e-894a00d6d620" x="2360" y="0" width="774" height="30" textAdjust="ScaleFont">
+				<paragraph rightIndent="4"/>
+				<expression><![CDATA[$F{reasonDetail}]]></expression>
 				<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 			</element>
 		</band>
