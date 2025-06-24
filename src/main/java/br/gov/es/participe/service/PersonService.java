@@ -1281,7 +1281,7 @@ public class PersonService {
           }
           PublicAgentDto publicAgent = acessoCidadaoService.findAgentPublicBySubInAcessoCidadaoAPI(publicAgentDto.getSub());
 
-          personSubMeetingDto = personRepository.findPersonByNameForMeeting(meetingId,"", null,publicAgent.getEmail());
+          personSubMeetingDto = personRepository.findPersonByNameForMeeting(meetingId,"", publicAgent.getSub(),publicAgent.getEmail());
           if(!personSubMeetingDto.isEmpty()){
             return new PageImpl<>(personSubMeetingDto, pageable, personSubMeetingDto.size());
           }

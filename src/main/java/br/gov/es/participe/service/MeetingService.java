@@ -34,6 +34,11 @@ import java.util.HashMap;
 
 import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
 import static br.gov.es.participe.enumerator.TypeMeetingEnum.VIRTUAL;
+import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import org.apache.commons.lang3.time.DateUtils;
 
 @Service
 public class MeetingService {
@@ -454,35 +459,50 @@ public class MeetingService {
 
     if (person != null && meeting != null) {
         Optional<CheckedInAt> optionalCheckIn = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
+        
+        CheckedInAt checkIn = optionalCheckIn.orElseGet(() -> {
+            CheckedInAt out = new CheckedInAt(person, meeting);
+            out.setTime(null);
+            return out;
+        });
+        
+        checkIn.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
+        checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
+        checkIn.setOrganization(organization);
+        checkIn.setRole(role);
+        checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
+        checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? announced : null);
 
-        if (optionalCheckIn.isPresent()) {
-            CheckedInAt checkIn = optionalCheckIn.get();
-            checkIn.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
-            checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
-            checkIn.setOrganization(organization);
-            checkIn.setRole(role);
-            checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
-            checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? announced : null);
-
-            return checkedInAtRepository.save(checkIn);
-        } else {
-            
-            Optional.ofNullable(preRegistrationService.findByMeetingAndPerson(meetingId, personId))
-                    .ifPresentOrElse((pr)-> {
-                        pr.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
-                        pr.setOrganization(organization);
-                        pr.setRole(role);
-                        
-                        preRegistrationService.save(pr);
-                    }, () -> {
-                        throw new IllegalArgumentException("Check-in ou Pré-credenciamento não encontrado para edição.");
-                    });
-            
-            return null;
-            
-            
-            
-        }
+        return checkedInAtRepository.save(checkIn);
+           
+//        if (optionalCheckIn.isPresent()) {
+//            CheckedInAt checkIn = optionalCheckIn.get();
+//            checkIn.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
+//            checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
+//            checkIn.setOrganization(organization);
+//            checkIn.setRole(role);
+//            checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
+//            checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? announced : null);
+//
+//            return checkedInAtRepository.save(checkIn);
+//        } else {
+//            
+//            Optional.ofNullable(preRegistrationService.findByMeetingAndPerson(meetingId, personId))
+//                    .ifPresentOrElse((pr)-> {
+//                        pr.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
+//                        pr.setOrganization(organization);
+//                        pr.setRole(role);
+//                        
+//                        preRegistrationService.save(pr);
+//                    }, () -> {
+//                        throw new IllegalArgumentException("Check-in ou Pré-credenciamento não encontrado para edição.");
+//                    });
+//            
+//            return null;
+//            
+//            
+//            
+//        }
     }
 
     throw new IllegalArgumentException("Person ou Meeting não encontrados.");
@@ -502,6 +522,22 @@ public class MeetingService {
                   checkIn.setIsAuthority(isAuthority);
                   checkIn.setOrganization(organization);
                   checkIn.setRole(role);
+                  
+                  if(checkIn.getTime() == null) {
+                      if(timeZone == null) {
+                          checkIn.setTime(new Date());
+                      } else {
+                          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                            LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of(timeZone));
+                            String format = localDateTime.format(formatter);
+
+                            try {
+                                checkIn.setTime(DateUtils.parseDate(format, "dd/MM/yyyy HH:mm:ss"));
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                      }
+                  }
                   
                   return checkedInAtRepository.save(checkIn);
               

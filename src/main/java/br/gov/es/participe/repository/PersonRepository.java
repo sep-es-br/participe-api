@@ -229,7 +229,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
                "       toLower(p.name) AS name, " +
                "       p.contactEmail AS email, " +
                "       p.telephone AS telephone, " +
-               "       cia IS NOT NULL AS checkedIn, " +
+               "       cia.time IS NOT NULL AS checkedIn, " +
                "       cia.time AS checkedInDate, " +
                "       COLLECT(DISTINCT au.server) AS authName " +
                "ORDER BY name ASC")
@@ -237,7 +237,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
       
   @Query(
     "match (p:Person)-[ci:CHECKED_IN_AT{isAuthority: true, toAnnounce: true}]->(m:Meeting)\n" +
-    "where id(m) = $idMeeting\n" +
+    "where id(m) = $idMeeting and ci.time is not null\n" +
     "return distinct\n" +
     "    id(p) as idPerson,\n" +
     "    id(ci) as idCheckIn,\n" +
@@ -299,11 +299,11 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
             "  ) AND\r\n" + //
             "  (CASE\r\n" + //
-            "    WHEN $filter = 'pres' THEN cia IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'pres' THEN cia.time IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg' THEN pr IS NOT NULL\r\n" + //
-            "    WHEN $filter = 'prereg_pres' THEN cia IS NOT NULL AND pr IS NOT NULL\r\n" + //
-            "    WHEN $filter = 'prereg_notpres' THEN cia IS NULL AND pr IS NOT NULL\r\n" + //
-            "    WHEN $filter = 'notprereg_pres' THEN cia IS NOT NULL AND pr IS NULL\r\n" + //
+            "    WHEN $filter = 'prereg_pres' THEN cia.time IS NOT NULL AND pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'prereg_notpres' THEN cia.time IS NULL AND pr IS NOT NULL\r\n" + //
+            "    WHEN $filter = 'notprereg_pres' THEN cia.time IS NOT NULL AND pr IS NULL\r\n" + //
             "    ELSE FALSE end) and\r\n" + //
             "  ( case\n" +
             "    when $status = 'screening' then (cia.isAuthority and not coalesce(cia.toAnnounce, false))\n" +
