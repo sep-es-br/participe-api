@@ -466,7 +466,22 @@ public class MeetingService {
 
             return checkedInAtRepository.save(checkIn);
         } else {
-            throw new IllegalArgumentException("Check-in não encontrado para edição.");
+            
+            Optional.ofNullable(preRegistrationService.findByMeetingAndPerson(meetingId, personId))
+                    .ifPresentOrElse((pr)-> {
+                        pr.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
+                        pr.setOrganization(organization);
+                        pr.setRole(role);
+                        
+                        preRegistrationService.save(pr);
+                    }, () -> {
+                        throw new IllegalArgumentException("Check-in ou Pré-credenciamento não encontrado para edição.");
+                    });
+            
+            return null;
+            
+            
+            
         }
     }
 

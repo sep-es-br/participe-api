@@ -349,13 +349,20 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "  RETURN *\r\n" + //
             "}\r\n" + //
             "WITH *\r\n" + //
-            "WHERE (CASE\r\n" + //
+            "WHERE \r\n" + //
+            "  (\r\n" + //
+            "    $name IS NULL OR\r\n" + //
+            "    apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)  OR\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($name) OR\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
+            "  ) AND\r\n" + //
+            "  (CASE\r\n" + //
             "    WHEN $filter = 'pres' THEN cia IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg' THEN pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg_pres' THEN cia IS NOT NULL AND pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg_notpres' THEN cia IS NULL AND pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'notprereg_pres' THEN cia IS NOT NULL AND pr IS NULL\r\n" + //
-            "    ELSE FALSE end) and  \n" +
+            "    ELSE FALSE end) and\r\n" + //
             "  ( case\n" +
             "    when $status = 'screening' then (cia.isAuthority and not coalesce(cia.toAnnounce, false))\n" +
             "    when $status = 'toAnnounce' then (coalesce(cia.toAnnounce, false) and not coalesce(cia.isAnnounced, false))\n" +
