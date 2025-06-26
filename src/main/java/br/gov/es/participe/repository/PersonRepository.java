@@ -236,15 +236,16 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     List<PersonMeetingDto> findPersonByNameForMeeting(@Param("idMeeting")Long idMeeting, @Param("name")String name, @Param("sub")String sub, @Param("cEmail")String cEmail);
       
   @Query(
-    "match (p:Person)-[ci:CHECKED_IN_AT{isAuthority: true, toAnnounce: true}]->(m:Meeting)\n" +
-    "where id(m) = $idMeeting and ci.time is not null\n" +
-    "return distinct\n" +
-    "    id(p) as idPerson,\n" +
-    "    id(ci) as idCheckIn,\n" +
-    "    ci.time as checkInTime,\n" +
-    "    ci.isAnnounced as announced, \n" +
-    "    p.name as name, \n" +
-    "    ci.role as role, \n" +
+    "MATCH (loc:Locality)<-[:AS_BEING_FROM]-(sfd:SelfDeclaration)<-[:MADE]- (p:Person)-[ci:CHECKED_IN_AT {isAuthority: true, toAnnounce: true}]->(m:Meeting)\n" +
+    "WHERE id(m) = $idMeeting AND ci.time IS NOT NULL\n" +
+    "RETURN DISTINCT\n" +
+    "    id(p) AS idPerson,\n" +
+    "    id(ci) AS idCheckIn,\n" +
+    "    ci.time AS checkInTime,\n" +
+    "    loc.name AS localityName,\n" +
+    "    COALESCE(ci.isAnnounced, false) AS announced, \n" +
+    "    p.name AS name, \n" +
+    "    ci.role AS role,  \n" +
     "    ci.organization as organization,\n" +
     "    ci\n" +
     "ORDER BY \n" +
@@ -253,7 +254,6 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     "        apoc.text.levenshteinSimilarity($name, ci.role),\n" +
     "        apoc.text.levenshteinSimilarity($name, ci.organization)\n" +
     "    ]) DESC, \n" +
-    "    (CASE WHEN ci IS NOT NULL THEN 0 ELSE 1 END) ASC,\n" +
     "    (CASE WHEN NOT coalesce(ci.isAnnounced, false) THEN 0 ELSE 1 END) ASC,\n" +
     "    ci.time ASC")
     List<AuthorityMeetingDto> findAuthorityByNameForMeeting(Long idMeeting, String name);
