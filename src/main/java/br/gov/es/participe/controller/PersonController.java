@@ -313,12 +313,20 @@ public class PersonController {
                                                 entry.put("role", evalRole.getNome());
                                                 
                                                 if(evalRole.getLotacaoGuid() != null){
+                                                  try {
                                                     AcSectionInfoDto unitInfo = acService.findSectionInfoFromOrganogramaAPI(evalRole.getLotacaoGuid());
                                                     if(unitInfo.getGuidOrganizacao() != null) {
-                                                        AcOrganizationInfoDto orgInfo = acService.findOrganizationInfoFromOrganogramaAPI(unitInfo.getGuidOrganizacao());
-                                                        entry.put("organization", orgInfo.getNomeFantasia());
-                                                        entry.put("organizationSh", orgInfo.getSigla());
+                                                        try {
+                                                          AcOrganizationInfoDto orgInfo = acService.findOrganizationInfoFromOrganogramaAPI(unitInfo.getGuidOrganizacao());
+                                                          entry.put("organization", orgInfo.getNomeFantasia());
+                                                          entry.put("organizationSh", orgInfo.getSigla());
+                                                        } catch (Exception ex) {
+                                                          
+                                                        }
+                                                        
                                                     }
+                                                  } catch(Exception e){}
+                                                    
                                                 }
                                                 
                                                 return entry;
