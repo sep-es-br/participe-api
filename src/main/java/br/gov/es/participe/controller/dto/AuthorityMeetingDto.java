@@ -15,10 +15,20 @@ public class AuthorityMeetingDto {
     
     private Long idLocality;
     
+    private String localityName;
+    
     private Boolean announced;
     private String name;
     private String role;
     private String organization;
+
+    public String getLocalityName() {
+        return localityName;
+    }
+
+    public void setLocalityName(String localityName) {
+        this.localityName = localityName;
+    }
 
     public Long getIdPerson() {
         return idPerson;
