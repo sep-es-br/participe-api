@@ -44,42 +44,51 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
     )
     List<ProposalEvaluationDto> findAllByConferenceId(@Param("conferenceId") Long conferenceId);
 
-    @Query(value = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference),  \r\n" + //
-                "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) \r\n" + //
-                "WHERE id(conference) = $conferenceId\r\n" + //
-                "\tAND comment.type = 'prop' \r\n" + //
-                "\tAND comment.status = 'pub' \r\n" + //
-                "\tAND (comment.duplicated = false OR comment.duplicated IS NULL) \r\n" + //
-                "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) \r\n" + //
-                "WITH comment, locality, planItem, area, eval, person \r\n" + //
+    @Query(value = "MATCH (microLoc:Locality)<-[:IS_LOCATED_IN]-(locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference),\n" +
+                "      (comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem)\n" +
+                "WHERE id(conference) = $conferenceId\n" +
+                "  AND comment.type = 'prop'\n" +
+                "  AND comment.status = 'pub'\n" +
+                "  AND (comment.duplicated = false OR comment.duplicated IS NULL)\n" +
+                "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person)\n" +
+                "WITH comment, locality, planItem, area, eval, person, microLoc \r\n" + //
                  SEARCH_FILTER + //
-                "WITH comment, locality, planItem, area, \r\n" + //
-                "CASE  \r\n" + //
-                "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN true  \r\n" + //
-                "ELSE false  \r\n" + //
-                "END AS evaluationStatus, \r\n" + //
-                "CASE  \r\n" + //
-                "WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, loaIncluded: eval.includedInNextYearLOA, evaluatorName: person.name}) \r\n" + //
-                "ELSE NULL  \r\n" + //
-                "END AS evaluatorOrgsNameAndLoaIncludedList\r\n" + //
-                "WITH comment, locality, planItem, area, \r\n" + //
-                "[result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList}) \r\n" + //
-                "WHERE result.evaluationStatus = true] AS trueResults, \r\n" + //
-                "[result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList}) \r\n" + //
-                "WHERE result.evaluationStatus = false] AS falseResults \r\n" + //
-                "WITH comment, locality, planItem, area, \r\n" + //
-                "CASE \r\n" + //
-                "WHEN SIZE(trueResults) > 0 THEN HEAD(trueResults) \r\n" + //
-                "ELSE HEAD(falseResults) \r\n" + //
-                "END AS finalResult \r\n" + //
-                "RETURN DISTINCT \r\n" + //
-                "id(comment) AS commentId, \r\n" + //
-                "locality.name AS localityName, \r\n" + //
-                "planItem.name AS planItemName, \r\n" + //
-                "area.name AS planItemAreaName, \r\n" + //
-                "comment.text AS description, \r\n" + //
-                "finalResult.evaluationStatus AS evaluationStatus, \r\n" + //
-                "finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList", 
+                "WITH comment, locality, planItem, area, microLoc, \n" +
+                "  CASE\n" +
+                "    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN true\n" +
+                "    ELSE false\n" +
+                "  END AS evaluationStatus,\n" +
+                "  CASE\n" +
+                "    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {\n" +
+                "      evaluatorOrgsName: eval.representing,\n" +
+                "      loaIncluded: eval.includedInNextYearLOA,\n" +
+                "      evaluatorName: person.name\n" +
+                "    })\n" +
+                "    ELSE NULL\n" +
+                "  END AS evaluatorOrgsNameAndLoaIncludedList\n" +
+                "WITH comment, locality, planItem, area, microLoc, \n" +
+                "  [result IN collect(DISTINCT {\n" +
+                "    evaluationStatus: evaluationStatus,\n" +
+                "    evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList\n" +
+                "  }) WHERE result.evaluationStatus = true] AS trueResults,\n" +
+                "  [result IN collect(DISTINCT {\n" +
+                "    evaluationStatus: evaluationStatus,\n" +
+                "    evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList\n" +
+                "  }) WHERE result.evaluationStatus = false] AS falseResults\n" +
+                "WITH comment, locality, planItem, area, microLoc, \n" +
+                "  CASE\n" +
+                "    WHEN SIZE(trueResults) > 0 THEN HEAD(trueResults)\n" +
+                "    ELSE HEAD(falseResults)\n" +
+                "  END AS finalResult\n" +
+                "RETURN DISTINCT\n" +
+                "  id(comment) AS commentId,\n" +
+                "  locality.name AS localityName,\n" +
+                "  microLoc.name AS microrregionName,\n" +
+                "  planItem.name AS planItemName,\n" +
+                "  area.name AS planItemAreaName,\n" +
+                "  comment.text AS description,\n" +
+                "  finalResult.evaluationStatus AS evaluationStatus,\n" +
+                "  finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList", 
             countQuery = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
                     "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
                     "WHERE id(conference) = $conferenceId " +
