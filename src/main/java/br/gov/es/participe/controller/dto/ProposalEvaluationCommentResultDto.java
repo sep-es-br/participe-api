@@ -10,6 +10,7 @@ public class ProposalEvaluationCommentResultDto {
     private Long commentId;
     private Boolean evaluationStatus;
     private String localityName;
+    private String microrregionName;
     private String planItemName;
     private String planItemAreaName;
     private String description;
@@ -35,6 +36,16 @@ public class ProposalEvaluationCommentResultDto {
 
     }
 
+    public String getMicrorregionName() {
+        return microrregionName;
+    }
+
+    public void setMicrorregionName(String microrregionName) {
+        this.microrregionName = microrregionName;
+    }
+
+    
+    
     public Long getCommentId() {
         return commentId;
     }
