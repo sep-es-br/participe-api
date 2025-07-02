@@ -1,5 +1,5 @@
 <!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
-<jasperReport name="ProposalEvaluation" language="java" pageWidth="5000" pageHeight="595" orientation="Landscape" columnWidth="4960" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce" ignorePagination="true">
+<jasperReport name="ProposalEvaluation" language="java" pageWidth="3175" pageHeight="595" orientation="Landscape" columnWidth="3135" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" uuid="992c424d-34be-4d3e-b5fd-5fae147ecbce" ignorePagination="true">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -130,7 +130,7 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="evaluatorName"/>
 		<property name="com.jaspersoft.studio.field.label" value="evaluatorName"/>
 	</field>
-	<title height="35" splitType="Stretch">
+	<title height="30" splitType="Stretch">
 		<element kind="staticText" uuid="3ddced7c-9617-4799-879b-f17e758ca228" x="852" y="0" width="774" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Descrição]]></text>
 		</element>
@@ -161,7 +161,7 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<property name="com.jaspersoft.studio.unit.height" value="px"/>
 	</title>
 	<detail>
-		<band height="35" splitType="Stretch">
+		<band height="30" splitType="Stretch">
 			<element kind="textField" uuid="bf0ae18c-1d37-449f-98dd-1449e73fe0a9" x="250" y="0" width="270" height="30" textAdjust="ScaleFont">
 				<paragraph rightIndent="4"/>
 				<expression><![CDATA[$F{planItemAreaName}]]></expression>
