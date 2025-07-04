@@ -15,10 +15,19 @@ public class ProposalEvaluationRequestDto {
     private String representingOrgTag;
     private String representingOrgName;
     private Boolean haveCost;
+    private String costType;
     private Boolean newRequest;
 
     public ProposalEvaluationRequestDto() {
 
+    }
+
+    public String getCostType() {
+        return costType;
+    }
+
+    public void setCostType(String costType) {
+        this.costType = costType;
     }
 
     public Boolean getHaveCost() {

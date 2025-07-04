@@ -30,6 +30,7 @@ public class Evaluates extends Entity {
     private String representingOrgTag;
     private String representingOrgName;
     private Boolean haveCost;
+    private String costType;
     private Boolean newRequest;
     private Boolean active;
     private Boolean deleted;
@@ -54,7 +55,16 @@ public class Evaluates extends Entity {
         this.representingOrgTag = proposalEvaluationRequestDto.getRepresentingOrgTag();
         this.representingOrgName = proposalEvaluationRequestDto.getRepresentingOrgName();
         this.haveCost = proposalEvaluationRequestDto.getHaveCost();
+        this.costType = proposalEvaluationRequestDto.getCostType();
         this.newRequest = proposalEvaluationRequestDto.getNewRequest();
+    }
+
+    public String getCostType() {
+        return costType;
+    }
+
+    public void setCostType(String costType) {
+        this.costType = costType;
     }
 
     public Boolean getHaveCost() {
