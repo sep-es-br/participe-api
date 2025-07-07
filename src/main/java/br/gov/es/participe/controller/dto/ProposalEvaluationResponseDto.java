@@ -5,8 +5,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import br.gov.es.participe.model.Evaluates;
+import br.gov.es.participe.util.domain.BudgetPlan;
+import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 public class ProposalEvaluationResponseDto {
     private Long id;
@@ -17,7 +22,7 @@ public class ProposalEvaluationResponseDto {
     private String budgetUnitName;
     private String budgetActionId;
     private String budgetActionName;
-    private String budgetPlan;
+    private List<BudgetPlan> budgetPlan;
     private String representing;
     private String evaluatorName;
     private Boolean haveCost;
@@ -36,7 +41,22 @@ public class ProposalEvaluationResponseDto {
             this.budgetUnitName = evaluatesRelationship.getBudgetUnitName();
             this.budgetActionId = evaluatesRelationship.getBudgetActionId();
             this.budgetActionName = evaluatesRelationship.getBudgetActionName();
-            this.budgetPlan = evaluatesRelationship.getBudgetPlan();
+
+            if(
+                evaluatesRelationship.getBudgetPlanIds() != null &&
+                evaluatesRelationship.getBudgetPlanNames() != null &&
+                evaluatesRelationship.getBudgetPlanIds().size() == evaluatesRelationship.getBudgetPlanNames().size()
+            ) {
+                this.budgetPlan = IntStream.range(0, evaluatesRelationship.getBudgetPlanIds().size())
+                                    .mapToObj(i -> new BudgetPlan(
+                                            evaluatesRelationship.getBudgetPlanIds().get(i),
+                                            evaluatesRelationship.getBudgetPlanNames().get(i)
+                                    )).collect(Collectors.toList());
+                
+               
+                
+            }
+
             this.haveCost = evaluatesRelationship.getHaveCost();
             this.newRequest = evaluatesRelationship.getNewRequest();
         } else {
@@ -128,11 +148,11 @@ public class ProposalEvaluationResponseDto {
         this.budgetActionName = budgetActionName;
     }
 
-    public String getBudgetPlan() {
+    public  List<BudgetPlan> getBudgetPlan() {
         return budgetPlan;
     }
 
-    public void setBudgetPlan(String budgetPlan) {
+    public void setBudgetPlan(List<BudgetPlan> budgetPlan) {
         this.budgetPlan = budgetPlan;
     }
 

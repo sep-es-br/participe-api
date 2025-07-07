@@ -1,5 +1,8 @@
 package br.gov.es.participe.controller.dto;
 
+import br.gov.es.participe.util.domain.BudgetPlan;
+import java.util.List;
+
 public class ProposalEvaluationRequestDto {
     private Long personId;
     private Long proposalId;
@@ -10,7 +13,7 @@ public class ProposalEvaluationRequestDto {
     private String budgetUnitName;
     private String budgetActionId;
     private String budgetActionName;
-    private String budgetPlan;
+    private List<BudgetPlan> budgetPlan;
     private String representing;
     private String representingOrgTag;
     private String representingOrgName;
@@ -128,11 +131,11 @@ public class ProposalEvaluationRequestDto {
         this.budgetActionName = budgetActionName;
     }
 
-    public String getBudgetPlan() {
+    public List<BudgetPlan> getBudgetPlan() {
         return budgetPlan;
     }
 
-    public void setBudgetPlan(String budgetPlan) {
+    public void setBudgetPlan(List<BudgetPlan> budgetPlan) {
         this.budgetPlan = budgetPlan;
     }
 

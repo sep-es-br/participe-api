@@ -17,6 +17,8 @@ import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.service.ConferenceService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.ProposalEvaluationService;
+import br.gov.es.participe.util.domain.BudgetPlan;
+import java.util.Arrays;
 
 @RestController
 @CrossOrigin
@@ -147,6 +149,24 @@ public class ProposalEvaluationController {
             return ResponseEntity.status(401).body(null);
         }
         return ResponseEntity.ok().body(proposalEvaluationService.checkIsCommentEvaluated(commentId));
+    }
+    
+    @GetMapping("/budgetPlanList")
+    public ResponseEntity<List<BudgetPlan>> getBudgetPlanList(
+    ) {
+
+       List<BudgetPlan> result = proposalEvaluationService.fetchBudgetPlanFromBI();
+        
+        // List<BudgetPlan> result = Arrays.asList(
+        //         new BudgetPlan("000004", "CAPS DE MARATAÍZES IMPLANTADO"),
+        //         new BudgetPlan("000005", "CENTRAL DE REGULAÇÃO ESTADUAL DE ACESSO A CONSULTAS, EXAMES E INTERNAÇÕES IMPLANTADA"),
+        //         new BudgetPlan("000006", "CENTRAL SAMU 192 NORTE IMPLANTADO - SÃO MATEUS"),
+        //         new BudgetPlan("000007", "CENTRAL SAMU 192 SUL IMPLANTADO - CACHOEIRO DE ITAPEMIRIM")
+        // );
+        
+        
+        
+        return ResponseEntity.ok().body(result);
     }
 
     @GetMapping("/conferences")
