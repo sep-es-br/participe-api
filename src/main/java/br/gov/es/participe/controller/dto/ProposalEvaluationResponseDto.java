@@ -26,6 +26,7 @@ public class ProposalEvaluationResponseDto {
     private String representing;
     private String evaluatorName;
     private Boolean haveCost;
+    private String costType;
     private Boolean newRequest;
     private String date;
 
@@ -58,6 +59,7 @@ public class ProposalEvaluationResponseDto {
             }
 
             this.haveCost = evaluatesRelationship.getHaveCost();
+            this.costType = evaluatesRelationship.getCostType();
             this.newRequest = evaluatesRelationship.getNewRequest();
         } else {
             this.reason = evaluatesRelationship.getReason();
@@ -66,6 +68,14 @@ public class ProposalEvaluationResponseDto {
         this.representing = evaluatesRelationship.getRepresenting();
         this.date = formatDate(evaluatesRelationship.getDate());
         this.evaluatorName = evaluatesRelationship.getPerson().getName();
+    }
+
+    public String getCostType() {
+        return costType;
+    }
+
+    public void setCostType(String costType) {
+        this.costType = costType;
     }
 
     public Boolean getHaveCost() {
