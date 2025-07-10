@@ -35,18 +35,3 @@ public class ProposalEvaluationDto {
     }
 }
 
-/*
-    private Long id;
-    private LocalityDto locality; // microrregiao
-    private PlanItemDto planItem; // categoria orçamentaria / desafio
-    private PlanItemDto planItemArea; // area temática
-    private String description; // texto da proposta (comentário)
-    private String status; // "Avaliado / "Não Avaliado"
-    // private Boolean includedInLOA; // "incluso na LOA do próximo ano?""
-    // includedInLOA == true:
-    //unidade orçamentária
-    //ação orçamentária
-    //plano orçamentário
-    //includedInLOA == false:
-    //razão -> "Entrega já realizada", "Conclusão prevista no ano vigente", etc.
- */

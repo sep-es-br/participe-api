@@ -85,7 +85,7 @@ order by microregiao.name]]></query>
 		<band height="87" splitType="Prevent">
 			<element kind="subreport" uuid="2fb20385-18f2-4e8f-b967-1d2edace3be5" x="-20" y="0" width="595" height="87" runToBottom="false" overflowType="Stretch" usingCache="false" style="Crosstab_CH">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<expression><![CDATA["ProposeReport_included_area.jasper"]]></expression>
+				<expression><![CDATA["ProposeReport_approved_area.jasper"]]></expression>
 				<parameter name="ID_MICROREGIAO">
 					<expression><![CDATA[$F{idMicroregion}]]></expression>
 				</parameter>

@@ -6,7 +6,7 @@ import java.util.List;
 public class ProposalEvaluationRequestDto {
     private Long personId;
     private Long proposalId;
-    private Boolean includedInNextYearLOA;
+    private Boolean approved;
     private String reason;
     private String reasonDetail;
     private String budgetUnitId;
@@ -83,12 +83,12 @@ public class ProposalEvaluationRequestDto {
         this.proposalId = proposalId;
     }
 
-    public Boolean getIncludedInNextYearLOA() {
-        return includedInNextYearLOA;
+    public Boolean getApproved() {
+        return approved;
     }
 
-    public void setIncludedInNextYearLOA(Boolean includedInNextYearLOA) {
-        this.includedInNextYearLOA = includedInNextYearLOA;
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
     }
 
     public String getReason() {

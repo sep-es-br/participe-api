@@ -19,7 +19,7 @@ public class ProposalEvaluationCommentResultDto {
 
     public class EvaluatorOrgsNameAndLoaIncluded {
         private String evaluatorOrgsName;
-        private Boolean loaIncluded;
+        private Boolean approved;
 
         public String getEvaluatorOrgsName() {
             return evaluatorOrgsName;
@@ -28,10 +28,10 @@ public class ProposalEvaluationCommentResultDto {
             this.evaluatorOrgsName = evaluatorOrgsName;
         }
         public Boolean getLoaIncluded() {
-            return loaIncluded;
+            return approved;
         }
-        public void setLoaIncluded(Boolean loaIncluded) {
-            this.loaIncluded = loaIncluded;
+        public void setLoaIncluded(Boolean approved) {
+            this.approved = approved;
         }
 
     }

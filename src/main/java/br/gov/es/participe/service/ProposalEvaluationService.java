@@ -131,7 +131,7 @@ public class ProposalEvaluationService {
         Long planItemAreaId, 
         Long planItemId,
         List<String> organizationGuid, 
-        Boolean loaIncluded, 
+        Boolean approved, 
         String commentText, 
         Long conferenceId, 
         Pageable pageable
@@ -143,7 +143,7 @@ public class ProposalEvaluationService {
             planItemAreaId, 
             planItemId,
             organizationGuid, 
-            loaIncluded, 
+            approved, 
             commentText, 
             conferenceId, 
             pageable);
@@ -396,14 +396,14 @@ public class ProposalEvaluationService {
             Long planItemAreaId,
             Long planItemId,
             List<String> organizationGuid,
-            Boolean loaIncluded,
+            Boolean approved,
             String commentText,
             Long conferenceId) {
         
         StructureItemAndLocalityTypeDto structureItemAndLocalityTypeDto = proposalEvaluationRepository.getStructureItemAndLocalityType(conferenceId);
 
         ProposalEvaluationJasperParamDto proposalEvaluationJasperParamDto = new ProposalEvaluationJasperParamDto(
-                evaluationStatus, localityId, planItemAreaId, planItemId, organizationGuid, loaIncluded, commentText,
+                evaluationStatus, localityId, planItemAreaId, planItemId, organizationGuid, approved, commentText,
                 conferenceId, structureItemAndLocalityTypeDto.getLocalityTypeName(), structureItemAndLocalityTypeDto.getStructureItemName());
         Map<String, Object> proposalEvaluationMap = proposalEvaluationJasperParamDto.getProposalEvaluationJasperMap();
         

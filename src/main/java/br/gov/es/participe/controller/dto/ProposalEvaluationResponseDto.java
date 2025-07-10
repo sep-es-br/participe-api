@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 
 public class ProposalEvaluationResponseDto {
     private Long id;
-    private Boolean includedInNextYearLOA;
+    private Boolean approved;
     private String reason;
     private String reasonDetail;
     private String budgetUnitId;
@@ -36,8 +36,8 @@ public class ProposalEvaluationResponseDto {
 
     public ProposalEvaluationResponseDto(Evaluates evaluatesRelationship) {
         this.id = evaluatesRelationship.getId();
-        this.includedInNextYearLOA = evaluatesRelationship.getIncludedInNextYearLOA();
-        if(evaluatesRelationship.getIncludedInNextYearLOA()) {
+        this.approved = evaluatesRelationship.getApproved();
+        if(evaluatesRelationship.getApproved()) {
             this.budgetUnitId = evaluatesRelationship.getBudgetUnitId();
             this.budgetUnitName = evaluatesRelationship.getBudgetUnitName();
             this.budgetActionId = evaluatesRelationship.getBudgetActionId();
@@ -110,12 +110,12 @@ public class ProposalEvaluationResponseDto {
         this.id = id;
     }
 
-    public Boolean getIncludedInNextYearLOA() {
-        return includedInNextYearLOA;
+    public Boolean getApproved() {
+        return approved;
     }
 
-    public void setIncludedInNextYearLOA(Boolean includedInNextYearLOA) {
-        this.includedInNextYearLOA = includedInNextYearLOA;
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
     }
 
     public String getReason() {

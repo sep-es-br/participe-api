@@ -66,7 +66,7 @@ ORDER BY
 		<band height="222">
 			<element kind="subreport" uuid="4b1f2c70-52eb-4a93-ad18-ddd2579e4a2b" x="-20" y="22" width="200" height="200">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<expression><![CDATA["ProposeReport_included.jasper"]]></expression>
+				<expression><![CDATA["ProposeReport_approved.jasper"]]></expression>
 				<parameter name="ID_CONFERENCE">
 					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 				</parameter>

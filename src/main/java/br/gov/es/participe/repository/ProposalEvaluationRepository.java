@@ -26,7 +26,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         + "AND (id(area) = $planItemAreaId OR $planItemAreaId IS NULL) "
         + "AND (id(planItem) = $planItemId OR $planItemId IS NULL) "
         + "AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $organizationGuid) OR $organizationGuid = []) "
-        + "AND ((eval.includedInNextYearLOA IS NOT NULL AND eval.includedInNextYearLOA = $loaIncluded) OR $loaIncluded IS NULL) "
+        + "AND ((eval.approved IS NOT NULL AND eval.approved = $approved) OR $approved IS NULL) "
         + "AND apoc.text.clean(comment.text) CONTAINS apoc.text.clean($commentText) ";
 
     @Query(
@@ -61,7 +61,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
                 "  CASE\n" +
                 "    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {\n" +
                 "      evaluatorOrgsName: eval.representing,\n" +
-                "      loaIncluded: eval.includedInNextYearLOA,\n" +
+                "      approved: eval.approved,\n" +
                 "      evaluatorName: person.name\n" +
                 "    })\n" +
                 "    ELSE NULL\n" +
@@ -104,7 +104,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         @Param("planItemAreaId") Long planItemAreaId, 
         @Param("planItemId") Long planItemId,
         @Param("organizationGuid") List<String> organizationGuid, 
-        @Param("loaIncluded") Boolean loaIncluded, 
+        @Param("approved") Boolean approved, 
         @Param("commentText") String commentText, 
         @Param("conferenceId") Long conferenceId, 
         @Param("pageable") Pageable pageable);

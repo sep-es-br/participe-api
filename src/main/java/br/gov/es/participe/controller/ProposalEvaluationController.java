@@ -48,7 +48,7 @@ public class ProposalEvaluationController {
         @RequestParam(value = "planItemAreaId", required = false, defaultValue = "") Long planItemAreaId,
         @RequestParam(value = "planItemId", required = false, defaultValue = "") Long planItemId,
         @RequestParam(value = "organizationGuid", required = false, defaultValue = "") List<String> organizationGuid,
-        @RequestParam(value = "loaIncluded", required = false, defaultValue = "") Boolean loaIncluded,
+        @RequestParam(value = "approved", required = false, defaultValue = "") Boolean approved,
         @RequestParam(value = "commentText", required = false, defaultValue = "") String commentText,
         @RequestParam(value = "conferenceId", required = true) Long conferenceId,
         Pageable pageable
@@ -59,7 +59,7 @@ public class ProposalEvaluationController {
             planItemAreaId,
             planItemId,
             organizationGuid,
-            loaIncluded,
+            approved,
             commentText,
             conferenceId,
             pageable
@@ -185,7 +185,7 @@ public class ProposalEvaluationController {
         @RequestParam(value = "planItemAreaId", required = false, defaultValue = "") Long planItemAreaId,
         @RequestParam(value = "planItemId", required = false, defaultValue = "") Long planItemId,
         @RequestParam(value = "organizationGuid", required = false, defaultValue = "") List<String> organizationGuid,
-        @RequestParam(value = "loaIncluded", required = false, defaultValue = "") Boolean loaIncluded,
+        @RequestParam(value = "approved", required = false, defaultValue = "") Boolean approved,
         @RequestParam(value = "commentText", required = false, defaultValue = "") String commentText,
         @RequestParam(value = "conferenceId", required = true) Long conferenceId
     ) {
@@ -195,7 +195,7 @@ public class ProposalEvaluationController {
             planItemAreaId,
             planItemId,
             organizationGuid,
-            loaIncluded,
+            approved,
             commentText,
             conferenceId
         );

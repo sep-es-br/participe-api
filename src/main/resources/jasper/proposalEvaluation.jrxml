@@ -18,7 +18,7 @@
 	<parameter name="organizationGuid" forPrompting="false" class="java.util.List" nestedType="java.lang.String">
 		<description><![CDATA[]]></description>
 	</parameter>
-	<parameter name="loaIncluded" forPrompting="false" class="java.lang.Boolean"/>
+	<parameter name="approved" forPrompting="false" class="java.lang.Boolean"/>
 	<parameter name="commentText" forPrompting="false" class="java.lang.String"/>
 	<parameter name="conferenceId" forPrompting="false" class="java.lang.Long"/>
 	<parameter name="localityTypeName" forPrompting="false" class="java.lang.String" nestedType=""/>
@@ -38,7 +38,7 @@ AND (id(locality) = $P!{localityId}  OR  $P!{localityId} IS NULL)
 AND (id(area) = $P!{planItemAreaId} OR $P!{planItemAreaId} IS NULL) 
 AND (id(planItem) = $P!{planItemId} OR $P!{planItemId} IS NULL) 
 AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $P!{organizationGuid}) OR $P!{organizationGuid} = [])
-AND ((eval.includedInNextYearLOA IS NOT NULL AND eval.includedInNextYearLOA = $P!{loaIncluded}) OR $P!{loaIncluded} IS NULL) 
+AND ((eval.approved IS NOT NULL AND eval.approved = $P!{approved}) OR $P!{approved} IS NULL) 
 AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR $P!{commentText} IS NULL)
     WITH comment, locality, planItem, area, eval, microLoc, 
     CASE  
@@ -46,7 +46,7 @@ AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR
     ELSE false  
     END AS evaluationStatus, 
     CASE  
-    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, loaIncluded: eval.includedInNextYearLOA}) 
+    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, approved: eval.approved}) 
     ELSE NULL  
     END AS evaluatorOrgsNameAndLoaIncludedList, 
     CASE  
@@ -76,10 +76,10 @@ RETURN DISTINCT
     area.name AS planItemAreaName, 
     comment.text AS description, 
     CASE 
-        WHEN eval.includedInNextYearLOA IS NULL THEN '-'
-        WHEN eval.includedInNextYearLOA THEN 'Sim'
+        WHEN eval.approved IS NULL THEN '-'
+        WHEN eval.approved THEN 'Sim'
         ELSE 'Não'
-    END AS loaIncluded, 
+    END AS approved, 
     CASE
         WHEN eval.budgetPlanIds IS NULL THEN COALESCE(eval.budgetPlan, '') 
         ELSE apoc.text.join(eval.budgetPlanIds, ', ')
@@ -132,9 +132,9 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="description"/>
 		<property name="com.jaspersoft.studio.field.label" value="description"/>
 	</field>
-	<field name="loaIncluded" class="java.lang.Object">
-		<property name="com.jaspersoft.studio.field.name" value="loaIncluded"/>
-		<property name="com.jaspersoft.studio.field.label" value="loaIncluded"/>
+	<field name="approved" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="approved"/>
+		<property name="com.jaspersoft.studio.field.label" value="approved"/>
 	</field>
 	<field name="budgetPlans" class="java.lang.Object">
 		<property name="com.jaspersoft.studio.field.name" value="budgetPlans"/>
@@ -234,7 +234,7 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 				<expression><![CDATA[$F{microrregionName}]]></expression>
 			</element>
 			<element kind="textField" uuid="7dcbe142-497b-465a-b068-03a79880b59d" mode="Transparent" x="1626" y="0" width="124" height="30">
-				<expression><![CDATA[$F{loaIncluded}]]></expression>
+				<expression><![CDATA[$F{approved}]]></expression>
 			</element>
 			<element kind="textField" uuid="49b01ad7-f7ae-421b-9012-92193aade3d9" mode="Transparent" x="2246" y="0" width="244" height="30">
 				<expression><![CDATA[$F{budgetPlans}]]></expression>

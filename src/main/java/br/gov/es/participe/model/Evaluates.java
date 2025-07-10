@@ -25,7 +25,7 @@ public class Evaluates extends Entity {
     @EndNode
     private Comment comment;
 
-    private Boolean includedInNextYearLOA;
+    private Boolean approved;
     private String reason;
     private String reasonDetail;
     private String budgetUnitId;
@@ -51,7 +51,7 @@ public class Evaluates extends Entity {
     }
 
     public Evaluates(ProposalEvaluationRequestDto proposalEvaluationRequestDto) {
-        this.includedInNextYearLOA = proposalEvaluationRequestDto.getIncludedInNextYearLOA();
+        this.approved = proposalEvaluationRequestDto.getApproved();
         this.budgetUnitId = proposalEvaluationRequestDto.getBudgetUnitId();
         this.budgetUnitName = proposalEvaluationRequestDto.getBudgetUnitName();
         this.budgetActionId = proposalEvaluationRequestDto.getBudgetActionId();
@@ -115,12 +115,12 @@ public class Evaluates extends Entity {
         this.comment = comment;
     }
 
-    public Boolean getIncludedInNextYearLOA() {
-        return includedInNextYearLOA;
+    public Boolean getApproved() {
+        return approved;
     }
 
-    public void setIncludedInNextYearLOA(Boolean includedInNextYearLOA) {
-        this.includedInNextYearLOA = includedInNextYearLOA;
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
     }
 
     public String getReason() {
