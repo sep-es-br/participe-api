@@ -88,7 +88,9 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.matches(".*/conferences/with-meetings")
                     || url.matches(".*/conferences/\\d+/regionalization")
                     || url.matches(".*/conferences/portal")
-                    || url.matches(".*/authority-credentia/*");
+                    || url.matches(".*/integration/*")
+                    || url.matches(".*/authorityCredential/*");
+            
 
             if (!isPublicUrl) {
                 String token = getToken(request);

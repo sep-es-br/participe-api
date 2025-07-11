@@ -67,4 +67,5 @@ public class ProposalsController {
 		Integer response = proposalsService.makeLike(idPerson, idComment);
 		return ResponseEntity.status(200).body(response);
 	}
+        
 }
