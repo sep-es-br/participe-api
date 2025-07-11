@@ -14,10 +14,10 @@ public class ProposalEvaluationCommentResultDto {
     private String planItemName;
     private String planItemAreaName;
     private String description;
-    private List<EvaluatorOrgsNameAndLoaIncluded> evaluatorOrgsNameAndLoaIncludedList;
+    private List<EvaluatorOrgsNameAndApproved> evaluatorOrgsNameAndApprovedList;
     private String evaluatorName;
 
-    public class EvaluatorOrgsNameAndLoaIncluded {
+    public class EvaluatorOrgsNameAndApproved {
         private String evaluatorOrgsName;
         private Boolean approved;
 
@@ -27,10 +27,10 @@ public class ProposalEvaluationCommentResultDto {
         public void setEvaluatorOrgsName(String evaluatorOrgsName) {
             this.evaluatorOrgsName = evaluatorOrgsName;
         }
-        public Boolean getLoaIncluded() {
+        public Boolean getApproved() {
             return approved;
         }
-        public void setLoaIncluded(Boolean approved) {
+        public void setApproved(Boolean approved) {
             this.approved = approved;
         }
 
@@ -94,13 +94,13 @@ public class ProposalEvaluationCommentResultDto {
         this.description = description;
     }
 
-    public List<EvaluatorOrgsNameAndLoaIncluded> getEvaluatorOrgsNameAndLoaIncludedList() {
-        return evaluatorOrgsNameAndLoaIncludedList;
+    public List<EvaluatorOrgsNameAndApproved> getEvaluatorOrgsNameAndApprovedList() {
+        return evaluatorOrgsNameAndApprovedList;
     }
 
-    public void setEvaluatorOrgsNameAndLoaIncludedList(
-            List<EvaluatorOrgsNameAndLoaIncluded> evaluatorOrgsNameAndLoaIncludedList) {
-        this.evaluatorOrgsNameAndLoaIncludedList = evaluatorOrgsNameAndLoaIncludedList;
+    public void setEvaluatorOrgsNameAndApprovedList(
+            List<EvaluatorOrgsNameAndApproved> evaluatorOrgsNameAndApprovedList) {
+        this.evaluatorOrgsNameAndApprovedList = evaluatorOrgsNameAndApprovedList;
     }
     
     public String getEvaluatorName() {

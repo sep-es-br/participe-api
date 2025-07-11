@@ -65,15 +65,15 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
                 "      evaluatorName: person.name\n" +
                 "    })\n" +
                 "    ELSE NULL\n" +
-                "  END AS evaluatorOrgsNameAndLoaIncludedList\n" +
+                "  END AS evaluatorOrgsNameAndApprovedList\n" +
                 "WITH comment, locality, planItem, area, microLoc, \n" +
                 "  [result IN collect(DISTINCT {\n" +
                 "    evaluationStatus: evaluationStatus,\n" +
-                "    evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList\n" +
+                "    evaluatorOrgsNameAndApprovedList: evaluatorOrgsNameAndApprovedList\n" +
                 "  }) WHERE result.evaluationStatus = true] AS trueResults,\n" +
                 "  [result IN collect(DISTINCT {\n" +
                 "    evaluationStatus: evaluationStatus,\n" +
-                "    evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList\n" +
+                "    evaluatorOrgsNameAndApprovedList: evaluatorOrgsNameAndApprovedList\n" +
                 "  }) WHERE result.evaluationStatus = false] AS falseResults\n" +
                 "WITH comment, locality, planItem, area, microLoc, \n" +
                 "  CASE\n" +
@@ -88,7 +88,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
                 "  area.name AS planItemAreaName,\n" +
                 "  comment.text AS description,\n" +
                 "  finalResult.evaluationStatus AS evaluationStatus,\n" +
-                "  finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList", 
+                "  finalResult.evaluatorOrgsNameAndApprovedList AS evaluatorOrgsNameAndApprovedList", 
             countQuery = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
                     "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
                     "WHERE id(conference) = $conferenceId " +
