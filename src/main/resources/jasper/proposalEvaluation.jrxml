@@ -48,15 +48,15 @@ AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR
     CASE  
     WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, approved: eval.approved}) 
     ELSE NULL  
-    END AS evaluatorOrgsNameAndLoaIncludedList, 
+    END AS evaluatorOrgsNameAndApprovedList, 
     CASE  
     WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN person.name  
     ELSE NULL  
     END AS evaluatorName 
     WITH comment, locality, planItem, area, eval, microLoc, 
-    [result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList, evaluatorName: evaluatorName}) 
+    [result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndApprovedList: evaluatorOrgsNameAndApprovedList, evaluatorName: evaluatorName}) 
     WHERE result.evaluationStatus = true] AS trueResults, 
-    [result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList, evaluatorName: evaluatorName}) 
+    [result IN collect(DISTINCT {evaluationStatus: evaluationStatus, evaluatorOrgsNameAndApprovedList: evaluatorOrgsNameAndApprovedList, evaluatorName: evaluatorName}) 
     WHERE result.evaluationStatus = false] AS falseResults 
     WITH eval, comment, locality, planItem, area, microLoc, 
     CASE 
@@ -85,7 +85,7 @@ RETURN DISTINCT
         ELSE apoc.text.join(eval.budgetPlanIds, ', ')
     END AS budgetPlans,
     finalResult.evaluationStatus AS evaluationStatus, 
-    finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList, 
+    finalResult.evaluatorOrgsNameAndApprovedList AS evaluatorOrgsNameAndApprovedList, 
     finalResult.evaluatorName AS evaluatorName 
 ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 	<field name="commentId" class="java.lang.Object">
@@ -144,9 +144,9 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="evaluationStatus"/>
 		<property name="com.jaspersoft.studio.field.label" value="evaluationStatus"/>
 	</field>
-	<field name="evaluatorOrgsNameAndLoaIncludedList" class="java.lang.Object">
-		<property name="com.jaspersoft.studio.field.name" value="evaluatorOrgsNameAndLoaIncludedList"/>
-		<property name="com.jaspersoft.studio.field.label" value="evaluatorOrgsNameAndLoaIncludedList"/>
+	<field name="evaluatorOrgsNameAndApprovedList" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="evaluatorOrgsNameAndApprovedList"/>
+		<property name="com.jaspersoft.studio.field.label" value="evaluatorOrgsNameAndApprovedList"/>
 	</field>
 	<field name="evaluatorName" class="java.lang.Object">
 		<property name="com.jaspersoft.studio.field.name" value="evaluatorName"/>
