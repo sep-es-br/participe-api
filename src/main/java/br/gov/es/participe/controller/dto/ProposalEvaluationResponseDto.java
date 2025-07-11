@@ -5,22 +5,28 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import br.gov.es.participe.model.Evaluates;
+import br.gov.es.participe.util.domain.BudgetPlan;
+import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 public class ProposalEvaluationResponseDto {
     private Long id;
-    private Boolean includedInNextYearLOA;
+    private Boolean approved;
     private String reason;
     private String reasonDetail;
     private String budgetUnitId;
     private String budgetUnitName;
     private String budgetActionId;
     private String budgetActionName;
-    private String budgetPlan;
+    private List<BudgetPlan> budgetPlan;
     private String representing;
     private String evaluatorName;
     private Boolean haveCost;
+    private String costType;
     private Boolean newRequest;
     private String date;
 
@@ -30,14 +36,30 @@ public class ProposalEvaluationResponseDto {
 
     public ProposalEvaluationResponseDto(Evaluates evaluatesRelationship) {
         this.id = evaluatesRelationship.getId();
-        this.includedInNextYearLOA = evaluatesRelationship.getIncludedInNextYearLOA();
-        if(evaluatesRelationship.getIncludedInNextYearLOA()) {
+        this.approved = evaluatesRelationship.getApproved();
+        if(evaluatesRelationship.getApproved()) {
             this.budgetUnitId = evaluatesRelationship.getBudgetUnitId();
             this.budgetUnitName = evaluatesRelationship.getBudgetUnitName();
             this.budgetActionId = evaluatesRelationship.getBudgetActionId();
             this.budgetActionName = evaluatesRelationship.getBudgetActionName();
-            this.budgetPlan = evaluatesRelationship.getBudgetPlan();
+
+            if(
+                evaluatesRelationship.getBudgetPlanIds() != null &&
+                evaluatesRelationship.getBudgetPlanNames() != null &&
+                evaluatesRelationship.getBudgetPlanIds().size() == evaluatesRelationship.getBudgetPlanNames().size()
+            ) {
+                this.budgetPlan = IntStream.range(0, evaluatesRelationship.getBudgetPlanIds().size())
+                                    .mapToObj(i -> new BudgetPlan(
+                                            evaluatesRelationship.getBudgetPlanIds().get(i),
+                                            evaluatesRelationship.getBudgetPlanNames().get(i)
+                                    )).collect(Collectors.toList());
+                
+               
+                
+            }
+
             this.haveCost = evaluatesRelationship.getHaveCost();
+            this.costType = evaluatesRelationship.getCostType();
             this.newRequest = evaluatesRelationship.getNewRequest();
         } else {
             this.reason = evaluatesRelationship.getReason();
@@ -46,6 +68,14 @@ public class ProposalEvaluationResponseDto {
         this.representing = evaluatesRelationship.getRepresenting();
         this.date = formatDate(evaluatesRelationship.getDate());
         this.evaluatorName = evaluatesRelationship.getPerson().getName();
+    }
+
+    public String getCostType() {
+        return costType;
+    }
+
+    public void setCostType(String costType) {
+        this.costType = costType;
     }
 
     public Boolean getHaveCost() {
@@ -80,12 +110,12 @@ public class ProposalEvaluationResponseDto {
         this.id = id;
     }
 
-    public Boolean getIncludedInNextYearLOA() {
-        return includedInNextYearLOA;
+    public Boolean getApproved() {
+        return approved;
     }
 
-    public void setIncludedInNextYearLOA(Boolean includedInNextYearLOA) {
-        this.includedInNextYearLOA = includedInNextYearLOA;
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
     }
 
     public String getReason() {
@@ -128,11 +158,11 @@ public class ProposalEvaluationResponseDto {
         this.budgetActionName = budgetActionName;
     }
 
-    public String getBudgetPlan() {
+    public  List<BudgetPlan> getBudgetPlan() {
         return budgetPlan;
     }
 
-    public void setBudgetPlan(String budgetPlan) {
+    public void setBudgetPlan(List<BudgetPlan> budgetPlan) {
         this.budgetPlan = budgetPlan;
     }
 

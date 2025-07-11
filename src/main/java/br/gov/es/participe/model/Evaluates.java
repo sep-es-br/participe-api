@@ -1,6 +1,10 @@
 package br.gov.es.participe.model;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.RelationshipEntity;
@@ -8,6 +12,9 @@ import org.neo4j.ogm.annotation.StartNode;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 import br.gov.es.participe.controller.dto.ProposalEvaluationRequestDto;
+import br.gov.es.participe.util.domain.BudgetPlan;
+
+import java.util.stream.Collectors;
 
 @RelationshipEntity(type = "EVALUATES")
 public class Evaluates extends Entity {
@@ -18,18 +25,20 @@ public class Evaluates extends Entity {
     @EndNode
     private Comment comment;
 
-    private Boolean includedInNextYearLOA;
+    private Boolean approved;
     private String reason;
     private String reasonDetail;
     private String budgetUnitId;
     private String budgetUnitName;
     private String budgetActionId;
     private String budgetActionName;
-    private String budgetPlan;
+    private List<String> budgetPlanIds;
+    private List<String> budgetPlanNames;
     private String representing;
     private String representingOrgTag;
     private String representingOrgName;
     private Boolean haveCost;
+    private String costType;
     private Boolean newRequest;
     private Boolean active;
     private Boolean deleted;
@@ -42,19 +51,36 @@ public class Evaluates extends Entity {
     }
 
     public Evaluates(ProposalEvaluationRequestDto proposalEvaluationRequestDto) {
-        this.includedInNextYearLOA = proposalEvaluationRequestDto.getIncludedInNextYearLOA();
+        this.approved = proposalEvaluationRequestDto.getApproved();
         this.budgetUnitId = proposalEvaluationRequestDto.getBudgetUnitId();
         this.budgetUnitName = proposalEvaluationRequestDto.getBudgetUnitName();
         this.budgetActionId = proposalEvaluationRequestDto.getBudgetActionId();
         this.budgetActionName = proposalEvaluationRequestDto.getBudgetActionName();
-        this.budgetPlan = proposalEvaluationRequestDto.getBudgetPlan();
+        if(proposalEvaluationRequestDto.getBudgetPlan() != null) {
+            this.budgetPlanIds = proposalEvaluationRequestDto.getBudgetPlan().stream()
+                                    .map(BudgetPlan::getBudgetPlanId)
+                                    .collect(Collectors.toList());
+            this.budgetPlanNames = proposalEvaluationRequestDto.getBudgetPlan().stream()
+                                    .map(BudgetPlan::getBudgetPlanName)
+                                    .collect(Collectors.toList());
+        }
+
         this.reason = proposalEvaluationRequestDto.getReason();
         this.reasonDetail = proposalEvaluationRequestDto.getReasonDetail();
         this.representing = proposalEvaluationRequestDto.getRepresenting();
         this.representingOrgTag = proposalEvaluationRequestDto.getRepresentingOrgTag();
         this.representingOrgName = proposalEvaluationRequestDto.getRepresentingOrgName();
         this.haveCost = proposalEvaluationRequestDto.getHaveCost();
+        this.costType = proposalEvaluationRequestDto.getCostType();
         this.newRequest = proposalEvaluationRequestDto.getNewRequest();
+    }
+
+    public String getCostType() {
+        return costType;
+    }
+
+    public void setCostType(String costType) {
+        this.costType = costType;
     }
 
     public Boolean getHaveCost() {
@@ -89,12 +115,12 @@ public class Evaluates extends Entity {
         this.comment = comment;
     }
 
-    public Boolean getIncludedInNextYearLOA() {
-        return includedInNextYearLOA;
+    public Boolean getApproved() {
+        return approved;
     }
 
-    public void setIncludedInNextYearLOA(Boolean includedInNextYearLOA) {
-        this.includedInNextYearLOA = includedInNextYearLOA;
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
     }
 
     public String getReason() {
@@ -137,12 +163,20 @@ public class Evaluates extends Entity {
         this.budgetActionName = budgetActionName;
     }
 
-    public String getBudgetPlan() {
-        return budgetPlan;
+    public List<String> getBudgetPlanIds() {
+        return budgetPlanIds;
     }
 
-    public void setBudgetPlan(String budgetPlan) {
-        this.budgetPlan = budgetPlan;
+    public void setBudgetPlanIds(List<String> budgetPlanIds) {
+        this.budgetPlanIds = budgetPlanIds;
+    }
+
+    public List<String> getBudgetPlanNames() {
+        return budgetPlanNames;
+    }
+
+    public void setBudgetPlanNames(List<String> budgetPlanNames) {
+        this.budgetPlanNames = budgetPlanNames;
     }
 
     public String getRepresenting() {

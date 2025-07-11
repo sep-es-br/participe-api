@@ -1,5 +1,5 @@
 <!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
-<jasperReport name="ProposeReport_included_subareaAll" language="java" columnCount="1" pageWidth="595" pageHeight="842" orientation="Landscape" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="e419bb14-7fcd-4d83-8199-cd9a23f79e22">
+<jasperReport name="ProposeReport_approved_subareaAll" language="java" columnCount="1" pageWidth="595" pageHeight="842" orientation="Landscape" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="e419bb14-7fcd-4d83-8199-cd9a23f79e22">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -17,7 +17,7 @@
 	<query language="SQL"><![CDATA[MATCH (area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(p:Person),
      (c)-[:ABOUT]->(microregiao:Locality) 
 where (eval.active AND NOT eval.deleted) and not c.duplicated
-    AND eval.includedInNextYearLOA
+    AND eval.approved
     AND id(microregiao) = $P{MICROREGION_ID} 
     AND id(area) = $P{AREA_ID} 
 MATCH (c)-[:ABOUT]->(co:Conference)

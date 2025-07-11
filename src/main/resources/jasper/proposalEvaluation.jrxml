@@ -18,7 +18,7 @@
 	<parameter name="organizationGuid" forPrompting="false" class="java.util.List" nestedType="java.lang.String">
 		<description><![CDATA[]]></description>
 	</parameter>
-	<parameter name="loaIncluded" forPrompting="false" class="java.lang.Boolean"/>
+	<parameter name="approved" forPrompting="false" class="java.lang.Boolean"/>
 	<parameter name="commentText" forPrompting="false" class="java.lang.String"/>
 	<parameter name="conferenceId" forPrompting="false" class="java.lang.Long"/>
 	<parameter name="localityTypeName" forPrompting="false" class="java.lang.String" nestedType=""/>
@@ -38,7 +38,7 @@ AND (id(locality) = $P!{localityId}  OR  $P!{localityId} IS NULL)
 AND (id(area) = $P!{planItemAreaId} OR $P!{planItemAreaId} IS NULL) 
 AND (id(planItem) = $P!{planItemId} OR $P!{planItemId} IS NULL) 
 AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $P!{organizationGuid}) OR $P!{organizationGuid} = [])
-AND ((eval.includedInNextYearLOA IS NOT NULL AND eval.includedInNextYearLOA = $P!{loaIncluded}) OR $P!{loaIncluded} IS NULL) 
+AND ((eval.approved IS NOT NULL AND eval.approved = $P!{approved}) OR $P!{approved} IS NULL) 
 AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR $P!{commentText} IS NULL)
     WITH comment, locality, planItem, area, eval, microLoc, 
     CASE  
@@ -46,7 +46,7 @@ AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR
     ELSE false  
     END AS evaluationStatus, 
     CASE  
-    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, loaIncluded: eval.includedInNextYearLOA}) 
+    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, approved: eval.approved}) 
     ELSE NULL  
     END AS evaluatorOrgsNameAndLoaIncludedList, 
     CASE  
@@ -63,10 +63,10 @@ AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR
     WHEN SIZE(trueResults) > 0 THEN HEAD(trueResults) 
     ELSE HEAD(falseResults) 
     END AS finalResult 
-    RETURN DISTINCT 
+RETURN DISTINCT 
     id(comment) AS commentId, 
     COALESCE(eval.representingOrgTag + " - " + eval.representingOrgName, "")  AS representingName,
-    CASE WHEN COALESCE(eval.haveCost, false) THEN "Sim" ELSE "Não" END AS haveCost,
+    CASE WHEN COALESCE(eval.haveCost, false) THEN eval.costType ELSE "Sem Custo" END AS haveCost,
     CASE WHEN COALESCE(eval.newRequest, false) THEN "Sim" ELSE "Não" END AS newRequest,
     COALESCE(eval.reasonDetail, "") AS reasonDetail,
     COALESCE(eval.reason, "") AS reason,
@@ -75,9 +75,18 @@ AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR
     planItem.name AS planItemName, 
     area.name AS planItemAreaName, 
     comment.text AS description, 
+    CASE 
+        WHEN eval.approved IS NULL THEN '-'
+        WHEN eval.approved THEN 'Sim'
+        ELSE 'Não'
+    END AS approved, 
+    CASE
+        WHEN eval.budgetPlanIds IS NULL THEN COALESCE(eval.budgetPlan, '') 
+        ELSE apoc.text.join(eval.budgetPlanIds, ', ')
+    END AS budgetPlans,
     finalResult.evaluationStatus AS evaluationStatus, 
     finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList, 
-finalResult.evaluatorName AS evaluatorName 
+    finalResult.evaluatorName AS evaluatorName 
 ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 	<field name="commentId" class="java.lang.Object">
 		<property name="com.jaspersoft.studio.field.name" value="commentId"/>
@@ -123,6 +132,14 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="description"/>
 		<property name="com.jaspersoft.studio.field.label" value="description"/>
 	</field>
+	<field name="approved" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="approved"/>
+		<property name="com.jaspersoft.studio.field.label" value="approved"/>
+	</field>
+	<field name="budgetPlans" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="budgetPlans"/>
+		<property name="com.jaspersoft.studio.field.label" value="budgetPlans"/>
+	</field>
 	<field name="evaluationStatus" class="java.lang.Object">
 		<property name="com.jaspersoft.studio.field.name" value="evaluationStatus"/>
 		<property name="com.jaspersoft.studio.field.label" value="evaluationStatus"/>
@@ -142,7 +159,7 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<element kind="textField" uuid="a89a6800-8a39-49da-928e-a9f6becc7cdf" x="250" y="0" width="270" height="30" fontSize="12.0" bold="true">
 			<expression><![CDATA[$P{structureItemName}]]></expression>
 		</element>
-		<element kind="textField" uuid="a0cb26b3-5dd9-4764-8f2f-d40187b155ad" x="1626" y="0" width="124" height="30" fontSize="12.0" bold="true">
+		<element kind="textField" uuid="a0cb26b3-5dd9-4764-8f2f-d40187b155ad" x="1750" y="0" width="124" height="30" fontSize="12.0" bold="true">
 			<expression><![CDATA[$P{localityTypeName}]]></expression>
 		</element>
 		<element kind="staticText" uuid="7868c665-3320-48e2-b145-6be315496209" x="520" y="0" width="332" height="30" fontSize="12.0" bold="true">
@@ -151,20 +168,26 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 		<element kind="staticText" uuid="e6955ee0-0750-453b-af01-8fd8d9ac07dc" x="-20" y="0" width="270" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Orgão Avaliador]]></text>
 		</element>
-		<element kind="staticText" uuid="668e1ac4-1dfd-49b5-9188-a66c97b36092" x="1874" y="0" width="124" height="30" fontSize="12.0" bold="true">
+		<element kind="staticText" uuid="668e1ac4-1dfd-49b5-9188-a66c97b36092" x="1998" y="0" width="124" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Possui custo?]]></text>
 		</element>
-		<element kind="staticText" uuid="db50cbae-10de-4a13-9bfc-0632afcdfd53" x="1998" y="0" width="124" height="30" fontSize="12.0" bold="true">
+		<element kind="staticText" uuid="db50cbae-10de-4a13-9bfc-0632afcdfd53" x="2122" y="0" width="124" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Iniciativa nova?]]></text>
 		</element>
-		<element kind="staticText" uuid="63b3c331-bbd5-4bff-8476-676c59822e92" x="2122" y="0" width="362" height="30" fontSize="12.0" bold="true">
+		<element kind="staticText" uuid="63b3c331-bbd5-4bff-8476-676c59822e92" x="2490" y="0" width="362" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Motivo da não inclusão]]></text>
 		</element>
-		<element kind="staticText" uuid="d164b0b2-effd-46dd-a96c-afe603c0cce2" x="2484" y="0" width="774" height="30" fontSize="12.0" bold="true">
+		<element kind="staticText" uuid="d164b0b2-effd-46dd-a96c-afe603c0cce2" x="2852" y="0" width="774" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Observação]]></text>
 		</element>
-		<element kind="staticText" uuid="4a46a291-b5ac-45aa-940f-6bb1fdb70a62" x="1750" y="0" width="124" height="30" fontSize="12.0" bold="true">
+		<element kind="staticText" uuid="4a46a291-b5ac-45aa-940f-6bb1fdb70a62" x="1874" y="0" width="124" height="30" fontSize="12.0" bold="true">
 			<text><![CDATA[Microrregião]]></text>
+		</element>
+		<element kind="staticText" uuid="be341968-4573-4e91-9439-4cab18be3601" x="1626" y="0" width="124" height="30" fontSize="12.0" bold="true">
+			<text><![CDATA[Será executada no próximo ano?]]></text>
+		</element>
+		<element kind="staticText" uuid="3f4e686a-0740-4f72-aca5-935a59a6e653" x="2246" y="0" width="244" height="30" fontSize="12.0" bold="true">
+			<text><![CDATA[Plano(s) orçamentário(s)]]></text>
 		</element>
 		<property name="com.jaspersoft.studio.unit.height" value="px"/>
 	</title>
@@ -180,7 +203,7 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 				<expression><![CDATA[$F{description}]]></expression>
 				<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 			</element>
-			<element kind="textField" uuid="dcfbb0df-c3f2-4e44-a9f0-e4b04e6e84a4" mode="Transparent" x="1626" y="0" width="124" height="30">
+			<element kind="textField" uuid="dcfbb0df-c3f2-4e44-a9f0-e4b04e6e84a4" mode="Transparent" x="1750" y="0" width="124" height="30">
 				<expression><![CDATA[$F{localityName}]]></expression>
 			</element>
 			<element kind="textField" uuid="a754fd91-3072-4740-a763-692a1556761d" x="520" y="0" width="332" height="30" textAdjust="ScaleFont">
@@ -193,22 +216,28 @@ ORDER BY area.name asc, planItemName asc,locality.name asc;]]></query>
 				<expression><![CDATA[$F{representingName}]]></expression>
 				<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 			</element>
-			<element kind="textField" uuid="a980bcc5-a729-45c8-a4d6-9710f910153e" mode="Transparent" x="1874" y="0" width="124" height="30">
+			<element kind="textField" uuid="a980bcc5-a729-45c8-a4d6-9710f910153e" mode="Transparent" x="1998" y="0" width="124" height="30">
 				<expression><![CDATA[$F{haveCost}]]></expression>
 			</element>
-			<element kind="textField" uuid="3780d058-1e38-4832-9ea3-49ba6e221d6e" mode="Transparent" x="1998" y="0" width="124" height="30">
+			<element kind="textField" uuid="3780d058-1e38-4832-9ea3-49ba6e221d6e" mode="Transparent" x="2122" y="0" width="124" height="30">
 				<expression><![CDATA[$F{newRequest}]]></expression>
 			</element>
-			<element kind="textField" uuid="552ee862-2cdc-4b41-990b-d7abf25ef8b2" mode="Transparent" x="2122" y="0" width="362" height="30">
+			<element kind="textField" uuid="552ee862-2cdc-4b41-990b-d7abf25ef8b2" mode="Transparent" x="2490" y="0" width="362" height="30">
 				<expression><![CDATA[$F{reason}]]></expression>
 			</element>
-			<element kind="textField" uuid="d7e39ca0-9d0c-4a1e-a37e-894a00d6d620" x="2484" y="0" width="774" height="30" textAdjust="ScaleFont">
+			<element kind="textField" uuid="d7e39ca0-9d0c-4a1e-a37e-894a00d6d620" x="2852" y="0" width="774" height="30" textAdjust="ScaleFont">
 				<paragraph rightIndent="4"/>
 				<expression><![CDATA[$F{reasonDetail}]]></expression>
 				<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 			</element>
-			<element kind="textField" uuid="087b699a-eb99-447c-baba-a1d56deb4ee5" mode="Transparent" x="1750" y="0" width="124" height="30">
+			<element kind="textField" uuid="087b699a-eb99-447c-baba-a1d56deb4ee5" mode="Transparent" x="1874" y="0" width="124" height="30">
 				<expression><![CDATA[$F{microrregionName}]]></expression>
+			</element>
+			<element kind="textField" uuid="7dcbe142-497b-465a-b068-03a79880b59d" mode="Transparent" x="1626" y="0" width="124" height="30">
+				<expression><![CDATA[$F{approved}]]></expression>
+			</element>
+			<element kind="textField" uuid="49b01ad7-f7ae-421b-9012-92193aade3d9" mode="Transparent" x="2246" y="0" width="244" height="30">
+				<expression><![CDATA[$F{budgetPlans}]]></expression>
 			</element>
 		</band>
 	</detail>

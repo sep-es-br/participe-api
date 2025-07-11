@@ -69,10 +69,10 @@ CALL {
 CALL {
     MATCH (co:Conference)<-[a:ABOUT]-(comment:Comment)<-[e:EVALUATES]-(:Person)
     WHERE id(co)= 47114  AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
-        AND e.includedInNextYearLOA AND e.active
-  	RETURN count(comment) AS includedProposals
+        AND e.approved AND e.active
+  	RETURN count(comment) AS approvedProposals
 }
-RETURN remoteParticipation, presentialParticipation, citiesParticipation, consolidatedProposals, registeredProposals, includedProposals]]></query>
+RETURN remoteParticipation, presentialParticipation, citiesParticipation, consolidatedProposals, registeredProposals, approvedProposals]]></query>
 	<field name="remoteParticipation" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="remoteParticipation"/>
 		<property name="com.jaspersoft.studio.field.label" value="remoteParticipation"/>
@@ -93,9 +93,9 @@ RETURN remoteParticipation, presentialParticipation, citiesParticipation, consol
 		<property name="com.jaspersoft.studio.field.name" value="registeredProposals"/>
 		<property name="com.jaspersoft.studio.field.label" value="registeredProposals"/>
 	</field>
-	<field name="includedProposals" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="includedProposals"/>
-		<property name="com.jaspersoft.studio.field.label" value="includedProposals"/>
+	<field name="approvedProposals" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="approvedProposals"/>
+		<property name="com.jaspersoft.studio.field.label" value="approvedProposals"/>
 	</field>
 	<background splitType="Stretch"/>
 	<title height="67">
@@ -159,7 +159,7 @@ Participantes]]></text>
 			<expression><![CDATA[$F{presentialParticipation}]]></expression>
 		</element>
 		<element kind="textField" uuid="11cbdd13-3ea8-4514-880f-0c22a5635b0f" x="391" y="554" width="150" height="74" fontSize="33.0" textAdjust="ScaleFont" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<expression><![CDATA[$F{includedProposals}]]></expression>
+			<expression><![CDATA[$F{approvedProposals}]]></expression>
 		</element>
 		<element kind="textField" uuid="e6805f1c-0ab5-4156-8cd0-48250f644482" x="10" y="540" width="150" height="59" fontSize="33.0" textAdjust="ScaleFont" bold="true" hTextAlign="Center" vTextAlign="Middle">
 			<expression><![CDATA[$F{consolidatedProposals}]]></expression>
