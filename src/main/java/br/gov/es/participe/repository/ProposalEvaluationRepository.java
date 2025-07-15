@@ -89,15 +89,16 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
                 "  comment.text AS description,\n" +
                 "  finalResult.evaluationStatus AS evaluationStatus,\n" +
                 "  finalResult.evaluatorOrgsNameAndApprovedList AS evaluatorOrgsNameAndApprovedList", 
-            countQuery = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
-                    "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
-                    "WHERE id(conference) = $conferenceId " +
-                    "AND comment.type = 'prop' " +
-                    "AND comment.status = 'pub' " +
-                    "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
-                    "WITH comment, locality, planItem, area, eval, person " +
-                    SEARCH_FILTER +
-                    "RETURN count(DISTINCT comment)")
+            countQuery = "MATCH (microLoc:Locality)<-[:IS_LOCATED_IN]-(locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), \n" +
+                        "      (comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) \n" +
+                        "WHERE id(conference) = $conferenceId \n" +
+                        "  AND comment.type = 'prop' \n" +
+                        "  AND comment.status = 'pub' \n" +
+                        "  AND (comment.duplicated = false OR comment.duplicated IS NULL) " +
+                        "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
+                        "WITH comment, locality, planItem, area, eval, person " +
+                        SEARCH_FILTER +
+                        "RETURN count(DISTINCT comment)")
     Page<ProposalEvaluationCommentResultDto> findAllCommentsForEvaluation(
         @Param("evaluationStatus") Boolean evaluationStatus, 
         @Param("localityId") Long localityId, 
