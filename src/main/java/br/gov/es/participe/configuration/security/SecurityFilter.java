@@ -88,8 +88,8 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.matches(".*/conferences/with-meetings")
                     || url.matches(".*/conferences/\\d+/regionalization")
                     || url.matches(".*/conferences/portal")
-                    || url.matches(".*/integration/*")
-                    || url.matches(".*/authorityCredential/*");
+                    || url.matches(".*/integration/.*")
+                    || url.matches(".*/authorityCredential/.*");
             
 
             if (!isPublicUrl) {
