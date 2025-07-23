@@ -4,38 +4,69 @@
  */
 package br.gov.es.participe.controller.dto.integration;
 
+import java.util.List;
+
 /**
  *
  * @author gean.carneiro
  */
 public class SpoProposalListRequestDto {
     
-    private String budgetUnitCode;
-    private Integer year;
-    private Long planItemId;
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public Long getPlanItemId() {
-        return planItemId;
-    }
-
-    public void setPlanItemId(Long planItemId) {
-        this.planItemId = planItemId;
-    }
+    private List<String> budgetUnitCodes;
+    private String planItemName;
+    private String textFilter;
+    private List<String> syncedIds;
     
-    public String getBudgetUnitCode() {
-        return budgetUnitCode;
+    private int pageNumber;
+    private int pageSize;
+    
+
+    public String getPlanItemName() {
+        return planItemName;
     }
 
-    public void setBudgetUnitCode(String budgetUnitCode) {
-        this.budgetUnitCode = budgetUnitCode;
+    public void setPlanItemName(String planItemName) {
+        this.planItemName = planItemName;
+    }
+
+    public List<String> getBudgetUnitCodes() {
+        return budgetUnitCodes;
+    }
+
+    public void setBudgetUnitCodes(List<String> budgetUnitCodes) {
+        this.budgetUnitCodes = budgetUnitCodes;
+    }
+
+    public String getTextFilter() {
+        return textFilter;
+    }
+
+    public void setTextFilter(String textFilter) {
+        this.textFilter = textFilter;
+    }
+
+    public List<String> getSyncedIds() {
+        return syncedIds;
+    }
+
+    public void setSyncedIds(List<String> syncedIds) {
+        this.syncedIds = syncedIds;
+    }
+
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
     }
     
     

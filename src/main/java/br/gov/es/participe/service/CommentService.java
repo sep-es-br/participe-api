@@ -34,6 +34,7 @@ import br.gov.es.participe.controller.dto.PlanItemDto;
 import br.gov.es.participe.controller.dto.ProposalDto;
 import br.gov.es.participe.controller.dto.ProposalsDto;
 import br.gov.es.participe.controller.dto.StructureItemDto;
+import br.gov.es.participe.controller.dto.integration.SpoProposalsListResponseDto;
 import br.gov.es.participe.model.CheckedInAt;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.Conference;
@@ -52,6 +53,7 @@ import br.gov.es.participe.util.StringUtils;
 import br.gov.es.participe.util.domain.CommentFromType;
 import br.gov.es.participe.util.domain.CommentStatusType;
 import br.gov.es.participe.util.domain.CommentTypeType;
+import org.springframework.data.domain.Sort;
 
 @Service
 public class CommentService {
@@ -167,6 +169,22 @@ public class CommentService {
     }
     screen.setProposals(proposals);
     return screen;
+  }
+  
+  public Page<SpoProposalsListResponseDto> listProposalForSpo(
+        Long idConference, 
+        List<String> codUnit, 
+        String planName, 
+        String textFilter, 
+        List<String> syncedIds,
+        int pageNumber,
+        int pageSize
+  ){
+    
+      
+    return commentRepository.findProposalsForSpo(idConference, codUnit, planName, textFilter, syncedIds, PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Order.asc("date"))));
+    
+  
   }
 
   private PlanItem getPlanItemDto(Set<PlanItem> itens, Long id) {
