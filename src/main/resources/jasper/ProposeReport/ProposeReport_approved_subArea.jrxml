@@ -114,7 +114,7 @@ UNWIND organizations as org
 MATCH (area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(:Person), (c)-[:ABOUT]->(microregiao:Locality) 
 where toInteger(eval.budgetUnitId) = org.id
     AND (eval.active AND NOT eval.deleted) and not c.duplicated
-    AND eval.includedInNextYearLOA
+    AND eval.approved
 return org.value as unit, eval.budgetActionId + ' - ' + eval.budgetActionName as action, subarea.name as subarea, c.text as propose order by subarea.name;]]></query>
 		<field name="unit" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.name" value="unit"/>
@@ -243,7 +243,7 @@ MATCH (area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[ev
      (c)-[:ABOUT]->(microregiao:Locality) 
 where toInteger(eval.budgetUnitId) = org.id
     AND (eval.active AND NOT eval.deleted) and not c.duplicated
-    AND eval.includedInNextYearLOA
+    AND eval.approved
     AND id(microregiao) = $P{ID_MICROREGIAO} 
     AND id(area) = $P{ID_AREA} 
     AND id(subarea) = $P{SUBAREA_ID} 

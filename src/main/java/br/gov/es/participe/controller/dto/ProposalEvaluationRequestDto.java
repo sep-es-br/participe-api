@@ -1,24 +1,36 @@
 package br.gov.es.participe.controller.dto;
 
+import br.gov.es.participe.util.domain.BudgetPlan;
+import java.util.List;
+
 public class ProposalEvaluationRequestDto {
     private Long personId;
     private Long proposalId;
-    private Boolean includedInNextYearLOA;
+    private Boolean approved;
     private String reason;
     private String reasonDetail;
     private String budgetUnitId;
     private String budgetUnitName;
     private String budgetActionId;
     private String budgetActionName;
-    private String budgetPlan;
+    private List<BudgetPlan> budgetPlan;
     private String representing;
     private String representingOrgTag;
     private String representingOrgName;
     private Boolean haveCost;
+    private String costType;
     private Boolean newRequest;
 
     public ProposalEvaluationRequestDto() {
 
+    }
+
+    public String getCostType() {
+        return costType;
+    }
+
+    public void setCostType(String costType) {
+        this.costType = costType;
     }
 
     public Boolean getHaveCost() {
@@ -71,12 +83,12 @@ public class ProposalEvaluationRequestDto {
         this.proposalId = proposalId;
     }
 
-    public Boolean getIncludedInNextYearLOA() {
-        return includedInNextYearLOA;
+    public Boolean getApproved() {
+        return approved;
     }
 
-    public void setIncludedInNextYearLOA(Boolean includedInNextYearLOA) {
-        this.includedInNextYearLOA = includedInNextYearLOA;
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
     }
 
     public String getReason() {
@@ -119,11 +131,11 @@ public class ProposalEvaluationRequestDto {
         this.budgetActionName = budgetActionName;
     }
 
-    public String getBudgetPlan() {
+    public List<BudgetPlan> getBudgetPlan() {
         return budgetPlan;
     }
 
-    public void setBudgetPlan(String budgetPlan) {
+    public void setBudgetPlan(List<BudgetPlan> budgetPlan) {
         this.budgetPlan = budgetPlan;
     }
 

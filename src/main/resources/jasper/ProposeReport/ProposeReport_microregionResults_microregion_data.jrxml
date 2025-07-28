@@ -89,12 +89,12 @@ CALL {
     WHERE id(co)= $P{ID_CONFERENCE} 
 		AND id(loc) = $P{ID_MICROREGION} 
 		AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
-        AND e.includedInNextYearLOA AND e.active
-  	RETURN count(comment) AS includedProposals
+        AND e.approved AND e.active
+  	RETURN count(comment) AS approvedProposals
 }
 RETURN microregion.name as microregionName,
 	 	apoc.text.join(collect(city.name), ', ') as cities,
-		remoteParticipation, citiesParticipation, consolidatedProposals, registeredProposals, includedProposals]]></query>
+		remoteParticipation, citiesParticipation, consolidatedProposals, registeredProposals, approvedProposals]]></query>
 	<field name="microregionName" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="microregionName"/>
 		<property name="com.jaspersoft.studio.field.label" value="microregionName"/>
@@ -119,9 +119,9 @@ RETURN microregion.name as microregionName,
 		<property name="com.jaspersoft.studio.field.name" value="registeredProposals"/>
 		<property name="com.jaspersoft.studio.field.label" value="registeredProposals"/>
 	</field>
-	<field name="includedProposals" class="java.lang.Object">
-		<property name="com.jaspersoft.studio.field.name" value="includedProposals"/>
-		<property name="com.jaspersoft.studio.field.label" value="includedProposals"/>
+	<field name="approvedProposals" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.name" value="approvedProposals"/>
+		<property name="com.jaspersoft.studio.field.label" value="approvedProposals"/>
 	</field>
 	<background splitType="Stretch"/>
 	<title height="750">
@@ -174,7 +174,7 @@ Incorporadas ao
 Orçamento]]></text>
 		</element>
 		<element kind="textField" uuid="2667a612-c58b-4ae8-919e-7c55d5905738" x="340" y="500" width="171" height="120" fontSize="37.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<expression><![CDATA[$F{includedProposals}]]></expression>
+			<expression><![CDATA[$F{approvedProposals}]]></expression>
 		</element>
 		<element kind="image" uuid="926c1bac-d80a-470e-b075-eb5e9276eb87" x="100" y="146" width="70" height="70">
 			<expression><![CDATA["imgs/remotoIcon.png"]]></expression>

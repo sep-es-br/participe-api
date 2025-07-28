@@ -26,7 +26,7 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
         + "AND (id(area) = $planItemAreaId OR $planItemAreaId IS NULL) "
         + "AND (id(planItem) = $planItemId OR $planItemId IS NULL) "
         + "AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $organizationGuid) OR $organizationGuid = []) "
-        + "AND ((eval.includedInNextYearLOA IS NOT NULL AND eval.includedInNextYearLOA = $loaIncluded) OR $loaIncluded IS NULL) "
+        + "AND ((eval.approved IS NOT NULL AND eval.approved = $approved) OR $approved IS NULL) "
         + "AND apoc.text.clean(comment.text) CONTAINS apoc.text.clean($commentText) ";
 
     @Query(
@@ -61,19 +61,19 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
                 "  CASE\n" +
                 "    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {\n" +
                 "      evaluatorOrgsName: eval.representing,\n" +
-                "      loaIncluded: eval.includedInNextYearLOA,\n" +
+                "      approved: eval.approved,\n" +
                 "      evaluatorName: person.name\n" +
                 "    })\n" +
                 "    ELSE NULL\n" +
-                "  END AS evaluatorOrgsNameAndLoaIncludedList\n" +
+                "  END AS evaluatorOrgsNameAndApprovedList\n" +
                 "WITH comment, locality, planItem, area, microLoc, \n" +
                 "  [result IN collect(DISTINCT {\n" +
                 "    evaluationStatus: evaluationStatus,\n" +
-                "    evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList\n" +
+                "    evaluatorOrgsNameAndApprovedList: evaluatorOrgsNameAndApprovedList\n" +
                 "  }) WHERE result.evaluationStatus = true] AS trueResults,\n" +
                 "  [result IN collect(DISTINCT {\n" +
                 "    evaluationStatus: evaluationStatus,\n" +
-                "    evaluatorOrgsNameAndLoaIncludedList: evaluatorOrgsNameAndLoaIncludedList\n" +
+                "    evaluatorOrgsNameAndApprovedList: evaluatorOrgsNameAndApprovedList\n" +
                 "  }) WHERE result.evaluationStatus = false] AS falseResults\n" +
                 "WITH comment, locality, planItem, area, microLoc, \n" +
                 "  CASE\n" +
@@ -88,23 +88,24 @@ public interface ProposalEvaluationRepository extends Neo4jRepository<Evaluates,
                 "  area.name AS planItemAreaName,\n" +
                 "  comment.text AS description,\n" +
                 "  finalResult.evaluationStatus AS evaluationStatus,\n" +
-                "  finalResult.evaluatorOrgsNameAndLoaIncludedList AS evaluatorOrgsNameAndLoaIncludedList", 
-            countQuery = "MATCH (locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), " +
-                    "(comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) " +
-                    "WHERE id(conference) = $conferenceId " +
-                    "AND comment.type = 'prop' " +
-                    "AND comment.status = 'pub' " +
-                    "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
-                    "WITH comment, locality, planItem, area, eval, person " +
-                    SEARCH_FILTER +
-                    "RETURN count(DISTINCT comment)")
+                "  finalResult.evaluatorOrgsNameAndApprovedList AS evaluatorOrgsNameAndApprovedList", 
+            countQuery = "MATCH (microLoc:Locality)<-[:IS_LOCATED_IN]-(locality:Locality)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(conference:Conference), \n" +
+                        "      (comment)-[:ABOUT]->(planItem:PlanItem)-[:COMPOSES]->(area:PlanItem) \n" +
+                        "WHERE id(conference) = $conferenceId \n" +
+                        "  AND comment.type = 'prop' \n" +
+                        "  AND comment.status = 'pub' \n" +
+                        "  AND (comment.duplicated = false OR comment.duplicated IS NULL) " +
+                        "OPTIONAL MATCH (comment)<-[eval:EVALUATES]-(person:Person) " +
+                        "WITH comment, locality, planItem, area, eval, person " +
+                        SEARCH_FILTER +
+                        "RETURN count(DISTINCT comment)")
     Page<ProposalEvaluationCommentResultDto> findAllCommentsForEvaluation(
         @Param("evaluationStatus") Boolean evaluationStatus, 
         @Param("localityId") Long localityId, 
         @Param("planItemAreaId") Long planItemAreaId, 
         @Param("planItemId") Long planItemId,
         @Param("organizationGuid") List<String> organizationGuid, 
-        @Param("loaIncluded") Boolean loaIncluded, 
+        @Param("approved") Boolean approved, 
         @Param("commentText") String commentText, 
         @Param("conferenceId") Long conferenceId, 
         @Param("pageable") Pageable pageable);

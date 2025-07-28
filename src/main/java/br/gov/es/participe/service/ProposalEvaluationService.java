@@ -47,6 +47,8 @@ import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.repository.ProposalEvaluationRepository;
+import br.gov.es.participe.util.domain.BudgetPlan;
+import java.net.URISyntaxException;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
@@ -56,6 +58,8 @@ import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import org.json.JSONException;
+import org.springframework.web.client.RestClientException;
 
 @Service
 public class ProposalEvaluationService {
@@ -83,6 +87,12 @@ public class ProposalEvaluationService {
 
     @Value("${pentahoBI.targetDataSource}")
     private String targetDataSource;
+
+    @Value("${pentahoBI.pathSpo}")
+    private String pathSpo;
+
+    @Value("${pentahoBI.targetDataSourceSpo}")
+    private String targetDataSourceSpo;
 
     @Value("${pentahoBI.userId}")
     private String userId;
@@ -121,7 +131,7 @@ public class ProposalEvaluationService {
         Long planItemAreaId, 
         Long planItemId,
         List<String> organizationGuid, 
-        Boolean loaIncluded, 
+        Boolean approved, 
         String commentText, 
         Long conferenceId, 
         Pageable pageable
@@ -133,7 +143,7 @@ public class ProposalEvaluationService {
             planItemAreaId, 
             planItemId,
             organizationGuid, 
-            loaIncluded, 
+            approved, 
             commentText, 
             conferenceId, 
             pageable);
@@ -300,6 +310,51 @@ public class ProposalEvaluationService {
         return result;
 
     }
+    
+    public List<BudgetPlan> fetchBudgetPlanFromBI() {
+        
+        String uri = baseURL + pathSpo + targetDataSourceSpo;
+
+        String notEncoded = String.format("%s:%s", userId, password);
+        String encodedAuth = String.format("Basic %s", Base64.getEncoder().encodeToString(notEncoded.getBytes()));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", encodedAuth);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName(charset)));
+
+        List<BudgetPlan> result = new ArrayList<>();
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(RequestEntity.get(new URI(uri)).headers(headers).build(), String.class);
+            
+            JSONObject biResult = new JSONObject(response.getBody());
+            JSONArray resultSet = new JSONArray().put(biResult.get("resultset")).getJSONArray(0);
+            
+            
+            for (int i = 0; i < resultSet.length(); i++) {
+
+                List<Object> data = resultSet.getJSONArray(i).toList();
+                
+                result.add(new BudgetPlan(
+                        data.get(0).toString(),
+                        data.get(1).toString()
+                ));
+
+            }
+            
+        } catch (URISyntaxException | JSONException | RestClientException e) {
+            log.error(e.getLocalizedMessage(), e);
+        }   
+
+        return result;
+        
+        
+        
+    }
 
     private List<BudgetOptionsDto> mapResultToBudgetOptionsList(String result) throws ParseException {
 
@@ -341,14 +396,14 @@ public class ProposalEvaluationService {
             Long planItemAreaId,
             Long planItemId,
             List<String> organizationGuid,
-            Boolean loaIncluded,
+            Boolean approved,
             String commentText,
             Long conferenceId) {
         
         StructureItemAndLocalityTypeDto structureItemAndLocalityTypeDto = proposalEvaluationRepository.getStructureItemAndLocalityType(conferenceId);
 
         ProposalEvaluationJasperParamDto proposalEvaluationJasperParamDto = new ProposalEvaluationJasperParamDto(
-                evaluationStatus, localityId, planItemAreaId, planItemId, organizationGuid, loaIncluded, commentText,
+                evaluationStatus, localityId, planItemAreaId, planItemId, organizationGuid, approved, commentText,
                 conferenceId, structureItemAndLocalityTypeDto.getLocalityTypeName(), structureItemAndLocalityTypeDto.getStructureItemName());
         Map<String, Object> proposalEvaluationMap = proposalEvaluationJasperParamDto.getProposalEvaluationJasperMap();
         

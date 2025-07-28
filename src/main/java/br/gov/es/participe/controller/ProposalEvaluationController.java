@@ -17,6 +17,8 @@ import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.service.ConferenceService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.ProposalEvaluationService;
+import br.gov.es.participe.util.domain.BudgetPlan;
+import java.util.Arrays;
 
 @RestController
 @CrossOrigin
@@ -46,7 +48,7 @@ public class ProposalEvaluationController {
         @RequestParam(value = "planItemAreaId", required = false, defaultValue = "") Long planItemAreaId,
         @RequestParam(value = "planItemId", required = false, defaultValue = "") Long planItemId,
         @RequestParam(value = "organizationGuid", required = false, defaultValue = "") List<String> organizationGuid,
-        @RequestParam(value = "loaIncluded", required = false, defaultValue = "") Boolean loaIncluded,
+        @RequestParam(value = "approved", required = false, defaultValue = "") Boolean approved,
         @RequestParam(value = "commentText", required = false, defaultValue = "") String commentText,
         @RequestParam(value = "conferenceId", required = true) Long conferenceId,
         Pageable pageable
@@ -57,7 +59,7 @@ public class ProposalEvaluationController {
             planItemAreaId,
             planItemId,
             organizationGuid,
-            loaIncluded,
+            approved,
             commentText,
             conferenceId,
             pageable
@@ -148,6 +150,24 @@ public class ProposalEvaluationController {
         }
         return ResponseEntity.ok().body(proposalEvaluationService.checkIsCommentEvaluated(commentId));
     }
+    
+    @GetMapping("/budgetPlanList")
+    public ResponseEntity<List<BudgetPlan>> getBudgetPlanList(
+    ) {
+
+       List<BudgetPlan> result = proposalEvaluationService.fetchBudgetPlanFromBI();
+        
+        // List<BudgetPlan> result = Arrays.asList(
+        //         new BudgetPlan("000004", "CAPS DE MARATAÍZES IMPLANTADO"),
+        //         new BudgetPlan("000005", "CENTRAL DE REGULAÇÃO ESTADUAL DE ACESSO A CONSULTAS, EXAMES E INTERNAÇÕES IMPLANTADA"),
+        //         new BudgetPlan("000006", "CENTRAL SAMU 192 NORTE IMPLANTADO - SÃO MATEUS"),
+        //         new BudgetPlan("000007", "CENTRAL SAMU 192 SUL IMPLANTADO - CACHOEIRO DE ITAPEMIRIM")
+        // );
+        
+        
+        
+        return ResponseEntity.ok().body(result);
+    }
 
     @GetMapping("/conferences")
     public ResponseEntity<List<ConferenceDto>> findConferencesActives(
@@ -165,7 +185,7 @@ public class ProposalEvaluationController {
         @RequestParam(value = "planItemAreaId", required = false, defaultValue = "") Long planItemAreaId,
         @RequestParam(value = "planItemId", required = false, defaultValue = "") Long planItemId,
         @RequestParam(value = "organizationGuid", required = false, defaultValue = "") List<String> organizationGuid,
-        @RequestParam(value = "loaIncluded", required = false, defaultValue = "") Boolean loaIncluded,
+        @RequestParam(value = "approved", required = false, defaultValue = "") Boolean approved,
         @RequestParam(value = "commentText", required = false, defaultValue = "") String commentText,
         @RequestParam(value = "conferenceId", required = true) Long conferenceId
     ) {
@@ -175,7 +195,7 @@ public class ProposalEvaluationController {
             planItemAreaId,
             planItemId,
             organizationGuid,
-            loaIncluded,
+            approved,
             commentText,
             conferenceId
         );
