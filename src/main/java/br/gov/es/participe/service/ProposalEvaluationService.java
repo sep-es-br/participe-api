@@ -339,6 +339,8 @@ public class ProposalEvaluationService {
 
                 List<Object> data = resultSet.getJSONArray(i).toList();
                 
+                if(data.get(0).toString().equals("000001")) continue;
+                
                 result.add(new BudgetPlan(
                         data.get(0).toString(),
                         data.get(1).toString()
