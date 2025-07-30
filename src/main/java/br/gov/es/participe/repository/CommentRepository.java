@@ -185,7 +185,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
             "WHERE // filtro de controle interno\n" +
             "  eval.approved AND \n" +
             "  eval.costType = 'Investimento' AND\n" +
-            "  id(conf) = $idConference\n" +
+            "  id(conf) = $idConference \n" +
             "WITH *, apoc.text.split(eval.budgetUnitId, ';') AS ids,\n" +
             "     apoc.text.split(eval.budgetUnitName, ';') AS names\n" +
             "WITH *, apoc.coll.min([size(ids), size(names)]) as minSize\n" +
@@ -200,6 +200,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
             "    ], '|')\n" +
             "  ]) AS syncHash\n" +
             "WHERE \n" +
+            "  ((NOT budgetUnitEntry.id STARTS WITH '0') AND (NOT budgetUnitEntry.id STARTS WITH '8') ) AND \n" +
             "  (size($codUnit) = 0 OR budgetUnitEntry.id IN $codUnit) AND\n" +
             "  ($planName IS NULL OR area.name = $planName) AND\n" +
             "  ($textFilter IS NULL OR apoc.text.clean(c.text) CONTAINS apoc.text.clean($textFilter)) AND\n" +

@@ -374,9 +374,6 @@ public class ProposalEvaluationService {
             String budgetActionId = data.get(2).toString();
             String budgetActionName = data.get(3).toString();
             
-            if(budgetUnitId.startsWith("0") || budgetUnitId.startsWith("8")) continue;
-               
-            
             String mapKey = budgetUnitId + budgetUnitName;
             BudgetOptionsDto targetDto = budgetOptionsMap.get(mapKey);
 
