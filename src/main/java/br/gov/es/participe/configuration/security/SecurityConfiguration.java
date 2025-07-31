@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import br.gov.es.participe.service.TokenService;
+import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableWebSecurity
@@ -21,7 +22,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private TokenService tokenService;
-
+    
+    @Autowired
+    private Environment env;
+    
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -30,14 +34,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 // plans
                 .antMatchers(HttpMethod.GET, "/plans").permitAll()
-                // .antMatchers("/plans/**").hasAuthority("Administrator")
 
                 // structures
                 .antMatchers(HttpMethod.GET, "/structures").permitAll()
-                // .antMatchers("/structures/**").hasRole("Administrator")
 
                 // citizen
-                // .antMatchers(HttpMethod.GET, "/citizen/**").hasRole("Administrator")
 
                 // conferences
                 .antMatchers("/conferences/portal").permitAll()
@@ -50,39 +51,26 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/conferences/AuthenticationScreen/**").permitAll()
                 .antMatchers("/conferences/validateDefaultConference").permitAll()
                 .antMatchers("/conferences/validate").permitAll()
-                // .antMatchers(HttpMethod.POST, "/conferences/**").hasRole("Administrator")
-                // .antMatchers(HttpMethod.PUT, "/conferences/**").hasRole("Administrator")
-                // .antMatchers(HttpMethod.DELETE, "/conferences/**").hasRole("Administrator")
 
                 // domain
                 .antMatchers(HttpMethod.GET, "/domain/**").permitAll()
-                // .antMatchers("/domain/**").hasRole("Administrator")
 
                 // comments
-                // .antMatchers(HttpMethod.DELETE, "/comments/**").hasRole("Administrator")
 
                 // signout
                 .antMatchers("/signout").permitAll()
 
                 // files
                 .antMatchers(HttpMethod.GET, "/files/**").permitAll()
-                // .antMatchers("/files/**").hasRole("Administrator")
                 
-//                // authority-credential
-//                .antMatchers("/meetings/**").permitAll()
-
                 // signin
                 .antMatchers("/signin/acesso-cidadao")
                 .authenticated().and().oauth2Login()
                 .authorizationEndpoint()
                 .authorizationRequestResolver(new AuthorizationRequestResolver(clientRegistrationRepository,
                         "/oauth2/authorization"));
-        httpSecurity.addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(new SecurityFilter(tokenService, env), UsernamePasswordAuthenticationFilter.class);
     }
 
-    @Bean
-    public SecurityFilter securityFilter() {
-        return new SecurityFilter(tokenService);
-    }
 
 }
