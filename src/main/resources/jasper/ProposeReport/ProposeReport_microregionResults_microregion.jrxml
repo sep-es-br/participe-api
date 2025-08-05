@@ -12,11 +12,10 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
-	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
-		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
-	</parameter>
+	<parameter name="IMG_PATH" class="java.lang.String"/>
+	<parameter name="DATA_SOURCE" class="java.lang.String"/>
 	<query language="SQL"><![CDATA[MATCH 
-    (conf:Conference)<-[:ABOUT]-(c:Comment)-[:ABOUT]->(loc:Locality)
+    (conf:Conference)<-[:ABOUT]-(c:Comment)-[:ABOUT|IS_LOCATED_IN*1..2]->(loc:Locality)-[:OF_TYPE]->(:LocalityType{name: 'Microrregião'})
 WHERE
     id(conf) = $P{ID_CONFERENCE} 
 RETURN 
@@ -44,7 +43,7 @@ ORDER BY
 					<expression><![CDATA[$F{idMicroregion}]]></expression>
 				</parameter>
 				<parameter name="ROOT">
-					<expression><![CDATA[$P{ROOT}]]></expression>
+					<expression><![CDATA[$P{IMG_PATH}]]></expression>
 				</parameter>
 			</element>
 		</band>
@@ -59,7 +58,10 @@ ORDER BY
 					<expression><![CDATA[$F{idMicroregion}]]></expression>
 				</parameter>
 				<parameter name="ROOT">
-					<expression><![CDATA[$P{ROOT}]]></expression>
+					<expression><![CDATA[$P{IMG_PATH}]]></expression>
+				</parameter>
+				<parameter name="DATA_SOURCE">
+					<expression><![CDATA[$P{DATA_SOURCE}]]></expression>
 				</parameter>
 			</element>
 		</band>
@@ -73,8 +75,8 @@ ORDER BY
 				<parameter name="ID_MICROREGION">
 					<expression><![CDATA[$F{idMicroregion}]]></expression>
 				</parameter>
-				<parameter name="ROOT">
-					<expression><![CDATA[$P{ROOT}]]></expression>
+				<parameter name="IMG_PATH">
+					<expression><![CDATA[$P{IMG_PATH}]]></expression>
 				</parameter>
 			</element>
 		</band>

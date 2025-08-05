@@ -1,15 +1,13 @@
 <!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
 <jasperReport name="ProposeReport_approved" language="java" columnCount="1" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="d91be523-5994-486c-bdba-8e4fce4fdc3e">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe hom"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="230"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="762"/>
 	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
 	<parameter name="ID_MICROREGION" class="java.lang.Integer"/>
-	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
-		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
-	</parameter>
-	<query language="SQL"><![CDATA[MATCH (co:Conference)<-[:ABOUT]-(:Comment)-[:ABOUT]->(microregiao:Locality)<-[:IS_LOCATED_IN]-(:Locality) 
+	<parameter name="IMG_PATH" class="java.lang.String"/>
+	<query language="SQL"><![CDATA[MATCH (co:Conference)<-[:ABOUT]-(:Comment)-[:ABOUT|IS_LOCATED_IN*1..2]->(microregiao:Locality)
 WHERE id(co) = $P{ID_CONFERENCE} 
 	AND id(microregiao) =  $P{ID_MICROREGION} 
 return distinct id(microregiao) as idMicroregion
@@ -31,8 +29,8 @@ order by idMicroregion]]></query>
 					<parameter name="ID_CONFERENCE">
 						<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 					</parameter>
-					<parameter name="ROOT">
-						<expression><![CDATA[$P{ROOT}]]></expression>
+					<parameter name="IMG_PATH">
+						<expression><![CDATA[$P{IMG_PATH}]]></expression>
 					</parameter>
 				</element>
 			</band>

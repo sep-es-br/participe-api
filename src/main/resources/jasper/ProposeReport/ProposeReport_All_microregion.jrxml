@@ -12,7 +12,7 @@ MATCH (area:PlanItem)<-[:COMPOSES]-(:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVAL
 WHERE id(area) = Area_Id
 		AND (eval.active AND NOT eval.deleted)
 		AND NOT c.duplicated
-MATCH (c)-[:ABOUT]->(microregiao:Locality) 
+MATCH (c)-[:ABOUT|IS_LOCATED_IN*1..2]->(microregiao:Locality) 
 WHERE id(microregiao) = Microregion_Id
 MATCH (c)-[:ABOUT]->(co:Conference)
 WHERE id(co) = Conference_Id

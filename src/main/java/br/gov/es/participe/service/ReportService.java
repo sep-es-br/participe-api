@@ -80,6 +80,9 @@ public class ReportService {
     @Value("${spring.data.neo4j.password}")
     private String passwordNeo4j;
     
+    @Value("${app.pathImagens}")
+    private String imgPath;
+    
     @Autowired
     private ResourcePatternResolver resourceResolver;
 
@@ -125,6 +128,7 @@ public class ReportService {
             Map<String, Object> params = new HashMap<>();
             params.put("ID_CONFERENCE", idConference);
             params.put("REPORT_CONNECTION", connection);
+            params.put("IMG_PATH", imgPath);
             
             JasperPrint print = JasperFillManager.getInstance(ctx).fill(report, params, connection);
 

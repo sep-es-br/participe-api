@@ -13,16 +13,20 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<parameter name="ID_MICROREGIAO" class="java.lang.Integer"/>
 	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
-	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
-		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
-	</parameter>
-	<query language="SQL"><![CDATA[MATCH (area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(:Person), (c)-[:ABOUT]->(microregiao:Locality) 
+	<parameter name="IMG_PATH" class="java.lang.String"/>
+	<query language="SQL"><![CDATA[MATCH (file:File)<-[:FEATURES]-(area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(:Person), (c)-[:ABOUT|IS_LOCATED_IN*1..2]->(microregiao:Locality)
 where (eval.active AND NOT eval.deleted) and not c.duplicated
-    AND eval.approved
+    AND coalesce(eval.approved, eval.includedInNextYearLOA)
     AND id(microregiao) = $P{ID_MICROREGIAO} 
 MATCH (c)-[:ABOUT]->(co:Conference)
     WHERE id(co) = $P{ID_CONFERENCE} 
-return distinct id(area) as idArea, area.name as area, id(microregiao) as idMicroregiao, microregiao.name as microregiao order by idMicroregiao, idArea;]]></query>
+return distinct 
+  id(area) as idArea, 
+  area.name as area, 
+  file.url as imgName,
+  id(microregiao) as idMicroregiao, 
+  microregiao.name as microregiao 
+order by idMicroregiao, idArea]]></query>
 	<field name="idArea" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="idArea"/>
 		<property name="com.jaspersoft.studio.field.label" value="idArea"/>
@@ -30,6 +34,10 @@ return distinct id(area) as idArea, area.name as area, id(microregiao) as idMicr
 	<field name="area" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="area"/>
 		<property name="com.jaspersoft.studio.field.label" value="area"/>
+	</field>
+	<field name="imgName" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="imgName"/>
+		<property name="com.jaspersoft.studio.field.label" value="imgName"/>
 	</field>
 	<field name="idMicroregiao" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="idMicroregiao"/>
@@ -52,12 +60,12 @@ return distinct id(area) as idArea, area.name as area, id(microregiao) as idMicr
 		<expression><![CDATA[$F{microregiao}]]></expression>
 	</group>
 	<background splitType="Stretch"/>
-	<columnHeader height="107" splitType="Stretch">
+	<columnHeader height="83" splitType="Stretch">
 		<element kind="image" uuid="a17036e5-ae9a-4ce5-bc4d-c0588d067897" x="0" y="0" width="550" height="80">
 			<expression><![CDATA["imgs/CabeçalhoResultadoGeral.png"]]></expression>
 		</element>
-		<element kind="image" uuid="058c17e7-bd54-4383-a717-a0538bee9614" x="0" y="1" width="550" height="69">
-			<expression><![CDATA["imgs/area" + $F{idArea} + ".png"]]></expression>
+		<element kind="image" uuid="058c17e7-bd54-4383-a717-a0538bee9614" x="0" y="1" width="550" height="69" linkType="None" linkTarget="Self">
+			<expression><![CDATA[new java.io.File($P{IMG_PATH} + "\\" + $F{imgName}).getAbsolutePath()  ]]></expression>
 		</element>
 		<element kind="textField" uuid="a12eb0a5-606c-4a62-a0b2-535bd33a55d0" x="120" y="10" width="420" height="30" forecolor="#CC72C2" fontSize="16.0" textAdjust="ScaleFont" bold="true">
 			<expression><![CDATA[$F{area}.toUpperCase()]]></expression>
