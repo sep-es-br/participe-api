@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import org.springframework.http.MediaType;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {
@@ -48,7 +49,7 @@ public class ResourceExceptionHandler {
   @ExceptionHandler(IOException.class)
   public ResponseEntity<MessageDto> handleException(IOException e, HttpServletRequest req) {
     log.error("Error", e);
-    return ResponseEntity.status(500).body(
+    return ResponseEntity.status(500).contentType(MediaType.APPLICATION_JSON).body(
       new MessageDto(500, e.getMessage() + " -> " + e.getCause()));
   }
 
