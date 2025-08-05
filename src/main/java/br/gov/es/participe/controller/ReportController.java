@@ -1,7 +1,11 @@
 package br.gov.es.participe.controller;
 
 import br.gov.es.participe.service.ReportService;
+import br.gov.es.participe.util.dto.MessageDto;
 import java.util.Arrays;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -28,14 +32,28 @@ public class ReportController {
     @GetMapping("/proposeReport")
     public ResponseEntity<?> getProposeReport(@RequestParam int idConference) {
         
-        
-        Resource resource = reportService.generateProposeReport(idConference);
-            
-        
-        return ResponseEntity.ok()
+        try {
+            Resource resource = reportService.generateProposeReport(idConference);
+
+            return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=ProposalReport_" + idConference + ".pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
+
+        } catch (Exception ex) {
+            // Log do erro
+            UUID uuid = UUID.randomUUID();
+            
+            Logger.getGlobal().log(Level.SEVERE, "Erro: " + uuid, ex);
+
+            // Retorna JSON com erro e content-type correto
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new MessageDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Erro: " + uuid));
+            
+            
+        }
         
         
     }
