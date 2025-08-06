@@ -1,6 +1,6 @@
 <!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
 <jasperReport name="ProposeReport_ Main" language="java" columnCount="1" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" uuid="05f708f2-080b-44b7-8465-f21d91213726" summaryNewPage="true">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe hom"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
 	<parameter name="IMG_PATH" class="java.lang.String"/>

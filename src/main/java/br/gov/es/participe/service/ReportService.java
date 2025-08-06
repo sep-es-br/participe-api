@@ -4,6 +4,7 @@
  */
 package br.gov.es.participe.service;
 
+import br.gov.es.participe.util.domain.report.ReportJobManager;
 import br.gov.es.participe.util.domain.report.RootFolderRepositoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
@@ -19,6 +20,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -35,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -85,6 +88,28 @@ public class ReportService {
     
     @Autowired
     private ResourcePatternResolver resourceResolver;
+    
+    @Autowired
+    private ReportJobManager jobManager;
+    
+    
+    public UUID startReportJob(int conferenceId) {
+        UUID jobId = jobManager.createJob();
+
+        // Processamento assíncrono
+        CompletableFuture.runAsync(() -> {
+            try {
+                // Aqui você geraria o PDF com Jasper, POI etc
+                Resource reportBytes = generateProposeReport(conferenceId);
+
+                jobManager.completeJob(jobId, reportBytes);
+            } catch (Exception e) {
+                jobManager.failJob(jobId);
+            }
+        });
+
+        return jobId;
+    }
 
     
     public Resource generateProposeReport(int idConference) {

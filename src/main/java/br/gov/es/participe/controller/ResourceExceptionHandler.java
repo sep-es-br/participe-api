@@ -24,8 +24,7 @@ import org.springframework.http.MediaType;
 @ControllerAdvice
 public class ResourceExceptionHandler {
 
-  @Autowired
-  private Logger log = Logger.getGlobal();
+  private static Logger log = Logger.getGlobal();
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<MessageDto> handleException(Exception e, HttpServletRequest req) {
