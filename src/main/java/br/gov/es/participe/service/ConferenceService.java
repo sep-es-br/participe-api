@@ -314,6 +314,10 @@ public class ConferenceService {
 
     return conference;
   }
+  
+  public Conference getLastConference(){
+      return conferenceRepository.getLastConference();
+  }
 
   private void loadAttributesFromParam(Conference conference, ConferenceParamDto param) throws ParseException {
     this.loadEvaluation(conference, param);

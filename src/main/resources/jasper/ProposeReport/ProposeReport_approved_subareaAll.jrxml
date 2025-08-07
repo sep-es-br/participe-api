@@ -45,7 +45,7 @@ order by subarea.name;]]></query>
 		<band height="100" splitType="Stretch">
 			<element kind="subreport" uuid="b2a64d15-a9dc-4bef-a0df-9acf285ea791" x="-20" y="0" width="200" height="100">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<expression><![CDATA["ProposeReport_Included_subArea.jasper"]]></expression>
+				<expression><![CDATA["ProposeReport_approved_subArea.jasper"]]></expression>
 				<parameter name="ID_MICROREGIAO">
 					<expression><![CDATA[$P{MICROREGION_ID}]]></expression>
 				</parameter>

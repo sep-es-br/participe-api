@@ -339,6 +339,8 @@ public class ProposalEvaluationService {
 
                 List<Object> data = resultSet.getJSONArray(i).toList();
                 
+                //if(data.get(0).toString().equals("000001")) continue;
+                
                 result.add(new BudgetPlan(
                         data.get(0).toString(),
                         data.get(1).toString()
@@ -371,6 +373,7 @@ public class ProposalEvaluationService {
             String budgetUnitName = data.get(1).toString();
             String budgetActionId = data.get(2).toString();
             String budgetActionName = data.get(3).toString();
+            
             String mapKey = budgetUnitId + budgetUnitName;
             BudgetOptionsDto targetDto = budgetOptionsMap.get(mapKey);
 

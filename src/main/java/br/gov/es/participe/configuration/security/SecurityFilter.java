@@ -13,15 +13,24 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Base64;
+import java.util.Objects;
+import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
 public class SecurityFilter extends OncePerRequestFilter {
 
     private TokenService tokenService;
-
-    public SecurityFilter(TokenService tokenService) {
+    
+    private Environment env;
+    
+    public SecurityFilter(TokenService tokenService, Environment env) {
         this.tokenService = tokenService;
+        this.env = env;
     }
 
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             String url = request.getRequestURI();
@@ -88,9 +97,14 @@ public class SecurityFilter extends OncePerRequestFilter {
                     || url.matches(".*/conferences/with-meetings")
                     || url.matches(".*/conferences/\\d+/regionalization")
                     || url.matches(".*/conferences/portal")
-                    || url.matches(".*/authority-credentia/*");
-
-            if (!isPublicUrl) {
+                    || url.matches(".*/authorityCredential/.*");
+            
+            if(
+                   (isPublicUrl)
+                || (url.matches(".*/integration/.*") && validateIntegration(request))
+            ) {
+                filterChain.doFilter(request, response);
+            } else {
                 String token = getToken(request);
                 Authentication auth = token != null ? tokenService.getAuthentication(token) : null;
                 SecurityContextHolder.getContext().setAuthentication(auth);
@@ -99,9 +113,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 } else {
                     throw new IllegalArgumentException();
                 }
-            } else {
-            	filterChain.doFilter(request, response);            	
-            }
+            }   
 
         } catch (IllegalArgumentException e) {
         	if ("Captcha inválido".equals(e.getMessage())) {
@@ -117,6 +129,36 @@ public class SecurityFilter extends OncePerRequestFilter {
         	response.setStatus(HttpStatus.SC_UNAUTHORIZED);
     		MessageDto messageDto = new MessageDto(401, "Invalid token");
     		response.getWriter().write(messageDto.getJSON());        	
+        }
+    }
+    
+    private boolean validateIntegration(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Basic ")) {
+            return false;
+        }
+
+        try {
+            // Remove "Basic " e decodifica
+            String base64Credentials = authHeader.substring("Basic ".length());
+            byte[] decodedBytes = Base64.getDecoder().decode(base64Credentials);
+            String credentials = new String(decodedBytes);
+
+            String[] parts = credentials.split(":", 2);
+            if (parts.length != 2) return false;
+
+            String client = parts[0];
+            String secret = parts[1];
+
+            // Lê o valor esperado do application.properties
+            String expectedSecret = env.getProperty("clientCredential." + client + ".secret");
+
+            return expectedSecret != null && expectedSecret.equals(secret);
+
+        } catch (IllegalArgumentException e) {
+            // Base64 inválido
+            return false;
         }
     }
 

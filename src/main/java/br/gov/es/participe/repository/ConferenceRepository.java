@@ -48,6 +48,13 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         + "WHERE id(c) = $id "
                         + "RETURN count(s)")
         Integer countSelfDeclarationById( @Param("id") Long id);
+        
+        @Query("MATCH (c:Conference)\n" +
+                "WHERE date() > date(datetime(c.beginDate))\n" +
+                "RETURN c\n" +
+                "ORDER BY c.endDate DESC\n" +
+                "LIMIT 1")
+        Conference getLastConference();
 
         @Query("MATCH (c:Conference)-[:TARGETS]->(p:Plan) WHERE id(p)=$id RETURN c;")
         List<Conference> findByPlan( @Param("id") Long id);
