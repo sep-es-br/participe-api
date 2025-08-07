@@ -1,6 +1,7 @@
 package br.gov.es.participe.repository;
 
 import br.gov.es.participe.controller.dto.ModerationResultDto;
+import br.gov.es.participe.controller.dto.integration.SpoProposalsListResponseDto;
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.model.StructureItem;
@@ -177,5 +178,53 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
             + "WHERE id(p)=$personId "
             + "RETURN c, a, p")
     List<Comment> findAllCommentsLikedByPerson(@Param("personId") Long personId);
+    
+    final String BASE_FIND_PROPOSALS_FOR_SPO = 
+            "MATCH (conf:Conference)-[]-(:Plan)-[]-(area:PlanItem)-[]-(:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(:Person),\n" +
+            "        (c)-[:ABOUT]->(:Locality)-[]-(micro:Locality)\n" +
+            "WHERE // filtro de controle interno\n" +
+            "  eval.approved AND \n" +
+            "  eval.costType = 'Investimento' AND\n" +
+            "  id(conf) = $idConference \n" +
+            "WITH *, apoc.text.split(eval.budgetUnitId, ';') AS ids,\n" +
+            "     apoc.text.split(eval.budgetUnitName, ';') AS names\n" +
+            "WITH *, apoc.coll.min([size(ids), size(names)]) as minSize\n" +
+            "WITH *, [i IN range(0, minSize-1, 1) | { id: ids[i], name: names[i] }] AS budgetUnitPairs\n" +
+            "UNWIND budgetUnitPairs as budgetUnitEntry\n" +
+            "WITH *,\n" +
+            "  apoc.util.md5([\n" +
+            "    apoc.text.join([\n" +
+            "      coalesce(c.text, ''),\n" +
+            "      coalesce(budgetUnitEntry.id, ''),\n" +
+            "      coalesce(apoc.convert.toString(c.time) , '')\n" +
+            "    ], '|')\n" +
+            "  ]) AS syncHash\n" +
+            "WHERE \n" +
+            "  ((NOT budgetUnitEntry.id STARTS WITH '0') AND (NOT budgetUnitEntry.id STARTS WITH '8') ) AND \n" +
+            "  (size($codUnit) = 0 OR budgetUnitEntry.id IN $codUnit) AND\n" +
+            "  ($planName IS NULL OR area.name = $planName) AND\n" +
+            "  ($textFilter IS NULL OR apoc.text.clean(c.text) CONTAINS apoc.text.clean($textFilter)) AND\n" +
+            "  NOT (syncHash IN $syncedIds)\n";
+    
+    @Query(value = BASE_FIND_PROPOSALS_FOR_SPO +
+            "RETURN\n" +
+            "  syncHash, \n" +
+            "    c.text as proposalText, \n" +
+            "    area.name as areaName, \n" +
+            "    budgetUnitEntry.id as budgetUnitId,\n" +
+            "    budgetUnitEntry.name as budgetUnitName,\n" +
+            "    micro.name as microrregion, \n" +
+            "    eval.date as date", 
+            countQuery = BASE_FIND_PROPOSALS_FOR_SPO + 
+                    "RETURN COUNT(syncHash)"
+    )
+    public Page<SpoProposalsListResponseDto> findProposalsForSpo(
+        Long idConference, 
+        List<String> codUnit, 
+        String planName, 
+        String textFilter, 
+        List<String> syncedIds,
+        Pageable pageable
+    );
 
 }
