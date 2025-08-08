@@ -15,21 +15,13 @@
 	<parameter name="AREA_ID" class="java.lang.Integer"/>
 	<parameter name="CONFERENCE_ID" class="java.lang.Integer"/>
 	<query language="SQL"><![CDATA[MATCH (area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(p:Person),
-     (c)-[:ABOUT]->(microregiao:Locality) 
+     (c)-[:ABOUT|IS_LOCATED_IN*1..2]->(microregiao:Locality) 
 where (eval.active AND NOT eval.deleted) and not c.duplicated
-    AND eval.approved
+    AND coalesce(eval.approved, eval.includedInNextYearLOA)
     AND id(microregiao) = $P{MICROREGION_ID} 
     AND id(area) = $P{AREA_ID} 
 MATCH (c)-[:ABOUT]->(co:Conference)
 where id(co) = $P{CONFERENCE_ID} 
-CALL {
-    WITH eval
-    WITH split(eval.budgetActionId, ';') as ids, 
-        split(eval.budgetActionName, ';') as names
-    WITH ids, names, (range(0, size(ids)-1)) as rows
-    UNWIND rows as row
-    return apoc.text.join(collect(ids[row] + ' - ' + names[row]), '; ') as budgets
-}
 return distinct id(subarea) as subarea_id, subarea.name as subarea
 order by subarea.name;]]></query>
 	<field name="subarea_id" class="java.lang.Integer">

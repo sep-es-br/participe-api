@@ -40,13 +40,14 @@
 	</style>
 	<parameter name="ID_MICROREGIAO" class="java.lang.Integer"/>
 	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
-	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
-		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
-	</parameter>
+	<parameter name="IMG_PATH" class="java.lang.String"/>
 	<query language="sql"><![CDATA[MATCH (microregiao:Locality)<-[:IS_LOCATED_IN]-(city:Locality) 
 where id(microregiao) = $P{ID_MICROREGIAO} 
-MATCH (microregiao)<-[:ABOUT]-(:Comment)-[:ABOUT]->(co:Conference)
+MATCH (microregiao)<-[:ABOUT|IS_LOCATED_IN*1..2]-(c:Comment)-[:ABOUT]->(co:Conference),
+(c)<-[eval:EVALUATES]-(:Person)
 WHERE id(co) = $P{ID_CONFERENCE} 
+	and (eval.active AND NOT eval.deleted) and not c.duplicated
+    AND coalesce(eval.approved, eval.includedInNextYearLOA)
 CALL {
 	WITH microregiao
 	MATCH (c:Locality)-[:IS_LOCATED_IN]->(m:Locality)
@@ -92,8 +93,8 @@ order by microregiao.name]]></query>
 				<parameter name="ID_CONFERENCE">
 					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
 				</parameter>
-				<parameter name="ROOT">
-					<expression><![CDATA[$P{ROOT}]]></expression>
+				<parameter name="IMG_PATH">
+					<expression><![CDATA[$P{IMG_PATH}]]></expression>
 				</parameter>
 			</element>
 		</band>

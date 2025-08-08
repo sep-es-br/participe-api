@@ -23,71 +23,81 @@
 	ORDER BY apoc.text.clean(city.name)
 }
 CALL {
+    WITH microregion
     CALL { // Contagem de participantes remotos
+        WITH microregion
         MATCH (p:Person)<-[:MADE_BY]-(h:Highlight)-[:ABOUT]->(co:Conference),
             (p)-[:MADE]->(sd:SelfDeclaration)-[:AS_BEING_FROM]->(:Locality)-[:IS_LOCATED_IN]->(loc:Locality),
 			(sd)-[:TO]->(co)
         WHERE id(co) = $P{ID_CONFERENCE} 
-            AND id(loc) =  $P{ID_MICROREGION} 
+            AND loc = microregion
         RETURN p, co
         UNION
+        WITH microregion
         MATCH (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference),
             (p)-[:MADE]->(sd:SelfDeclaration)-[:AS_BEING_FROM]->(:Locality)-[:IS_LOCATED_IN]->(loc:Locality),
 			(sd)-[:TO]->(co)
         WHERE id(co) = $P{ID_CONFERENCE} 
-            AND id(loc) = $P{ID_MICROREGION} 
+            AND loc = microregion
         RETURN p, co
 	} WITH p
 	RETURN COUNT(DISTINCT p) AS remoteParticipation
 }
 CALL {
+    WITH microregion
 	CALL {
+        WITH microregion
 	    MATCH (p:Person)<-[:MADE_BY]-(h:Highlight)-[:ABOUT]->(co:Conference),
             (p)-[:MADE]->(sd:SelfDeclaration)-[:AS_BEING_FROM]->(city:Locality)-[:IS_LOCATED_IN]->(loc:Locality),
 			(sd)-[:TO]->(co)
 	    WHERE id(co) = $P{ID_CONFERENCE} 
-            AND id(loc) = $P{ID_MICROREGION} 
+            AND loc = microregion
 	    RETURN p, co,city
 	
 	    UNION
+        WITH microregion
 	
 	    MATCH (p:Person)<-[:MADE_BY]-(c:Comment)-[:ABOUT]->(co:Conference),
             (p)-[:MADE]->(sd:SelfDeclaration)-[:AS_BEING_FROM]->(city:Locality)-[:IS_LOCATED_IN]->(loc:Locality),
 			(sd)-[:TO]->(co)
 	    WHERE id(co) = $P{ID_CONFERENCE} 
-            AND id(loc) = $P{ID_MICROREGION}  
+            AND loc = microregion
 	    RETURN p, co,city
 	
 	    UNION
+        WITH microregion
 	
 	    match (co:Conference)<-[:OCCURS_IN]-(m:Meeting)<-[:CHECKED_IN_AT]-(p:Person),
             (p)-[:MADE]->(sd:SelfDeclaration)-[:AS_BEING_FROM]->(city:Locality)-[:IS_LOCATED_IN]->(loc:Locality),
 			(sd)-[:TO]->(co)
 		where   id(co) = $P{ID_CONFERENCE} 
-            AND id(loc) = $P{ID_MICROREGION} 
+            AND loc = microregion
 		return p, co,city
 	} WITH p, co,city
 	RETURN count(DISTINCT city) AS citiesParticipation
 }
 CALL {
-    MATCH (co:Conference)<-[:ABOUT]-(comment:Comment)-[:ABOUT]->(loc:Locality)
+    WITH microregion
+    MATCH (co:Conference)<-[:ABOUT]-(comment:Comment)-[:ABOUT|IS_LOCATED_IN*1..2]->(loc:Locality)-[:OF_TYPE]->(:LocalityType{name: 'Microrregião'})
     WHERE id(co)= $P{ID_CONFERENCE} 
-		AND id(loc) = $P{ID_MICROREGION} 
+		AND loc = microregion
 	  AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
   	RETURN count(comment) AS consolidatedProposals
 }
 CALL {
+    WITH microregion
     MATCH (co:Conference)-[a:ABOUT]-(comment:Comment)-[:MADE_BY]->(p:Person),
-            (comment)-[:ABOUT]->(loc:Locality)
+            (comment)-[:ABOUT|IS_LOCATED_IN*1..2]->(loc:Locality)-[:OF_TYPE]->(:LocalityType{name: 'Microrregião'})
     WHERE id(co) = $P{ID_CONFERENCE} 
-		AND id(loc) = $P{ID_MICROREGION}  AND comment.status IN  ['pub', 'arq']
+		AND loc = microregion AND comment.status IN  ['pub', 'arq']
   	RETURN count(comment) AS registeredProposals
 }
 CALL {
+    WITH microregion
     MATCH (co:Conference)<-[a:ABOUT]-(comment:Comment)<-[e:EVALUATES]-(:Person),
-		(comment)-[:ABOUT]->(loc:Locality)
+		(comment)-[:ABOUT|IS_LOCATED_IN*1..2]->(loc:Locality)-[:OF_TYPE]->(:LocalityType{name: 'Microrregião'})
     WHERE id(co)= $P{ID_CONFERENCE} 
-		AND id(loc) = $P{ID_MICROREGION} 
+		AND loc = microregion
 		AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
         AND e.approved AND e.active
   	RETURN count(comment) AS approvedProposals

@@ -1,7 +1,7 @@
 <!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
 <jasperReport name="ProposeReport_Included_subArea" language="java" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="294bd20f-245c-435a-84ee-de964dd58e98">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe hom"/>
 	<dataset name="Dataset1" uuid="c6ee461e-e192-42fe-9edf-be85ee8c155a">
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
@@ -114,7 +114,7 @@ UNWIND organizations as org
 MATCH (area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(:Person), (c)-[:ABOUT]->(microregiao:Locality) 
 where toInteger(eval.budgetUnitId) = org.id
     AND (eval.active AND NOT eval.deleted) and not c.duplicated
-    AND eval.approved
+    AND coalesce(eval.approved, eval.includedInNextYearLOA)
 return org.value as unit, eval.budgetActionId + ' - ' + eval.budgetActionName as action, subarea.name as subarea, c.text as propose order by subarea.name;]]></query>
 		<field name="unit" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.name" value="unit"/>
@@ -134,118 +134,136 @@ return org.value as unit, eval.budgetActionId + ' - ' + eval.budgetActionName as
 	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
 	<parameter name="SUBAREA_ID" class="java.lang.Integer"/>
 	<query language="SQL"><![CDATA[WITH [
-  {id: 10101, value: 'SCV'},
-  {id: 10102, value: 'SCM'},
-  {id: 10103, value: 'SECONT'},
-  {id: 10104, value: 'SECOM'},
-  {id: 10109, value: 'SEG'},
-  {id: 10205, value: 'FUNDAÇÃO CARMÉLIA'},
-  {id: 10904, value: 'FECC'},
-  {id: 10905, value: 'FESAD'},
-  {id: 10906, value: 'FEADM'},
-  {id: 16101, value: 'PGE'},
-  {id: 16901, value: 'FUNCAD'},
-  {id: 19101, value: 'VICE'},
-  {id: 22101, value: 'SEFAZ'},
-  {id: 22202, value: 'JUCEES'},
-  {id: 22204, value: 'BANESTES'},
-  {id: 22901, value: 'FUNSEFAZ'},
-  {id: 22902, value: 'FUNSES'},
-  {id: 22904, value: 'FORTEC'},
-  {id: 27101, value: 'SEP'},
-  {id: 27201, value: 'IJSN'},
-  {id: 28101, value: 'SEGER'},
-  {id: 28201, value: 'ESESP'},
-  {id: 28202, value: 'DIO'},
-  {id: 28203, value: 'PRODEST'},
-  {id: 28204, value: 'APEES'},
-  {id: 31101, value: 'SEAG'},
-  {id: 31201, value: 'IDAF'},
-  {id: 31202, value: 'INCAPER'},
-  {id: 31203, value: 'CEASA'},
-  {id: 31901, value: 'FEAC'},
-  {id: 31902, value: 'FUNSAF'},
-  {id: 31903, value: 'FUNDO RURAL SUSTENTÁVEL'},
-  {id: 31904, value: 'FEACME'},
-  {id: 32101, value: 'SECTI'},
-  {id: 32202, value: 'FAPES'},
-  {id: 32901, value: 'FUNCITEC'},
-  {id: 35101, value: 'SEMOBI'},
-  {id: 35201, value: 'DER-ES'},
-  {id: 35203, value: 'CETURB-GV'},
-  {id: 35901, value: 'FEP'},
-  {id: 35903, value: 'FEFIN'},
-  {id: 36101, value: 'SEDURB'},
-  {id: 36202, value: 'CESAN'},
-  {id: 36901, value: 'FEHAB'},
-  {id: 37101, value: 'SETUR'},
-  {id: 37901, value: 'FUNTUR'},
-  {id: 39101, value: 'SESPORT'},
-  {id: 39901, value: 'PRÓ-ESPORTE'},
-  {id: 40101, value: 'SECULT'},
-  {id: 40901, value: 'FUNCULTURA'},
-  {id: 41101, value: 'SEAMA'},
-  {id: 41201, value: 'IEMA'},
-  {id: 41202, value: 'AGERH'},
-  {id: 41901, value: 'FUNDEMA'},
-  {id: 41902, value: 'FUNDÁGUA'},
-  {id: 42101, value: 'SEDU'},
-  {id: 42201, value: 'FAMES'},
-  {id: 42901, value: 'FUNPAES'},
-  {id: 44202, value: 'iNOVA CAPIXABA'},
-  {id: 44901, value: 'FES'},
-  {id: 45101, value: 'SESP'},
-  {id: 45102, value: 'PCES'},
-  {id: 45103, value: 'PMES'},
-  {id: 45104, value: 'CBMES'},
-  {id: 45105, value: 'DSPM'},
-  {id: 45106, value: 'CEPDEC'},
-  {id: 45107, value: 'PCIES'},
-  {id: 45202, value: 'DETRAN'},
-  {id: 45901, value: 'FUNREPOCI'},
-  {id: 45902, value: 'FUNREPOM'},
-  {id: 45903, value: 'FSPMES'},
-  {id: 45904, value: 'FUNREBOM'},
-  {id: 45905, value: 'FUNPDEC'},
-  {id: 45906, value: 'FESP'},
-  {id: 46101, value: 'SEJUS'},
-  {id: 46113, value: 'PPES'},
-  {id: 46202, value: 'PROCON'},
-  {id: 46901, value: 'FRSP'},
-  {id: 46903, value: 'FUNPEN'},
-  {id: 46904, value: 'FEDC'},
-  {id: 47101, value: 'SETADES'},
-  {id: 47901, value: 'FEAS'},
-  {id: 47904, value: 'FUNCOP'},
-  {id: 47906, value: 'FET'},
-  {id: 48101, value: 'SEDH'},
-  {id: 48201, value: 'IASES'},
-  {id: 48901, value: 'FIA'},
-  {id: 48902, value: 'FEPI'},
-  {id: 48904, value: 'FEJUVES'},
-  {id: 49101, value: 'SEDES'},
-  {id: 49202, value: 'BANDES'},
-  {id: 49203, value: 'ADERES'},
-  {id: 49204, value: 'IPEM-ES'},
-  {id: 49205, value: 'ARSP'},
-  {id: 49901, value: 'GARANTIR - ES'},
-  {id: 50101, value: 'SESM'},
-  {id: 60201, value: 'IPAJM'},
-  {id: 60210, value: 'FUNDO FINANCEIRO'},
-  {id: 60211, value: 'FUNDO PREVIDENCIÁRIO'},
-  {id: 60212, value: 'FPS'},
-  {id: 80101, value: 'ENC-SEGER'},
-  {id: 80102, value: 'ENC-SEFAZ'},
-  {id: 80104, value: 'ENC-SEP'}
+  {id: 1101, value: "ALEES"},
+  {id: 2101, value: "TCEES"},
+  {id: 3101, value: "TJEES"},
+  {id: 3901, value: "FUNEPJ"},
+  {id: 5101, value: "MPES"},
+  {id: 5901, value: "FERIDL"},
+  {id: 5902, value: "FUNEMP"},
+  {id: 6101, value: "DPES"},
+  {id: 6901, value: "FADEPES"},
+  {id: 10101, value: "SCV"},
+  {id: 10102, value: "SCM"},
+  {id: 10103, value: "SECONT"},
+  {id: 10104, value: "SECOM"},
+  {id: 10109, value: "SEG"},
+  {id: 10201, value: "RTV-ES"},
+  {id: 10205, value: "FUNDAÇÃO CARMÉLIA"},
+  {id: 10904, value: "FECC"},
+  {id: 10905, value: "FESAD"},
+  {id: 10906, value: "FEADM"},
+  {id: 16101, value: "PGE"},
+  {id: 16901, value: "FUNCAD"},
+  {id: 19101, value: "VICE"},
+  {id: 22101, value: "SEFAZ"},
+  {id: 22202, value: "JUCEES"},
+  {id: 22204, value: "BANESTES"},
+  {id: 22901, value: "FUNSEFAZ"},
+  {id: 22902, value: "FUNSES"},
+  {id: 22904, value: "FORTEC"},
+  {id: 27101, value: "SEP"},
+  {id: 27201, value: "IJSN"},
+  {id: 27901, value: "FUMDEVIT"},
+  {id: 28101, value: "SEGER"},
+  {id: 28201, value: "ESESP"},
+  {id: 28202, value: "DIO"},
+  {id: 28203, value: "PRODEST"},
+  {id: 28204, value: "APEES"},
+  {id: 31101, value: "SEAG"},
+  {id: 31201, value: "IDAF"},
+  {id: 31202, value: "INCAPER"},
+  {id: 31203, value: "CEASA"},
+  {id: 31901, value: "FEAC"},
+  {id: 31902, value: "FUNSAF"},
+  {id: 31903, value: "FUNDO RURAL SUSTENTÁVEL"},
+  {id: 31904, value: "FEACME"},
+  {id: 32101, value: "SECTI"},
+  {id: 32202, value: "FAPES"},
+  {id: 32901, value: "FUNCITEC"},
+  {id: 35101, value: "SEMOBI"},
+  {id: 35201, value: "DER-ES"},
+  {id: 35203, value: "CETURB-GV"},
+  {id: 35901, value: "FEP"},
+  {id: 35903, value: "FEFIN"},
+  {id: 36101, value: "SEDURB"},
+  {id: 36202, value: "CESAN"},
+  {id: 36901, value: "FEHAB"},
+  {id: 37101, value: "SETUR"},
+  {id: 37901, value: "FUNTUR"},
+  {id: 39101, value: "SESPORT"},
+  {id: 39901, value: "PRÓ-ESPORTE"},
+  {id: 40101, value: "SECULT"},
+  {id: 40901, value: "FUNCULTURA"},
+  {id: 41101, value: "SEAMA"},
+  {id: 41201, value: "IEMA"},
+  {id: 41202, value: "AGERH"},
+  {id: 41901, value: "FUNDEMA"},
+  {id: 41902, value: "FUNDÁGUA"},
+  {id: 42101, value: "SEDU"},
+  {id: 42201, value: "FAMES"},
+  {id: 42901, value: "FUNPAES"},
+  {id: 44202, value: "INOVA CAPIXABA"},
+  {id: 44901, value: "FES"},
+  {id: 45101, value: "SESP"},
+  {id: 45102, value: "PCES"},
+  {id: 45103, value: "PMES"},
+  {id: 45104, value: "CBMES"},
+  {id: 45105, value: "DSPM"},
+  {id: 45106, value: "CEPDEC"},
+  {id: 45107, value: "PCIES"},
+  {id: 45202, value: "DETRAN"},
+  {id: 45901, value: "FUNREPOCI"},
+  {id: 45902, value: "FUNREPOM"},
+  {id: 45903, value: "FSPMES"},
+  {id: 45904, value: "FUNREBOM"},
+  {id: 45905, value: "FUNPDEC"},
+  {id: 45906, value: "FESP"},
+  {id: 46101, value: "SEJUS"},
+  {id: 46113, value: "PPES"},
+  {id: 46202, value: "PROCON"},
+  {id: 46901, value: "FRSP"},
+  {id: 46903, value: "FUNPEN"},
+  {id: 46904, value: "FEDC"},
+  {id: 47101, value: "SETADES"},
+  {id: 47901, value: "FEAS"},
+  {id: 47904, value: "FUNCOP"},
+  {id: 47906, value: "FET"},
+  {id: 48101, value: "SEDH"},
+  {id: 48201, value: "IASES"},
+  {id: 48901, value: "FIA"},
+  {id: 48902, value: "FEPI"},
+  {id: 48904, value: "FEJUVES"},
+  {id: 49101, value: "SEDES"},
+  {id: 49202, value: "BANDES"},
+  {id: 49203, value: "ADERES"},
+  {id: 49204, value: "IPEM-ES"},
+  {id: 49205, value: "ARSP"},
+  {id: 49901, value: "GARANTIR - ES"},
+  {id: 49902, value: "FEPES"},
+  {id: 50101, value: "SESM"},
+  {id: 51101, value: "SERD"},
+  {id: 60201, value: "IPAJM"},
+  {id: 60210, value: "FUNDO FINANCEIRO"},
+  {id: 60211, value: "FUNDO PREVIDENCIÁRIO"},
+  {id: 60212, value: "FPS"},
+  {id: 70101, value: "SENT. JUDICIÁRIAS"},
+  {id: 80101, value: "ENC-SEGER"},
+  {id: 80102, value: "ENC-SEFAZ"},
+  {id: 80104, value: "ENC-SEP"}
 ] AS organizations
-UNWIND organizations as org
 MATCH (area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(p:Person),
-     (c)-[:ABOUT]->(microregiao:Locality) 
-where toInteger(eval.budgetUnitId) = org.id
-    AND (eval.active AND NOT eval.deleted) and not c.duplicated
-    AND eval.approved
+     (c)-[:ABOUT|IS_LOCATED_IN*1..2]->(microregiao:Locality) 
+WITH *,
+  // Tenta buscar a sigla na lista
+  apoc.text.join(
+	  [buId IN split(toString(eval.budgetUnitId), ';') | 
+	    head([x IN organizations WHERE x.id = toInteger(buId) | x.value])
+	  ], ', '
+	)  AS unitSigla
+where (eval.active AND NOT eval.deleted) and not c.duplicated
+    AND coalesce(eval.approved, eval.includedInNextYearLOA)
     AND id(microregiao) = $P{ID_MICROREGIAO} 
-    AND id(area) = $P{ID_AREA} 
     AND id(subarea) = $P{SUBAREA_ID} 
 MATCH (c)-[:ABOUT]->(co:Conference)
 where id(co) = $P{ID_CONFERENCE} 
@@ -253,11 +271,11 @@ CALL {
     WITH eval
     WITH split(eval.budgetActionId, ';') as ids, 
         split(eval.budgetActionName, ';') as names
-    WITH ids, names, (range(0, size(ids)-1)) as rows
+    WITH ids, names, (range(0, size(coalesce(ids, []))-1)) as rows
     UNWIND rows as row
     return apoc.text.join(collect(ids[row] + ' - ' + names[row]), '; ') as budgets
 }
-return org.value as unit, budgets as action, subarea.name as subarea, c.text as propose
+return coalesce(unitSigla, toInteger(eval.budgetUnitId))  as unit, budgets as action, subarea.name as subarea, c.text as propose
 order by subarea.name;]]></query>
 	<field name="unit" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="unit"/>
