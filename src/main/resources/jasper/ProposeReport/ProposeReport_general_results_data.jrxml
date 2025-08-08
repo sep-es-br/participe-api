@@ -58,17 +58,17 @@ CALL {
 }
 CALL {
     MATCH (co:Conference)<-[a:ABOUT]-(comment:Comment)
-    WHERE id(co)= 47114  AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
+    WHERE id(co)= $P{ID_CONFERENCE}  AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
   	RETURN count(comment) AS consolidatedProposals
 }
 CALL {
     MATCH (co:Conference)-[a:ABOUT]-(comment:Comment)-[:MADE_BY]->(:Person)
-    WHERE id(co)= 47114 AND comment.status IN  ['pub', 'arq']
+    WHERE id(co)= $P{ID_CONFERENCE} AND comment.status IN  ['pub', 'arq']
   	RETURN count(comment) AS registeredProposals
 }
 CALL {
     MATCH (co:Conference)<-[a:ABOUT]-(comment:Comment)<-[e:EVALUATES]-(:Person)
-    WHERE id(co)= 47114  AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
+    WHERE id(co)= $P{ID_CONFERENCE}  AND comment.status = 'pub' AND comment.type='prop'  AND (comment.duplicated = false OR comment.duplicated IS NULL) 
         AND e.approved AND e.active
   	RETURN count(comment) AS approvedProposals
 }
