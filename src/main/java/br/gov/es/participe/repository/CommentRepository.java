@@ -185,6 +185,7 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
             "WHERE // filtro de controle interno\n" +
             "  eval.approved AND \n" +
             "  eval.costType = 'Investimento' AND\n" +
+            "  NOT eval.newRequest AND \n" +
             "  id(conf) = $idConference \n" +
             "WITH *, apoc.text.split(eval.budgetUnitId, ';') AS ids,\n" +
             "     apoc.text.split(eval.budgetUnitName, ';') AS names\n" +
