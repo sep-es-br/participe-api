@@ -70,6 +70,7 @@ ORDER BY planItemName]]></query>
 	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
 		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
 	</parameter>
+	<parameter name="DATA_SOURCE" class="java.lang.String"/>
 	<query language="SQL"><![CDATA[]]></query>
 	<background splitType="Stretch"/>
 	<title height="86" splitType="Stretch">
@@ -123,8 +124,8 @@ ORDER BY planItemName]]></query>
 				<rightPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
 			</box>
 		</element>
-		<element kind="staticText" uuid="f82886ee-743e-482c-8ff7-d98a57e93a06" x="104" y="435" width="440" height="30" fontSize="9.0" italic="true" hTextAlign="Right">
-			<text><![CDATA[Fonte: Audiência Pública do Orçamento 2025, Sistema Participe]]></text>
+		<element kind="textField" uuid="6d2da8c9-c615-4f79-b87a-b8eba206d586" x="104" y="435" width="440" height="30" fontSize="9.0" italic="true" hTextAlign="Right">
+			<expression><![CDATA["Fonte: " + $P{DATA_SOURCE} + ", Sistema Participe"]]></expression>
 		</element>
 	</summary>
 </jasperReport>

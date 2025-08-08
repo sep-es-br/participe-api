@@ -38,7 +38,7 @@ AND (id(locality) = $P!{localityId}  OR  $P!{localityId} IS NULL)
 AND (id(area) = $P!{planItemAreaId} OR $P!{planItemAreaId} IS NULL) 
 AND (id(planItem) = $P!{planItemId} OR $P!{planItemId} IS NULL) 
 AND ((NOT eval.deleted OR eval.deleted IS NULL) AND (eval.representing IS NOT NULL AND eval.representing IN $P!{organizationGuid}) OR $P!{organizationGuid} = [])
-AND ((eval.approved IS NOT NULL AND eval.approved = $P!{approved}) OR $P!{approved} IS NULL) 
+AND ((coalesce(eval.approved, eval.includedInNextYearLOA) IS NOT NULL AND coalesce(eval.approved, eval.includedInNextYearLOA) = $P!{approved}) OR $P!{approved} IS NULL) 
 AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR $P!{commentText} IS NULL)
     WITH comment, locality, planItem, area, eval, microLoc, 
     CASE  
@@ -46,7 +46,7 @@ AND (apoc.text.clean(comment.text) CONTAINS apoc.text.clean($P!{commentText}) OR
     ELSE false  
     END AS evaluationStatus, 
     CASE  
-    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, approved: eval.approved}) 
+    WHEN (NOT eval.deleted OR eval.deleted IS NULL) AND exists((comment)<-[:EVALUATES]-()) THEN collect(DISTINCT {evaluatorOrgsName: eval.representing, approved: coalesce(eval.approved, eval.includedInNextYearLOA)}) 
     ELSE NULL  
     END AS evaluatorOrgsNameAndApprovedList, 
     CASE  
@@ -76,8 +76,8 @@ RETURN DISTINCT
     area.name AS planItemAreaName, 
     comment.text AS description, 
     CASE 
-        WHEN eval.approved IS NULL THEN '-'
-        WHEN eval.approved THEN 'Sim'
+        WHEN coalesce(eval.approved, eval.includedInNextYearLOA) IS NULL THEN '-'
+        WHEN coalesce(eval.approved, eval.includedInNextYearLOA) THEN 'Sim'
         ELSE 'Não'
     END AS approved, 
     CASE

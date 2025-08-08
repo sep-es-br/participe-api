@@ -13,7 +13,7 @@ MATCH (area:PlanItem)<-[:COMPOSES]-(:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVAL
 WHERE id(area) = Area_Id
 		AND (eval.active AND NOT eval.deleted)
 		AND NOT c.duplicated
-MATCH (microregiao:Locality)<-[:ABOUT]-(c)-[:ABOUT]->(co:Conference)
+MATCH (:LocalityType{name: 'Microrregião'})<-[:OF_TYPE]-(microregiao:Locality)<-[:ABOUT|IS_LOCATED_IN*1..2]-(c)-[:ABOUT]->(co:Conference)
 WHERE id(co) = Conference_Id
 RETURN DISTINCT area.name as area, id(microregiao) as idMicroregion, microregiao.name as microregion
 ORDER BY microregion;]]></query>

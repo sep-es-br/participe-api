@@ -11,53 +11,41 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<dataset name="Dataset1" uuid="e6997c5b-15ee-4902-a421-50285e69b461">
-		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<dataset name="Dataset1" uuid="f867aabe-94fb-4122-8ab2-d9cea71d2f51">
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 		<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
 		<parameter name="ID_MICROREGION" class="java.lang.Integer"/>
-		<query language="SQL"><![CDATA[
-WITH $P{ID_CONFERENCE} AS Conference_Id,
-	 $P{ID_MICROREGION} AS Microregion_Id
+		<query language="sql"><![CDATA[WITH $P{ID_CONFERENCE} AS Conference_Id,
+		$P{ID_MICROREGION} AS Microregion_Id
 CALL {
-	WITH Conference_Id, Microregion_Id
-	MATCH
-		(a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference),
-		(a)-[:ABOUT]->(loc:Locality)<-[:IS_LOCATED_IN]-(city:Locality)
-	WHERE
-		ID(conf) = Conference_Id
-		AND id(loc) = Microregion_Id
-		AND (NOT a.status IN ['rem', 'pen'])
-	WITH a,	planItem, cPI, loc,	city
+  WITH Microregion_Id
+  MATCH (microrregion:Locality)<-[:IS_LOCATED_IN]-(city:Locality)
+  WHERE id(microrregion) = Microregion_Id
+  RETURN microrregion, reduce(cities = '', c IN collect(city.name) | CASE cities WHEN '' THEN c ELSE cities + ', '+ c END) as cities
+} WITH microrregion, cities, Conference_Id
+CALL { WITH Conference_Id
+  MATCH (planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)
+  WHERE ID(conf) = Conference_Id
+  RETURN planItem as planItem
+} WITH microrregion, cities, planItem
+CALL {
+	WITH microrregion, planItem
+	MATCH (microrregion)<-[:ABOUT|IS_LOCATED_IN*1..2]-(a:Comment)-[:ABOUT]->(:PlanItem)-[:COMPOSES]->(planItem)
+	WHERE (NOT a.status IN ['rem', 'pen'])
 	RETURN 
-		loc.name AS microregion,
-		reduce(cities = '', c IN collect(DISTINCT city.name) | CASE cities WHEN '' THEN c ELSE cities + ', '+ c END) as cities,
-		id(planItem) as idPlanItemP,
-		planItem.name AS planItemNameP,
 		count(distinct a) as quantityComment
 }
 CALL {
-	WITH Conference_Id, Microregion_Id
+	WITH microrregion, planItem
 	MATCH
-		(a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES *0..]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference),
-		(a)-[:ABOUT *0..]->(loc:Locality)-[:IS_LOCATED_IN *0..]->(parentLoc:Locality)
-	WHERE
-		ID(conf) = Conference_Id
-
-		AND (
-			id(parentLoc) = Microregion_Id
-			OR
-			id(loc) = Microregion_Id
-		)
-	WITH a,	planItem, cPI
-	RETURN 
-		id(planItem) as idPlanItemH,
-		planItem.name as planItemNameH,
+		(microrregion)<-[:ABOUT|IS_LOCATED_IN*1..2]-(a:Highlight)-[:ABOUT]->(:PlanItem)-[:COMPOSES]->(planItem)
+	RETURN
 		count(distinct a) as quantityHighlight
 }
-WITH idPlanItemP, idPlanItemH, microregion, cities, planItemNameP, quantityComment, quantityHighlight
-WHERE idPlanItemP = idPlanItemH
-RETURN microregion, cities, planItemNameP as planItemName, quantityComment, quantityHighlight
+WITH planItem, quantityComment, quantityHighlight, microrregion, cities
+RETURN microrregion.name AS microregion, 
+  cities, planItem.name as planItemName, quantityComment, quantityHighlight
 ORDER BY planItemName]]></query>
 		<field name="microregion" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.name" value="microregion"/>
@@ -85,43 +73,37 @@ ORDER BY planItemName]]></query>
 	<parameter name="ROOT" forPrompting="false" class="java.lang.String">
 		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
 	</parameter>
-	<query language="SQL"><![CDATA[CALL {
-	WITH $P{ID_CONFERENCE} AS Conference_Id,
-		  $P{ID_MICROREGION} AS Microregion_Id
-	MATCH
-		(a:Comment)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference),
-		(a)-[:ABOUT]->(loc:Locality)<-[:IS_LOCATED_IN]-(city:Locality)
-	WHERE
-		ID(conf) = Conference_Id
-		AND id(loc) = Microregion_Id
-		AND (NOT a.status IN ['rem', 'pen'])
-	WITH a,	planItem, cPI, loc,	city
+	<parameter name="DATA_SOURCE" class="java.lang.String"/>
+	<query language="SQL"><![CDATA[WITH $P{ID_CONFERENCE} AS Conference_Id,
+		$P{ID_MICROREGION} AS Microregion_Id
+CALL {
+  WITH Microregion_Id
+  MATCH (microrregion:Locality)<-[:IS_LOCATED_IN]-(city:Locality)
+  WHERE id(microrregion) = Microregion_Id
+  RETURN microrregion, reduce(cities = '', c IN collect(city.name) | CASE cities WHEN '' THEN c ELSE cities + ', '+ c END) as cities
+} WITH microrregion, cities, Conference_Id
+CALL { WITH Conference_Id
+  MATCH (cPI:PlanItem)-[:COMPOSES]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)
+  WHERE ID(conf) = Conference_Id
+  RETURN cPI as planItem
+} WITH microrregion, cities, planItem
+CALL {
+	WITH microrregion, planItem
+	MATCH (microrregion)<-[:ABOUT|IS_LOCATED_IN*1..2]-(a:Comment)-[:ABOUT]->(planItem)
+	WHERE (NOT a.status IN ['rem', 'pen'])
 	RETURN 
-		loc.name AS microregion,
-		reduce(cities = '', c IN collect(DISTINCT city.name) | CASE cities WHEN '' THEN c ELSE cities + ', '+ c END) as cities,
-		id(planItem) as idPlanItem,
-		planItem.name AS planItemName,
 		count(distinct a) as quantityComment
 }
 CALL {
-	WITH $P{ID_CONFERENCE} AS Conference_Id,
-		  $P{ID_MICROREGION} AS Microregion_Id
+	WITH microrregion, planItem
 	MATCH
-		(conf:Conference)<-[:ABOUT]-(a:Highlight)-[:ABOUT]->(cPI:PlanItem)-[:COMPOSES]->(planItem:PlanItem),
-		(a)-[:ABOUT]->(loc:Locality)
-	WHERE
-		ID(conf) = Conference_Id
-		AND id(loc) = Microregion_Id
+		(microrregion)<-[:ABOUT|IS_LOCATED_IN*1..2]-(a:Highlight)-[:ABOUT]->(planItem)
 	RETURN
-		id(planItem) AS idArea,
-		planItem.name AS areaName,
 		count(distinct a) as quantityHighlight
-	ORDER BY
-		areaName
 }
-WITH idPlanItem, microregion, cities, planItemName, quantityComment, quantityHighlight, idArea
-WHERE idPlanItem = idArea
-RETURN microregion, cities, planItemName, quantityComment, quantityHighlight
+WITH planItem, quantityComment, quantityHighlight, microrregion, cities
+RETURN microrregion.name AS microregion, 
+  cities, planItem.name as planItemName, quantityComment, quantityHighlight
 ORDER BY planItemName]]></query>
 	<field name="microregion" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="microregion"/>
@@ -131,7 +113,7 @@ ORDER BY planItemName]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="cities"/>
 		<property name="com.jaspersoft.studio.field.label" value="cities"/>
 	</field>
-	<field name="planItemName" class="java.lang.Object">
+	<field name="planItemName" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="planItemName"/>
 		<property name="com.jaspersoft.studio.field.label" value="planItemName"/>
 	</field>
@@ -154,7 +136,7 @@ ORDER BY planItemName]]></query>
 		<element kind="textField" uuid="155e886c-121b-410d-83bc-8b8e4bf4436a" x="2" y="21" width="550" height="29" forecolor="#FFFFFF" fontSize="14.0" textAdjust="ScaleFont" hTextAlign="Center" vTextAlign="Top">
 			<expression><![CDATA[$F{cities}]]></expression>
 		</element>
-		<element kind="chart" chartType="bar" uuid="bb7b4e4d-20e0-4e8a-9f5f-56d6d3402c89" x="40" y="260" width="470" height="410" showLegend="true" evaluationTime="Report" legendPosition="Top">
+		<element kind="chart" chartType="bar" uuid="bb7b4e4d-20e0-4e8a-9f5f-56d6d3402c89" x="40" y="260" width="470" height="410" showLegend="true" evaluationTime="Report" linkType="None" linkTarget="Self" legendPosition="Top">
 			<titleFont fontSize="12.0" bold="true"/>
 			<titleExpression><![CDATA["PROPOSTAS E DESTAQUES POR ÁREA\nTEMÁTICA (" + $F{microregion}.toUpperCase() + ")"]]></titleExpression>
 			<dataset kind="category">
@@ -195,8 +177,8 @@ ORDER BY planItemName]]></query>
 				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 			</box>
 		</element>
-		<element kind="staticText" uuid="0248294b-bb49-4c04-93c7-dd645463fa6c" x="170" y="674" width="339" height="16" fontSize="9.0" italic="true" hTextAlign="Right">
-			<text><![CDATA[Fonte: Audiência Pública do Orçamento 2025, Sistema Participe]]></text>
+		<element kind="textField" uuid="c1a6df60-1288-45d1-bf9f-1b5fd1ef384b" x="170" y="674" width="339" height="16" fontSize="9.0" italic="true" hTextAlign="Right">
+			<expression><![CDATA["Fonte: " + $P{DATA_SOURCE} + ", Sistema Participe"]]></expression>
 		</element>
 	</title>
 </jasperReport>
