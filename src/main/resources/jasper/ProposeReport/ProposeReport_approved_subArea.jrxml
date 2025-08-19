@@ -253,7 +253,8 @@ return org.value as unit, eval.budgetActionId + ' - ' + eval.budgetActionName as
   {id: 80104, value: "ENC-SEP"}
 ] AS organizations
 MATCH (area:PlanItem)<-[:COMPOSES]-(subarea:PlanItem)<-[:ABOUT]-(c:Comment)<-[eval:EVALUATES]-(p:Person),
-     (c)-[:ABOUT|IS_LOCATED_IN*1..2]->(microregiao:Locality) 
+     (c)-[:ABOUT|IS_LOCATED_IN*1..2]->(microregiao:Locality)
+OPTIONAL MATCH (c)-[:ABOUT]->(cidade)-[:IS_LOCATED_IN]->(microregiao)
 WITH *,
   // Tenta buscar a sigla na lista
   apoc.text.join(
@@ -275,7 +276,12 @@ CALL {
     UNWIND rows as row
     return apoc.text.join(collect(ids[row] + ' - ' + names[row]), '; ') as budgets
 }
-return coalesce(unitSigla, toInteger(eval.budgetUnitId))  as unit, budgets as action, subarea.name as subarea, c.text as propose
+return 
+	coalesce(unitSigla, toInteger(eval.budgetUnitId))  as unit, 
+	budgets as action, 
+	subarea.name as subarea, 
+	c.text as propose,
+	cidade.name as city
 order by subarea.name;]]></query>
 	<field name="unit" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="unit"/>
@@ -293,70 +299,164 @@ order by subarea.name;]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="propose"/>
 		<property name="com.jaspersoft.studio.field.label" value="propose"/>
 	</field>
+	<field name="city" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="city"/>
+		<property name="com.jaspersoft.studio.field.label" value="city"/>
+	</field>
 	<background splitType="Stretch"/>
 	<columnHeader height="60">
-		<element kind="staticText" uuid="92f7d81a-7f49-4a69-9f07-df14d9861ade" mode="Opaque" x="0" y="30" width="120" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[ÓRGÃO]]></text>
-			<box>
-				<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-			</box>
-		</element>
-		<element kind="staticText" uuid="9e6c90a6-8d1e-4887-b776-cc5ff15e803b" mode="Opaque" x="120" y="30" width="130" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[AÇÃO]]></text>
-			<box>
-				<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-			</box>
-		</element>
-		<element kind="staticText" uuid="9de9c21b-eda8-4961-acef-4cd62dd03fa0" mode="Opaque" x="250" y="30" width="300" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[PROPOSTA POPULAR]]></text>
-			<box>
-				<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-			</box>
-		</element>
 		<element kind="staticText" uuid="d72762e3-71f4-4e72-a737-541cf3b216e6" x="0" y="0" width="59" height="19" forecolor="#0070C0" bold="true">
 			<text><![CDATA[SUBÁREA: ]]></text>
 		</element>
 		<element kind="textField" uuid="b119063c-b5dd-4c9b-8b2e-c4c278ae6bfe" x="59" y="0" width="491" height="19" forecolor="#0070C0" textAdjust="ScaleFont">
 			<expression><![CDATA[$F{subarea}.toUpperCase()]]></expression>
 		</element>
+		<element kind="frame" uuid="2748be12-8aa9-4925-a22e-0512a7116acc" x="0" y="30" width="550" height="30">
+			<printWhenExpression><![CDATA[$F{city} == null]]></printWhenExpression>
+			<element kind="staticText" uuid="92f7d81a-7f49-4a69-9f07-df14d9861ade" mode="Opaque" x="0" y="0" width="120" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[ÓRGÃO]]></text>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<element kind="staticText" uuid="9e6c90a6-8d1e-4887-b776-cc5ff15e803b" mode="Opaque" x="120" y="0" width="130" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[AÇÃO]]></text>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<element kind="staticText" uuid="9de9c21b-eda8-4961-acef-4cd62dd03fa0" mode="Opaque" x="250" y="0" width="300" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[PROPOSTA POPULAR]]></text>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+		</element>
+		<element kind="frame" uuid="09bb4ff2-7538-493d-bb49-fb202c63166c" x="0" y="30" width="550" height="30">
+			<printWhenExpression><![CDATA[$F{city} != null]]></printWhenExpression>
+			<property name="com.jaspersoft.studio.unit.y" value="px"/>
+			<element kind="staticText" uuid="d89e4357-a8fe-4811-a8e7-82f434217f0a" mode="Opaque" x="340" y="0" width="210" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[PROPOSTA POPULAR]]></text>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<element kind="staticText" uuid="b0ab492b-e013-4e35-b28c-a25111859fae" mode="Opaque" x="220" y="0" width="120" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[AÇÃO]]></text>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<element kind="staticText" uuid="29dae289-ae79-4acf-a5d0-a50454fa2bfd" mode="Opaque" x="0" y="0" width="110" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[ÓRGÃO]]></text>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<element kind="staticText" uuid="93cc5fff-c845-4a31-871a-3ac92c749a06" mode="Opaque" x="110" y="0" width="110" height="30" forecolor="#FFFFFF" backcolor="#254771" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[MUNICÍPIO]]></text>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+		</element>
 	</columnHeader>
 	<detail>
 		<band height="60" splitType="Prevent">
-			<element kind="textField" uuid="d7d11c55-782b-469d-8073-f20e4ee39264" stretchType="ContainerHeight" x="0" y="0" width="120" height="60" textAdjust="ScaleFont" hTextAlign="Center" vTextAlign="Middle">
-				<expression><![CDATA[$F{unit}.toUpperCase()]]></expression>
-				<box padding="10">
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
+			<element kind="frame" uuid="eb502e12-ceef-4198-a684-0660a22e7306" x="0" y="0" width="550" height="60">
+				<printWhenExpression><![CDATA[$F{city} != null]]></printWhenExpression>
+				<element kind="textField" uuid="d7d11c55-782b-469d-8073-f20e4ee39264" stretchType="ContainerHeight" x="0" y="0" width="110" height="60" textAdjust="ScaleFont" hTextAlign="Center" vTextAlign="Middle">
+					<expression><![CDATA[$F{unit}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="16b0fddf-205e-4eae-a334-bfd4a3f95aae" stretchType="ContainerHeight" x="110" y="0" width="110" height="60" textAdjust="StretchHeight" hTextAlign="Center" vTextAlign="Middle">
+					<expression><![CDATA[$F{city}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="69f6de53-c656-43cd-ad42-df820e25c92e" stretchType="ContainerHeight" x="340" y="0" width="209" height="60" textAdjust="StretchHeight" hTextAlign="Center" vTextAlign="Middle">
+					<expression><![CDATA[$F{propose}]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="0723b671-8c41-4387-96c7-5aeaa9ec02c4" stretchType="ContainerHeight" x="220" y="0" width="120" height="60" textAdjust="StretchHeight" hTextAlign="Center" vTextAlign="Middle">
+					<expression><![CDATA[$F{action}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
 			</element>
-			<element kind="textField" uuid="16b0fddf-205e-4eae-a334-bfd4a3f95aae" stretchType="ContainerHeight" x="120" y="0" width="130" height="60" textAdjust="StretchHeight" hTextAlign="Center" vTextAlign="Middle">
-				<expression><![CDATA[$F{action}.toUpperCase()]]></expression>
-				<box padding="10">
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-			</element>
-			<element kind="textField" uuid="69f6de53-c656-43cd-ad42-df820e25c92e" stretchType="ContainerHeight" x="250" y="0" width="300" height="60" textAdjust="StretchHeight" hTextAlign="Center" vTextAlign="Middle">
-				<expression><![CDATA[$F{propose}]]></expression>
-				<box padding="10">
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
+			<element kind="frame" uuid="28532779-3c03-4d22-88af-de2ce9857527" x="0" y="0" width="550" height="60">
+				<printWhenExpression><![CDATA[$F{city} == null]]></printWhenExpression>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				<element kind="textField" uuid="c3ba4353-cc4f-4aea-a781-7c46645c6b02" stretchType="ContainerHeight" x="0" y="0" width="120" height="60" textAdjust="ScaleFont" hTextAlign="Center" vTextAlign="Middle">
+					<expression><![CDATA[$F{unit}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="abba8905-d673-4a53-977e-ea4b004ab0ff" stretchType="ContainerHeight" x="120" y="0" width="130" height="60" textAdjust="StretchHeight" hTextAlign="Center" vTextAlign="Middle">
+					<expression><![CDATA[$F{action}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="ccd86af7-9928-4a5c-900f-84962c18d9b0" stretchType="ContainerHeight" x="250" y="0" width="300" height="60" textAdjust="StretchHeight" hTextAlign="Center" vTextAlign="Middle">
+					<expression><![CDATA[$F{propose}]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
 			</element>
 		</band>
 	</detail>
