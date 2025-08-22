@@ -135,6 +135,8 @@ public class ReportService {
                     Files.copy(is, tempDir.resolve(resource.getFilename()), StandardCopyOption.REPLACE_EXISTING);
                 }
             }
+            
+            Class.forName("org.neo4j.jdbc.bolt.BoltDriver");
                                     
             Connection connection = DriverManager.getConnection(
             "jdbc:neo4j:" + this.urlConnection,
@@ -169,6 +171,8 @@ public class ReportService {
         } catch (JRException | SQLException | IOException e) {
             
             throw new RuntimeException("Erro ao gerar Relatório", e);
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException("Erro ao gerar Relatório", ex);
         }
         
     }
