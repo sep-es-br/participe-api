@@ -105,6 +105,7 @@ public class ReportService {
                 jobManager.completeJob(jobId, reportBytes);
             } catch (Exception e) {
                 jobManager.failJob(jobId);
+                Logger.getGlobal().log(Level.SEVERE, "report_error", e);
             }
         });
 
