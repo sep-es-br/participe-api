@@ -159,7 +159,7 @@ Online]]></text>
 			<pen lineWidth="2.0" lineColor="#CC72C2"/>
 		</element>
 		<element kind="staticText" uuid="117f1cd1-8bab-4a54-bdd5-fc7554343012" x="340" y="320" width="171" height="78" forecolor="#CC72C2" backcolor="#CC72C2" fontSize="18.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[Municipios
+			<text><![CDATA[Municípios
 Participantes]]></text>
 		</element>
 		<element kind="textField" uuid="fa205719-1932-4adb-9f55-1ff2aeaa9081" x="340" y="190" width="171" height="120" fontSize="37.0" bold="true" hTextAlign="Center" vTextAlign="Middle">

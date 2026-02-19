@@ -11,6 +11,8 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="46"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="946"/>
 	<dataset name="Dataset1" uuid="f867aabe-94fb-4122-8ab2-d9cea71d2f51">
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
@@ -80,7 +82,16 @@ CALL {
   WITH Microregion_Id
   MATCH (microrregion:Locality)<-[:IS_LOCATED_IN]-(city:Locality)
   WHERE id(microrregion) = Microregion_Id
-  RETURN microrregion, reduce(cities = '', c IN collect(city.name) | CASE cities WHEN '' THEN c ELSE cities + ', '+ c END) as cities
+  WITH microrregion, city
+  ORDER BY city.name
+  WITH microrregion, collect(city.name) AS cityNames
+  RETURN microrregion,
+         reduce(cities = '', c IN cityNames |
+           CASE cities
+             WHEN '' THEN c
+             ELSE cities + ', ' + c
+           END) AS cities
+
 } WITH microrregion, cities, Conference_Id
 CALL { WITH Conference_Id
   MATCH (cPI:PlanItem)-[:COMPOSES]->(planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)
