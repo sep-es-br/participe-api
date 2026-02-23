@@ -47,10 +47,10 @@ order by idMicroregiao, idArea]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="microregiao"/>
 		<property name="com.jaspersoft.studio.field.label" value="microregiao"/>
 	</field>
-	<group name="Group1" minHeightToStartNewPage="200">
+	<group name="Group1" minHeightToStartNewPage="200" keepTogether="true">
 		<expression><![CDATA[$F{idArea}]]></expression>
 		<groupHeader>
-			<band height="80" splitType="Stretch">
+			<band height="80" splitType="Prevent">
 				<element kind="image" uuid="a17036e5-ae9a-4ce5-bc4d-c0588d067897" x="0" y="0" width="550" height="80">
 					<expression><![CDATA["imgs/CabeçalhoResultadoGeral.png"]]></expression>
 				</element>
@@ -68,23 +68,23 @@ order by idMicroregiao, idArea]]></query>
 				</element>
 			</band>
 		</groupHeader>
-		<groupFooter>
-			<band height="40" splitType="Stretch">
-				<element kind="subreport" uuid="bbfb2c28-11bb-4863-84bb-842936a1e562" x="-20" y="0" width="580" height="40" usingCache="false" removeLineWhenBlank="true">
-					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					<expression><![CDATA["ProposeReport_approved_subareaAll.jasper"]]></expression>
-					<parameter name="MICROREGION_ID">
-						<expression><![CDATA[$P{ID_MICROREGIAO}]]></expression>
-					</parameter>
-					<parameter name="AREA_ID">
-						<expression><![CDATA[$F{idArea}]]></expression>
-					</parameter>
-					<parameter name="CONFERENCE_ID">
-						<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
-					</parameter>
-				</element>
-			</band>
-		</groupFooter>
 	</group>
 	<background splitType="Stretch"/>
+	<detail>
+		<band height="40">
+			<element kind="subreport" uuid="bbfb2c28-11bb-4863-84bb-842936a1e562" x="-20" y="0" width="580" height="40" usingCache="false" removeLineWhenBlank="true">
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<expression><![CDATA["ProposeReport_approved_subareaAll.jasper"]]></expression>
+				<parameter name="MICROREGION_ID">
+					<expression><![CDATA[$P{ID_MICROREGIAO}]]></expression>
+				</parameter>
+				<parameter name="AREA_ID">
+					<expression><![CDATA[$F{idArea}]]></expression>
+				</parameter>
+				<parameter name="CONFERENCE_ID">
+					<expression><![CDATA[$P{ID_CONFERENCE}]]></expression>
+				</parameter>
+			</element>
+		</band>
+	</detail>
 </jasperReport>

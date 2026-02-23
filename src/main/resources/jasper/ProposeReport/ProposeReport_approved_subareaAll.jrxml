@@ -34,8 +34,8 @@ order by subarea.name;]]></query>
 	</field>
 	<background splitType="Stretch"/>
 	<detail>
-		<band height="1" splitType="Stretch">
-			<element kind="subreport" uuid="b2a64d15-a9dc-4bef-a0df-9acf285ea791" stretchType="ContainerHeight" x="-20" y="0" width="200" height="1" removeLineWhenBlank="true">
+		<band height="20" splitType="Prevent">
+			<element kind="subreport" uuid="b2a64d15-a9dc-4bef-a0df-9acf285ea791" stretchType="ContainerHeight" x="-20" y="0" width="200" height="20" removeLineWhenBlank="true">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<expression><![CDATA["ProposeReport_approved_subArea.jasper"]]></expression>
 				<property name="com.jaspersoft.studio.unit.height" value="px"/>
