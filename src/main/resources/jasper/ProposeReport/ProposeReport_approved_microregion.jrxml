@@ -92,7 +92,7 @@ order by microregiao.name]]></query>
 		</element>
 	</pageHeader>
 	<detail>
-		<band height="87" splitType="Prevent">
+		<band height="87" splitType="Stretch">
 			<element kind="subreport" uuid="2fb20385-18f2-4e8f-b967-1d2edace3be5" x="-20" y="0" width="595" height="87" runToBottom="false" overflowType="Stretch" usingCache="false" removeLineWhenBlank="true" style="Crosstab_CH">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<expression><![CDATA["ProposeReport_approved_area.jasper"]]></expression>

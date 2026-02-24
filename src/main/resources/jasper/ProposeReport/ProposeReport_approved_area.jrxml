@@ -1,7 +1,7 @@
 <!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
 <jasperReport name="ProposeReport_approved_area" language="java" columnCount="1" pageWidth="595" pageHeight="842" orientation="Landscape" whenNoDataType="NoPages" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="0" uuid="38b6e115-5d53-4ede-b5d0-2df47230d794">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Participe PROD"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Participe Dev"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -71,7 +71,7 @@ order by idMicroregiao, idArea]]></query>
 	</group>
 	<background splitType="Stretch"/>
 	<detail>
-		<band height="40">
+		<band height="40" splitType="Immediate">
 			<element kind="subreport" uuid="bbfb2c28-11bb-4863-84bb-842936a1e562" x="-20" y="0" width="580" height="40" usingCache="false" removeLineWhenBlank="true">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<expression><![CDATA["ProposeReport_approved_subareaAll.jasper"]]></expression>

@@ -303,7 +303,7 @@ order by subarea.name;]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="city"/>
 		<property name="com.jaspersoft.studio.field.label" value="city"/>
 	</field>
-	<group name="Group1" minHeightToStartNewPage="150" reprintHeaderOnEachPage="true">
+	<group name="Group1" minHeightToStartNewPage="150" keepTogether="true" reprintHeaderOnEachPage="true">
 		<expression><![CDATA[$F{subarea}]]></expression>
 		<groupHeader>
 			<band height="60" splitType="Prevent">
