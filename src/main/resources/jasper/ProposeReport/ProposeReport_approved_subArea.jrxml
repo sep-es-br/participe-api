@@ -303,10 +303,97 @@ order by subarea.name;]]></query>
 		<property name="com.jaspersoft.studio.field.name" value="city"/>
 		<property name="com.jaspersoft.studio.field.label" value="city"/>
 	</field>
-	<group name="Group1" minHeightToStartNewPage="150" keepTogether="true" reprintHeaderOnEachPage="true">
+	<variable name="V_LAST_SUBAREA" resetType="Group" resetGroup="Group1" class="java.lang.String">
 		<expression><![CDATA[$F{subarea}]]></expression>
-		<groupHeader>
-			<band height="60" splitType="Prevent">
+		<initialValueExpression><![CDATA[null]]></initialValueExpression>
+	</variable>
+	<group name="Group1" keepTogether="true" reprintHeaderOnEachPage="true">
+		<expression><![CDATA[$F{subarea}]]></expression>
+	</group>
+	<background splitType="Stretch"/>
+	<detail>
+		<band height="120" splitType="Prevent">
+			<element kind="frame" uuid="eb502e12-ceef-4198-a684-0660a22e7306" stretchType="ContainerHeight" x="0" y="60" width="550" height="60">
+				<printWhenExpression><![CDATA[$F{city} != null]]></printWhenExpression>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				<element kind="textField" uuid="d7d11c55-782b-469d-8073-f20e4ee39264" stretchType="ContainerHeight" x="0" y="0" width="110" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
+					<paragraph lineSpacing="Single"/>
+					<expression><![CDATA[$F{unit}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="16b0fddf-205e-4eae-a334-bfd4a3f95aae" stretchType="ContainerHeight" x="110" y="0" width="110" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
+					<paragraph lineSpacing="Single"/>
+					<expression><![CDATA[$F{city}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="69f6de53-c656-43cd-ad42-df820e25c92e" stretchType="ContainerHeight" x="360" y="0" width="189" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
+					<paragraph lineSpacing="Single"/>
+					<expression><![CDATA[$F{propose}]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="0723b671-8c41-4387-96c7-5aeaa9ec02c4" stretchType="ContainerHeight" x="220" y="0" width="140" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
+					<paragraph lineSpacing="Single"/>
+					<expression><![CDATA[$F{action}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+			</element>
+			<element kind="frame" uuid="28532779-3c03-4d22-88af-de2ce9857527" stretchType="ContainerHeight" x="0" y="60" width="550" height="60">
+				<printWhenExpression><![CDATA[$F{city} == null]]></printWhenExpression>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				<element kind="textField" uuid="c3ba4353-cc4f-4aea-a781-7c46645c6b02" stretchType="ContainerHeight" x="0" y="0" width="120" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
+					<paragraph lineSpacing="Single"/>
+					<expression><![CDATA[$F{unit}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="abba8905-d673-4a53-977e-ea4b004ab0ff" stretchType="ContainerHeight" x="120" y="0" width="130" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
+					<paragraph lineSpacing="Single"/>
+					<expression><![CDATA[$F{action}.toUpperCase()]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+				<element kind="textField" uuid="ccd86af7-9928-4a5c-900f-84962c18d9b0" stretchType="ContainerHeight" x="250" y="0" width="300" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
+					<paragraph lineSpacing="Single"/>
+					<expression><![CDATA[$F{propose}]]></expression>
+					<box padding="10">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+				</element>
+			</element>
+			<element kind="frame" uuid="6d527387-e101-42d2-aa42-3fd063458131" x="0" y="0" width="550" height="60" removeLineWhenBlank="true">
+				<printWhenExpression><![CDATA[$V{REPORT_COUNT}.intValue() == 1 
+|| !$F{subarea}.equals($V{V_LAST_SUBAREA})]]></printWhenExpression>
 				<element kind="staticText" uuid="d72762e3-71f4-4e72-a737-541cf3b216e6" x="0" y="0" width="59" height="19" forecolor="#0070C0" bold="true">
 					<text><![CDATA[SUBÁREA: ]]></text>
 				</element>
@@ -386,88 +473,6 @@ order by subarea.name;]]></query>
 							<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						</box>
 					</element>
-				</element>
-			</band>
-		</groupHeader>
-	</group>
-	<background splitType="Stretch"/>
-	<detail>
-		<band height="60" splitType="Prevent">
-			<element kind="frame" uuid="eb502e12-ceef-4198-a684-0660a22e7306" stretchType="ContainerHeight" x="0" y="0" width="550" height="60">
-				<printWhenExpression><![CDATA[$F{city} != null]]></printWhenExpression>
-				<element kind="textField" uuid="d7d11c55-782b-469d-8073-f20e4ee39264" stretchType="ContainerHeight" x="0" y="0" width="110" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
-					<paragraph lineSpacing="Single"/>
-					<expression><![CDATA[$F{unit}.toUpperCase()]]></expression>
-					<box padding="10">
-						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					</box>
-				</element>
-				<element kind="textField" uuid="16b0fddf-205e-4eae-a334-bfd4a3f95aae" stretchType="ContainerHeight" x="110" y="0" width="110" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
-					<paragraph lineSpacing="Single"/>
-					<expression><![CDATA[$F{city}.toUpperCase()]]></expression>
-					<box padding="10">
-						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					</box>
-				</element>
-				<element kind="textField" uuid="69f6de53-c656-43cd-ad42-df820e25c92e" stretchType="ContainerHeight" x="360" y="0" width="189" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
-					<paragraph lineSpacing="Single"/>
-					<expression><![CDATA[$F{propose}]]></expression>
-					<box padding="10">
-						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					</box>
-				</element>
-				<element kind="textField" uuid="0723b671-8c41-4387-96c7-5aeaa9ec02c4" stretchType="ContainerHeight" x="220" y="0" width="140" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
-					<paragraph lineSpacing="Single"/>
-					<expression><![CDATA[$F{action}.toUpperCase()]]></expression>
-					<box padding="10">
-						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					</box>
-				</element>
-			</element>
-			<element kind="frame" uuid="28532779-3c03-4d22-88af-de2ce9857527" stretchType="ContainerHeight" x="0" y="0" width="550" height="60">
-				<printWhenExpression><![CDATA[$F{city} == null]]></printWhenExpression>
-				<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				<element kind="textField" uuid="c3ba4353-cc4f-4aea-a781-7c46645c6b02" stretchType="ContainerHeight" x="0" y="0" width="120" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
-					<paragraph lineSpacing="Single"/>
-					<expression><![CDATA[$F{unit}.toUpperCase()]]></expression>
-					<box padding="10">
-						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					</box>
-				</element>
-				<element kind="textField" uuid="abba8905-d673-4a53-977e-ea4b004ab0ff" stretchType="ContainerHeight" x="120" y="0" width="130" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
-					<paragraph lineSpacing="Single"/>
-					<expression><![CDATA[$F{action}.toUpperCase()]]></expression>
-					<box padding="10">
-						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					</box>
-				</element>
-				<element kind="textField" uuid="ccd86af7-9928-4a5c-900f-84962c18d9b0" stretchType="ContainerHeight" x="250" y="0" width="300" height="60" textAdjust="StretchHeight" linkType="None" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
-					<paragraph lineSpacing="Single"/>
-					<expression><![CDATA[$F{propose}]]></expression>
-					<box padding="10">
-						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					</box>
 				</element>
 			</element>
 		</band>
