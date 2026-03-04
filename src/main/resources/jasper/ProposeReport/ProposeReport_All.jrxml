@@ -42,4 +42,9 @@ ORDER BY area;]]></query>
 			</element>
 		</band>
 	</detail>
+	<pageFooter height="25">
+		<element kind="textField" uuid="8158dc0b-9d20-4995-9e40-37fe3e3efc2b" x="219" y="5" width="137" height="20" evaluationTime="Master" hTextAlign="Center">
+			<expression><![CDATA[$V{MASTER_CURRENT_PAGE} + 16]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>
