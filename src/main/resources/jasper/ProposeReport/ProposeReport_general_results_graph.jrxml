@@ -1,7 +1,7 @@
 <!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
 <jasperReport name="ProposeReport_general_results_graph" language="java" columnCount="1" pageWidth="595" pageHeight="842" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="55fb6cb3-c0ee-43e2-b4e0-f9c031bc5ae8">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe prod"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Participe Dev"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -84,6 +84,11 @@ ORDER BY planItemName]]></query>
 			<text><![CDATA[Propostas e destaques por área temática computadas no site <orçamento.es.gov.br>]]></text>
 		</element>
 	</title>
+	<pageFooter height="20">
+		<element kind="textField" uuid="87083f21-3ce3-4213-9e58-67d756decefb" x="209" y="0" width="137" height="20" evaluationTime="Master" hTextAlign="Center">
+			<expression><![CDATA[$V{MASTER_CURRENT_PAGE} + 16]]></expression>
+		</element>
+	</pageFooter>
 	<summary height="592" splitType="Stretch">
 		<element kind="chart" chartType="bar" uuid="138df84e-dca6-4f5d-b604-93885b2ca187" x="10" y="50" width="534" height="380" evaluationTime="Report" linkType="None" linkTarget="Self" legendPosition="Top">
 			<titleFont fontSize="14.0" bold="true"/>

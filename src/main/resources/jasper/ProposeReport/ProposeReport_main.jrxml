@@ -1,6 +1,6 @@
 <!-- Created with Jaspersoft Studio version 7.0.0.final using JasperReports Library version 7.0.0-b478feaa9aab4375eba71de77b4ca138ad2f62aa  -->
 <jasperReport name="ProposeReport_ Main" language="java" columnCount="1" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="20" uuid="05f708f2-080b-44b7-8465-f21d91213726" summaryNewPage="true">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="neo4j participe hom"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Participe Dev"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="ID_CONFERENCE" class="java.lang.Integer"/>
 	<parameter name="IMG_PATH" class="java.lang.String"/>
@@ -49,6 +49,11 @@ RETURN c.name as dataSource]]></query>
 			</parameter>
 		</element>
 	</title>
+	<pageFooter height="25">
+		<element kind="textField" uuid="33295639-199f-4766-9d9f-236900e96047" x="209" y="5" width="137" height="20" evaluationTime="Master" hTextAlign="Center">
+			<expression><![CDATA[$V{MASTER_CURRENT_PAGE} + 16]]></expression>
+		</element>
+	</pageFooter>
 	<summary height="616">
 		<element kind="subreport" uuid="66e443c7-383d-4fb3-9c4e-ea7c6fe9dfd7" positionType="Float" stretchType="NoStretch" x="-20" y="216" width="200" height="200" runToBottom="true" usingCache="true">
 			<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
@@ -77,7 +82,7 @@ RETURN c.name as dataSource]]></query>
 		<element kind="staticText" uuid="b26c4c17-0056-4375-8014-667c51e8fa22" x="-1" y="80" width="550" height="130" fontSize="12.0" hTextAlign="Justified">
 			<text><![CDATA[Todas as propostas populares recebidas por meio do site durante as audiências públicas foram registradas e analisadas pela equipe da Secretaria de Economia e Planejamento.
 
-Todas as demandas recebidas, já em seu formato consolidado, estão disponíveis neste anexo. Foram divididas, primeiramente, por área temática/ e, em segundo lugar, pela microrregião que realizou a solicitação.]]></text>
+Todas as demandas recebidas, já em seu formato consolidado, estão disponíveis neste anexo. Foram divididas, primeiramente, por área temática e, em segundo lugar, pela microrregião que realizou a solicitação.]]></text>
 		</element>
 		<element kind="staticText" uuid="1cadb35f-a1c5-4d8f-88e3-4bde71ac2929" x="-1" y="0" width="100" height="30" forecolor="#1F90FF" fontName="Calibri" fontSize="21.0" bold="true">
 			<text><![CDATA[>>>>]]></text>

@@ -109,6 +109,11 @@ RETURN remoteParticipation, presentialParticipation, citiesParticipation, consol
 			<text><![CDATA[Participações totais computadas no site <orçamento.es.gov.br>]]></text>
 		</element>
 	</title>
+	<pageFooter height="20">
+		<element kind="textField" uuid="2c1d1bfb-1c67-4f87-8430-bd6943072798" x="209" y="0" width="137" height="20" evaluationTime="Master" hTextAlign="Center">
+			<expression><![CDATA[$V{MASTER_CURRENT_PAGE} + 16]]></expression>
+		</element>
+	</pageFooter>
 	<summary height="650" splitType="Stretch">
 		<element kind="rectangle" uuid="7ccba7ba-d708-4755-a7ca-e430a05c32cd" x="3" y="90" width="170" height="187" forecolor="#CC72C2" backcolor="rgba(255, 255, 255, 0.0)" radius="10">
 			<pen lineWidth="4.0"/>

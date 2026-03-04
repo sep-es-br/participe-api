@@ -66,7 +66,7 @@ ORDER BY
 			</element>
 		</band>
 		<band height="222">
-			<element kind="subreport" uuid="4b1f2c70-52eb-4a93-ad18-ddd2579e4a2b" x="-20" y="22" width="200" height="200">
+			<element kind="subreport" uuid="4b1f2c70-52eb-4a93-ad18-ddd2579e4a2b" x="-20" y="22" width="200" height="200" removeLineWhenBlank="true">
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<expression><![CDATA["ProposeReport_approved.jasper"]]></expression>
 				<parameter name="ID_CONFERENCE">
@@ -81,4 +81,10 @@ ORDER BY
 			</element>
 		</band>
 	</detail>
+	<pageFooter height="25">
+		<element kind="textField" uuid="4cbefb73-df44-44df-9781-990981b80e0c" positionType="FixRelativeToBottom" x="209" y="5" width="137" height="20" evaluationTime="Master" hTextAlign="Center">
+			<expression><![CDATA[$V{MASTER_CURRENT_PAGE} + 16
+]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>

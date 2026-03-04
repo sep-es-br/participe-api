@@ -17,10 +17,19 @@
 		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
 	</parameter>
 	<query language="SQL"><![CDATA[CALL {
-	MATCH (microregion:Locality)<-[:IS_LOCATED_IN]-(city:Locality)
-	WHERE id(microregion) = $P{ID_MICROREGION} 
-	RETURN microregion, city
-	ORDER BY apoc.text.clean(city.name)
+  MATCH (microregion:Locality)
+  WHERE id(microregion) = $P{ID_MICROREGION} 
+  CALL {
+		WITH microregion
+		MATCH (c:Locality)-[:IS_LOCATED_IN]->(m:Locality)
+		WHERE id(m) = id(microregion)
+		return c as citi
+		order by apoc.text.clean(c.name)
+	}  WITH microregion, citi
+  RETURN microregion, reduce(cities='', c in collect(distinct citi.name) | case when cities = '' then c else cities + ', ' + c end) as cities
+
+
+
 }
 CALL {
     WITH microregion
@@ -103,7 +112,7 @@ CALL {
   	RETURN count(comment) AS approvedProposals
 }
 RETURN microregion.name as microregionName,
-	 	apoc.text.join(collect(city.name), ', ') as cities,
+	 	cities,
 		remoteParticipation, citiesParticipation, consolidatedProposals, registeredProposals, approvedProposals]]></query>
 	<field name="microregionName" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="microregionName"/>
@@ -159,7 +168,7 @@ Online]]></text>
 			<pen lineWidth="2.0" lineColor="#CC72C2"/>
 		</element>
 		<element kind="staticText" uuid="117f1cd1-8bab-4a54-bdd5-fc7554343012" x="340" y="320" width="171" height="78" forecolor="#CC72C2" backcolor="#CC72C2" fontSize="18.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[Municipios
+			<text><![CDATA[Municípios
 Participantes]]></text>
 		</element>
 		<element kind="textField" uuid="fa205719-1932-4adb-9f55-1ff2aeaa9081" x="340" y="190" width="171" height="120" fontSize="37.0" bold="true" hTextAlign="Center" vTextAlign="Middle">

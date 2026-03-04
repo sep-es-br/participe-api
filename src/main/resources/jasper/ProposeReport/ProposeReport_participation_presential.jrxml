@@ -46,4 +46,9 @@ RETURN id(m) AS idMeeting]]></query>
 			</element>
 		</band>
 	</detail>
+	<pageFooter height="25">
+		<element kind="textField" uuid="4fcb299f-c7df-414c-8f79-050068bc78e8" positionType="FixRelativeToBottom" x="209" y="5" width="137" height="20" evaluationTime="Master" hTextAlign="Center">
+			<expression><![CDATA[$V{MASTER_CURRENT_PAGE} + 16]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>
