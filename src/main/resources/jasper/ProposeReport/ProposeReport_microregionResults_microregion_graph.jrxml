@@ -22,9 +22,16 @@
 		$P{ID_MICROREGION} AS Microregion_Id
 CALL {
   WITH Microregion_Id
-  MATCH (microrregion:Locality)<-[:IS_LOCATED_IN]-(city:Locality)
+  MATCH (microrregion:Locality)
   WHERE id(microrregion) = Microregion_Id
-  RETURN microrregion, reduce(cities = '', c IN collect(city.name) | CASE cities WHEN '' THEN c ELSE cities + ', '+ c END) as cities
+  CALL {
+		WITH microregiao
+		MATCH (c:Locality)-[:IS_LOCATED_IN]->(m:Locality)
+		WHERE id(m) = id(microregiao)
+		return c as citi
+		order by apoc.text.clean(c.name)
+	}
+  RETURN microrregion, reduce(cities='', c in collect(distinct citi.name) | case when cities = '' then c else cities + ', ' + c end) as cities
 } WITH microrregion, cities, Conference_Id
 CALL { WITH Conference_Id
   MATCH (planItem:PlanItem)-[:COMPOSES]->(plan:Plan)<-[:TARGETS]-(conf:Conference)
@@ -80,17 +87,16 @@ ORDER BY planItemName]]></query>
 		$P{ID_MICROREGION} AS Microregion_Id
 CALL {
   WITH Microregion_Id
-  MATCH (microrregion:Locality)<-[:IS_LOCATED_IN]-(city:Locality)
+  MATCH (microrregion:Locality)
   WHERE id(microrregion) = Microregion_Id
-  WITH microrregion, city
-  ORDER BY city.name
-  WITH microrregion, collect(city.name) AS cityNames
-  RETURN microrregion,
-         reduce(cities = '', c IN cityNames |
-           CASE cities
-             WHEN '' THEN c
-             ELSE cities + ', ' + c
-           END) AS cities
+  CALL {
+		WITH microregiao
+		MATCH (c:Locality)-[:IS_LOCATED_IN]->(m:Locality)
+		WHERE id(m) = id(microregiao)
+		return c as citi
+		order by apoc.text.clean(c.name)
+	}
+  RETURN microrregion, reduce(cities='', c in collect(distinct citi.name) | case when cities = '' then c else cities + ', ' + c end) as cities
 
 } WITH microrregion, cities, Conference_Id
 CALL { WITH Conference_Id

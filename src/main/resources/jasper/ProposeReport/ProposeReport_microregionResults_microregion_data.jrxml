@@ -17,10 +17,19 @@
 		<defaultValueExpression><![CDATA["."]]></defaultValueExpression>
 	</parameter>
 	<query language="SQL"><![CDATA[CALL {
-	MATCH (microregion:Locality)<-[:IS_LOCATED_IN]-(city:Locality)
-	WHERE id(microregion) = $P{ID_MICROREGION} 
-	RETURN microregion, city
-	ORDER BY apoc.text.clean(city.name)
+  MATCH (microrregion:Locality)
+  WHERE id(microrregion) = $P{ID_MICROREGION} 
+  CALL {
+		WITH microregiao
+		MATCH (c:Locality)-[:IS_LOCATED_IN]->(m:Locality)
+		WHERE id(m) = id(microregiao)
+		return c as citi
+		order by apoc.text.clean(c.name)
+	}
+  RETURN microrregion, reduce(cities='', c in collect(distinct citi.name) | case when cities = '' then c else cities + ', ' + c end) as cities
+
+
+
 }
 CALL {
     WITH microregion
@@ -103,7 +112,7 @@ CALL {
   	RETURN count(comment) AS approvedProposals
 }
 RETURN microregion.name as microregionName,
-	 	apoc.text.join(collect(city.name), ', ') as cities,
+	 	cities,
 		remoteParticipation, citiesParticipation, consolidatedProposals, registeredProposals, approvedProposals]]></query>
 	<field name="microregionName" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="microregionName"/>
