@@ -25,12 +25,12 @@ CALL {
   MATCH (microrregion:Locality)
   WHERE id(microrregion) = Microregion_Id
   CALL {
-		WITH microregiao
+		WITH microrregion
 		MATCH (c:Locality)-[:IS_LOCATED_IN]->(m:Locality)
-		WHERE id(m) = id(microregiao)
+		WHERE id(m) = id(microrregion)
 		return c as citi
 		order by apoc.text.clean(c.name)
-	}
+	} with microrregion, citi
   RETURN microrregion, reduce(cities='', c in collect(distinct citi.name) | case when cities = '' then c else cities + ', ' + c end) as cities
 } WITH microrregion, cities, Conference_Id
 CALL { WITH Conference_Id
@@ -90,12 +90,12 @@ CALL {
   MATCH (microrregion:Locality)
   WHERE id(microrregion) = Microregion_Id
   CALL {
-		WITH microregiao
+		WITH microrregion
 		MATCH (c:Locality)-[:IS_LOCATED_IN]->(m:Locality)
-		WHERE id(m) = id(microregiao)
+		WHERE id(m) = id(microrregion)
 		return c as citi
 		order by apoc.text.clean(c.name)
-	}
+	} WITH microrregion, citi
   RETURN microrregion, reduce(cities='', c in collect(distinct citi.name) | case when cities = '' then c else cities + ', ' + c end) as cities
 
 } WITH microrregion, cities, Conference_Id
