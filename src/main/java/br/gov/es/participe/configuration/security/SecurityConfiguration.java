@@ -51,7 +51,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/conferences/AuthenticationScreen/**").permitAll()
                 .antMatchers("/conferences/validateDefaultConference").permitAll()
                 .antMatchers("/conferences/validate").permitAll()
-
+                .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/v2/api-docs").permitAll()
+                .antMatchers("/swagger-resources/**").permitAll()
+                .antMatchers("/webjars/**").permitAll()
+                
                 // domain
                 .antMatchers(HttpMethod.GET, "/domain/**").permitAll()
 
