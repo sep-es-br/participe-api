@@ -299,12 +299,13 @@ public class MeetingController {
       @RequestParam(name = "filterBy", required = true) String filterBy,
       @RequestParam(name = "filterByIsAuthority", required = false) Boolean filterByIsAuthority,
       @RequestParam(name = "filterByStatus", required = false) String filterByStatus,
+      @RequestParam(name = "filterByOrganization", required = false) String filterByOrganization,
       @ApiIgnore Pageable page) {
               
         Page<PersonMeetingFilteredDto> personMeetingFilteredDto = 
                 personService.findPersonOnMeetingByAttendanceFilterPaged(
                         meetingId, localities, name, sort, filterBy, 
-                        filterByIsAuthority, filterByStatus, page
+                        filterByIsAuthority, filterByStatus, filterByOrganization, page
                 );
 
         return ResponseEntity.ok().body(personMeetingFilteredDto);
@@ -320,11 +321,12 @@ public class MeetingController {
         @RequestParam(name = "sort", required = true) String sort,
         @RequestParam(name = "filterBy", required = true) String filterBy,
         @RequestParam(name = "filterByIsAuthority", required = false) Boolean filterByIsAuthority,
+      @RequestParam(name = "filterByOrganization", required = false) String filterByOrganization,
       @RequestParam(name = "filterByStatus", required = false) String filterByStatus
   ) {
       
     Map<String, Long> totalParticipants = personService.countTotalParticipantsInMeeting(
-            meetingId, localities, name, sort, filterBy, filterByIsAuthority, filterByStatus
+            meetingId, localities, name, sort, filterBy, filterByIsAuthority, filterByOrganization, filterByStatus
     );
 
     return ResponseEntity.ok().body(totalParticipants);

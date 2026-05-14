@@ -296,7 +296,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    $name IS NULL OR\r\n" + //
             "    apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)  OR\r\n" + //
             "    apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($name) OR\r\n" + //
-            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name) OR\r\n" + //
+            "    (apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($orgName) OR apoc.text.clean($orgName) CONTAINS apoc.text.clean(COALESCE(cia, pr).organization) )\r\n" + //
             "  ) AND\r\n" + //
             "  (CASE\r\n" + //
             "    WHEN $filter = 'pres' THEN cia.time IS NOT NULL\r\n" + //
@@ -354,7 +355,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    $name IS NULL OR\r\n" + //
             "    apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)  OR\r\n" + //
             "    apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($name) OR\r\n" + //
-            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name) OR \r\n" + //
+            "   (apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($orgName) OR apoc.text.clean($orgName) CONTAINS apoc.text.clean(COALESCE(cia, pr).organization) )\r\n" + //
             "  ) AND\r\n" + //
             "  (CASE\r\n" + //
             "    WHEN $filter = 'pres' THEN cia IS NOT NULL\r\n" + //
@@ -383,6 +385,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             String sort,
             String filter,
             Boolean filterIsAuthotity,
+            String orgName,
             String status
     );
   
