@@ -1,14 +1,11 @@
 package br.gov.es.participe.controller;
 
-import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
-import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.ForgotPasswordDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
 import br.gov.es.participe.controller.dto.UnitRolesDto;
-import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.service.AcessoCidadaoService;
@@ -18,13 +15,6 @@ import br.gov.es.participe.service.SelfDeclarationService;
 import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,8 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import jdk.jfr.ContentType;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
@@ -88,7 +81,7 @@ public class PersonController {
         AcSectionInfoDto sectionInfoDto = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
         if(sectionInfoDto != null) {
             AcOrganizationInfoDto organizationInfoDto = acService.findOrganizationInfoFromOrganogramaAPI(sectionInfoDto.getGuidOrganizacao());
-            if(organizationInfoDto != null) acRole.put("organization", organizationInfoDto.getRazaoSocial());
+            if(organizationInfoDto != null) acRole.put("organization", Optional.ofNullable(organizationInfoDto.getRazaoSocial()).orElse(organizationInfoDto.getNomeFantasia()) + " - " + organizationInfoDto.getSigla());
         }
       }
       

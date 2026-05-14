@@ -2,8 +2,8 @@ package br.gov.es.participe.service;
 
 import br.gov.es.participe.controller.dto.ChildOrganizationsDto;
 import br.gov.es.participe.controller.dto.EvaluatorOrganizationDto;
-import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
+import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.OrganizationUnitsDto;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonProfileSignInDto;
@@ -20,7 +20,23 @@ import br.gov.es.participe.util.domain.TokenType;
 import br.gov.es.participe.util.dto.acessoCidadao.AcGrupoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -37,29 +53,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
-import java.net.URI;
-import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import org.apache.http.client.ClientProtocolException;
 
 @Service
 public class AcessoCidadaoService {
@@ -556,7 +549,7 @@ public class AcessoCidadaoService {
         });
 
         childOrganizationsDtos.iterator().forEachRemaining((childOrg) -> {
-          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), (childOrg.getNomeFantasia() + " - " + childOrg.getSigla()));
+          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), (Optional.ofNullable(childOrg.getRazaoSocial()).orElse(childOrg.getNomeFantasia())  + " - " + childOrg.getSigla()));
           evaluatorOrganizationDto.add(newEvalOrgDto);
         });
 
