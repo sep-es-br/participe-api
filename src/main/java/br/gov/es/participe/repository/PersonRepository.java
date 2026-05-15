@@ -296,8 +296,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    $name IS NULL OR\r\n" + //
             "    apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)  OR\r\n" + //
             "    apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($name) OR\r\n" + //
-            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name) OR\r\n" + //
-            "    (apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($orgName) OR apoc.text.clean($orgName) CONTAINS apoc.text.clean(COALESCE(cia, pr).organization) )\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
             "  ) AND\r\n" + //
             "  (CASE\r\n" + //
             "    WHEN $filter = 'pres' THEN cia.time IS NOT NULL\r\n" + //
@@ -312,7 +311,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    when $status = 'announced' then coalesce(cia.isAnnounced, false)\n" +
             "    else true end\n" +
             "  ) and\r\n" + //
-            "    ($filterIsAuthotity is null or $filterIsAuthotity = coalesce(cia.isAuthority, pr.isAuthority, false))\r\n" + //
+            "    ($filterIsAuthotity is null or $filterIsAuthotity = coalesce(cia.isAuthority, pr.isAuthority, false)) AND\r\n" + //
+            "    (apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($orgName) OR apoc.text.clean($orgName) CONTAINS apoc.text.clean(COALESCE(cia, pr).organization) )\r\n" + //
             "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\r\n" + //
             "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
             "RETURN DISTINCT \r\n" + //
