@@ -312,7 +312,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    else true end\n" +
             "  ) and\r\n" + //
             "    ($filterIsAuthotity is null or $filterIsAuthotity = coalesce(cia.isAuthority, pr.isAuthority, false)) AND\r\n" + //
-            "    ($orgName IS NULL OR apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($orgName) OR apoc.text.clean($orgName) CONTAINS apoc.text.clean(COALESCE(cia, pr).organization) )\r\n" + //
+            "    ($orgName IS NULL OR apoc.text.clean(COALESCE(cia, pr).organization) = apoc.text.clean($orgName))\r\n" + //
             "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\r\n" + //
             "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
             "RETURN DISTINCT \r\n" + //

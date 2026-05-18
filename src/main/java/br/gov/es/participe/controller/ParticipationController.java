@@ -69,8 +69,6 @@ public class ParticipationController {
                             .map(EvaluatorOrganizationDto::getName)
                             .collect(Collectors.toList());
         
-        list.addAll(participationService.findOrganizationNamesWithoutList(idMeeting, list));
-        
         return ResponseEntity.ok(list);
       }catch(IOException ex) {
           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Erro ao buscar organizações"));
