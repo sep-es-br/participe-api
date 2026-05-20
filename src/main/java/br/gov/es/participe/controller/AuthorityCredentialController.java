@@ -2,15 +2,7 @@ package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.AuthorityCredentialRequest;
 import br.gov.es.participe.controller.dto.CheckedInAtDto;
-import br.gov.es.participe.controller.dto.ForgotPasswordDto;
-import br.gov.es.participe.controller.dto.PersonDto;
-import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.PreRegistrationAuthorityDto;
-import br.gov.es.participe.controller.dto.PreRegistrationDto;
-import br.gov.es.participe.controller.dto.PublicAgentDto;
-import br.gov.es.participe.controller.dto.RelationshipAuthServiceAuxiliaryDto;
-import br.gov.es.participe.controller.dto.SelfDeclarationDto;
-import br.gov.es.participe.controller.dto.UnitRolesDto;
 import br.gov.es.participe.model.AuthService;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Meeting;
@@ -26,25 +18,16 @@ import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.PreRegistrationService;
 import br.gov.es.participe.service.QRCodeService;
 import br.gov.es.participe.service.SelfDeclarationService;
-import br.gov.es.participe.util.dto.MessageDto;
-import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
-import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
 import com.google.zxing.WriterException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.mail.MessagingException;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
@@ -132,15 +115,17 @@ public class AuthorityCredentialController {
                                     .map(pr -> {
                                         
                                        pr.setPreRegistration(new Date());
-                                       pr.setOrganization(credentialRequest.getOrganization());
+                                       pr.setOrganizationGuid(credentialRequest.getOrganization().getGuid());
+                                       pr.setOrganization(credentialRequest.getOrganization().getName());
+                                       pr.setOrganizationShort(credentialRequest.getOrganization().getShortName());
                                        pr.setRole(credentialRequest.getRole());
                                        pr.setMadeBy(madeByPerson);
                                         
                                         return pr;
                                     })
                                     .orElse(new PreRegistration(
-                                        meeting, madeByPerson, representedByPerson, 
-                                        credentialRequest.getOrganization(), credentialRequest.getRole()));
+                                        meeting, madeByPerson, representedByPerson, credentialRequest.getOrganization().getGuid(),
+                                        credentialRequest.getOrganization().getName(), credentialRequest.getOrganization().getShortName(), credentialRequest.getRole()));
         
         
       PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration, true);

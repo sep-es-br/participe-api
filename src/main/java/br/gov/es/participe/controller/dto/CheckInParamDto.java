@@ -5,7 +5,8 @@ public class CheckInParamDto {
     private Long meetingId;
     private String timeZone;
     private Boolean isAuthority;
-    private String organization;
+    private Boolean isTeam;
+    private OptionOrganization organization;
     private String role;
     private Boolean toAnnounce;
     private Boolean announced;
@@ -25,9 +26,14 @@ public class CheckInParamDto {
     public void setAnnounced(Boolean announced) {
         this.announced = announced;
     }
-    
-    
-    
+
+    public Boolean getIsTeam() {
+        return isTeam;
+    }
+
+    public void setIsTeam(Boolean isTeam) {
+        this.isTeam = isTeam;
+    }
 
     public Long getPersonId() {
         return personId;
@@ -60,12 +66,13 @@ public class CheckInParamDto {
     public void setIsAuthority(Boolean isAuthority) {
         this.isAuthority = isAuthority;
     }
+    
 
-    public String getOrganization() {
+    public OptionOrganization getOrganization() {
         return organization;
     }
 
-    public void setOrganization(String organization) {
+    public void setOrganization(OptionOrganization organization) {
         this.organization = organization;
     }
 

@@ -66,7 +66,7 @@ public class ParticipationController {
       try{
         List<String> list = acessoCidadaoService.findOrganizationsFromOrganogramaAPI().stream()
                             .sorted(Comparator.nullsFirst(Comparator.comparing(EvaluatorOrganizationDto::getName)))
-                            .map(EvaluatorOrganizationDto::getName)
+                            .map(org -> org.getName() + " - " + org.getShortName())
                             .collect(Collectors.toList());
         
         return ResponseEntity.ok(list);

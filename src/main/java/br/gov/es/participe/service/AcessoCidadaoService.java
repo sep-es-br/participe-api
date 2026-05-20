@@ -549,7 +549,7 @@ public class AcessoCidadaoService {
         });
 
         childOrganizationsDtos.iterator().forEachRemaining((childOrg) -> {
-          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), (Optional.ofNullable(childOrg.getRazaoSocial()).orElse(childOrg.getNomeFantasia())  + " - " + childOrg.getSigla()));
+          EvaluatorOrganizationDto newEvalOrgDto = new EvaluatorOrganizationDto(childOrg.getGuid(), Optional.ofNullable(childOrg.getRazaoSocial()).orElse(childOrg.getNomeFantasia()), childOrg.getSigla());
           evaluatorOrganizationDto.add(newEvalOrgDto);
         });
 

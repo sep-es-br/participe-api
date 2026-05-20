@@ -6,6 +6,15 @@ import br.gov.es.participe.repository.*;
 import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
 import br.gov.es.participe.util.dto.MessageDto;
+import java.io.IOException;
+import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +25,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import java.io.IOException;
-import java.text.Normalizer;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpSession;
 
 @Service
 @SuppressWarnings({ "unused" })
@@ -1366,11 +1365,11 @@ public class PersonService {
 
 
   public Page<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilterPaged(
-          Long meetingId, List<Long> localities, String name, String sort, String filterBy, Boolean filterByIsAuthority,
+          Long meetingId, List<Long> localities, String name, String sort, String filterBy, String tipoParticipante,
           String status, String filterByOrganization, Pageable pageable
   ) {
     List<PersonMeetingFilteredDto> fullList = findPersonOnMeetingByAttendanceFilter(
-            meetingId, localities, name, sort, filterBy, filterByIsAuthority, status, filterByOrganization
+            meetingId, localities, name, sort, filterBy, tipoParticipante, status, filterByOrganization
     );
 
     int start = (int) pageable.getOffset();
@@ -1383,12 +1382,12 @@ public class PersonService {
 
 
   public Map<String, Long> countTotalParticipantsInMeeting(
-          Long meetingId, List<Long> localities, String name, String order, String filter, Boolean filterIsAuthority, String status, String filterByOrganization
+          Long meetingId, List<Long> localities, String name, String order, String filter, String tipoParticipante, String status, String filterByOrganization
   ) {
     Map<String, Long> count = new HashMap<>();
 
     List<PersonMeetingFilteredDto> personMeetingFilteredDtoList = findPersonOnMeetingByAttendanceFilter(
-            meetingId, localities, name, order, filter, filterIsAuthority, filterByOrganization, status
+            meetingId, localities, name, order, filter, tipoParticipante, filterByOrganization, status
     );
 
     final long[] totalCheckedIn = {0L};
@@ -1411,14 +1410,14 @@ public class PersonService {
   }
 
   private List<PersonMeetingFilteredDto> findPersonOnMeetingByAttendanceFilter(
-    Long meetingId, List<Long> localities, String name, String sort, String filter, Boolean filterIsAuthority, String status, String filterByOrganization
+    Long meetingId, List<Long> localities, String name, String sort, String filter, String tipoParticipante, String status, String filterByOrganization
     ) {
     if (meetingId == null) {
       throw new IllegalArgumentException(PERSON_ERROR_MEETING_ID_NOT_SPECIFIED);
     }
 
     List<PersonMeetingFilteredDto> personMeetingFilteredDtoList = 
-            personRepository.findPersonsOnMeeting(meetingId, localities, name, sort, filter, filterIsAuthority, filterByOrganization, status);
+            personRepository.findPersonsOnMeeting(meetingId, localities, name, sort, filter, tipoParticipante, filterByOrganization, status);
     
 
 	  assert personMeetingFilteredDtoList != null;
