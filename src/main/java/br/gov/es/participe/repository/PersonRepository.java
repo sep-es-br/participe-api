@@ -320,31 +320,69 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    ($orgName IS NULL OR apoc.text.clean(COALESCE(cia, pr).organization) = apoc.text.clean($orgName))\r\n" + //
             "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\r\n" + //
             "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
-            "RETURN DISTINCT \r\n" + //
-            "  id(p) AS personId,\r\n" + //
-            "  id(cia) AS checkInId,\r\n" + //
-            "  toLower(p.name) AS name,\r\n" + //
-            "  p.contactEmail AS email,\r\n" + //
-            "  p.telehpone AS telephone,\r\n" + //
-            "  cia.time AS checkedInDate,\r\n" + //
-            "  coalesce(coalesce(cia, pr).isAuthority, false) AS isAuthority,\r\n" + //
-            "  coalesce(coalesce(cia, pr).role, '') AS role,\r\n" + //
-            "  coalesce(coalesce(cia, pr).organization, '') + ' ' + coalesce(coalesce(cia, pr).organizationShort, '') AS organization,\r\n" + //
-            "  coalesce(coalesce(cia, pr).isAnnounced, false) AS isAnnounced,  \r\n" + //
-            "  coalesce(coalesce(cia, pr).toAnnounce, false) AS toAnnounce,\r\n" + //
-            "  pr.created AS preRegisteredDate\r\n" + //
-            "order by (\r\n" + //
-            "  case\r\n" + //
-            "    when $sort = 'name' then apoc.text.clean(name)\r\n" + //
-            "    when $sort = 'checkedInDate' then checkedInDate\r\n" + //
-            "    when $sort = 'status' then (\r\n" + //
-            "      case\r\n" + //
-            "        when (isAuthority and not toAnnounce) then 0\r\n" + //
-            "        when (toAnnounce and not isAnnounced) then 1\r\n" + //
-            "        when (toAnnounce and isAnnounced) then 2\r\n" + //
-            "        else 3 end\r\n" + //
-            "    ) end \r\n" + //
-            ") asc, cia.time ASC",
+            "WITH DISTINCT \n" +
+            "  id(p) AS personId,\n" +
+            "  id(cia) AS checkInId,\n" +
+            "  toLower(p.name) AS name,\n" +
+            "  p.contactEmail AS email,\n" +
+            "  p.telehpone AS telephone,\n" +
+            "  cia.time AS checkedInDate,\n" +
+            "  coalesce(coalesce(cia, pr).isAuthority, false) AS isAuthority,\n" +
+            "  coalesce(coalesce(cia, pr).isTeam, false) AS isTeam,\n" +
+            "  coalesce(coalesce(cia, pr).role, '') AS role,\n" +
+            "  coalesce(coalesce(cia, pr).organization, '') + ' ' + coalesce(coalesce(cia, pr).organizationShort, '') AS organization,\n" +
+            "  coalesce(coalesce(cia, pr).isAnnounced, false) AS isAnnounced,  \n" +
+            "  coalesce(coalesce(cia, pr).toAnnounce, false) AS toAnnounce,\n" +
+            "  pr.created AS preRegisteredDate,\n" +
+            "  cia // Passando cia para usar no \"cia.time\" e \"cia IS NOT NULL\"\n" +
+            "\n" +
+            "// 3. Só cospe o resultado final limpo pro client\n" +
+            "RETURN \n" +
+            "  personId,\n" +
+            "  checkInId,\n" +
+            "  name,\n" +
+            "  email,\n" +
+            "  telephone,\n" +
+            "  checkedInDate,\n" +
+            "  isAuthority,\n" +
+            "  isTeam,\n" +
+            "  role,\n" +
+            "  organization,\n" +
+            "  isAnnounced,  \n" +
+            "  toAnnounce,\n" +
+            "  preRegisteredDate" +
+            "// 2. Ordena usando as variáveis que AGORA existem de verdade no escopo\n" +
+            "ORDER BY (\n" +
+            "  CASE\n" +
+            "    WHEN $sort = 'name' THEN apoc.text.clean(name)\n" +
+            "    WHEN $sort = 'checkedInDate' THEN toString(checkedInDate) // toString previne type mismatch\n" +
+            "    WHEN $sort = 'namingStatus' THEN \n" +
+            "      CASE\n" +
+            "        WHEN (isAuthority AND NOT toAnnounce) THEN \"0\"\n" +
+            "        WHEN (toAnnounce AND NOT isAnnounced) THEN \"1\"\n" +
+            "        WHEN (toAnnounce AND isAnnounced) THEN \"2\"\n" +
+            "        ELSE \"3\" \n" +
+            "      END\n" +
+            "    WHEN $sort = 'participationType' THEN \n" +
+            "      CASE\n" +
+            "        WHEN (isAuthority AND isTeam) THEN \"0\"\n" +
+            "        WHEN (isAuthority AND NOT isTeam) THEN \"1\"\n" +
+            "        ELSE \"2\"\n" +
+            "      END\n" +
+            "    WHEN $sort = 'credentialPresence' THEN \n" +
+            "      CASE\n" +
+            "        WHEN (cia IS NOT NULL) THEN \"0\"\n" +
+            "        // Como o pr.created virou preRegisteredDate, podemos inferir pr por ela\n" +
+            "        WHEN (preRegisteredDate IS NOT NULL) THEN \"1\" \n" +
+            "        ELSE \"2\"\n" +
+            "      END\n" +
+            "    WHEN $sort = 'organization' THEN " + 
+            "      CASE \n" +
+            "        WHEN organization IS NULL OR size(trim(apoc.text.clean(organization))) = 0 THEN 'zzzzzzzzzzzzzz' \n" +
+            "        ELSE apoc.text.clean(organization) \n" +
+            "      END\n" +
+            "  END \n" +
+            ") ASC, cia.time ASC\n",
         countQuery = 
             "CALL {\r\n" + //
             "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\r\n" + //

@@ -1,6 +1,7 @@
 package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.ForgotPasswordDto;
+import br.gov.es.participe.controller.dto.OptionOrganization;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
@@ -81,7 +82,14 @@ public class PersonController {
         AcSectionInfoDto sectionInfoDto = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
         if(sectionInfoDto != null) {
             AcOrganizationInfoDto organizationInfoDto = acService.findOrganizationInfoFromOrganogramaAPI(sectionInfoDto.getGuidOrganizacao());
-            if(organizationInfoDto != null) acRole.put("organization", Optional.ofNullable(organizationInfoDto.getRazaoSocial()).orElse(organizationInfoDto.getNomeFantasia()) + " - " + organizationInfoDto.getSigla());
+            if(organizationInfoDto != null){
+                OptionOrganization optOrg = new OptionOrganization();
+                optOrg.setGuid(organizationInfoDto.getGuid());
+                optOrg.setName(Optional.ofNullable(organizationInfoDto.getRazaoSocial()).orElse(organizationInfoDto.getNomeFantasia()));
+                optOrg.setShortName(organizationInfoDto.getSigla());
+
+                acRole.put("organization", optOrg);
+            }
         }
       }
       
