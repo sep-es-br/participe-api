@@ -295,6 +295,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    $name IS NULL OR\r\n" + //
             "    apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)  OR\r\n" + //
             "    apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($name) OR\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).organizationShort) CONTAINS apoc.text.clean($name) OR\r\n" + //
             "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
             "  ) AND\r\n" + //
             "  (CASE\r\n" + //
