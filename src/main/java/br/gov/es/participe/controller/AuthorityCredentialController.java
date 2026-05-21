@@ -3,6 +3,7 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.AuthorityCredentialRequest;
 import br.gov.es.participe.controller.dto.CheckedInAtDto;
 import br.gov.es.participe.controller.dto.PreRegistrationAuthorityDto;
+import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.model.AuthService;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Meeting;
@@ -70,6 +71,13 @@ public class AuthorityCredentialController {
       
       Person madeByPerson = personService.find(credentialRequest.getMadeBy());
       
+      PublicAgentDto dumb = new PublicAgentDto();
+      dumb.setSub(personService.getSubById(madeByPerson.getId()));
+      
+      PublicAgentDto publicAgent = this.acService.findThePersonEmailBySubInAcessoCidadaoAPI(dumb);
+      
+      madeByPerson.setContactEmail(publicAgent.getCorporativo() != null ? publicAgent.getCorporativo() : publicAgent.getEmail()  );
+      
       Meeting meeting = meetingService.find(credentialRequest.getMeetingId());
       
       Locality locality = localityService.find(credentialRequest.getLocalityId());
@@ -119,13 +127,16 @@ public class AuthorityCredentialController {
                                        pr.setOrganization(credentialRequest.getOrganization().getName());
                                        pr.setOrganizationShort(credentialRequest.getOrganization().getShortName());
                                        pr.setRole(credentialRequest.getRole());
+                                       pr.setIsTeam(credentialRequest.getIsTeam());
                                        pr.setMadeBy(madeByPerson);
                                         
                                         return pr;
                                     })
                                     .orElse(new PreRegistration(
                                         meeting, madeByPerson, representedByPerson, credentialRequest.getOrganization().getGuid(),
-                                        credentialRequest.getOrganization().getName(), credentialRequest.getOrganization().getShortName(), credentialRequest.getRole()));
+                                        credentialRequest.getOrganization().getName(), credentialRequest.getOrganization().getShortName(), credentialRequest.getRole(),
+                                        credentialRequest.getIsTeam()));
+                                            
         
         
       PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration, true);

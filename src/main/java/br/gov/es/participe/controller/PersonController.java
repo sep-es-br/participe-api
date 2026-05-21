@@ -105,9 +105,13 @@ public class PersonController {
         acRole.put("localityId", _sf.getLocality().getId());
       });
      
-      Optional.ofNullable(paDto).ifPresent(_paDto -> {
-          acRole.put("email", _paDto.getEmail());
-      });
+      
+        if(paDto.getCorporativo() != null) {
+            acRole.put("email", paDto.getCorporativo());
+        } else {
+            if(paDto.getEmail() != null) acRole.put("email", paDto.getEmail());
+        }
+        
         
       return ResponseEntity.ok(acRole);
   }
@@ -137,7 +141,13 @@ public class PersonController {
         person.setSub(sub);
         person = acService.findThePersonEmailBySubInAcessoCidadaoAPI(person);
 
-        if(person.getEmail() != null) acInfo.put("email", person.getEmail());
+        if(person.getCorporativo() != null) {
+            acInfo.put("email", person.getCorporativo());
+        } else {
+            if(person.getEmail() != null) acInfo.put("email", person.getEmail());
+        }
+        
+        
                 
       
       PublicAgentDto maybePublicAgentDto = acService.findAgentPublicBySubInAcessoCidadaoAPI(sub);

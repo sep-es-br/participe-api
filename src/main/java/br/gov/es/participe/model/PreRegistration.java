@@ -18,6 +18,7 @@ public class PreRegistration extends Entity implements Serializable {
     private Person madeBy;
     
     private Boolean isAuthority;
+    private Boolean isTeam;
     
     private String organizationGuid;
     private String organization;
@@ -49,8 +50,9 @@ public class PreRegistration extends Entity implements Serializable {
 
     }
 
-    public PreRegistration(Meeting meeting, Person madeByPerson, Person representingPerson, String organizationGuid, String organization, String organizationShort, String role ){
+    public PreRegistration(Meeting meeting, Person madeByPerson, Person representingPerson, String organizationGuid, String organization, String organizationShort, String role, Boolean isTeam ){
         this.isAuthority = true;
+        this.isTeam = isTeam;
         this.meeting = meeting;
         this.madeBy = madeByPerson;
         this.person = representingPerson;
@@ -101,8 +103,14 @@ public class PreRegistration extends Entity implements Serializable {
     public void setOrganizationShort(String organizationShort) {
         this.organizationShort = organizationShort;
     }
-    
-    
+
+    public Boolean getIsTeam() {
+        return isTeam;
+    }
+
+    public void setIsTeam(Boolean isTeam) {
+        this.isTeam = isTeam;
+    }
 
     public String getRole() {
         return role;
