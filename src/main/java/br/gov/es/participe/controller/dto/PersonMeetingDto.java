@@ -1,9 +1,8 @@
 package br.gov.es.participe.controller.dto;
 
-import org.springframework.data.neo4j.annotation.QueryResult;
-
 import java.util.Date;
 import java.util.List;
+import org.springframework.data.neo4j.annotation.QueryResult;
 
 @QueryResult
 public class PersonMeetingDto {
@@ -22,6 +21,7 @@ public class PersonMeetingDto {
     private Boolean isAuthTypeCpf;
     private List<String> authName;
     private Boolean isAuthority;
+    private Boolean isTeam;
     private Boolean isAnnounced;
     private Boolean toAnnounce;
     private String role;
@@ -50,6 +50,14 @@ public class PersonMeetingDto {
 
     public void setIsAnnounced(Boolean isAnnounced) {
         this.isAnnounced = isAnnounced;
+    }
+
+    public Boolean getIsTeam() {
+        return isTeam;
+    }
+
+    public void setIsTeam(Boolean isTeam) {
+        this.isTeam = isTeam;
     }
 
     public Boolean getToAnnounce() {

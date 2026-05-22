@@ -596,6 +596,10 @@ public class PersonService {
                 if (checkin.getIsAuthority() != null) {
                     personCitizen.setIsAuthority(Boolean.TRUE.equals(checkin.getIsAuthority()));
                 }
+                
+                if(checkin.getIsTeam() != null) {
+                    personCitizen.setIsTeam(Boolean.TRUE.equals(checkin.getIsTeam()));
+                }
 
                 if (checkin.getOrganization() != null) {
                     personCitizen.setOrganization(checkin.getOrganization());
@@ -618,6 +622,10 @@ public class PersonService {
                  if (preRegistration != null) {
                     if (preRegistration.getIsAuthority() != null) {
                         personCitizen.setIsAuthority(Boolean.TRUE.equals(preRegistration.getIsAuthority()) ? true : null);
+                    }
+                    
+                    if (preRegistration.getIsTeam() != null) {
+                        personCitizen.setIsTeam(Boolean.TRUE.equals(preRegistration.getIsTeam()));
                     }
 
                     if (preRegistration.getOrganization() != null) {
@@ -1442,7 +1450,6 @@ public class PersonService {
         element.setSuperLocality(localityInfo.getSuperLocality());
       }
     });
-
     return personMeetingFilteredDtoList;
   }
 
