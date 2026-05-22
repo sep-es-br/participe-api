@@ -63,97 +63,136 @@ public class AuthorityCredentialController {
     private AuthorityCredentialService authcSrv;
         
     
-  @PutMapping
-  public ResponseEntity<PreRegistrationAuthorityDto> registerAuthority(
-      @RequestHeader(name = "Authorization") String token,
-      @RequestBody AuthorityCredentialRequest credentialRequest
-          ) {
-      
-      Person madeByPerson = personService.find(credentialRequest.getMadeBy());
-      
-      PublicAgentDto dumb = new PublicAgentDto();
-      dumb.setSub(personService.getSubById(madeByPerson.getId()));
-      
-      PublicAgentDto publicAgent = this.acService.findThePersonEmailBySubInAcessoCidadaoAPI(dumb);
-      
-      madeByPerson.setContactEmail(publicAgent.getCorporativo() != null ? publicAgent.getCorporativo() : publicAgent.getEmail()  );
-      
-      Meeting meeting = meetingService.find(credentialRequest.getMeetingId());
-      
-      Locality locality = localityService.find(credentialRequest.getLocalityId());
-      
-      Person representedByPerson;
-      if(credentialRequest.getRepresentedByCpf() == null) {
-        representedByPerson = madeByPerson;
-      } else {
+    @PutMapping
+    public ResponseEntity<PreRegistrationAuthorityDto> registerAuthority(
+        @RequestHeader(name = "Authorization") String token,
+        @RequestBody AuthorityCredentialRequest credentialRequest
+            ) {
+
+        Person madeByPerson = personService.find(credentialRequest.getMadeBy());
+
+        PublicAgentDto dumb = new PublicAgentDto();
+        dumb.setSub(personService.getSubById(madeByPerson.getId()));
+
+        PublicAgentDto publicAgent = this.acService.findThePersonEmailBySubInAcessoCidadaoAPI(dumb);
+
+        madeByPerson.setContactEmail(publicAgent.getCorporativo() != null ? publicAgent.getCorporativo() : publicAgent.getEmail()  );
+
+        Meeting meeting = meetingService.find(credentialRequest.getMeetingId());
+
+        Locality locality = localityService.find(credentialRequest.getLocalityId());
+
+        Person representedByPerson;
+        if(credentialRequest.getRepresentedByCpf() == null) {
+          representedByPerson = madeByPerson;
+        } else {
+
+          Optional<Person> optReprPerson = personService.getBySubEmail(credentialRequest.getRepresentedBySub(), credentialRequest.getRepresentedByEmail());
+
+          representedByPerson = optReprPerson.orElseGet(() -> {
+              Person reprPerson = new Person();
+              reprPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
+              reprPerson.setName(credentialRequest.getRepresentedByName());
+
+              AuthService as = new AuthService();
+              as.setPerson(reprPerson);
+              as.setServer(AcessoCidadaoService.SERVER);
+              as.setServerId(credentialRequest.getRepresentedBySub());
+
+              reprPerson.addAuthService(as);
+
+              return personService.save(reprPerson, true);
+          });
+
+
+        }
+        SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
+
+          Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
+              selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
+          }, 
+          () -> {
+              representedByPerson.addSelfDeclaration(
+                      selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
+              );
+          });
+
+          PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
+
+          preRegistration = Optional.ofNullable(preRegistration)
+                                      .map(pr -> {
+
+                                         pr.setPreRegistration(new Date());
+                                         pr.setOrganizationGuid(credentialRequest.getOrganization().getGuid());
+                                         pr.setOrganization(credentialRequest.getOrganization().getName());
+                                         pr.setOrganizationShort(credentialRequest.getOrganization().getShortName());
+                                         pr.setRole(credentialRequest.getRole());
+                                         pr.setIsTeam(credentialRequest.getIsTeam());
+                                         pr.setMadeBy(madeByPerson);
+
+                                          return pr;
+                                      })
+                                      .orElse(new PreRegistration(
+                                          meeting, madeByPerson, representedByPerson, credentialRequest.getOrganization().getGuid(),
+                                          credentialRequest.getOrganization().getName(), credentialRequest.getOrganization().getShortName(), credentialRequest.getRole(),
+                                          credentialRequest.getIsTeam()));
+
+
+
+        PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration, true);
+        try {
+            byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
+
+          Map<String, String> emailBody = preRegistrationService.buildEmailBody(meeting);
+          String[] to = new String[]{madeByPerson.getContactEmail(), representedByPerson.getContactEmail()};
+          String title =  meeting.getConference().getName()+" - Pré-Credenciamento de Autoridade";
+          emailService.sendEmailPreRegistration(to, title, emailBody, imageQR);
+          return ResponseEntity.status(200).body(new PreRegistrationAuthorityDto(savedPreRegistration,imageQR) );
+        }catch (IOException | WriterException | MessagingException ex) {
+            throw new RuntimeException(ex);
+        }
+
+
+    }
+  
+    @DeleteMapping
+    public void deleteCredencial(
+            @RequestBody AuthorityCredentialRequest request
+    ) {
         
-        Optional<Person> optReprPerson = personService.getBySubEmail(credentialRequest.getRepresentedBySub(), credentialRequest.getRepresentedByEmail());
+        Meeting meeting = meetingService.find(request.getMeetingId());
         
-        representedByPerson = optReprPerson.orElseGet(() -> {
-            Person reprPerson = new Person();
-            reprPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
-            reprPerson.setName(credentialRequest.getRepresentedByName());
-            
-            AuthService as = new AuthService();
-            as.setPerson(reprPerson);
-            as.setServer(AcessoCidadaoService.SERVER);
-            as.setServerId(credentialRequest.getRepresentedBySub());
-            
-            reprPerson.addAuthService(as);
-            
-            return personService.save(reprPerson, true);
-        });
-           
+        Person madeByPerson = personService.find(request.getMadeBy());
         
-      }
-      SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
-        
-        Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
-            selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
-        }, 
-        () -> {
-            representedByPerson.addSelfDeclaration(
-                    selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
-            );
-        });
-        
+        Person representedByPerson;
+        if(request.getRepresentedByCpf() == null) {
+          representedByPerson = madeByPerson;
+        } else {
+
+          Optional<Person> optReprPerson = personService.getBySubEmail(request.getRepresentedBySub(), request.getRepresentedByEmail());
+
+          representedByPerson = optReprPerson.orElseGet(() -> {
+              Person reprPerson = new Person();
+              reprPerson.setContactEmail(request.getRepresentedByEmail());
+              reprPerson.setName(request.getRepresentedByName());
+
+              AuthService as = new AuthService();
+              as.setPerson(reprPerson);
+              as.setServer(AcessoCidadaoService.SERVER);
+              as.setServerId(request.getRepresentedBySub());
+
+              reprPerson.addAuthService(as);
+
+              return personService.save(reprPerson, true);
+          });
+
+
+        }
         PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
         
-        preRegistration = Optional.ofNullable(preRegistration)
-                                    .map(pr -> {
-                                        
-                                       pr.setPreRegistration(new Date());
-                                       pr.setOrganizationGuid(credentialRequest.getOrganization().getGuid());
-                                       pr.setOrganization(credentialRequest.getOrganization().getName());
-                                       pr.setOrganizationShort(credentialRequest.getOrganization().getShortName());
-                                       pr.setRole(credentialRequest.getRole());
-                                       pr.setIsTeam(credentialRequest.getIsTeam());
-                                       pr.setMadeBy(madeByPerson);
-                                        
-                                        return pr;
-                                    })
-                                    .orElse(new PreRegistration(
-                                        meeting, madeByPerson, representedByPerson, credentialRequest.getOrganization().getGuid(),
-                                        credentialRequest.getOrganization().getName(), credentialRequest.getOrganization().getShortName(), credentialRequest.getRole(),
-                                        credentialRequest.getIsTeam()));
-                                            
-        
-        
-      PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration, true);
-      try {
-          byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
-
-        Map<String, String> emailBody = preRegistrationService.buildEmailBody(meeting);
-        String[] to = new String[]{madeByPerson.getContactEmail(), representedByPerson.getContactEmail()};
-        String title =  meeting.getConference().getName()+" - Pré-Credenciamento de Autoridade";
-        emailService.sendEmailPreRegistration(to, title, emailBody, imageQR);
-        return ResponseEntity.status(200).body(new PreRegistrationAuthorityDto(savedPreRegistration,imageQR) );
-      }catch (IOException | WriterException | MessagingException ex) {
-          throw new RuntimeException(ex);
-      }
+        this.preRegistrationService.deletePreRegistration(preRegistration);
+    }
             
-      
-  }
 
     @PutMapping("{idCheckedIn}/toggleAnnounced")
     public ResponseEntity<?> toggleAnnounced(

@@ -1,12 +1,10 @@
 package br.gov.es.participe.repository;
 
+import br.gov.es.participe.model.PreRegistration;
 import java.util.Optional;
-
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
-
-import br.gov.es.participe.model.PreRegistration;
 
 public interface PreRegistrationRepository extends Neo4jRepository<PreRegistration, Long> {
 
@@ -25,5 +23,9 @@ public interface PreRegistrationRepository extends Neo4jRepository<PreRegistrati
                 "[(pr)-[r_2:PRE_REGISTRATION]->(m) | [r_2,m]]" + //
                 "]")
     Optional<PreRegistration> findPreRegistrationWithRelationshipsById(@Param("preRegistrationId") Long preRegistrationId);
+    
+    // Deleta o relacionamento direto pelo ID dele no Neo4j
+    @Query("MATCH ()-[r]-() WHERE id(r) = $id DELETE r")
+    void deletePreRegistrationById(Long id);
     
 }
