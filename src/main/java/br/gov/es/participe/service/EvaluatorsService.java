@@ -1,21 +1,5 @@
 package br.gov.es.participe.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
 import br.gov.es.participe.controller.dto.EvaluatorRequestDto;
 import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
@@ -28,6 +12,20 @@ import br.gov.es.participe.model.Organization;
 import br.gov.es.participe.model.Role;
 import br.gov.es.participe.model.Section;
 import br.gov.es.participe.repository.EvaluatorsRepository;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 @Service
 public class EvaluatorsService {
@@ -74,7 +72,7 @@ public class EvaluatorsService {
             }
 
         }
-        if(!organizationGuids.isEmpty()){;
+        if(!organizationGuids.isEmpty()){
             return String.join(",", organizationGuids);
         }else{
             throw new EvaluatorForbiddenException();

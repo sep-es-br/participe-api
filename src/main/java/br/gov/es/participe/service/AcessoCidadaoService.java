@@ -189,8 +189,9 @@ public class AcessoCidadaoService {
      }
    }
    
-    //  roles.add("Administrator");;
-    //  roles.add("Presenter");
+    //  roles.add("Administrator");
+//      roles.add("Presenter");
+//      roles.add("Recepcionist");
     
     return roles;
   }

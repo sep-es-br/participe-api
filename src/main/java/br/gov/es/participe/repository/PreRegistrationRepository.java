@@ -16,7 +16,7 @@ public interface PreRegistrationRepository extends Neo4jRepository<PreRegistrati
     "]")
     PreRegistration findByMeetingAndPerson( @Param("meetingId") Long meetingId, @Param("personId") Long personID);
 
-    @Query("MATCH (pr:PreRegistration)-[r_1:PRE_REGISTRATION]->(p:Person),(pr)-[r_2:PRE_REGISTRATION]->(m:Meeting)" + //
+    @Query("MATCH (pr:c)-[r_1:PRE_REGISTRATION]->(p:Person),(pr)-[r_2:PRE_REGISTRATION]->(m:Meeting)" + //
                 "WHERE id(pr)=$preRegistrationId " + //
                 "WITH pr RETURN pr, [" + //
                 "[(pr)-[r_1:PRE_REGISTRATION]->(p) | [r_1,p]]," + //
@@ -25,7 +25,7 @@ public interface PreRegistrationRepository extends Neo4jRepository<PreRegistrati
     Optional<PreRegistration> findPreRegistrationWithRelationshipsById(@Param("preRegistrationId") Long preRegistrationId);
     
     // Deleta o relacionamento direto pelo ID dele no Neo4j
-    @Query("MATCH ()-[r]-() WHERE id(r) = $id DELETE r")
+    @Query("MATCH (r:PreRegistration) WHERE  id(r) = $id DETACH DELETE r")
     void deletePreRegistrationById(Long id);
     
 }
