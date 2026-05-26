@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -188,6 +190,9 @@ public class AuthorityCredentialController {
 
 
         }
+        
+        Logger.getGlobal().log(Level.INFO, "meeting id: {0}; representedByPerson id: {1}", new Object[]{meeting.getId(), representedByPerson.getId()});
+        
         PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
         
         this.preRegistrationService.deletePreRegistration(preRegistration);
