@@ -602,7 +602,12 @@ public class PersonService {
                 }
 
                 if (checkin.getOrganization() != null) {
-                    personCitizen.setOrganization(checkin.getOrganization());
+                    OptionOrganization optOrg = new OptionOrganization();
+                    optOrg.setGuid(checkin.getOrganizationGuid());
+                    optOrg.setName(checkin.getOrganization());
+                    optOrg.setShortName(checkin.getOrganizationShort());
+
+                    personCitizen.setOrganization(optOrg);
                 }
 
                 if (checkin.getRole() != null) {
@@ -629,7 +634,13 @@ public class PersonService {
                     }
 
                     if (preRegistration.getOrganization() != null) {
-                        personCitizen.setOrganization(preRegistration.getOrganization());
+                        
+                        OptionOrganization optOrg = new OptionOrganization();
+                        optOrg.setGuid(preRegistration.getOrganizationGuid());
+                        optOrg.setName(preRegistration.getOrganization());
+                        optOrg.setShortName(preRegistration.getOrganizationShort());
+                        
+                        personCitizen.setOrganization(optOrg);
                     }
 
                     if (preRegistration.getRole() != null) {

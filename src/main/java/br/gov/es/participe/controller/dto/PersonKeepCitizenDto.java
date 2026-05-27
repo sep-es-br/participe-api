@@ -46,7 +46,7 @@ public class PersonKeepCitizenDto {
         
         private Boolean announced;
 
-    private String organization;
+    private OptionOrganization organization;
 
     private String role;
 
@@ -214,11 +214,11 @@ public class PersonKeepCitizenDto {
 
         
 
-	public String getOrganization() {
+	public OptionOrganization getOrganization() {
 		return organization;
 	}
 
-	public void setOrganization(String organization) {
+	public void setOrganization(OptionOrganization organization) {
 		this.organization = organization;
 	}
 
