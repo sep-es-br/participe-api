@@ -163,7 +163,7 @@ public class PersonController {
           
       }
       
-        Optional<Person> optPerson = personService.getBySubEmail(sub, person.getEmail());
+        Optional<Person> optPerson = personService.findByLoginSub(sub);
 
         optPerson.ifPresent(p -> {
             SelfDeclaration sd = selfDeclarationService.findByPersonAndConference(p.getId(), conferenceId);
