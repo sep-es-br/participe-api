@@ -89,11 +89,10 @@ public class AuthorityCredentialController {
           representedByPerson = madeByPerson;
         } else {
 
-          Optional<Person> optReprPerson = personService.getBySubEmail(credentialRequest.getRepresentedBySub(), credentialRequest.getRepresentedByEmail());
-
+          Optional<Person> optReprPerson = personService.findByLoginSub(credentialRequest.getRepresentedBySub());
+                  
           representedByPerson = optReprPerson.orElseGet(() -> {
               Person reprPerson = new Person();
-              reprPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
               reprPerson.setName(credentialRequest.getRepresentedByName());
 
               AuthService as = new AuthService();
@@ -106,6 +105,7 @@ public class AuthorityCredentialController {
               return personService.save(reprPerson, true);
           });
 
+          representedByPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
 
         }
         SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
