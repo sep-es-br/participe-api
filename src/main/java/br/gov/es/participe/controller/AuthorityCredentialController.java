@@ -114,7 +114,9 @@ public class AuthorityCredentialController {
         SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
 
           Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
-              selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
+              SelfDeclaration atualizada = selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
+              
+              sf.setLocality(atualizada.getLocality());
           }, 
           () -> {
               representedByPerson.addSelfDeclaration(
