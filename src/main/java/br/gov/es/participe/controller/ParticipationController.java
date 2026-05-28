@@ -1,22 +1,27 @@
 package br.gov.es.participe.controller;
 
 import br.gov.es.participe.controller.dto.*;
+import br.gov.es.participe.model.CheckedInAt;
 import br.gov.es.participe.model.Comment;
-import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.model.Highlight;
+import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.service.*;
 import br.gov.es.participe.util.domain.TokenType;
-import br.gov.es.participe.model.CheckedInAt;
+import br.gov.es.participe.util.dto.MessageDto;
+import java.io.IOException;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.Optional;
+import java.util.List;
 import java.util.Map;
-
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +35,9 @@ public class ParticipationController {
 
   @Autowired
   private ParticipationService participationService;
+  
+  @Autowired
+  private AcessoCidadaoService acessoCidadaoService;
 
   @Autowired
   private TokenService tokenService;
@@ -50,6 +58,25 @@ public class ParticipationController {
   private MeetingService meetingService;
 
 
+  
+  @GetMapping("{idMeeting}/organizations")
+  public ResponseEntity<?> findAllOrganization(
+          @PathVariable Long idMeeting
+  ){
+      try{
+        List<String> list = acessoCidadaoService.findOrganizationsFromOrganogramaAPI().stream()
+                            .sorted(Comparator.nullsFirst(Comparator.comparing(EvaluatorOrganizationDto::getName)))
+                            .map(org -> org.getName() + " - " + org.getShortName())
+                            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(list);
+      }catch(IOException ex) {
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Erro ao buscar organizações"));
+      }
+              
+  }
+  
+  
   @GetMapping("/{idConference}")
   public ResponseEntity<ParticipationsDto> getParticipation(@RequestHeader(name = "Authorization") String token,
                                                             @RequestParam(name = "text", required = false, defaultValue = "") String text,

@@ -4,26 +4,17 @@ import br.gov.es.participe.controller.dto.PreRegistrationDto;
 import br.gov.es.participe.exception.QRCodeGenerateException;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
-
+import com.google.zxing.WriterException;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.swing.text.DateFormatter;
-
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.zxing.WriterException;
 
 @Service
 public class PreRegistrationService {
@@ -151,5 +142,9 @@ public class PreRegistrationService {
                 throw new QRCodeGenerateException("Erro ao tentar recuperar seu pré-credenciamento. ");
             }
             return new PreRegistrationDto(preRegistration, imageQR);
+    }
+    
+    public void deletePreRegistration(PreRegistration preRegistration){
+        this.preRegistrationRepository.deletePreRegistrationById(preRegistration.getId());
     }
 }

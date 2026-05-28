@@ -2,15 +2,14 @@ package br.gov.es.participe.repository;
 
 import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.Person;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 public interface PersonRepository extends Neo4jRepository<Person, Long> {
 
@@ -58,7 +57,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
   Optional<Person> findByLoginEmail(@Param("email")String email);
 
     @Query("MATCH (person:Person)-[authBy:IS_AUTHENTICATED_BY]->(authService:AuthService)\n" +
-    "    WHERE authService.serverId=$sub\n" +
+    "    WHERE authBy.idByAuth=$sub OR authService.serverId=$sub\n" +
     "    OPTIONAL MATCH (l:Login)<-[:MADE]-(person)\n" +
     "    RETURN person\n" +
     "    ORDER BY l.time IS NOT NULL ASC, l.time DESC\n" +
@@ -296,6 +295,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    $name IS NULL OR\r\n" + //
             "    apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)  OR\r\n" + //
             "    apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($name) OR\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).organizationShort) CONTAINS apoc.text.clean($name) OR\r\n" + //
             "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
             "  ) AND\r\n" + //
             "  (CASE\r\n" + //
@@ -310,35 +310,80 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    when $status = 'toAnnounce' then (coalesce(cia.toAnnounce, false) and not coalesce(cia.isAnnounced, false))\n" +
             "    when $status = 'announced' then coalesce(cia.isAnnounced, false)\n" +
             "    else true end\n" +
-            "  ) and\r\n" + //
-            "    ($filterIsAuthotity is null or $filterIsAuthotity = coalesce(cia.isAuthority, pr.isAuthority, false))\r\n" + //
+            "  ) AND\n" +
+            "  (CASE\n" +
+            "    WHEN $tipoParticipante = 'repr' THEN COALESCE(COALESCE(cia, pr).isAuthority, FALSE)\n" +
+            "    WHEN $tipoParticipante = 'repr-not-equipe' THEN COALESCE(COALESCE(cia, pr).isAuthority, FALSE) AND NOT COALESCE(COALESCE(cia, pr).isTeam, FALSE)\n" +
+            "    WHEN $tipoParticipante = 'repr-equipe' THEN COALESCE(COALESCE(cia, pr).isAuthority, FALSE) AND COALESCE(COALESCE(cia, pr).isTeam, FALSE)\n" +
+            "    WHEN $tipoParticipante = 'pub' THEN NOT COALESCE(COALESCE(cia, pr).isAuthority, FALSE) AND NOT COALESCE(COALESCE(cia, pr).isTeam, FALSE)\n" +
+            "    ELSE TRUE END\n" +
+            "  )  AND\r\n" + //
+            "    ($orgName IS NULL OR apoc.text.clean(COALESCE(cia, pr).organization) = apoc.text.clean($orgName))\r\n" + //
             "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\r\n" + //
             "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
-            "RETURN DISTINCT \r\n" + //
-            "  id(p) AS personId,\r\n" + //
-            "  id(cia) AS checkInId,\r\n" + //
-            "  toLower(p.name) AS name,\r\n" + //
-            "  p.contactEmail AS email,\r\n" + //
-            "  p.telehpone AS telephone,\r\n" + //
-            "  cia.time AS checkedInDate,\r\n" + //
-            "  coalesce(coalesce(cia, pr).isAuthority, false) AS isAuthority,\r\n" + //
-            "  coalesce(coalesce(cia, pr).role, '') AS role,\r\n" + //
-            "  coalesce(coalesce(cia, pr).organization, '') AS organization,\r\n" + //
-            "  coalesce(coalesce(cia, pr).isAnnounced, false) AS isAnnounced,  \r\n" + //
-            "  coalesce(coalesce(cia, pr).toAnnounce, false) AS toAnnounce,\r\n" + //
-            "  pr.created AS preRegisteredDate\r\n" + //
-            "order by (\r\n" + //
-            "  case\r\n" + //
-            "    when $sort = 'name' then apoc.text.clean(name)\r\n" + //
-            "    when $sort = 'checkedInDate' then checkedInDate\r\n" + //
-            "    when $sort = 'status' then (\r\n" + //
-            "      case\r\n" + //
-            "        when (isAuthority and not toAnnounce) then 0\r\n" + //
-            "        when (toAnnounce and not isAnnounced) then 1\r\n" + //
-            "        when (toAnnounce and isAnnounced) then 2\r\n" + //
-            "        else 3 end\r\n" + //
-            "    ) end \r\n" + //
-            ") asc, cia.time ASC",
+            "WITH DISTINCT \n" +
+            "  id(p) AS personId,\n" +
+            "  id(cia) AS checkInId,\n" +
+            "  toLower(p.name) AS name,\n" +
+            "  p.contactEmail AS email,\n" +
+            "  p.telehpone AS telephone,\n" +
+            "  cia.time AS checkedInDate,\n" +
+            "  coalesce(coalesce(cia, pr).isAuthority, false) AS isAuthority,\n" +
+            "  coalesce(coalesce(cia, pr).isTeam, false) AS isTeam,\n" +
+            "  coalesce(coalesce(cia, pr).role, '') AS role,\n" +
+            "  coalesce(coalesce(cia, pr).organization, '') + ' ' + coalesce(coalesce(cia, pr).organizationShort, '') AS organization,\n" +
+            "  coalesce(coalesce(cia, pr).isAnnounced, false) AS isAnnounced,  \n" +
+            "  coalesce(coalesce(cia, pr).toAnnounce, false) AS toAnnounce,\n" +
+            "  pr.created AS preRegisteredDate,\n" +
+            "  cia // Passando cia para usar no \"cia.time\" e \"cia IS NOT NULL\"\n" +
+            "\n" +
+            "// 3. Só cospe o resultado final limpo pro client\n" +
+            "RETURN \n" +
+            "  personId,\n" +
+            "  checkInId,\n" +
+            "  name,\n" +
+            "  email,\n" +
+            "  telephone,\n" +
+            "  checkedInDate,\n" +
+            "  isAuthority,\n" +
+            "  isTeam,\n" +
+            "  role,\n" +
+            "  organization,\n" +
+            "  isAnnounced,  \n" +
+            "  toAnnounce,\n" +
+            "  preRegisteredDate" +
+            "// 2. Ordena usando as variáveis que AGORA existem de verdade no escopo\n" +
+            "ORDER BY (\n" +
+            "  CASE\n" +
+            "    WHEN $sort = 'name' THEN apoc.text.clean(name)\n" +
+            "    WHEN $sort = 'checkedInDate' THEN toString(checkedInDate) // toString previne type mismatch\n" +
+            "    WHEN $sort = 'namingStatus' THEN \n" +
+            "      CASE\n" +
+            "        WHEN (isAuthority AND NOT toAnnounce) THEN \"0\"\n" +
+            "        WHEN (toAnnounce AND NOT isAnnounced) THEN \"1\"\n" +
+            "        WHEN (toAnnounce AND isAnnounced) THEN \"2\"\n" +
+            "        ELSE \"3\" \n" +
+            "      END\n" +
+            "    WHEN $sort = 'participationType' THEN \n" +
+            "      CASE\n" +
+            "        WHEN (isAuthority AND isTeam) THEN \"0\"\n" +
+            "        WHEN (isAuthority AND NOT isTeam) THEN \"1\"\n" +
+            "        ELSE \"2\"\n" +
+            "      END\n" +
+            "    WHEN $sort = 'credentialPresence' THEN \n" +
+            "      CASE\n" +
+            "        WHEN (cia IS NOT NULL) THEN \"0\"\n" +
+            "        // Como o pr.created virou preRegisteredDate, podemos inferir pr por ela\n" +
+            "        WHEN (preRegisteredDate IS NOT NULL) THEN \"1\" \n" +
+            "        ELSE \"2\"\n" +
+            "      END\n" +
+            "    WHEN $sort = 'organization' THEN " + 
+            "      CASE \n" +
+            "        WHEN organization IS NULL OR size(trim(apoc.text.clean(organization))) = 0 THEN 'zzzzzzzzzzzzzz' \n" +
+            "        ELSE apoc.text.clean(organization) \n" +
+            "      END\n" +
+            "  END \n" +
+            ") ASC, cia.time ASC\n",
         countQuery = 
             "CALL {\r\n" + //
             "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\r\n" + //
@@ -354,7 +399,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    $name IS NULL OR\r\n" + //
             "    apoc.text.clean(p.name) CONTAINS apoc.text.clean($name)  OR\r\n" + //
             "    apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($name) OR\r\n" + //
-            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
+            "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name) OR \r\n" + //
+            "   (apoc.text.clean(COALESCE(cia, pr).organization) CONTAINS apoc.text.clean($orgName) OR apoc.text.clean($orgName) CONTAINS apoc.text.clean(COALESCE(cia, pr).organization) )\r\n" + //
             "  ) AND\r\n" + //
             "  (CASE\r\n" + //
             "    WHEN $filter = 'pres' THEN cia IS NOT NULL\r\n" + //
@@ -368,8 +414,14 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    when $status = 'toAnnounce' then (coalesce(cia.toAnnounce, false) and not coalesce(cia.isAnnounced, false))\n" +
             "    when $status = 'announced' then coalesce(cia.isAnnounced, false)\n" +
             "    else true end\n" +
-            "  ) and\r\n" + //
-            "    ($filterIsAuthotity is null or $filterIsAuthotity = coalesce(cia.isAuthority, pr.isAuthority, false))\r\n" + //
+            "  ) AND\n" +
+            "  (CASE\n" +
+            "    WHEN $tipoParticipante = 'repr' THEN COALESCE(COALESCE(cia, pr).isAuthority, FALSE)\n" +
+            "    WHEN $tipoParticipante = 'repr-not-equipe' THEN COALESCE(COALESCE(cia, pr).isAuthority, FALSE) AND NOT COALESCE(COALESCE(cia, pr).isTeam, FALSE)\n" +
+            "    WHEN $tipoParticipante = 'repr-equipe' THEN COALESCE(COALESCE(cia, pr).isAuthority, FALSE) AND COALESCE(COALESCE(cia, pr).isTeam, FALSE)\n" +
+            "    WHEN $tipoParticipante = 'pub' THEN NOT COALESCE(COALESCE(cia, pr).isAuthority, FALSE) AND NOT COALESCE(COALESCE(cia, pr).isTeam, FALSE)\n" +
+            "    ELSE TRUE END\n" +
+            "  ) \r\n" + //
             "OPTIONAL MATCH (p)-[md:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality)\r\n" + //
             "WHERE ((loc IS NOT NULL AND id(loc) IN $localities) OR NOT $localities)\r\n" + //
             "WITH DISTINCT id(p) AS personId, toLower(p.name) AS name, p.contactEmail AS email, p.telehpone AS telephone, " +
@@ -382,7 +434,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             String name,
             String sort,
             String filter,
-            Boolean filterIsAuthotity,
+            String tipoParticipante,
+            String orgName,
             String status
     );
   

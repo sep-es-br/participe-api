@@ -1,14 +1,12 @@
 package br.gov.es.participe.controller;
 
-import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
-import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.ForgotPasswordDto;
+import br.gov.es.participe.controller.dto.OptionOrganization;
 import br.gov.es.participe.controller.dto.PersonDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
 import br.gov.es.participe.controller.dto.UnitRolesDto;
-import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.service.AcessoCidadaoService;
@@ -18,13 +16,6 @@ import br.gov.es.participe.service.SelfDeclarationService;
 import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,8 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import jdk.jfr.ContentType;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
@@ -88,7 +82,14 @@ public class PersonController {
         AcSectionInfoDto sectionInfoDto = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
         if(sectionInfoDto != null) {
             AcOrganizationInfoDto organizationInfoDto = acService.findOrganizationInfoFromOrganogramaAPI(sectionInfoDto.getGuidOrganizacao());
-            if(organizationInfoDto != null) acRole.put("organization", organizationInfoDto.getRazaoSocial());
+            if(organizationInfoDto != null){
+                OptionOrganization optOrg = new OptionOrganization();
+                optOrg.setGuid(organizationInfoDto.getGuid());
+                optOrg.setName(Optional.ofNullable(organizationInfoDto.getRazaoSocial()).orElse(organizationInfoDto.getNomeFantasia()));
+                optOrg.setShortName(organizationInfoDto.getSigla());
+
+                acRole.put("organization", optOrg);
+            }
         }
       }
       
@@ -104,9 +105,13 @@ public class PersonController {
         acRole.put("localityId", _sf.getLocality().getId());
       });
      
-      Optional.ofNullable(paDto).ifPresent(_paDto -> {
-          acRole.put("email", _paDto.getEmail());
-      });
+      
+        if(paDto.getCorporativo() != null) {
+            acRole.put("email", paDto.getCorporativo());
+        } else {
+            if(paDto.getEmail() != null) acRole.put("email", paDto.getEmail());
+        }
+        
         
       return ResponseEntity.ok(acRole);
   }
@@ -136,7 +141,13 @@ public class PersonController {
         person.setSub(sub);
         person = acService.findThePersonEmailBySubInAcessoCidadaoAPI(person);
 
-        if(person.getEmail() != null) acInfo.put("email", person.getEmail());
+        if(person.getCorporativo() != null) {
+            acInfo.put("email", person.getCorporativo());
+        } else {
+            if(person.getEmail() != null) acInfo.put("email", person.getEmail());
+        }
+        
+        
                 
       
       PublicAgentDto maybePublicAgentDto = acService.findAgentPublicBySubInAcessoCidadaoAPI(sub);
@@ -152,7 +163,7 @@ public class PersonController {
           
       }
       
-        Optional<Person> optPerson = personService.getBySubEmail(sub, person.getEmail());
+        Optional<Person> optPerson = personService.findByLoginSub(sub);
 
         optPerson.ifPresent(p -> {
             SelfDeclaration sd = selfDeclarationService.findByPersonAndConference(p.getId(), conferenceId);
