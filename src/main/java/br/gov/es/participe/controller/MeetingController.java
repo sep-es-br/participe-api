@@ -7,35 +7,9 @@ import br.gov.es.participe.model.Person;
 import br.gov.es.participe.service.MeetingService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.QRCodeService;
-
+import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.interfaces.ApiPageable;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-/* Início das importações */
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.springframework.http.ContentDisposition;
-/* Fim das importações */
-import javax.imageio.ImageIO;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.WriterException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,6 +17,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 
 
@@ -59,6 +44,28 @@ public class MeetingController {
 
   @Autowired
   private QRCodeService qrCodeService;
+  
+  @GetMapping("/organizationList")
+  public ResponseEntity<?> getOrganizationList(
+  
+  ) {
+      
+      try {        
+        return ResponseEntity.ok(meetingService.listOptionOrganization());
+      
+      } catch(IOException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new MessageDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getLocalizedMessage()));
+      }
+  }
+  
+  @GetMapping("/canEditIsTeam")
+  public Boolean getCanEditIsTeam(
+      @RequestHeader(name = "Authorization") String token
+  ){
+      return personService.hasOneOfTheRoles(token, new String[] { "Administrator" });
+  }
 
   @GetMapping("/{idConference}/page-number")
   public ResponseEntity<Object> findPageNumberByConference(
@@ -203,6 +210,7 @@ public class MeetingController {
         checkInParamDto.getMeetingId(),
         checkInParamDto.getTimeZone(),
         checkInParamDto.getIsAuthority(),
+        checkInParamDto.getIsTeam(),
         checkInParamDto.getOrganization(),
         checkInParamDto.getRole(),
         checkInParamDto.getToAnnounce(),
@@ -235,6 +243,7 @@ public class MeetingController {
         checkInParamDto.getMeetingId(),
         checkInParamDto.getTimeZone(),
         checkInParamDto.getIsAuthority(),
+        checkInParamDto.getIsTeam(),
         checkInParamDto.getOrganization(),
         checkInParamDto.getRole());
 
@@ -264,6 +273,7 @@ public class MeetingController {
         checkInParamDto.getMeetingId(),
         checkInParamDto.getTimeZone(),
         checkInParamDto.getIsAuthority(),
+        checkInParamDto.getIsTeam(),
         checkInParamDto.getOrganization(),
         checkInParamDto.getRole());
 
@@ -297,14 +307,15 @@ public class MeetingController {
       @RequestParam(name = "name", required = false) String name, 
       @RequestParam(name = "sort", required = true) String sort,
       @RequestParam(name = "filterBy", required = true) String filterBy,
-      @RequestParam(name = "filterByIsAuthority", required = false) Boolean filterByIsAuthority,
+      @RequestParam(name = "tipoParticipante", required = false) String tipoParticipantes,
       @RequestParam(name = "filterByStatus", required = false) String filterByStatus,
+      @RequestParam(name = "filterByOrganization", required = false) String filterByOrganization,
       @ApiIgnore Pageable page) {
               
         Page<PersonMeetingFilteredDto> personMeetingFilteredDto = 
                 personService.findPersonOnMeetingByAttendanceFilterPaged(
                         meetingId, localities, name, sort, filterBy, 
-                        filterByIsAuthority, filterByStatus, page
+                        tipoParticipantes, filterByStatus, filterByOrganization, page
                 );
 
         return ResponseEntity.ok().body(personMeetingFilteredDto);
@@ -319,12 +330,13 @@ public class MeetingController {
           @RequestParam(name = "name", required = false) String name,
         @RequestParam(name = "sort", required = true) String sort,
         @RequestParam(name = "filterBy", required = true) String filterBy,
-        @RequestParam(name = "filterByIsAuthority", required = false) Boolean filterByIsAuthority,
+      @RequestParam(name = "tipoParticipante", required = false) String tipoParticipantes,
+      @RequestParam(name = "filterByOrganization", required = false) String filterByOrganization,
       @RequestParam(name = "filterByStatus", required = false) String filterByStatus
   ) {
       
     Map<String, Long> totalParticipants = personService.countTotalParticipantsInMeeting(
-            meetingId, localities, name, sort, filterBy, filterByIsAuthority, filterByStatus
+            meetingId, localities, name, sort, filterBy, tipoParticipantes, filterByOrganization, filterByStatus
     );
 
     return ResponseEntity.ok().body(totalParticipants);

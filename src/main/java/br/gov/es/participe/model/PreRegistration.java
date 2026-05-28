@@ -1,12 +1,9 @@
 package br.gov.es.participe.model;
 
-import org.neo4j.ogm.annotation.*;
-import org.neo4j.ogm.annotation.typeconversion.DateString;
-
-import br.gov.es.participe.controller.dto.PreRegistrationParamDto;
-
 import java.io.*;
 import java.util.*;
+import org.neo4j.ogm.annotation.*;
+import org.neo4j.ogm.annotation.typeconversion.DateString;
 
 @NodeEntity
 public class PreRegistration extends Entity implements Serializable {
@@ -21,8 +18,11 @@ public class PreRegistration extends Entity implements Serializable {
     private Person madeBy;
     
     private Boolean isAuthority;
+    private Boolean isTeam;
     
+    private String organizationGuid;
     private String organization;
+    private String organizationShort;
     private String role;
 
     @DateString
@@ -50,12 +50,15 @@ public class PreRegistration extends Entity implements Serializable {
 
     }
 
-    public PreRegistration(Meeting meeting, Person madeByPerson, Person representingPerson, String organization, String role ){
+    public PreRegistration(Meeting meeting, Person madeByPerson, Person representingPerson, String organizationGuid, String organization, String organizationShort, String role, Boolean isTeam ){
         this.isAuthority = true;
+        this.isTeam = isTeam;
         this.meeting = meeting;
         this.madeBy = madeByPerson;
         this.person = representingPerson;
+        this.organizationGuid = organizationGuid;
         this.organization = organization;
+        this.organizationShort = organizationShort;
         this.role = role;
         this.created = new Date();
 
@@ -83,6 +86,30 @@ public class PreRegistration extends Entity implements Serializable {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public String getOrganizationGuid() {
+        return organizationGuid;
+    }
+
+    public void setOrganizationGuid(String organizationGuid) {
+        this.organizationGuid = organizationGuid;
+    }
+
+    public String getOrganizationShort() {
+        return organizationShort;
+    }
+
+    public void setOrganizationShort(String organizationShort) {
+        this.organizationShort = organizationShort;
+    }
+
+    public Boolean getIsTeam() {
+        return isTeam;
+    }
+
+    public void setIsTeam(Boolean isTeam) {
+        this.isTeam = isTeam;
     }
 
     public String getRole() {

@@ -10,6 +10,12 @@ import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.util.dto.MessageDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,15 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/signin")
@@ -49,6 +46,7 @@ public class SignInController {
   private static final String FRONT_CALLBACK_URL = "front_callback_url";
   private static final String FRONT_CONFERENCE_ID = "front_conference_id";
   private static final String FRONT_MEETING_ID = "front_meeting_id";
+  private static final String FRONT_MODULE = "front_module";
 
   @GetMapping("/refresh")
   public ResponseEntity<SigninDto> refresh(@RequestParam(name = "refreshToken") String refreshToken) {
@@ -121,7 +119,12 @@ public class SignInController {
         cookieService.deleteCookie(request, response, FRONT_MEETING_ID, "/participe");
         String meetingId = meetingCookie.getValue();
         
-        return String.format("%s/#/authority-credential/%s?signinDto=%s", url, meetingId, value);
+        Cookie moduleCookie = cookieService.findCookie(request, FRONT_MODULE);
+        cookieService.deleteCookie(request, response, FRONT_MODULE, "/participe");
+        String module = moduleCookie.getValue();
+        
+        
+        return String.format("%s/#/%s/%s?signinDto=%s", url, module, meetingId, value);
     } else {
         return url.concat("/#/home?signinDto=".concat(value));
     }

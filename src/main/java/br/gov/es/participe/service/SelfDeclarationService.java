@@ -5,13 +5,12 @@ import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.repository.SelfDeclarationRepository;
+import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Objects;
 
 @Service
 public class SelfDeclarationService {
@@ -100,9 +99,7 @@ public class SelfDeclarationService {
 
   // @Transactional
   public SelfDeclaration updateLocality(SelfDeclaration selfDeclaration, Long idLocality) {
-    selfDeclaration.setLocality(null);
-    log.info("Alterando locality para nulo da SelfDeclaration com id={}", selfDeclaration.getId());
-    selfDeclarationRepository.save(selfDeclaration);
+    
     selfDeclaration.setPerson(personService.find(selfDeclaration.getPerson().getId()));
     selfDeclaration.setConference(conferenceService.find(selfDeclaration.getConference().getId()));
     selfDeclaration.setLocality(localityService.find(idLocality));

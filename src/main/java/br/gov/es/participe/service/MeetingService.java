@@ -1,9 +1,12 @@
 package br.gov.es.participe.service;
 
-import br.gov.es.participe.controller.dto.ConferenceDto;
+import br.gov.es.participe.controller.dto.EvaluatorOrganizationDto;
 import br.gov.es.participe.controller.dto.MeetingDto;
 import br.gov.es.participe.controller.dto.MeetingParamDto;
+import br.gov.es.participe.controller.dto.OptionOrganization;
 import br.gov.es.participe.controller.dto.PlanItemComboDto;
+import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
+import static br.gov.es.participe.enumerator.TypeMeetingEnum.VIRTUAL;
 import br.gov.es.participe.model.Channel;
 import br.gov.es.participe.model.CheckedInAt;
 import br.gov.es.participe.model.Conference;
@@ -14,6 +17,23 @@ import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.model.PortalServer;
 import br.gov.es.participe.repository.CheckedInAtRepository;
 import br.gov.es.participe.repository.MeetingRepository;
+import java.io.IOException;
+import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,31 +41,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
-
-import static br.gov.es.participe.enumerator.TypeMeetingEnum.PRESENCIAL_VIRTUAL;
-import static br.gov.es.participe.enumerator.TypeMeetingEnum.VIRTUAL;
-import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import org.apache.commons.lang3.time.DateUtils;
-
 @Service
 public class MeetingService {
 
   @Autowired
   private MeetingRepository meetingRepository;
-
+  
   @Autowired
   private LocalityService localityService;
 
@@ -69,6 +70,9 @@ public class MeetingService {
 
   @Autowired
   private PreRegistrationService preRegistrationService;
+  
+  @Autowired
+  private AcessoCidadaoService acService;
 
   private final static Logger log = LoggerFactory.getLogger(MeetingService.class);
 
@@ -451,7 +455,7 @@ public class MeetingService {
   }
 
   public CheckedInAt editCheckInOnMeeting(
-    Long personId, Long meetingId, String timeZone, Boolean isAuthority, String organization, String role,
+    Long personId, Long meetingId, String timeZone, Boolean isAuthority, Boolean isTeam, OptionOrganization organization, String role,
     Boolean toAnnounce, Boolean announced
     ) {
     Meeting meeting = this.find(meetingId);
@@ -467,49 +471,24 @@ public class MeetingService {
         });
         
         checkIn.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
+        checkIn.setIsTeam(Boolean.TRUE.equals(isTeam) ? true : null);
         checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
-        checkIn.setOrganization(organization);
+        checkIn.setOrganizationGuid(organization.getGuid());
+        checkIn.setOrganization(organization.getName());
+        checkIn.setOrganizationShort(organization.getShortName());
         checkIn.setRole(role);
         checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
         checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? announced : null);
 
         return checkedInAtRepository.save(checkIn);
-           
-//        if (optionalCheckIn.isPresent()) {
-//            CheckedInAt checkIn = optionalCheckIn.get();
-//            checkIn.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
-//            checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
-//            checkIn.setOrganization(organization);
-//            checkIn.setRole(role);
-//            checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
-//            checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? announced : null);
-//
-//            return checkedInAtRepository.save(checkIn);
-//        } else {
-//            
-//            Optional.ofNullable(preRegistrationService.findByMeetingAndPerson(meetingId, personId))
-//                    .ifPresentOrElse((pr)-> {
-//                        pr.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
-//                        pr.setOrganization(organization);
-//                        pr.setRole(role);
-//                        
-//                        preRegistrationService.save(pr);
-//                    }, () -> {
-//                        throw new IllegalArgumentException("Check-in ou Pré-credenciamento não encontrado para edição.");
-//                    });
-//            
-//            return null;
-//            
-//            
-//            
-//        }
+
     }
 
     throw new IllegalArgumentException("Person ou Meeting não encontrados.");
 }
 
 
-  public CheckedInAt checkInOnMeeting(Long personId, Long meetingId, String timeZone, Boolean isAuthority, String organization, String role) {
+  public CheckedInAt checkInOnMeeting(Long personId, Long meetingId, String timeZone, Boolean isAuthority, Boolean isTeam, OptionOrganization organization, String role) {
     Meeting meeting = this.find(meetingId);
     Person person = personService.find(personId);
     if (person != null && meeting != null) {
@@ -520,7 +499,10 @@ public class MeetingService {
       return checkedInAt
               .map(checkIn -> {
                   checkIn.setIsAuthority(isAuthority);
-                  checkIn.setOrganization(organization);
+                  checkIn.setIsTeam(isTeam);
+                  checkIn.setOrganizationGuid(organization.getGuid());
+                  checkIn.setOrganization(organization.getName());
+                  checkIn.setOrganizationShort(organization.getShortName());
                   checkIn.setRole(role);
                   
                   if(checkIn.getTime() == null) {
@@ -546,8 +528,11 @@ public class MeetingService {
                      CheckedInAt newParticipant = timeZone == null ? new CheckedInAt(person, meeting)
                     : new CheckedInAt(person, meeting, timeZone);
                     newParticipant.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
+                    newParticipant.setIsTeam(Boolean.TRUE.equals(isTeam) ? true : null);
                     newParticipant.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
-                    newParticipant.setOrganization(organization);
+                    newParticipant.setOrganizationGuid(organization.getGuid());
+                    newParticipant.setOrganization(organization.getName());
+                    newParticipant.setOrganizationShort(organization.getShortName());
                     newParticipant.setRole(role);
 
                     preRegistrationService.saveCheckIn(personId, meetingId);
@@ -634,5 +619,25 @@ public class MeetingService {
 
     return preRegistration;
 
+  }
+  
+  public List<OptionOrganization> listOptionOrganization() throws IOException{
+      
+      List<EvaluatorOrganizationDto> orgList = acService.findOrganizationsFromOrganogramaAPI();
+      
+      return orgList.stream()
+              .map(org -> {
+              
+                  OptionOrganization optOrg = new OptionOrganization();
+                  optOrg.setGuid(org.getGuid());
+                  optOrg.setName(org.getName());
+                  optOrg.setShortName(org.getShortName());
+                  
+                  return optOrg;
+              
+              }).collect(Collectors.toList());
+              
+      
+      
   }
 }
