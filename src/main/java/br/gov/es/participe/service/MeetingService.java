@@ -626,8 +626,9 @@ public class MeetingService {
       List<EvaluatorOrganizationDto> orgList = acService.findOrganizationsFromOrganogramaAPI();
       
       return orgList.stream()
+              .filter((org) -> !org.getName().toLowerCase().equals("null"))
               .map(org -> {
-              
+                  
                   OptionOrganization optOrg = new OptionOrganization();
                   optOrg.setGuid(org.getGuid());
                   optOrg.setName(org.getName());
