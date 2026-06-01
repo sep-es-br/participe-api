@@ -1,15 +1,14 @@
 package br.gov.es.participe.model;
 
+import java.text.ParseException;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import org.apache.commons.lang3.time.DateUtils;
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 import org.neo4j.ogm.annotation.typeconversion.DateString;
-
-import java.text.ParseException;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 @RelationshipEntity(type = "CHECKED_IN_AT")
 public class CheckedInAt extends Entity {
@@ -24,8 +23,10 @@ public class CheckedInAt extends Entity {
     private Date time;
     
     private Boolean isAuthority;
+    private Boolean isTeam;
     private Boolean isAnnounced;
     private Boolean toAnnounce;
+    private String organizationGuid;
     private String organization;
     private String organizationShort;
     private String role;
@@ -108,6 +109,22 @@ public class CheckedInAt extends Entity {
 
     public void setIsAuthority(Boolean isAuthority) {
         this.isAuthority = isAuthority;
+    }
+
+    public Boolean getIsTeam() {
+        return isTeam;
+    }
+
+    public void setIsTeam(Boolean isTeam) {
+        this.isTeam = isTeam;
+    }
+
+    public String getOrganizationGuid() {
+        return organizationGuid;
+    }
+
+    public void setOrganizationGuid(String organizationGuid) {
+        this.organizationGuid = organizationGuid;
     }
 
     public String getOrganization() {

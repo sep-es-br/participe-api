@@ -2,13 +2,12 @@ package br.gov.es.participe.repository;
 
 import br.gov.es.participe.controller.dto.ParticipationDto;
 import br.gov.es.participe.model.Attend;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 public interface AttendRepository extends Neo4jRepository<Attend, Long> {
 
@@ -268,5 +267,18 @@ Integer countParticipationAllOriginsByConference( @Param("idConference") Long id
           " return count (distinct np) ")
   Integer countLocalityPresentialOriginByConference( @Param("idConference") Long idConference, @Param("meetings") List<Long> meetings );
   
+  
+  @Query("MATCH (m:Meeting)\n" +
+            "WHERE id(m) = $idMeeting\n" +
+            "WITH m\n" +
+            "MATCH (:Person)-[attending:PRE_REGISTRATION|CHECKED_IN_AT]->(m)\n" +
+            "WHERE attending.organization IS NOT NULL\n" +
+            "    AND NONE(term IN $exceptThose WHERE \n" +
+            "        toUpper(attending.organization) CONTAINS toUpper(term)\n" +
+            "        OR toUpper(term) CONTAINS toUpper(attending.organization))\n" +
+            "WITH apoc.text.clean(toUpper(attending.organization)) AS normalized, collect(attending.organization) AS originals\n" +
+            "RETURN toUpper(head(originals)) AS name\n" +
+            "ORDER BY normalized")
+  List<String> findOrganizationNamesWithoutList(Long idMeeting, List<String> exceptThose);
   
 }

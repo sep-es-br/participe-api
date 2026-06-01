@@ -1,21 +1,5 @@
 package br.gov.es.participe.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
 import br.gov.es.participe.controller.dto.EvaluatorRequestDto;
 import br.gov.es.participe.controller.dto.EvaluatorResponseDto;
 import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
@@ -28,6 +12,20 @@ import br.gov.es.participe.model.Organization;
 import br.gov.es.participe.model.Role;
 import br.gov.es.participe.model.Section;
 import br.gov.es.participe.repository.EvaluatorsRepository;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 @Service
 public class EvaluatorsService {
@@ -74,7 +72,7 @@ public class EvaluatorsService {
             }
 
         }
-        if(!organizationGuids.isEmpty()){;
+        if(!organizationGuids.isEmpty()){
             return String.join(",", organizationGuids);
         }else{
             throw new EvaluatorForbiddenException();
@@ -95,6 +93,7 @@ public class EvaluatorsService {
     }
 
     public EvaluatorResponseDto saveEvaluator(EvaluatorRequestDto evaluatorRequestDto) {
+        
 
         Organization evaluatorOrganization = this.persistOrganization(evaluatorRequestDto.getOrganization());
 
@@ -196,7 +195,7 @@ public class EvaluatorsService {
         }
 
         roles.iterator().forEachRemaining((guid_lotacao_name) -> {
-
+            
             String guid = guid_lotacao_name.getGuid();
             String lotacao = guid_lotacao_name.getLotacao();
 
@@ -309,7 +308,7 @@ public class EvaluatorsService {
 
         Map<String, String> rolesNamesList = rolesList.stream()
             .filter((role) -> evaluatorsNamesRequestDto.getRolesGuidList().contains(role.getGuid()))
-            .collect(Collectors.toUnmodifiableMap((role) -> role.getGuid(), (role) -> role.getName()));
+            .collect(Collectors.toUnmodifiableMap(EvaluatorRoleDto::getGuid, EvaluatorRoleDto::getName, (existing, replacement) -> existing));
 
         EvaluatorsNamesResponseDto evaluatorsNamesMap = new EvaluatorsNamesResponseDto(sectionsNamesList, rolesNamesList);
 

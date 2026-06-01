@@ -1,8 +1,7 @@
 package br.gov.es.participe.controller.dto;
 
-import org.springframework.data.neo4j.annotation.QueryResult;
-
 import java.util.List;
+import org.springframework.data.neo4j.annotation.QueryResult;
 
 @QueryResult
 public class PersonKeepCitizenDto {
@@ -40,12 +39,14 @@ public class PersonKeepCitizenDto {
 	private List<String> authName;
 
 	private Boolean isAuthority;
+        
+        private Boolean isTeam;
 
 	private Boolean toAnnounce;
         
         private Boolean announced;
 
-    private String organization;
+    private OptionOrganization organization;
 
     private String role;
 
@@ -203,11 +204,21 @@ public class PersonKeepCitizenDto {
 		this.isAuthority = isAuthority;
 	}
 
-	public String getOrganization() {
+        public Boolean getIsTeam() {
+            return isTeam;
+        }
+
+        public void setIsTeam(Boolean isTeam) {
+            this.isTeam = isTeam;
+        }
+
+        
+
+	public OptionOrganization getOrganization() {
 		return organization;
 	}
 
-	public void setOrganization(String organization) {
+	public void setOrganization(OptionOrganization organization) {
 		this.organization = organization;
 	}
 

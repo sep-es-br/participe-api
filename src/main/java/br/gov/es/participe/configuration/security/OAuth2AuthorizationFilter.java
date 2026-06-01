@@ -2,16 +2,15 @@ package br.gov.es.participe.configuration.security;
 
 import br.gov.es.participe.service.CookieService;
 import br.gov.es.participe.util.ParticipeUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
-
+import java.io.IOException;
+import java.util.Map;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 @Component
 @WebFilter(
@@ -36,6 +35,7 @@ public class OAuth2AuthorizationFilter implements Filter {
     private static final String FRONT_CALLBACK_URL = "front_callback_url";
     private static final String FRONT_CONFERENCE_ID = "front_conference_id";
     private static final String FRONT_MEETING_ID = "front_meeting_id";
+    private static final String FRONT_MODULE = "front_module";
 
 
     @Override
@@ -51,7 +51,7 @@ public class OAuth2AuthorizationFilter implements Filter {
         if (request.getRequestURI().contains("/oauth2/authorization/")) {
             if (request.getQueryString() != null && !request.getQueryString().isEmpty()) {
                 Map<String, String> params = participeUtils.convertQueryStringToHashMap(request.getQueryString());
-                if (params.get(FRONT_CALLBACK_URL) != null) {
+                if (params.containsKey(FRONT_CALLBACK_URL)) {
                 	cookieService.createCookie(
                 			response,
                 			FRONT_CALLBACK_URL,
@@ -59,7 +59,7 @@ public class OAuth2AuthorizationFilter implements Filter {
                 			"/participe"
         			);
                 }
-                if (params.get(FRONT_CONFERENCE_ID) != null) {
+                if (params.containsKey(FRONT_CONFERENCE_ID)) {
                 	cookieService.createCookie(
                 			response,
                 			FRONT_CONFERENCE_ID,
@@ -67,11 +67,19 @@ public class OAuth2AuthorizationFilter implements Filter {
                 			"/participe"
         			);
                 }
-                if (params.get(FRONT_MEETING_ID) != null) {
+                if (params.containsKey(FRONT_MEETING_ID)) {
                 	cookieService.createCookie(
                 			response,
                 			FRONT_MEETING_ID,
                 			params.get(FRONT_MEETING_ID),
+                			"/participe"
+        			);
+                }
+                if (params.containsKey(FRONT_MODULE)) {
+                	cookieService.createCookie(
+                			response,
+                			FRONT_MODULE,
+                			params.get(FRONT_MODULE),
                 			"/participe"
         			);
                 }

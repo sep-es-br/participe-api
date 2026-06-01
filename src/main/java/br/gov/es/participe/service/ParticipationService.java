@@ -4,6 +4,12 @@ import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.AttendRepository;
 import br.gov.es.participe.util.StringUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class ParticipationService {
@@ -424,5 +423,9 @@ public class ParticipationService {
       Person person = personService.find(idPerson);
       self.setPerson(person);
     }
+  }
+  
+  public List<String> findOrganizationNamesWithoutList(Long idMeeting, List<String> exceptThose){
+      return this.attendRepository.findOrganizationNamesWithoutList(idMeeting, exceptThose);
   }
 }

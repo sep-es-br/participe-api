@@ -10,38 +10,15 @@ import br.gov.es.participe.service.MeetingService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.PreRegistrationService;
 import br.gov.es.participe.service.QRCodeService;
-
-import br.gov.es.participe.util.interfaces.ApiPageable;
+import com.google.zxing.WriterException;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+import javax.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-/* Início das importações */
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import javax.servlet.http.HttpServletResponse;
-import org.springframework.http.ContentDisposition;
-/* Fim das importações */
-import javax.imageio.ImageIO;
-import javax.mail.MessagingException;
-
-import com.google.zxing.WriterException;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin
@@ -114,7 +91,7 @@ public class PreRegistrationController {
       @RequestBody CheckInPreRegistrationParamDto checkInPreRegistationDto){
       PreRegistration preRegistration = preRegistrationService.find(checkInPreRegistationDto.getPreRegistrationId());
       Meeting meeting = meetingService.find(checkInPreRegistationDto.getMeetingId()); 
-      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(preRegistration.getPerson().getId(), meeting.getId(),null,null,null,null);
+      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(preRegistration.getPerson().getId(), meeting.getId(),null,null,null,null,null);
       if (checkedInAt != null) {
         return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
       }
@@ -127,7 +104,7 @@ public class PreRegistrationController {
       @RequestBody AcreditationParamDto checkInAccreditationDto){
       Person person = personService.find(checkInAccreditationDto.getPersonId());
       Meeting meeting = meetingService.find(checkInAccreditationDto.getMeetingId()); 
-      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(person.getId(), meeting.getId(),null,null,null,null);
+      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(person.getId(), meeting.getId(),null,null, null, null,null);
       if (checkedInAt != null) {
         return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
       }

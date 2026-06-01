@@ -15,9 +15,10 @@ public class AuthorityCredentialRequest {
     private String representedByName;
     private String representedBySub;
     private Long meetingId;
-    private String organization;
+    private OptionOrganization organization;
     private String role;
     private Long localityId;
+    private Boolean isTeam;
 
     public String getRepresentedBySub() {
         return representedBySub;
@@ -68,8 +69,6 @@ public class AuthorityCredentialRequest {
     public void setRepresentedByName(String representedByName) {
         this.representedByName = representedByName;
     }
-    
-    
 
     public Long getMeetingId() {
         return meetingId;
@@ -79,11 +78,11 @@ public class AuthorityCredentialRequest {
         this.meetingId = meetingId;
     }
     
-    public String getOrganization() {
+    public OptionOrganization getOrganization() {
         return organization;
     }
 
-    public void setOrganization(String organization) {
+    public void setOrganization(OptionOrganization organization) {
         this.organization = organization;
     }
 
@@ -94,5 +93,15 @@ public class AuthorityCredentialRequest {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public Boolean getIsTeam() {
+        return isTeam;
+    }
+
+    public void setIsTeam(Boolean isTeam) {
+        this.isTeam = isTeam;
+    }
+    
+    
     
 }
