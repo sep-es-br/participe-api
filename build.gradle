@@ -10,6 +10,19 @@ group = 'br.gov.es'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
+bootRun {
+    main = 'br.gov.es.participe.ParticipeApplication'
+}
+
+bootRun {
+    doFirst {
+        def classpathFile = file("$buildDir/classpath.txt")
+        classpathFile.text = classpath.asPath
+
+        jvmArgs = ["-cp", "@${classpathFile.absolutePath}"]
+        classpath = files()
+    }
+}
 
 repositories {
 	mavenCentral()
