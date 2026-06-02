@@ -93,6 +93,7 @@ public class EvaluatorsService {
     }
 
     public EvaluatorResponseDto saveEvaluator(EvaluatorRequestDto evaluatorRequestDto) {
+        
 
         Organization evaluatorOrganization = this.persistOrganization(evaluatorRequestDto.getOrganization());
 
@@ -194,7 +195,7 @@ public class EvaluatorsService {
         }
 
         roles.iterator().forEachRemaining((guid_lotacao_name) -> {
-
+            
             String guid = guid_lotacao_name.getGuid();
             String lotacao = guid_lotacao_name.getLotacao();
 
@@ -307,7 +308,7 @@ public class EvaluatorsService {
 
         Map<String, String> rolesNamesList = rolesList.stream()
             .filter((role) -> evaluatorsNamesRequestDto.getRolesGuidList().contains(role.getGuid()))
-            .collect(Collectors.toUnmodifiableMap((role) -> role.getGuid(), (role) -> role.getName()));
+            .collect(Collectors.toUnmodifiableMap(EvaluatorRoleDto::getGuid, EvaluatorRoleDto::getName, (existing, replacement) -> existing));
 
         EvaluatorsNamesResponseDto evaluatorsNamesMap = new EvaluatorsNamesResponseDto(sectionsNamesList, rolesNamesList);
 

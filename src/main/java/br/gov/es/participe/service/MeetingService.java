@@ -627,7 +627,7 @@ public class MeetingService {
       
       return orgList.stream()
               .map(org -> {
-              
+                  
                   OptionOrganization optOrg = new OptionOrganization();
                   optOrg.setGuid(org.getGuid());
                   optOrg.setName(org.getName());

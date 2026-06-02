@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -554,7 +555,9 @@ public class AcessoCidadaoService {
           evaluatorOrganizationDto.add(newEvalOrgDto);
         });
 
-        return evaluatorOrganizationDto;
+        return evaluatorOrganizationDto.stream()
+              .filter((org) -> !org.getName().toLowerCase().equals("null"))
+                .collect(Collectors.toList());
       } else {
         logger.error("Não foi possível buscar a lista de organizações (Filhas do GOVES).");
         throw new ApiOrganogramaException(STATUS + response.statusCode());
