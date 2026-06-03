@@ -60,6 +60,7 @@ public class PreRegistrationController {
       Person person = personService.find(preRegistationDto.getPersonId());
       Meeting meeting = meetingService.find(preRegistationDto.getMeetingId());
       PreRegistration preRegistration = new PreRegistration(meeting, person);
+      preRegistration.setMadeBy(person);
       PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration);
       byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
 
@@ -69,7 +70,7 @@ public class PreRegistrationController {
       emailService.sendEmailPreRegistration(to, title, emailBody, imageQR);
 
 
-      return ResponseEntity.status(200).body(new PreRegistrationDto(savedPreRegistration,imageQR) );
+      return ResponseEntity.status(200).body(new PreRegistrationDto(savedPreRegistration, null, null, imageQR) );
     }
 
     @Transactional
@@ -115,5 +116,7 @@ public class PreRegistrationController {
     public ResponseEntity getPreRegistration( @PathVariable Long meetingId, @PathVariable Long personId) throws WriterException, IOException, MessagingException  { 
       return ResponseEntity.ok().body(preRegistrationService.getPreRegistrationByMeetingAndPerson(meetingId, personId));
     }
+    
+    
 
 }

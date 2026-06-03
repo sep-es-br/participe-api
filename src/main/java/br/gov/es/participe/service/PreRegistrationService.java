@@ -24,6 +24,12 @@ public class PreRegistrationService {
 
     @Autowired
     private PreRegistrationRepository preRegistrationRepository;
+    
+    @Autowired
+    private SelfDeclarationService selfDeclarationSrv;
+    
+    @Autowired
+    private IsAuthenticatedByRepository authByRepo;
 
     @Autowired
     private PersonService personService;
@@ -135,13 +141,30 @@ public class PreRegistrationService {
             Meeting meeting = meetingService.find(meetingId);
             Person person = personService.find(personId);
             PreRegistration preRegistration = preRegistrationRepository.findByMeetingAndPerson(meeting.getId(), person.getId());
+            if (preRegistration == null) {
+                preRegistration = new PreRegistration(meeting, person);
+                preRegistration.setMadeBy(person);
+                preRegistration = this.save(preRegistration);
+            }
             byte[] imageQR;
             try {
                 imageQR = qrCodeService.generateQRCode(preRegistration.getId().toString(), 300, 300);
             } catch (WriterException | IOException e) {
                 throw new QRCodeGenerateException("Erro ao tentar recuperar seu pré-credenciamento. ");
             }
-            return new PreRegistrationDto(preRegistration, imageQR);
+            IsAuthenticatedBy authRelationship = personService.getIsAuthenticatedBy(personId, "AcessoCidadao");
+            String email = null;
+            if(authRelationship != null) {
+                email = authRelationship.getEmail();
+            }
+            
+            SelfDeclaration sd = selfDeclarationSrv.findByPersonAndConference(personId, meeting.getConference().getId());
+            Long localityId = null;
+            if(sd != null){
+                localityId = sd.getLocality().getId();
+            }
+            
+            return new PreRegistrationDto(preRegistration, email, localityId, imageQR);
     }
     
     public void deletePreRegistration(PreRegistration preRegistration){

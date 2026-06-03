@@ -128,8 +128,9 @@ public class AuthorityCredentialController {
 
           preRegistration = Optional.ofNullable(preRegistration)
                                       .map(pr -> {
-
+                                         
                                          pr.setPreRegistration(new Date());
+                                         pr.setIsAuthority(true);
                                          pr.setOrganizationGuid(credentialRequest.getOrganization().getGuid());
                                          pr.setOrganization(credentialRequest.getOrganization().getName());
                                          pr.setOrganizationShort(credentialRequest.getOrganization().getShortName());
