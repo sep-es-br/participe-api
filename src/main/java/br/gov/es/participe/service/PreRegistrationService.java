@@ -158,6 +158,10 @@ public class PreRegistrationService {
                 email = authRelationship.getEmail();
             }
             
+            if(email == null) {
+                email = person.getContactEmail();
+            }
+            
             SelfDeclaration sd = selfDeclarationSrv.findByPersonAndConference(personId, meeting.getConference().getId());
             Long localityId = null;
             if(sd != null){
