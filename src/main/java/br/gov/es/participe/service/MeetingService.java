@@ -542,6 +542,10 @@ public class MeetingService {
     }
     throw new IllegalArgumentException("Person or Meeting not found.");
   }
+  
+  public Optional<CheckedInAt> getCheckIn(Long meetingId, Long personId){
+      return this.checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
+  }
 
   public Set<CheckedInAt> findCheckedInAtByMeeting(Long meetingId) {
     Meeting meeting = this.find(meetingId);
