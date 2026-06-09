@@ -4,20 +4,48 @@
  */
 package br.gov.es.participe.controller.dto;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+
 /**
  *
  * @author desenvolvimento
  */
 public class AuthorityCredentialRequest {
+    
+    @Positive(message = "O campo deve ser positivo")
+    @NotNull(message = "O campo não pode ser nulo")
     private Long madeBy;
+    
+     
     private String representedByCpf;
+    
+    @NotBlank(message = "O campo não pode ser vazio")
     private String representedByEmail;
+    
+    @NotBlank(message = "O campo não pode ser vazio")
     private String representedByName;
+    
+    @NotBlank(message = "O campo não pode ser vazio")
     private String representedBySub;
+    
+    @Positive(message = "O campo deve ser positivo")
+    @NotNull(message = "O campo não pode ser nulo")
     private Long meetingId;
+    
+    @NotNull(message = "O campo não pode ser nulo")
+    @Valid
     private OptionOrganization organization;
+    
+    @NotBlank
     private String role;
+    
+    @Positive
+    @NotNull(message = "O campo não pode ser nulo")
     private Long localityId;
+    
     private Boolean isTeam;
 
     public String getRepresentedBySub() {

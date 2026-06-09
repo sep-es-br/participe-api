@@ -3,7 +3,6 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.AuthorityCredentialRequest;
 import br.gov.es.participe.controller.dto.CheckedInAtDto;
 import br.gov.es.participe.controller.dto.PreRegistrationAuthorityDto;
-import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.model.AuthService;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Meeting;
@@ -27,9 +26,11 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.MessagingException;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -68,21 +69,19 @@ public class AuthorityCredentialController {
     @PutMapping
     public ResponseEntity<PreRegistrationAuthorityDto> registerAuthority(
         @RequestHeader(name = "Authorization") String token,
-        @RequestBody AuthorityCredentialRequest credentialRequest
+        @Valid @RequestBody AuthorityCredentialRequest credentialRequest
             ) {
 
         Person madeByPerson = personService.find(credentialRequest.getMadeBy());
-
-        PublicAgentDto dumb = new PublicAgentDto();
-        dumb.setSub(personService.getSubById(madeByPerson.getId()));
-
-        PublicAgentDto publicAgent = this.acService.findThePersonEmailBySubInAcessoCidadaoAPI(dumb);
-
-        madeByPerson.setContactEmail(publicAgent.getCorporativo() != null ? publicAgent.getCorporativo() : publicAgent.getEmail()  );
-
         Meeting meeting = meetingService.find(credentialRequest.getMeetingId());
-
         Locality locality = localityService.find(credentialRequest.getLocalityId());
+        
+        Assert.notNull(madeByPerson, "Pessoa com id (" + credentialRequest.getMadeBy() + ") inexistente");
+        Assert.notNull(meeting, "Reunião com id (" + credentialRequest.getMeetingId() + ") inexistente");
+        Assert.notNull(locality, "Localidade com id (" + credentialRequest.getLocalityId() + ") inexistente");
+
+        madeByPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
+
 
         Person representedByPerson;
         if(credentialRequest.getRepresentedByCpf() == null) {
@@ -128,8 +127,9 @@ public class AuthorityCredentialController {
 
           preRegistration = Optional.ofNullable(preRegistration)
                                       .map(pr -> {
-
+                                         
                                          pr.setPreRegistration(new Date());
+                                         pr.setIsAuthority(true);
                                          pr.setOrganizationGuid(credentialRequest.getOrganization().getGuid());
                                          pr.setOrganization(credentialRequest.getOrganization().getName());
                                          pr.setOrganizationShort(credentialRequest.getOrganization().getShortName());

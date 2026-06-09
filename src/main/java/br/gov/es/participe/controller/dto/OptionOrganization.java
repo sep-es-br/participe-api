@@ -4,6 +4,8 @@
  */
 package br.gov.es.participe.controller.dto;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  *
  * @author gean.carneiro
@@ -11,6 +13,8 @@ package br.gov.es.participe.controller.dto;
 public class OptionOrganization {
     
     private String guid;
+    
+    @NotBlank
     private String name;
     private String shortName;
 

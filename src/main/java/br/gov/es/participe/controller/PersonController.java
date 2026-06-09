@@ -154,7 +154,23 @@ public class PersonController {
       if(maybePublicAgentDto != null) {
           acInfo.put("name", maybePublicAgentDto.getName());
           UnitRolesDto role = acService.findPriorityRoleFromAcessoCidadaoAPIBySub(sub, false);
-          if(role != null) acInfo.put("role", role.getNome());
+          if(role != null) {
+              acInfo.put("role", role.getNome());
+              if(role.getLotacaoGuid() != null) {
+                  AcSectionInfoDto sectionInfo = acService.findSectionInfoFromOrganogramaAPI(role.getLotacaoGuid());
+                  if (sectionInfo != null && sectionInfo.getGuidOrganizacao() != null) {
+                      AcOrganizationInfoDto orgInfo = acService.findOrganizationInfoFromOrganogramaAPI(sectionInfo.getGuidOrganizacao());
+                      if (orgInfo != null) {
+                          OptionOrganization optOrganization = new OptionOrganization();
+                          optOrganization.setGuid(orgInfo.getGuid());
+                          optOrganization.setName(Optional.ofNullable(orgInfo.getNomeFantasia()).orElse(orgInfo.getRazaoSocial()));
+                          optOrganization.setShortName(orgInfo.getSigla());
+                          
+                          acInfo.put("organization", optOrganization);
+                      }
+                  }
+              }
+          }
                
       } else {
           personService.getBySubEmail(sub, person.getEmail()).ifPresent(_person -> {
@@ -307,6 +323,14 @@ public class PersonController {
         "Hummm... Não encontramos esse e-mail em nossos registros. Talvez você tenha se cadastrado com outro endereço ou utilizado o Acesso Cidadão, Google ou Facebook");
     msg.setCode(403);
     return ResponseEntity.status(403).body(msg);
+  }
+  
+  @GetMapping("/bySub/{sub}")
+  public ResponseEntity<?> userBySub(
+          @PathVariable String sub
+  ) {
+      
+        return ResponseEntity.of(personService.findByLoginSub(sub).map(PersonDto::new)); 
   }
 
   @GetMapping("/{sub}/papeisBySub")
