@@ -16,7 +16,7 @@ import javax.validation.constraints.Positive;
 public class AuthorityCredentialRequest {
     
     @Positive(message = "O campo deve ser positivo")
-    @NotBlank(message = "O campo não pode ser vazio")
+    @NotNull(message = "O campo não pode ser nulo")
     private Long madeBy;
     
      
@@ -32,10 +32,10 @@ public class AuthorityCredentialRequest {
     private String representedBySub;
     
     @Positive(message = "O campo deve ser positivo")
-    @NotBlank(message = "O campo não pode ser vazio")
+    @NotNull(message = "O campo não pode ser nulo")
     private Long meetingId;
     
-    @NotNull
+    @NotNull(message = "O campo não pode ser nulo")
     @Valid
     private OptionOrganization organization;
     
@@ -43,7 +43,7 @@ public class AuthorityCredentialRequest {
     private String role;
     
     @Positive
-    @NotBlank
+    @NotNull(message = "O campo não pode ser nulo")
     private Long localityId;
     
     private Boolean isTeam;

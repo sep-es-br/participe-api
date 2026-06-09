@@ -168,7 +168,9 @@ public class PreRegistrationService {
                 localityId = sd.getLocality().getId();
             }
             
-            return new PreRegistrationDto(preRegistration, email, localityId, imageQR);
+            String sub = this.personService.getSubById(personId);
+            
+            return new PreRegistrationDto(preRegistration, email, localityId, sub, imageQR);
     }
     
     public void deletePreRegistration(PreRegistration preRegistration){

@@ -70,7 +70,7 @@ public class PreRegistrationController {
       emailService.sendEmailPreRegistration(to, title, emailBody, imageQR);
 
 
-      return ResponseEntity.status(200).body(new PreRegistrationDto(savedPreRegistration, null, null, imageQR) );
+      return ResponseEntity.status(200).body(new PreRegistrationDto(savedPreRegistration, null, null, null, imageQR) );
     }
 
     @Transactional

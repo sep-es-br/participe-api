@@ -18,6 +18,7 @@ public class PreRegistrationDto {
     private Long localityId;
     
     private Boolean isAuthority;
+    private String authoritySub;
     
     private String qrcode;
 
@@ -34,7 +35,7 @@ public class PreRegistrationDto {
         this.preRegistrationDate = preRegistration.getPreRegistration();
     }
 
-    public PreRegistrationDto(PreRegistration preRegistration, String email, Long localityId, byte[] qrcode) {
+    public PreRegistrationDto(PreRegistration preRegistration, String email, Long localityId, String sub, byte[] qrcode) {
         if (preRegistration == null) return;
 
         this.id = preRegistration.getMadeBy().getId();
@@ -52,11 +53,21 @@ public class PreRegistrationDto {
         this.role = preRegistration.getRole();
         this.email = email;
         this.localityId = localityId;
+        this.authoritySub = sub;
         
         this.isAuthority = Optional.ofNullable(preRegistration.getIsAuthority()).orElse(false);
         
     }
 
+    public String getAuthoritySub() {
+        return authoritySub;
+    }
+
+    public void setAuthoritySub(String authoritySub) {
+        this.authoritySub = authoritySub;
+    }
+
+    
 
     public Long getId() {
         return id;
