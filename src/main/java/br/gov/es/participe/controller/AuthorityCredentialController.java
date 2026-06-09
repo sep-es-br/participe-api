@@ -113,10 +113,22 @@ public class AuthorityCredentialController {
         SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
 
           Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
-              SelfDeclaration atualizada = selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
-              
-              sf.setLocality(atualizada.getLocality());
-          }, 
+                // 1. Setamos a nova localidade direto no objeto que veio do banco
+                sf.setLocality(locality); // Usando a 'locality' que vc já buscou lá no topo do método!
+
+                // 2. Salvamos a SelfDeclaration DIRETAMENTE pelo repositório dela
+                // Isso força o Neo4j a recriar a seta (SelfDeclaration)-[:SUA_RELACAO]->(Locality)
+                SelfDeclaration atualizada = selfDeclarationService.save(sf);
+
+                // 3. Atualizamos a lista da Person na memória para o Neo4j não desfazer o link depois
+                if (representedByPerson.getSelfDeclaretions() != null) {
+                    representedByPerson.getSelfDeclaretions().removeIf(sd -> 
+                        sd.getConference() != null && 
+                        sd.getConference().getId().equals(meeting.getConference().getId())
+                    );
+                    representedByPerson.getSelfDeclaretions().add(atualizada);
+                }
+            },
           () -> {
               representedByPerson.addSelfDeclaration(
                       selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
