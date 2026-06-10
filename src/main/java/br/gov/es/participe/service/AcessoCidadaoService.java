@@ -253,7 +253,7 @@ public class AcessoCidadaoService {
               PersonDto person = new PersonDto();
               person.setSub(obj.getString("Sub"));
               person.setName(obj.getString("Nome"));
-              person.setContactEmail(obj.getString("Email"));
+              person.setContactEmail(obj.get("Email") == null ? null : obj.getString("Email"));
               personList.add(person);
             }
           });
