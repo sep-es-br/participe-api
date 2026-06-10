@@ -30,7 +30,7 @@ public class PreRegistrationDto {
 
         this.id = preRegistration.getId();
         this.meeting = new MeetingDto(preRegistration.getMeeting(),false);
-        this.person = new PersonDto(preRegistration.getPerson());
+        this.person = new PersonDto(preRegistration.getPerson(), null);
         this.checkInDate = preRegistration.getCheckIn();
         this.preRegistrationDate = preRegistration.getPreRegistration();
     }
@@ -40,7 +40,7 @@ public class PreRegistrationDto {
 
         this.id = preRegistration.getMadeBy().getId();
         this.meeting = new MeetingDto(preRegistration.getMeeting(),false);
-        this.person = new PersonDto(preRegistration.getPerson());
+        this.person = new PersonDto(preRegistration.getPerson(), null);
         this.checkInDate = preRegistration.getCheckIn();
         this.preRegistrationDate = preRegistration.getPreRegistration();
         this.qrcode = Base64.getEncoder().encodeToString(qrcode);

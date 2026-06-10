@@ -1,11 +1,9 @@
 package br.gov.es.participe.controller.dto;
 
-import java.util.Base64;
-
-import org.springframework.data.neo4j.annotation.QueryResult;
-
 import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
+import java.util.Base64;
+import org.springframework.data.neo4j.annotation.QueryResult;
 
 @QueryResult
 public class AccreditationDto {
@@ -19,7 +17,7 @@ public class AccreditationDto {
     public AccreditationDto(Person person, Meeting meeting, byte[] qrcode) {
         if (person == null || meeting == null) return;
         this.meeting = new MeetingDto(meeting,false);
-        this.person = new PersonDto(person);
+        this.person = new PersonDto(person, null);
         this.qrcode = Base64.getEncoder().encodeToString(qrcode);
     }
 

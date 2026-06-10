@@ -23,7 +23,7 @@ public class SelfDeclarationDto {
 				this.locality = new LocalityDto(selfdeclaration.getLocality());
 			
 			if(selfdeclaration.getPerson() != null && selfdeclaration.getPerson().getId() != null)
-				this.person = new PersonDto(selfdeclaration.getPerson());
+				this.person = new PersonDto(selfdeclaration.getPerson(), null);
 		}
 	}
 

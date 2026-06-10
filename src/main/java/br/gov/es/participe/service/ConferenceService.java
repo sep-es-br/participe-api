@@ -6,12 +6,6 @@ import br.gov.es.participe.repository.AttendRepository;
 import br.gov.es.participe.repository.ConferenceRepository;
 import br.gov.es.participe.util.ParticipeUtils;
 import br.gov.es.participe.util.domain.StatusConferenceType;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -25,6 +19,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class ConferenceService {
@@ -755,7 +754,7 @@ public class ConferenceService {
 
   public List<PersonDto> findModeratorsByConferenceId(Long id) {
     List<PersonDto> persons = new ArrayList<>();
-    this.conferenceRepository.findModeratorsById(id).forEach(p -> persons.add(new PersonDto(p)));
+    this.conferenceRepository.findModeratorsById(id).forEach(p -> persons.add(new PersonDto(p, null)));
     return persons;
   }
 

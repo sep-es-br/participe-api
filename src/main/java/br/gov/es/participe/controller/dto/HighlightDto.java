@@ -35,7 +35,7 @@ public class HighlightDto {
 		
 		if(highlight.getPersonMadeBy() != null) {
 			highlight.getPersonMadeBy().setSelfDeclaretions(null);
-			personMadeBy = new PersonDto(highlight.getPersonMadeBy());
+			personMadeBy = new PersonDto(highlight.getPersonMadeBy(), null);
 		}
 		if(highlight.getPlanItem() != null) 
 			planItem = new PlanItemDto(highlight.getPlanItem(),false);

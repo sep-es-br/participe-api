@@ -956,7 +956,7 @@ public class PersonService {
     );
     if (notHaveAcessoCidadaoLoginInThisConference) {
       Person person = createAcessoCidadaoLogin(personParam, makeLogin, typeAuthenticationCpf);
-      return ResponseEntity.status(200).body(new PersonDto(person));
+      return ResponseEntity.status(200).body(new PersonDto(person, null));
     }
 
     MessageDto msg = new MessageDto();
@@ -1184,7 +1184,7 @@ public class PersonService {
       sd = this.selfDeclarationService.save(sd);
     }
 
-    PersonDto response = new PersonDto(person);
+    PersonDto response = new PersonDto(person, null);
     
 
     // this.createRelationshipWithAuthService(
@@ -1248,7 +1248,7 @@ public class PersonService {
       int size = personParam.getPassword().length();
       if (size >= 6 && personParam.getPassword().matches(VALID_CHARACTERS)) {
         Person person = this.find(idPerson);
-        PersonDto response = new PersonDto(person);
+        PersonDto response = new PersonDto(person, null);
 
         this.createRelationshipWithAuthService(
             new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)

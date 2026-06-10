@@ -120,7 +120,7 @@ public class MeetingController {
   public ResponseEntity<MeetingDto> findById(@RequestParam(name = "meetingId", required = false) Long meetingId) {
 
     Meeting meeting = meetingService.findById(meetingId);
-    MeetingDto meetingDto = new MeetingDto(meeting);
+    MeetingDto meetingDto = new MeetingDto(meeting, personService);
 
     return ResponseEntity.status(200).body(meetingDto);
   }
@@ -412,7 +412,7 @@ public class MeetingController {
     Optional<Person> personOpt = personService.findByContactEmail(email);
 
     return personOpt.map(
-        person -> ResponseEntity.status(200).body(new PersonDto(person)))
+        person -> ResponseEntity.status(200).body(new PersonDto(person, null)))
         .orElseGet(() -> ResponseEntity.noContent().build());
   }
 

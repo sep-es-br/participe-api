@@ -3,8 +3,8 @@ package br.gov.es.participe.controller.dto;
 import br.gov.es.participe.enumerator.AttendanceListEnum;
 import br.gov.es.participe.enumerator.TypeMeetingEnum;
 import br.gov.es.participe.model.Meeting;
+import br.gov.es.participe.service.PersonService;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,16 +42,19 @@ public class MeetingDto {
 
 
 
+  public MeetingDto(Meeting meeting, PersonService personSrv) {
+    loadMeetingDto(meeting, true, personSrv);
+  }
 
   public MeetingDto(Meeting meeting) {
-    loadMeetingDto(meeting, true);
+    loadMeetingDto(meeting, true, null);
   }
 
   public MeetingDto(Meeting meeting, boolean loadConference) {
-    loadMeetingDto(meeting, loadConference);
+    loadMeetingDto(meeting, loadConference, null);
   }
 
-  private void loadMeetingDto(Meeting meeting, boolean loadConference) {
+  private void loadMeetingDto(Meeting meeting, boolean loadConference, PersonService personSrv) {
     this.id = meeting.getId();
     this.name = meeting.getName();
     this.address = meeting.getAddress();
@@ -73,11 +76,11 @@ public class MeetingDto {
 
     if(meeting.getReceptionists() != null && !meeting.getReceptionists().isEmpty()) {
       this.receptionists = new ArrayList<>();
-      meeting.getReceptionists().forEach(receptionist -> this.receptionists.add(new PersonDto(receptionist)));
+      meeting.getReceptionists().forEach(receptionist -> this.receptionists.add(new PersonDto(receptionist, personSrv == null ? null : personSrv.getSubById(receptionist.getId()))));
     }
     if(meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
       this.participants = new ArrayList<>();
-      meeting.getParticipants().forEach(participant -> this.participants.add(new PersonDto(participant)));
+      meeting.getParticipants().forEach(participant -> this.participants.add(new PersonDto(participant, personSrv.getSubById(participant.getId()))));
     }
     if(meeting.getPlanItems() != null && !meeting.getPlanItems().isEmpty()) {
       this.segmentations = meeting.getPlanItems().stream()
