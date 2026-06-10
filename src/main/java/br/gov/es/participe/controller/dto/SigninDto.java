@@ -20,7 +20,7 @@ public class SigninDto {
 
   public SigninDto(Person person, String authServiceName, String token, String refreshToken) {
     this.type = "Bearer";
-    this.person = new PersonDto(person);
+    this.person = new PersonDto(person, null);
     this.token = token;
     this.refreshToken = refreshToken;
     this.isCompleted = isAllFieldsCompleted(person);

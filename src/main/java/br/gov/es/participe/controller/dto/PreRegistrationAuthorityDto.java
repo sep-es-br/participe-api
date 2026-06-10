@@ -1,10 +1,8 @@
 package br.gov.es.participe.controller.dto;
 
-import java.util.*;
-
-import org.springframework.data.neo4j.annotation.QueryResult;
-
 import br.gov.es.participe.model.PreRegistration;
+import java.util.*;
+import org.springframework.data.neo4j.annotation.QueryResult;
 
 @QueryResult
 public class PreRegistrationAuthorityDto {
@@ -26,8 +24,8 @@ public class PreRegistrationAuthorityDto {
 
         this.id = preRegistration.getId();
         this.meeting = new MeetingDto(preRegistration.getMeeting(),false);
-        this.person = new PersonDto(preRegistration.getPerson());
-        this.madeByPerson = new PersonDto(preRegistration.getMadeBy());
+        this.person = new PersonDto(preRegistration.getPerson(), null);
+        this.madeByPerson = new PersonDto(preRegistration.getMadeBy(), null);
         this.checkInDate = preRegistration.getCheckIn();
         this.preRegistrationDate = preRegistration.getPreRegistration();
         this.qrcode = Base64.getEncoder().encodeToString(qrcode);

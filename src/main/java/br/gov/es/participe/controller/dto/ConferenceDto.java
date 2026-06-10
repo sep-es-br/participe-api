@@ -5,7 +5,6 @@ import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.model.StructureItem;
 import br.gov.es.participe.util.domain.DisplayModeType;
 import br.gov.es.participe.util.domain.StatusConferenceType;
-
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -161,7 +160,7 @@ public class ConferenceDto {
 
     if (conference.getModerators() != null && !conference.getModerators().isEmpty()) {
       this.moderators = new ArrayList<>();
-      conference.getModerators().forEach(moderator -> this.moderators.add(new PersonDto(moderator)));
+      conference.getModerators().forEach(moderator -> this.moderators.add(new PersonDto(moderator, null)));
     }
   }
 

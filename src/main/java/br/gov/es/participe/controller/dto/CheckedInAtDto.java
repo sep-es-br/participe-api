@@ -1,8 +1,7 @@
 package br.gov.es.participe.controller.dto;
 
-import java.util.Date;
-
 import br.gov.es.participe.model.CheckedInAt;
+import java.util.Date;
 
 public class CheckedInAtDto {
 	private PersonDto person;
@@ -32,7 +31,7 @@ public class CheckedInAtDto {
                 this.role = checkedInAt.getRole();
                 
 		if(checkedInAt.getPerson() != null) {
-			this.person = new PersonDto(checkedInAt.getPerson());
+			this.person = new PersonDto(checkedInAt.getPerson(), null);
 		}
 		if(checkedInAt.getMeeting() != null) {
 			this.meeting = new MeetingDto(checkedInAt.getMeeting(), false);
