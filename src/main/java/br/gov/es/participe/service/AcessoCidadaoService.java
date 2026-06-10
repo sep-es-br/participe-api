@@ -265,7 +265,7 @@ public class AcessoCidadaoService {
       personList.removeIf(
           p -> !participeUtils.normalize(p.getName()).contains(participeUtils.normalize(name))
               || !participeUtils.normalize(p.getContactEmail()).contains(
-                  participeUtils.normalize(email)));
+                  email == null ? p.getContactEmail() : participeUtils.normalize(email)));
     }
 
     return personList;
