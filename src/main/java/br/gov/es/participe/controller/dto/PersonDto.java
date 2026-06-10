@@ -1,7 +1,6 @@
 package br.gov.es.participe.controller.dto;
 
 import br.gov.es.participe.model.Person;
-
 import java.util.Set;
 
 public class PersonDto {
@@ -24,7 +23,7 @@ public class PersonDto {
   public PersonDto(Person person) {
     this.id = person.getId();
     this.name = person.getName();
-    this.contactEmail = person.getContactEmail();
+    this.contactEmail = ("null".equalsIgnoreCase(person.getContactEmail())) ? null : person.getContactEmail();
     this.cpf = person.getCpf();
     this.telephone = person.getTelephone();
     this.roles = person.getRoles();
