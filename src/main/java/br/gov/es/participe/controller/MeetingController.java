@@ -224,6 +224,22 @@ public class MeetingController {
     return ResponseEntity.noContent().build();
   }
 
+  @GetMapping("/checkIn/{meetingId}/{personId}")
+  @Transactional
+  public ResponseEntity<CheckedInAtDto> editCheckIn(
+      @RequestHeader(name = "Authorization") String token,
+      @PathVariable Long meetingId,
+      @PathVariable Long personId
+       ) {
+      
+
+    if (!personService.hasOneOfTheRoles(token, new String[]{"Administrator", "Recepcionist"})) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    return ResponseEntity.ok(this.meetingService.getCheckIn(meetingId, personId).map(CheckedInAtDto::new).orElse(null));
+  }
+
   @Transactional
   @PostMapping("/checkIn")
   public ResponseEntity<CheckedInAtDto> checkInOnMeeting(
