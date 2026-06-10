@@ -182,15 +182,15 @@ public class AcessoCidadaoService {
 
   private Set<String> getRoles(JSONObject userInfo) throws IOException {
     Set<String> roles = new HashSet<>();
-//   if (!userInfo.isNull(FIELD_ROLE)) {
-//     if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
-//       userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));
-//     } else {
-//       roles.add(userInfo.getString(FIELD_ROLE));
-//     }
-//   }
+   if (!userInfo.isNull(FIELD_ROLE)) {
+     if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
+       userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));
+     } else {
+       roles.add(userInfo.getString(FIELD_ROLE));
+     }
+   }
    
-      roles.add("Administrator");
+//      roles.add("Administrator");
 //      roles.add("Presenter");
 //      roles.add("Recepcionist");
     
