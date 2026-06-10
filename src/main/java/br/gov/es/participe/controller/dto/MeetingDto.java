@@ -76,7 +76,7 @@ public class MeetingDto {
 
     if(meeting.getReceptionists() != null && !meeting.getReceptionists().isEmpty()) {
       this.receptionists = new ArrayList<>();
-      meeting.getReceptionists().forEach(receptionist -> this.receptionists.add(new PersonDto(receptionist, personSrv.getSubById(receptionist.getId()))));
+      meeting.getReceptionists().forEach(receptionist -> this.receptionists.add(new PersonDto(receptionist, personSrv == null ? null : personSrv.getSubById(receptionist.getId()))));
     }
     if(meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
       this.participants = new ArrayList<>();
