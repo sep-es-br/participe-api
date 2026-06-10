@@ -209,7 +209,14 @@ public class PersonController {
         !profile.equalsIgnoreCase("Recepcionist")) {
       return ResponseEntity.status(404).body(null);
     }
-    Optional<Person> person = personService.findByContactEmail(personParam.getContactEmail());
+    Optional<Person> person;
+    if(personParam.getContactEmail() == null || personParam.getContactEmail().equalsIgnoreCase("")) {
+        person = personService.findByLoginSub(personParam.getSub());
+    } else {
+        person = personService.findByContactEmail(personParam.getContactEmail());
+    }
+    
+    
     if (!person.isPresent()) {
       Person addedPerson = personService.storePersonOperator(personParam, profile);
       if (addedPerson == null) {
