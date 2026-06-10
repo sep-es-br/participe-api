@@ -30,6 +30,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,6 +68,7 @@ public class AuthorityCredentialController {
         
     
     @PutMapping
+    @Transactional
     public ResponseEntity<PreRegistrationAuthorityDto> registerAuthority(
         @RequestHeader(name = "Authorization") String token,
         @Valid @RequestBody AuthorityCredentialRequest credentialRequest
@@ -113,9 +115,10 @@ public class AuthorityCredentialController {
         SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
 
           Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
-                // 1. Setamos a nova localidade direto no objeto que veio do banco
-                sf.setLocality(locality); // Usando a 'locality' que vc já buscou lá no topo do método!
-
+                // 1. FORÇA o Neo4j a ver a mudança: limpa a localidade antiga antes de setar a nova
+                sf.setLocality(null); 
+                sf.setLocality(locality); // Seta a nova localidade encontrada no topo do método
+                
                 // 2. Salvamos a SelfDeclaration DIRETAMENTE pelo repositório dela
                 // Isso força o Neo4j a recriar a seta (SelfDeclaration)-[:SUA_RELACAO]->(Locality)
                 SelfDeclaration atualizada = selfDeclarationService.save(sf);
