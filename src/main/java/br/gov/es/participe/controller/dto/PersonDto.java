@@ -24,7 +24,7 @@ public class PersonDto {
     this.id = person.getId();
     this.sub = sub;
     this.name = person.getName();
-    this.contactEmail = ("null".equalsIgnoreCase(person.getContactEmail())) ? "" : person.getContactEmail();
+    this.contactEmail = (person.getContactEmail() == null || "null".equalsIgnoreCase(person.getContactEmail())) ? "" : person.getContactEmail();
     this.cpf = person.getCpf();
     this.telephone = person.getTelephone();
     this.roles = person.getRoles();
