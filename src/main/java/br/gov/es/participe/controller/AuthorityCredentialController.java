@@ -30,6 +30,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,6 +68,7 @@ public class AuthorityCredentialController {
         
     
     @PutMapping
+    @Transactional
     public ResponseEntity<PreRegistrationAuthorityDto> registerAuthority(
         @RequestHeader(name = "Authorization") String token,
         @Valid @RequestBody AuthorityCredentialRequest credentialRequest
@@ -110,20 +112,31 @@ public class AuthorityCredentialController {
           });
 
         }
+        
+
+        PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
+          
         SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
 
           Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
-              SelfDeclaration atualizada = selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
-              
-              sf.setLocality(atualizada.getLocality());
-          }, 
+                // 1. Chame o seu updateLocality maroto (ele vai salvar no banco com @Transactional)
+                SelfDeclaration atualizada = selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
+
+                // 2. ATUALIZE A MEMÓRIA: Remove a versão velha da lista da Person pelo ID da conferência
+                if (representedByPerson.getSelfDeclaretions() != null) {
+                    representedByPerson.getSelfDeclaretions().removeIf(sd -> 
+                        sd.getConference() != null && 
+                        sd.getConference().getId().equals(meeting.getConference().getId())
+                    );
+                    // 3. Injeta a instância 'atualizada' que o seu método devolveu
+                    representedByPerson.getSelfDeclaretions().add(atualizada);
+                }
+            },
           () -> {
               representedByPerson.addSelfDeclaration(
                       selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
               );
           });
-
-          PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
 
           preRegistration = Optional.ofNullable(preRegistration)
                                       .map(pr -> {
@@ -136,6 +149,7 @@ public class AuthorityCredentialController {
                                          pr.setRole(credentialRequest.getRole());
                                          pr.setIsTeam(credentialRequest.getIsTeam());
                                          pr.setMadeBy(madeByPerson);
+                                         
 
                                           return pr;
                                       })
@@ -144,9 +158,10 @@ public class AuthorityCredentialController {
                                           credentialRequest.getOrganization().getName(), credentialRequest.getOrganization().getShortName(), credentialRequest.getRole(),
                                           credentialRequest.getIsTeam()));
 
+        preRegistration.setPerson(representedByPerson);
 
 
-        PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration, true);
+        PreRegistration savedPreRegistration = preRegistrationService.crudeSave(preRegistration);
         try {
             byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
 

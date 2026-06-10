@@ -37,6 +37,11 @@ public class PreRegistrationService {
     @Autowired
     private QRCodeService qrCodeService;
 
+    public PreRegistration crudeSave(PreRegistration preRegistration) {
+        return preRegistrationRepository.save(preRegistration);
+    }
+    
+
     public PreRegistration save(PreRegistration preRegistration, boolean update){
 
         PreRegistration preRegistrationStored =  preRegistrationRepository.findByMeetingAndPerson(preRegistration.getMeeting().getId(), preRegistration.getPerson().getId());
