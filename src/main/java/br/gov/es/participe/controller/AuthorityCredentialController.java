@@ -112,23 +112,23 @@ public class AuthorityCredentialController {
           });
 
         }
+        
+
+        PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
+          
         SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
 
           Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
-                // 1. FORÇA o Neo4j a ver a mudança: limpa a localidade antiga antes de setar a nova
-                sf.setLocality(null); 
-                sf.setLocality(locality); // Seta a nova localidade encontrada no topo do método
-                
-                // 2. Salvamos a SelfDeclaration DIRETAMENTE pelo repositório dela
-                // Isso força o Neo4j a recriar a seta (SelfDeclaration)-[:SUA_RELACAO]->(Locality)
-                SelfDeclaration atualizada = selfDeclarationService.save(sf);
+                // 1. Chame o seu updateLocality maroto (ele vai salvar no banco com @Transactional)
+                SelfDeclaration atualizada = selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
 
-                // 3. Atualizamos a lista da Person na memória para o Neo4j não desfazer o link depois
+                // 2. ATUALIZE A MEMÓRIA: Remove a versão velha da lista da Person pelo ID da conferência
                 if (representedByPerson.getSelfDeclaretions() != null) {
                     representedByPerson.getSelfDeclaretions().removeIf(sd -> 
                         sd.getConference() != null && 
                         sd.getConference().getId().equals(meeting.getConference().getId())
                     );
+                    // 3. Injeta a instância 'atualizada' que o seu método devolveu
                     representedByPerson.getSelfDeclaretions().add(atualizada);
                 }
             },
@@ -137,8 +137,6 @@ public class AuthorityCredentialController {
                       selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
               );
           });
-
-          PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
 
           preRegistration = Optional.ofNullable(preRegistration)
                                       .map(pr -> {
@@ -151,6 +149,7 @@ public class AuthorityCredentialController {
                                          pr.setRole(credentialRequest.getRole());
                                          pr.setIsTeam(credentialRequest.getIsTeam());
                                          pr.setMadeBy(madeByPerson);
+                                         
 
                                           return pr;
                                       })
@@ -159,9 +158,10 @@ public class AuthorityCredentialController {
                                           credentialRequest.getOrganization().getName(), credentialRequest.getOrganization().getShortName(), credentialRequest.getRole(),
                                           credentialRequest.getIsTeam()));
 
+        preRegistration.setPerson(representedByPerson);
 
 
-        PreRegistration savedPreRegistration = preRegistrationService.save(preRegistration, true);
+        PreRegistration savedPreRegistration = preRegistrationService.crudeSave(preRegistration);
         try {
             byte[] imageQR = qrCodeService.generateQRCode(savedPreRegistration.getId().toString(), 300, 300);
 

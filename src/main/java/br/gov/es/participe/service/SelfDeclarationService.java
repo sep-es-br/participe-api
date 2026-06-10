@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SelfDeclarationService {
@@ -97,11 +98,9 @@ public class SelfDeclarationService {
     return updatedSelfDeclaration;
   }
 
-  // @Transactional
+  @Transactional
   public SelfDeclaration updateLocality(SelfDeclaration selfDeclaration, Long idLocality) {
     
-    selfDeclaration.setPerson(personService.find(selfDeclaration.getPerson().getId()));
-    selfDeclaration.setConference(conferenceService.find(selfDeclaration.getConference().getId()));
     selfDeclaration.setLocality(localityService.find(idLocality));
     log.info(
       "Atualizado atributos da SelfDeclaration com id={} novos atributos = personId={}, conferenceId={}, localityId={}",
