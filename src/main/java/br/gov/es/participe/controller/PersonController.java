@@ -55,7 +55,7 @@ public class PersonController {
     if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
       List<Person> people = personService.findAll();
       List<PersonDto> response = new ArrayList<>();
-      people.forEach(person -> response.add(new PersonDto(person)));
+      people.forEach(person -> response.add(new PersonDto(person, null)));
       return ResponseEntity.status(200).body(response);
     } else {
       return ResponseEntity.status(401).body(null);
@@ -272,7 +272,7 @@ public class PersonController {
           self
       );
 
-      PersonDto response = new PersonDto(person);
+      PersonDto response = new PersonDto(person, null);
       response.setSelfDeclaretion(new SelfDeclarationDto(self, false));
       return ResponseEntity.status(200).body(response);
     } else {
@@ -337,7 +337,7 @@ public class PersonController {
           @PathVariable String sub
   ) {
       
-        return ResponseEntity.of(personService.findByLoginSub(sub).map(PersonDto::new)); 
+        return ResponseEntity.of(personService.findByLoginSub(sub).map(p -> new PersonDto(p, sub) )); 
   }
 
   @GetMapping("/{sub}/papeisBySub")

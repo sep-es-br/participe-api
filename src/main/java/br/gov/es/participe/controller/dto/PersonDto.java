@@ -20,8 +20,9 @@ public class PersonDto {
 
   }
 
-  public PersonDto(Person person) {
+  public PersonDto(Person person, String sub) {
     this.id = person.getId();
+    this.sub = sub;
     this.name = person.getName();
     this.contactEmail = ("null".equalsIgnoreCase(person.getContactEmail())) ? null : person.getContactEmail();
     this.cpf = person.getCpf();
