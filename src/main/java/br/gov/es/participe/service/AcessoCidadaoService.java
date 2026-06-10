@@ -252,8 +252,8 @@ public class AcessoCidadaoService {
               JSONObject obj = (JSONObject) element;
               PersonDto person = new PersonDto();
               person.setSub(obj.getString("Sub"));
-              person.setName((obj.get("Nome") == null || obj.get("Nome").equals(JSONObject.NULL)) ? null : obj.getString("Nome"));
-              person.setContactEmail((obj.get("Email") == null || obj.get("Email").equals(JSONObject.NULL)) ? null : obj.getString("Email"));
+              person.setName((obj.get("Nome") == null || obj.get("Nome").equals(JSONObject.NULL)) ? "" : obj.getString("Nome"));
+              person.setContactEmail((obj.get("Email") == null || obj.get("Email").equals(JSONObject.NULL)) ? "" : obj.getString("Email"));
               personList.add(person);
             }
           });
