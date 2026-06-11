@@ -324,6 +324,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "WITH DISTINCT \n" +
             "  id(p) AS personId,\n" +
             "  id(cia) AS checkInId,\n" +
+            "  (cia IS NOT NULL) AS checkedIn,\n" +
             "  toLower(p.name) AS name,\n" +
             "  p.contactEmail AS email,\n" +
             "  p.telehpone AS telephone,\n" +
@@ -341,6 +342,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "RETURN \n" +
             "  personId,\n" +
             "  checkInId,\n" +
+            "  checkedIn,\n" +
             "  name,\n" +
             "  email,\n" +
             "  telephone,\n" +
