@@ -534,6 +534,21 @@ public class MeetingService {
                     newParticipant.setOrganization(organization == null ? null : organization.getName());
                     newParticipant.setOrganizationShort(organization == null ? null : organization.getShortName());
                     newParticipant.setRole(role);
+                    if(newParticipant.getTime() == null) {
+                      if(timeZone == null) {
+                          newParticipant.setTime(new Date());
+                      } else {
+                          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                            LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of(timeZone));
+                            String format = localDateTime.format(formatter);
+
+                            try {
+                                newParticipant.setTime(DateUtils.parseDate(format, "dd/MM/yyyy HH:mm:ss"));
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                      }
+                  }
 
                     preRegistrationService.saveCheckIn(personId, meetingId);
                 log.info("Realizando checkin da personId={} na meetingId={} com timezone={}", personId, meetingId, timeZone);
