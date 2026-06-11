@@ -500,9 +500,9 @@ public class MeetingService {
               .map(checkIn -> {
                   checkIn.setIsAuthority(isAuthority);
                   checkIn.setIsTeam(isTeam);
-                  checkIn.setOrganizationGuid(organization.getGuid());
+                  checkIn.setOrganizationGuid(organization == null ? null : organization.getGuid());
                   checkIn.setOrganization(organization.getName());
-                  checkIn.setOrganizationShort(organization.getShortName());
+                  checkIn.setOrganizationShort(organization == null ? null : organization.getShortName());
                   checkIn.setRole(role);
                   
                   if(checkIn.getTime() == null) {
@@ -530,9 +530,9 @@ public class MeetingService {
                     newParticipant.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
                     newParticipant.setIsTeam(Boolean.TRUE.equals(isTeam) ? true : null);
                     newParticipant.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
-                    newParticipant.setOrganizationGuid(organization.getGuid());
+                    newParticipant.setOrganizationGuid(organization == null ? null : organization.getGuid());
                     newParticipant.setOrganization(organization.getName());
-                    newParticipant.setOrganizationShort(organization.getShortName());
+                    newParticipant.setOrganizationShort(organization == null ? null : organization.getShortName());
                     newParticipant.setRole(role);
 
                     preRegistrationService.saveCheckIn(personId, meetingId);
