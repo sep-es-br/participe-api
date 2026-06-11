@@ -902,7 +902,7 @@ public class PersonService {
         new RelationshipAuthServiceAuxiliaryDto.RelationshipAuthServiceAuxiliaryDtoBuilder(person)
             .password(null)
             .server(ACESSOCIDADAO)
-            .serverId(personList.get(0).getSub())
+            .serverId(personParam.getSub())
             .conferenceId(null)
             .resetPassword(false)
             .makeLogin(false)
