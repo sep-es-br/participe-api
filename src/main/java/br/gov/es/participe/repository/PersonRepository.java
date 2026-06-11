@@ -207,7 +207,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
                "WHERE (au.server = 'AcessoCidadao' OR au.server = 'Google') AND (" +
                "ALL(x IN cs WHERE apoc.text.clean(p.name) CONTAINS apoc.text.clean(x)) " +
                "OR ALL(x IN cs WHERE apoc.text.clean(p.contactEmail) CONTAINS apoc.text.clean(x))) " +
-               "AND ($sub IS NULL OR aut.idByAuth = $sub ) " +
+               "AND ($sub IS NULL OR aut.idByAuth = $sub OR au.serverId = $sub ) " +
                "AND ($cEmail IS NULL OR p.contactEmail = $cEmail) " +
                "OPTIONAL MATCH (p)-[cia:CHECKED_IN_AT]->(m:Meeting) " +
                "WHERE id(m) = mId " +
