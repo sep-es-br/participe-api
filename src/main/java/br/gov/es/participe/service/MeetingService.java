@@ -501,7 +501,7 @@ public class MeetingService {
                   checkIn.setIsAuthority(isAuthority);
                   checkIn.setIsTeam(isTeam);
                   checkIn.setOrganizationGuid(organization == null ? null : organization.getGuid());
-                  checkIn.setOrganization(organization.getName());
+                  checkIn.setOrganization(organization == null ? null : organization.getName());
                   checkIn.setOrganizationShort(organization == null ? null : organization.getShortName());
                   checkIn.setRole(role);
                   
@@ -531,7 +531,7 @@ public class MeetingService {
                     newParticipant.setIsTeam(Boolean.TRUE.equals(isTeam) ? true : null);
                     newParticipant.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
                     newParticipant.setOrganizationGuid(organization == null ? null : organization.getGuid());
-                    newParticipant.setOrganization(organization.getName());
+                    newParticipant.setOrganization(organization == null ? null : organization.getName());
                     newParticipant.setOrganizationShort(organization == null ? null : organization.getShortName());
                     newParticipant.setRole(role);
 
