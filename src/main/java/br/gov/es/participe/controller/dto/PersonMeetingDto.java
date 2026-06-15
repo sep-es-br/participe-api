@@ -12,6 +12,7 @@ public class PersonMeetingDto {
     private String email;
     private String telephone;
     private String locality;
+    private Long localityId;
     private String superLocality;
     private Long superLocalityId;
     private String regionalizable;
@@ -204,5 +205,13 @@ public class PersonMeetingDto {
 
     public void setSub(String sub) {
         this.sub = sub;
+    }
+
+    public Long getLocalityId() {
+        return localityId;
+    }
+
+    public void setLocalityId(Long localityId) {
+        this.localityId = localityId;
     }
 }

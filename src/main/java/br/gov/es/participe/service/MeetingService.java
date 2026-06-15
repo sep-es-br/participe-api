@@ -464,23 +464,25 @@ public class MeetingService {
     if (person != null && meeting != null) {
         Optional<CheckedInAt> optionalCheckIn = checkedInAtRepository.findByPersonAndMeeting(personId, meetingId);
         
-        CheckedInAt checkIn = optionalCheckIn.orElseGet(() -> {
-            CheckedInAt out = new CheckedInAt(person, meeting);
-            out.setTime(null);
-            return out;
-        });
-        
-        checkIn.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
-        checkIn.setIsTeam(Boolean.TRUE.equals(isTeam) ? true : null);
-        checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
-        checkIn.setOrganizationGuid(organization.getGuid());
-        checkIn.setOrganization(organization.getName());
-        checkIn.setOrganizationShort(organization.getShortName());
-        checkIn.setRole(role);
-        checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
-        checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? announced : null);
+        if(optionalCheckIn.isPresent()){
+            CheckedInAt checkIn = optionalCheckIn.get();
 
-        return checkedInAtRepository.save(checkIn);
+            checkIn.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
+            checkIn.setIsTeam(Boolean.TRUE.equals(isTeam) ? true : null);
+            checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
+            checkIn.setOrganizationGuid(organization.getGuid());
+            checkIn.setOrganization(organization.getName());
+            checkIn.setOrganizationShort(organization.getShortName());
+            checkIn.setRole(role);
+            checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
+            checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? announced : null);
+
+            return checkedInAtRepository.save(checkIn);
+        } else {
+            return null;
+        }
+        
+        
 
     }
 

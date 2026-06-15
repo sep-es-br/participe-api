@@ -216,12 +216,13 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
                "    OPTIONAL MATCH (p)-[:MADE]->(sd:SelfDeclaration)-[:TO]->(c:Conference), " +
                "    (sd)-[ab:AS_BEING_FROM]->(l:Locality)-[ot:OF_TYPE]-(lt:LocalityType) " +
                "    OPTIONAL MATCH (l)-[:IS_LOCATED_IN]->(sl:Locality) " +
-               "    RETURN l.name AS locality, sl.name AS superLocality, id(sl) AS superLocalityId, lt.name AS regionalizable " +
+               "    RETURN l.name AS locality, id(l) AS localityId, sl.name AS superLocality, id(sl) AS superLocalityId, lt.name AS regionalizable " +
                "    ORDER BY c.beginDate DESC LIMIT 1 " +
                "} " +
                "RETURN DISTINCT " +
                "       id(p) AS personId, " +
                "       locality, " +
+               "       localityId, " +
                "       superLocality, " +
                "       superLocalityId, " +
                "       regionalizable, " +
