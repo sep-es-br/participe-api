@@ -15,6 +15,7 @@ import br.gov.es.participe.model.Meeting;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.model.PortalServer;
+import br.gov.es.participe.model.PreRegistration;
 import br.gov.es.participe.repository.CheckedInAtRepository;
 import br.gov.es.participe.repository.MeetingRepository;
 import java.io.IOException;
@@ -479,7 +480,24 @@ public class MeetingService {
 
             return checkedInAtRepository.save(checkIn);
         } else {
-            return null;
+            
+            PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meetingId, personId);
+            
+            if(preRegistration != null) {
+                preRegistration.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
+                preRegistration.setIsTeam(Boolean.TRUE.equals(isTeam) ? true : null);
+                preRegistration.setOrganizationGuid(organization.getGuid());
+                preRegistration.setOrganization(organization.getName());
+                preRegistration.setOrganizationShort(organization.getShortName());
+                preRegistration.setRole(role);
+                
+                preRegistrationService.crudeSave(preRegistration);
+                return null;
+            } else {
+                return null;
+            }
+            
+            
         }
         
         
