@@ -252,7 +252,7 @@ Integer countParticipationAllOriginsByConference( @Param("idConference") Long id
 	  
   */
     
-  @Query( " optional match (l:Locality)<-[:AS_BEING_FROM]-(s:SelfDeclaration)<-[:MADE]-(p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference) " + 
+  @Query( " optional match (l:Locality)<-[:AS_BEING_FROM]-(s:SelfDeclaration)<-[:MADE]-(p:Person)-[c:CHECKED_IN_AT]->(m:Meeting)-[:OCCURS_IN]->(co:Conference), (s)-[:TO]->(co) " + 
           " where id(co) = $idConference  AND " + 
           " (m.attendanceListMode = 'AUTO') and (($meetings IS NULL) OR (id(m) IN $meetings)) " + 
           " with collect(l) as plogged  " + 
