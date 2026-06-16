@@ -4,10 +4,7 @@ import br.gov.es.participe.ParticipeApplication;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.service.AcessoCidadaoService;
 import br.gov.es.participe.service.CacheService;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Stream;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,20 +44,24 @@ public class MyJob implements Job {
      */
     private boolean cacheJaInicializado() {
         try {
-            // Pega o caminho relativo onde a pasta 'dados_cache' deve estar
-            Path pastaCache = java.nio.file.Paths.get("cache");
-            
-            if (!Files.exists(pastaCache)) {
+            // Usa a mesma lógica para achar a pasta do JAR ou do Target da IDE 🎯
+            String caminhoDoJar = CacheService.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            String caminhoDecodificado = java.net.URLDecoder.decode(caminhoDoJar, java.nio.charset.StandardCharsets.UTF_8);
+            java.io.File pastaDoJar = new java.io.File(caminhoDecodificado).getParentFile();
+
+            // Aponta para a pasta correta (seja no target da IDE ou no servidor)
+            java.nio.file.Path pastaCache = java.nio.file.Paths.get(pastaDoJar.getAbsolutePath(), "dados_cache");
+
+            if (!java.nio.file.Files.exists(pastaCache)) {
                 return false;
             }
 
-            // Vasculha a pasta procurando por arquivos que terminem com ".sst" (arquivos de dados do RocksDB)
-            try (Stream<Path> stream = Files.list(pastaCache)) {
+            try (java.util.stream.Stream<java.nio.file.Path> stream = java.nio.file.Files.list(pastaCache)) {
                 return stream.anyMatch(file -> file.toString().endsWith(".sst"));
             }
         } catch (Exception e) {
             System.err.println("Erro ao verificar pasta de cache: " + e.getMessage());
-            return false; // Na dúvida, deixa rodar a carga
+            return false;
         }
     }
     
