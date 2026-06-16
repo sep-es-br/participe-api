@@ -471,9 +471,9 @@ public class MeetingService {
             checkIn.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
             checkIn.setIsTeam(Boolean.TRUE.equals(isTeam) ? true : null);
             checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? false : null);
-            checkIn.setOrganizationGuid(organization.getGuid());
-            checkIn.setOrganization(organization.getName());
-            checkIn.setOrganizationShort(organization.getShortName());
+            checkIn.setOrganizationGuid(Optional.ofNullable(organization).map(OptionOrganization::getGuid).orElse(null));
+            checkIn.setOrganization(Optional.ofNullable(organization).map(OptionOrganization::getName).orElse(null));
+            checkIn.setOrganizationShort(Optional.ofNullable(organization).map(OptionOrganization::getShortName).orElse(null));
             checkIn.setRole(role);
             checkIn.setToAnnounce(Boolean.TRUE.equals(isAuthority) ? toAnnounce : null);
             checkIn.setIsAnnounced(Boolean.TRUE.equals(isAuthority) ? announced : null);
@@ -486,9 +486,9 @@ public class MeetingService {
             if(preRegistration != null) {
                 preRegistration.setIsAuthority(Boolean.TRUE.equals(isAuthority) ? true : null);
                 preRegistration.setIsTeam(Boolean.TRUE.equals(isTeam) ? true : null);
-                preRegistration.setOrganizationGuid(organization.getGuid());
-                preRegistration.setOrganization(organization.getName());
-                preRegistration.setOrganizationShort(organization.getShortName());
+                preRegistration.setOrganizationGuid(Optional.ofNullable(organization).map(OptionOrganization::getGuid).orElse(null));
+                preRegistration.setOrganization(Optional.ofNullable(organization).map(OptionOrganization::getName).orElse(null));
+                preRegistration.setOrganizationShort(Optional.ofNullable(organization).map(OptionOrganization::getShortName).orElse(null));
                 preRegistration.setRole(role);
                 
                 preRegistrationService.crudeSave(preRegistration);
