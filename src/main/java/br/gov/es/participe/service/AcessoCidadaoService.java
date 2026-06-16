@@ -569,7 +569,7 @@ public class AcessoCidadaoService {
     }
   }
 
-  public List<PublicAgentDto> findPublicAgentsFromAcessoCidadaoAPI() {
+  public List<PublicAgentDto> findPublicAgentsFromAcessoCidadaoAPI(String guid) {
     String token = null;
 
     try {
@@ -578,7 +578,7 @@ public class AcessoCidadaoService {
       throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
     }
 
-    String url = acessocidadaoUriWebApi.concat("conjunto/" + GUID_GOVES + "/agentesPublicos");
+    String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/agentesPublicos");
 
     HttpRequest request = HttpRequest.newBuilder(URI.create(url))
         .header(AUTHORIZATION, BEARER + token)
@@ -604,6 +604,10 @@ public class AcessoCidadaoService {
       logger.error(e.getMessage());
       throw new ApiAcessoCidadaoException("Não foi possível buscar os agentes publicos atrelado ao Guid GOVES.");
     }
+  }
+
+  public List<PublicAgentDto> findPublicAgentsFromAcessoCidadaoAPI() {
+    return this.findPublicAgentsFromAcessoCidadaoAPI(GUID_GOVES);
   }
 
   public PublicAgentDto findTheAgentPublicSubByCpfInAcessoCidadaoAPI(String cpf) {
