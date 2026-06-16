@@ -3,7 +3,14 @@ package br.gov.es.participe;
 import br.gov.es.participe.configuration.ApplicationProperties;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.service.AcessoCidadaoService;
-
+import java.util.List;
+import java.util.TimeZone;
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -14,17 +21,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 import org.springframework.scheduling.annotation.*;
 
-
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-
-import java.util.List;
-import java.util.TimeZone;
-
 @EnableConfigurationProperties({ApplicationProperties.class})
 @EnableNeo4jRepositories("br.gov.es.participe.repository")
 @SpringBootApplication(exclude = {
@@ -32,6 +28,7 @@ import java.util.TimeZone;
 		UserDetailsServiceAutoConfiguration.class
 })
 @EnableScheduling
+@EnableAsync
 public class ParticipeApplication implements ServletContextListener, HttpSessionListener {
 
 	@Value("${app.default-timezone}")
