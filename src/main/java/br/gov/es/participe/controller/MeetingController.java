@@ -261,7 +261,9 @@ public class MeetingController {
         checkInParamDto.getIsAuthority(),
         checkInParamDto.getIsTeam(),
         checkInParamDto.getOrganization(),
-        checkInParamDto.getRole());
+        checkInParamDto.getRole(),
+        checkInParamDto.getToAnnounce(),
+        checkInParamDto.getAnnounced());
 
 
 
@@ -291,7 +293,9 @@ public class MeetingController {
         checkInParamDto.getIsAuthority(),
         checkInParamDto.getIsTeam(),
         checkInParamDto.getOrganization(),
-        checkInParamDto.getRole());
+        checkInParamDto.getRole(),
+        checkInParamDto.getToAnnounce(),
+        checkInParamDto.getAnnounced());    
 
     if (checkedInAt != null) {
       return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));

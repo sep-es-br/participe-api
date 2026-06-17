@@ -508,7 +508,7 @@ public class MeetingService {
 }
 
 
-  public CheckedInAt checkInOnMeeting(Long personId, Long meetingId, String timeZone, Boolean isAuthority, Boolean isTeam, OptionOrganization organization, String role) {
+  public CheckedInAt checkInOnMeeting(Long personId, Long meetingId, String timeZone, Boolean isAuthority, Boolean isTeam, OptionOrganization organization, String role,Boolean toAnnounce,Boolean announced) {
     Meeting meeting = this.find(meetingId);
     Person person = personService.find(personId);
     if (person != null && meeting != null) {
@@ -524,6 +524,8 @@ public class MeetingService {
                   checkIn.setOrganization(organization == null ? null : organization.getName());
                   checkIn.setOrganizationShort(organization == null ? null : organization.getShortName());
                   checkIn.setRole(role);
+                  checkIn.setToAnnounce(toAnnounce);
+                  checkIn.setIsAnnounced(announced);
                   
                   if(checkIn.getTime() == null) {
                       if(timeZone == null) {
@@ -554,6 +556,10 @@ public class MeetingService {
                     newParticipant.setOrganization(organization == null ? null : organization.getName());
                     newParticipant.setOrganizationShort(organization == null ? null : organization.getShortName());
                     newParticipant.setRole(role);
+                    newParticipant.setToAnnounce(toAnnounce);
+                    newParticipant.setIsAnnounced(announced);
+                    
+                    
                     if(newParticipant.getTime() == null) {
                       if(timeZone == null) {
                           newParticipant.setTime(new Date());

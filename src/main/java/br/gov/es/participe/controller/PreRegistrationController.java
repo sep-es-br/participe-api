@@ -92,7 +92,7 @@ public class PreRegistrationController {
       @RequestBody CheckInPreRegistrationParamDto checkInPreRegistationDto){
       PreRegistration preRegistration = preRegistrationService.find(checkInPreRegistationDto.getPreRegistrationId());
       Meeting meeting = meetingService.find(checkInPreRegistationDto.getMeetingId()); 
-      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(preRegistration.getPerson().getId(), meeting.getId(),null,null,null,null,null);
+      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(preRegistration.getPerson().getId(), meeting.getId(),null,null,null,null,null, null, null);
       if (checkedInAt != null) {
         return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
       }
@@ -105,7 +105,7 @@ public class PreRegistrationController {
       @RequestBody AcreditationParamDto checkInAccreditationDto){
       Person person = personService.find(checkInAccreditationDto.getPersonId());
       Meeting meeting = meetingService.find(checkInAccreditationDto.getMeetingId()); 
-      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(person.getId(), meeting.getId(),null,null, null, null,null);
+      CheckedInAt checkedInAt = meetingService.checkInOnMeeting(person.getId(), meeting.getId(),null,null, null, null,null, null, null);
       if (checkedInAt != null) {
         return ResponseEntity.ok().body(new CheckedInAtDto(checkedInAt));
       }
