@@ -236,7 +236,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     List<PersonMeetingDto> findPersonByNameForMeeting(@Param("idMeeting")Long idMeeting, @Param("name")String name, @Param("sub")String sub, @Param("cEmail")String cEmail);
       
   @Query(
-    "MATCH (loc:Locality)<-[:AS_BEING_FROM]-(sfd:SelfDeclaration)<-[:MADE]- (p:Person)-[ci:CHECKED_IN_AT {isAuthority: true, toAnnounce: true}]->(m:Meeting)\n" +
+    "MATCH (loc:Locality)<-[:AS_BEING_FROM]-(sfd:SelfDeclaration)<-[:MADE]- (p:Person)-[ci:CHECKED_IN_AT {isAuthority: true, toAnnounce: true}]->(m:Meeting)-[]-(co:Conference), (sfd)-[]-(co)\n" +
     "WHERE id(m) = $idMeeting AND ci.time IS NOT NULL\n" +
     "RETURN DISTINCT\n" +
     "    id(p) AS idPerson,\n" +
