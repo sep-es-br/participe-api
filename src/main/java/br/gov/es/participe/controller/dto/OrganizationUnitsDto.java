@@ -69,29 +69,33 @@ public class OrganizationUnitsDto {
     public void setUnidadePai(UnidadePai unidadePai) {
         this.unidadePai = unidadePai;
     }
+    
+    public class UnidadePai {
+
+        @JsonProperty("guid")
+        public String guid;
+
+        @JsonProperty("nome")
+        public String nome;
+
+        @JsonProperty("sigla")
+        public String sigla;
+
+        @JsonProperty("nomeCurto")
+        public String nomeCurto;
+    }
+    
+    public class TipoUnidade {
+
+        @JsonProperty("descricao")
+        public String descricao;
+
+        @JsonProperty("id")
+        public int id;
+    }
 }
 
-class TipoUnidade {
 
-    @JsonProperty("descricao")
-    String descricao;
 
-    @JsonProperty("id")
-    int id;
-}
 
-class UnidadePai {
-
-    @JsonProperty("guid")
-    String guid;
-
-    @JsonProperty("nome")
-    String nome;
-
-    @JsonProperty("sigla")
-    String sigla;
-
-    @JsonProperty("nomeCurto")
-    String nomeCurto;
-}
 

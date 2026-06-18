@@ -139,10 +139,46 @@ public class PersonService {
         
         log.info("Lista de agentes+papel carregado em {}", System.currentTimeMillis() - startTime);
     }
-
+    
     public List<PersonListItemsResponse> filterPersonsByOrganization(String guid){
         
-        return List.copyOf(this.cacheGuidOrgPerson.getOrDefault(guid, Collections.emptyList())) ;
+        List<PersonListItemsResponse> response = new ArrayList<>();
+        
+        try {
+            List<OrganizationUnitsDto> sections = acessoCidadaoService.findOrgUnitsFromOrganogramaAPI(guid);
+            
+            sections = sections.stream().filter(unt -> {
+                if(unt.getUnidadePai() == null) return false;
+                
+                return unt.getUnidadePai().guid.equalsIgnoreCase("07a0462f-6b02-4b98-b86d-18d7e4fa543a");
+            })
+            .collect(Collectors.toList());
+            
+            
+            for(OrganizationUnitsDto unit : sections) {
+                
+                List<UnitRolesDto> evals = acessoCidadaoService.findUnitRolesFromAcessoCidadaoAPI(unit.getGuid());
+                
+                for(UnitRolesDto eval : evals) {
+                    
+                    if(!response.stream().anyMatch(e -> e.getSub().equalsIgnoreCase(eval.getAgentePublicoSub())))
+                        response.add(new  PersonListItemsResponse(
+                                eval.getAgentePublicoSub(), 
+                                eval.getAgentePublicoNome(), 
+                                eval.getNome(), 
+                                Optional.ofNullable(unit.getNome()).orElse(unit.getNomeCurto())
+                        ));
+                    
+                }
+            }
+                
+            return response;
+            
+        } catch (IOException ex) {
+            log.error("Erro ao buscar pessoas da organização: " + guid, ex);
+            throw new RuntimeException(ex);
+        }
+        
         
     }
 

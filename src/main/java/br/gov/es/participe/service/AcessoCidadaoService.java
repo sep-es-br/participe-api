@@ -405,6 +405,20 @@ public class AcessoCidadaoService {
   }
 
   public List<EvaluatorRoleDto> findRolesFromAcessoCidadaoAPI(String guid) throws IOException {
+    
+    List<UnitRolesDto> unitRolesDtos = this.findUnitRolesFromAcessoCidadaoAPI(guid);
+    
+    List<EvaluatorRoleDto> evaluatorServerDtos = new ArrayList<>();
+    unitRolesDtos.iterator().forEachRemaining((role) -> {
+        EvaluatorRoleDto newEvalServerDto = new EvaluatorRoleDto(role.getGuid(), (role.getAgentePublicoNome() + " - " + role.getNome()), guid);
+        evaluatorServerDtos.add(newEvalServerDto);
+      });
+    return evaluatorServerDtos;
+  }
+  
+  
+
+  public List<UnitRolesDto> findUnitRolesFromAcessoCidadaoAPI(String guid) throws IOException {
     String token = getClientToken();
     String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/papeis");
 
@@ -417,16 +431,8 @@ public class AcessoCidadaoService {
     try {
       HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() == 200) { 
-        List<EvaluatorRoleDto> evaluatorServerDtos = new ArrayList<>();
-        List<UnitRolesDto> unitRolesDtos = mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {
-        });
+        return mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {});
 
-        unitRolesDtos.iterator().forEachRemaining((role) -> {
-          EvaluatorRoleDto newEvalServerDto = new EvaluatorRoleDto(role.getGuid(), (role.getAgentePublicoNome() + " - " + role.getNome()), guid);
-          evaluatorServerDtos.add(newEvalServerDto);
-        });
-
-        return evaluatorServerDtos;
       } else {
         logger.error("Não foi possível buscar a lista de papéis da unidade.");
         throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
@@ -439,6 +445,19 @@ public class AcessoCidadaoService {
   }
 
   public List<EvaluatorSectionDto> findSectionsFromOrganogramaAPI(String guid) throws IOException {
+    
+    List<EvaluatorSectionDto> evaluatorSectionDtos = new ArrayList<>();
+    List<OrganizationUnitsDto> organizationUnitsDtos = this.findOrgUnitsFromOrganogramaAPI(guid);
+    organizationUnitsDtos.iterator().forEachRemaining((unit) -> {
+      EvaluatorSectionDto newEvalSectionDto = new EvaluatorSectionDto(unit.getGuid(), (unit.getNomeCurto() + " - " + unit.getNome()));
+      evaluatorSectionDtos.add(newEvalSectionDto);
+    });
+
+    return evaluatorSectionDtos;
+
+  }
+
+   public List<OrganizationUnitsDto> findOrgUnitsFromOrganogramaAPI(String guid) throws IOException {
     String token = getClientToken();
     String url = organogramaUriWebapi.concat("/unidades/organizacao/" + guid);
 
@@ -451,16 +470,7 @@ public class AcessoCidadaoService {
     try {
       HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() == 200) {
-        List<EvaluatorSectionDto> evaluatorSectionDtos = new ArrayList<>();
-        List<OrganizationUnitsDto> organizationUnitsDtos = mapper.readValue(response.body(), new TypeReference<List<OrganizationUnitsDto>>() {
-        });
-
-        organizationUnitsDtos.iterator().forEachRemaining((unit) -> {
-          EvaluatorSectionDto newEvalSectionDto = new EvaluatorSectionDto(unit.getGuid(), (unit.getNomeCurto() + " - " + unit.getNome()));
-          evaluatorSectionDtos.add(newEvalSectionDto);
-        });
-
-        return evaluatorSectionDtos;
+        return mapper.readValue(response.body(), new TypeReference<List<OrganizationUnitsDto>>() {});
 
       } else {
         logger.error("Não foi possível buscar a lista de unidades da organização.");
