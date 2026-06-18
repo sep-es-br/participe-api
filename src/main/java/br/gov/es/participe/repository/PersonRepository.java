@@ -60,7 +60,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     "    WHERE authBy.idByAuth=$sub OR authService.serverId=$sub\n" +
     "    OPTIONAL MATCH (l:Login)<-[:MADE]-(person)\n" +
     "    RETURN person\n" +
-    "    ORDER BY l.time IS NOT NULL ASC, l.time DESC\n" +
+    "    ORDER BY l.time IS NOT NULL DESC, l.time DESC\n" +
     "    LIMIT 1"
         )
     Optional<Person> findByLoginSub(@Param("sub")String sub);
