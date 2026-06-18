@@ -312,6 +312,7 @@ public class PersonService {
           authenticatedBy,
           person,
           server,
+          serverId,
           password,
           conferenceId,
           typeAuthentication);
@@ -456,6 +457,7 @@ public class PersonService {
       IsAuthenticatedBy authenticatedBy,
       Person person,
       String server,
+      String serverId,
       String password,
       Long conferenceId,
       String typeAuthentication) {
@@ -470,6 +472,10 @@ public class PersonService {
     }
     if (conferenceId == null) {
       authenticatedBy.setTemporaryPassword(false);
+    }
+
+    if (authenticatedBy.getIdByAuth() == null && serverId != null) {
+      authenticatedBy.setIdByAuth(serverId);
     }
 
     if (authenticatedBy.getAuthType() == null) {
