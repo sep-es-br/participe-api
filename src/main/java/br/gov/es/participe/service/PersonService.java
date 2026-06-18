@@ -327,7 +327,7 @@ public class PersonService {
     this.verifyMakeLoginCondition(person, makeLogin, authService, conferenceId);
 
     if (persistRelationship) {
-      isAuthenticatedByRepository.save(authenticatedBy, 0);
+      isAuthenticatedByRepository.save(authenticatedBy);
       log.info("Alterações no relacionamento isAuthenticatedById={} persistidas com sucesso", authenticatedBy.getId());
     }
     return person;
