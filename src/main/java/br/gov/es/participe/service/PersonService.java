@@ -311,7 +311,7 @@ public class PersonService {
       loadAuthenticatedBy(
           authenticatedBy,
           person,
-          serverId,
+          server,
           password,
           conferenceId,
           typeAuthentication);
