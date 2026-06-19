@@ -22,7 +22,6 @@ public class AuthorityCredentialRequest {
      
     private String representedByCpf;
     
-    @NotBlank(message = "O campo não pode ser vazio")
     private String representedByEmail;
     
     @NotBlank(message = "O campo não pode ser vazio")
@@ -43,7 +42,6 @@ public class AuthorityCredentialRequest {
     private String role;
     
     @Positive
-    @NotNull(message = "O campo não pode ser nulo")
     private Long localityId;
     
     private Boolean isTeam;

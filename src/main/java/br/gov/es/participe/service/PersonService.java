@@ -147,10 +147,12 @@ public class PersonService {
         try {
             List<OrganizationUnitsDto> sections = acessoCidadaoService.findOrgUnitsFromOrganogramaAPI(guid);
             
+            final OrganizationUnitsDto unidadeBase = sections.stream().filter(s -> s.getUnidadePai() == null).findFirst().orElse(null);
+            
             sections = sections.stream().filter(unt -> {
                 if(unt.getUnidadePai() == null) return false;
                 
-                return unt.getUnidadePai().guid.equalsIgnoreCase("07a0462f-6b02-4b98-b86d-18d7e4fa543a");
+                return unt.getUnidadePai().guid.equalsIgnoreCase(unidadeBase.getGuid());
             })
             .collect(Collectors.toList());
             
