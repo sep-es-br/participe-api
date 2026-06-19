@@ -12,7 +12,7 @@
         <discardingThreshold>0</discardingThreshold> <queueSize>500</queueSize>                   <neverBlock>false</neverBlock>               </appender>
 
     <root level="INFO">
-        <appender-ref ref="ASYNC_CONSOLE" />
+        <appender-ref ref="CONSOLE" />
     </root>
 
 </configuration>
