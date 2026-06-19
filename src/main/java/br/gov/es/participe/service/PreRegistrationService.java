@@ -147,9 +147,7 @@ public class PreRegistrationService {
             Person person = personService.find(personId);
             PreRegistration preRegistration = preRegistrationRepository.findByMeetingAndPerson(meeting.getId(), person.getId());
             if (preRegistration == null) {
-                preRegistration = new PreRegistration(meeting, person);
-                preRegistration.setMadeBy(person);
-                preRegistration = this.save(preRegistration);
+                return null;
             }
             byte[] imageQR;
             try {
