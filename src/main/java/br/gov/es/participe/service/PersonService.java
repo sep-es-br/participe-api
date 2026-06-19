@@ -622,6 +622,95 @@ public class PersonService {
           person.getContactEmail(),
           person.getId()
         );
+
+      }
+      authenticatedBy = createAuthenticatedBy(
+          server,
+          person,
+          conference,
+          password,
+          authService,
+          typeAuthentication
+      );
+    } else {
+      if (authService.getNumberOfAccesses() == null) {
+        authService.setNumberOfAccesses(0);
+      }
+      authService
+          .setNumberOfAccesses(makeLogin ? authService.getNumberOfAccesses() + 1 : authService.getNumberOfAccesses());
+      if (persistRelationship) {
+        log.info("Alterando numberOfAccesses do authServiceId={} para numberOfAccesses={}",
+          authService.getId(),
+          authService.getNumberOfAccesses()
+        );
+        authServiceRepository.save(authService);
+      }
+      loadAuthenticatedBy(
+          authenticatedBy,
+          person,
+          server,
+          password,
+          conferenceId,
+          typeAuthentication);
+    }
+
+    this.verifyResetPasswordCondition(
+        resetPassword,
+        newAuthService,
+        person,
+        conference,
+        authenticatedBy);
+
+    this.verifyMakeLoginCondition(person, makeLogin, authService, conferenceId);
+
+    if (persistRelationship) {
+      isAuthenticatedByRepository.save(authenticatedBy);
+      log.info("Alterações no relacionamento isAuthenticatedById={} persistidas com sucesso", authenticatedBy.getId());
+    }
+    return person;
+  }
+
+  private void verifyResetPasswordCondition(Boolean resetPassword, Boolean newAuthService, Person person,
+      Conference conference, IsAuthenticatedBy authenticatedBy) {
+    if (resetPassword && !newAuthService) {
+      resetPassword(person, conference, authenticatedBy);
+    }
+  }
+
+  private void verifyMakeLoginCondition(Person person, Boolean makeLogin, AuthService authService, Long conferenceId) {
+    log.info("Verificando flag makeLogin={} para a personId={}, authService={}, conferenceId={}",
+             makeLogin,
+             person.getId(),
+             authService.getId(),
+             conferenceId
+    );
+    if (makeLogin) {
+      createLogin(person, authService, conferenceId);
+    }
+  }
+
+  private void resetPassword(Person person, Conference conference, IsAuthenticatedBy authenticatedBy) {
+    Date passwordTime = expirationTime((long) 24);
+    String password = generateTemporaryPassword();
+    authenticatedBy.setPassword(password);
+    authenticatedBy.setPasswordTime(passwordTime);
+
+    sendConfirmationEmail(person, conference, password);
+  }
+
+  private IsAuthenticatedBy createAuthenticatedBy(
+      String server,
+      Person person,
+      Conference conference,
+      String password,
+      AuthService authService,
+      String typeAuthentication) {
+    IsAuthenticatedBy authenticatedBy;
+    if (server.equalsIgnoreCase(PARTICIPE)) {
+      if (typeAuthentication != null && typeAuthentication.equals("cpf")) {
+        authenticatedBy = new IsAuthenticatedBy(PARTICIPE, "participeCpf", password,
+            false, null, person, authService);
+
       } else {
         log.info("Foi encontrado uma person com personId={}, email={}", person.getId(), person.getContactEmail());
         personBD.setTelephone(person.getTelephone());
