@@ -622,6 +622,7 @@ public class PersonService {
           person.getContactEmail(),
           person.getId()
         );
+
       }
       authenticatedBy = createAuthenticatedBy(
           server,
