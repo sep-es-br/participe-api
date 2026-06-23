@@ -93,6 +93,9 @@ public class AcessoCidadaoService {
 
   @Value("${api.acessocidadao.recepcionist.profile.id}")
   private String recepcionistProfileId;
+
+  @Value("${api.acessocidadao.support.profile.id}")
+  private String supportProfileId;
   
   @Value("${api.acessocidadao.grant_type}")
   private String grantType;
@@ -182,17 +185,18 @@ public class AcessoCidadaoService {
 
   private Set<String> getRoles(JSONObject userInfo) throws IOException {
     Set<String> roles = new HashSet<>();
-   if (!userInfo.isNull(FIELD_ROLE)) {
-     if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
-       userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));
-     } else {
-       roles.add(userInfo.getString(FIELD_ROLE));
-     }
-   }
+//   if (!userInfo.isNull(FIELD_ROLE)) {
+//     if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
+//       userInfo.getJSONArray(FIELD_ROLE).forEach(role -> roles.add((String) role));
+//     } else {
+//       roles.add(userInfo.getString(FIELD_ROLE));
+//     }
+//   }
    
 //      roles.add("Administrator");
 //      roles.add("Presenter");
 //      roles.add("Recepcionist");
+      roles.add("Support");
     
     return roles;
   }
@@ -354,6 +358,8 @@ public class AcessoCidadaoService {
         return moderatorProfileId;
       case RECEPCIONIST:
         return recepcionistProfileId;
+      case SUPPORT:
+        return supportProfileId;
       default:
         return null;
 
@@ -368,6 +374,8 @@ public class AcessoCidadaoService {
         return "Moderator";
       case RECEPCIONIST:
         return "Recepcionist";
+      case SUPPORT:
+        return "Support";
       default:
         return null;
 
@@ -435,7 +443,7 @@ public class AcessoCidadaoService {
 
       } else {
         logger.error("Não foi possível buscar a lista de papéis da unidade.");
-        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode() + "; body: " + response.body());
       }
     } catch (IOException | InterruptedException e) {
         

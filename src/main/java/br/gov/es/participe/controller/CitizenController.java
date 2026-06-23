@@ -5,7 +5,6 @@ import br.gov.es.participe.controller.dto.PersonKeepCitizenDto;
 import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.PersonService;
-import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.interfaces.ApiPageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,7 +40,7 @@ public class CitizenController {
       @RequestParam(value = "conferenceId", required = false) Long conferenceId,
       @ApiIgnore Pageable page) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Support" })) {
       Page<PersonKeepCitizenDto> list = personService
           .listKeepCitizen(name, email, autentication, active, locality, conferenceId, page);
       return ResponseEntity.status(200).body(list);
@@ -59,7 +58,7 @@ public class CitizenController {
       @RequestParam Long meetingId,
       @RequestParam Boolean isEdit) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist", "Support" })) {
       PersonKeepCitizenDto citizen = personService.findCitizenById(personId, conferenceId, meetingId, isEdit);
       return ResponseEntity.status(200).body(citizen);
     } else {
@@ -74,7 +73,7 @@ public class CitizenController {
       @RequestHeader("Authorization") String token,
       @RequestBody PersonParamDto personParam) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist", "Support" })) {
       return personService.storePerson(personParam, false);
     } else {
       return ResponseEntity.status(401).body(null);
@@ -89,7 +88,7 @@ public class CitizenController {
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long id) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Support" })) {
       personService.delete(id);
       return ResponseEntity.status(200).build();
     } else {
@@ -105,7 +104,7 @@ public class CitizenController {
       @PathVariable Long id,
       @RequestBody PersonParamDto personParam) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist", "Support" })) {
       personParam.setId(id);
       return personService.updatePerson(personParam, false);
     } else {
@@ -119,7 +118,7 @@ public class CitizenController {
       @PathVariable(name = "idConferences", required = false) Long idConferences,
       @RequestParam(name = "name", required = false, defaultValue = "") String name) {
 
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist", "Support" })) {
       LocalityCitizenSelectDto localityCitizenSelectDto = localityService.getLocalitiesToDisplay(idConferences, name);
       return ResponseEntity.status(200).body(localityCitizenSelectDto);
     } else {

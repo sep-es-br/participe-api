@@ -195,7 +195,7 @@ public class MeetingController {
       @RequestHeader(name = "Authorization") String token,
       @RequestBody CheckInParamDto checkInParamDto) {
 
-    if (!personService.hasOneOfTheRoles(token, new String[]{"Administrator", "Recepcionist"})) {
+    if (!personService.hasOneOfTheRoles(token, new String[]{"Administrator", "Recepcionist", "Support"})) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
@@ -233,7 +233,7 @@ public class MeetingController {
        ) {
       
 
-    if (!personService.hasOneOfTheRoles(token, new String[]{"Administrator", "Recepcionist"})) {
+    if (!personService.hasOneOfTheRoles(token, new String[]{"Administrator", "Recepcionist", "Support"})) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
@@ -245,7 +245,7 @@ public class MeetingController {
   public ResponseEntity<CheckedInAtDto> checkInOnMeeting(
       @RequestHeader(name = "Authorization") String token,
       @RequestBody CheckInParamDto checkInParamDto) {
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist", "Support" })) {
       return ResponseEntity.status(401).body(null);
     }
     if (checkInParamDto == null ||
@@ -369,7 +369,7 @@ public class MeetingController {
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long personId,
       @PathVariable Long meetingId) {
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist", "Support" })) {
       return ResponseEntity.status(401).body(null);
     }
     Boolean response = meetingService.deleteParticipation(personId, meetingId);
@@ -384,7 +384,7 @@ public class MeetingController {
       @RequestParam(name = "name", required = false, defaultValue = "") String name,
       Pageable pageable,
       HttpSession session) {
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist" })) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Recepcionist", "Support" })) {
       return ResponseEntity.status(401).body(null);
     }
     Page<PersonMeetingDto> personMeetingDtoPage = personService.findPersonForMeeting(meetingId, name, pageable, session);
@@ -399,7 +399,7 @@ public class MeetingController {
       @RequestParam(name = "name", required = false, defaultValue = "") String name,
       Pageable pageable,
       HttpSession session) {
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Presenter" })) {
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Presenter", "Support" })) {
       return ResponseEntity.status(401).body(null);
     }
     List<AuthorityMeetingDto> authorityMeetingDto = personService.findAuthorityForMeeting(meetingId, name);

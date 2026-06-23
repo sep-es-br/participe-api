@@ -59,7 +59,7 @@ public class PersonController {
       
       Assert.hasText(guid, "guid não informado");
       
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator" }))
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Support" }))
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         
     List<PersonListItemsResponse> response = personService.filterPersonsByOrganization(guid);

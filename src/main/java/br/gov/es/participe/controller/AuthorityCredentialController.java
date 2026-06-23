@@ -3,6 +3,7 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.AuthorityCredentialRequest;
 import br.gov.es.participe.controller.dto.CheckedInAtDto;
 import br.gov.es.participe.controller.dto.PreRegistrationAuthorityDto;
+import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.model.AuthService;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Meeting;
@@ -88,6 +89,19 @@ public class AuthorityCredentialController {
         Assert.notNull(madeByPerson, "Pessoa com id (" + credentialRequest.getMadeBy() + ") inexistente");
         Assert.notNull(meeting, "Reunião com id (" + credentialRequest.getMeetingId() + ") inexistente");
 
+        
+        if (credentialRequest.getRepresentedByEmail() == null) {
+            PublicAgentDto dummy = new PublicAgentDto();
+            dummy.setSub(credentialRequest.getRepresentedBySub());
+            
+            dummy = acService.findThePersonEmailBySubInAcessoCidadaoAPI(dummy);
+            
+            if(dummy.getCorporativo() != null) {
+                credentialRequest.setRepresentedByEmail(dummy.getCorporativo());
+            } else {
+                credentialRequest.setRepresentedByEmail(dummy.getEmail());
+            }
+        }
 
         Person representedByPerson;
         if(credentialRequest.getRepresentedByCpf() == null) {
