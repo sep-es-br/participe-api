@@ -113,6 +113,7 @@ public class ControlPanelService {
 	    	 dto.setHighlights(highlightService.countHighlightAllOriginsByConference(idConference));
 	    	 dto.setProposals(attendRepository.countCommentAllOriginsByConference(idConference));
 	    	 dto.setCounties(attendRepository.countLocalityAllOriginsByConference(idConference));
+                 dto.setPlanItems(attendRepository.countPlanItemAllOriginsByConference(idConference));
 	   }
 	   else if (origin.equals("rem")) {
 		   dto.setParticipants(attendRepository.countParticipationRemoteOriginByConference(idConference));    
