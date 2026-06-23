@@ -266,6 +266,28 @@ Integer countParticipationAllOriginsByConference( @Param("idConference") Long id
           " unwind allp as np " + 
           " return count (distinct np) ")
   Integer countLocalityPresentialOriginByConference( @Param("idConference") Long idConference, @Param("meetings") List<Long> meetings );
+    
+  @Query( "OPTIONAL MATCH (planItem:PlanItem)-[]-(loc:PlanItem)<-[:ABOUT]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting) \n" +
+            "WHERE id(co) = $idConference \n" +
+            "  AND m.attendanceListMode = 'MANUAL'  \n" +
+            "  AND c.time >= m.beginDate \n" +
+            "  AND c.time <= m.endDate \n" +
+            "  AND (($meetings IS NULL) OR (id(m) IN $meetings)) \n" +
+            "  AND c.status IN ['pub', 'arq'] \n" +
+            "WITH collect(DISTINCT planItem) AS plogged  \n" +
+            "\n" +
+            "OPTIONAL MATCH (planItem:PlanItem)-[]-(loc:PlanItem)<-[:ABOUT]-(c:Comment)-[:ABOUT]->(co:Conference)<-[:OCCURS_IN]-(m:Meeting)\n" +
+            "WHERE id(co) = $idConference \n" +
+            "  AND m.attendanceListMode = 'AUTO' \n" +
+            "  AND c.from = 'pres' \n" +
+            "  AND (m)<-[:DURING]-(c)  \n" +
+            "  AND c.status IN ['pub', 'arq']  \n" +
+            "  AND (($meetings IS NULL) OR (id(m) IN $meetings)) \n" +
+            "WITH plogged + collect(DISTINCT planItem) AS allp  \n" +
+            "\n" +
+            "UNWIND allp AS np \n" +
+            "RETURN count(distinct np)")
+  Integer countPlanItemPresentialOriginByConference( @Param("idConference") Long idConference, @Param("meetings") List<Long> meetings );
   
   
   @Query("MATCH (m:Meeting)\n" +

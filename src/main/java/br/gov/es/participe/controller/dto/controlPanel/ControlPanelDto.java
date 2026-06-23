@@ -7,6 +7,7 @@ public class ControlPanelDto {
     private int proposals;
     private int highlights;
     private int counties;
+    private int planItems;
     private List<ControlPanelChartDto> microregionChart;
     private List<HeatMapChartDto> heatMapChart;
     private List<ControlPanelChartDto> strategicAreaChart;
@@ -66,5 +67,15 @@ public class ControlPanelDto {
     public void setHeatMapChart(List<HeatMapChartDto> heatMapChart) {
         this.heatMapChart = heatMapChart;
     }
+
+    public int getPlanItems() {
+        return planItems;
+    }
+
+    public void setPlanItems(int planItems) {
+        this.planItems = planItems;
+    }
+    
+    
 
 }
