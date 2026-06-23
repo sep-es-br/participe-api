@@ -98,47 +98,6 @@ public class PersonService {
     @Autowired
     private CheckedInAtRepository checkedInAtRepository;
     
-    public void loadPersonsCache() {
-        log.info("Carregando a lista de agentes+papel...");
-        long startTime = System.currentTimeMillis();
-        List<PublicAgentDto> agentesTodos = this.acessoCidadaoService.findPublicAgentsFromAcessoCidadaoAPI();
-        
-        for (PublicAgentDto agente : agentesTodos){
-
-            List<UnitRolesDto> papeis = this.acessoCidadaoService.findPapeisFromAcessoCidadaoAPIByAgentePublicoSub(agente.getSub());
-
-            UnitRolesDto papel = papeis.stream().filter(UnitRolesDto::isPrioritario).findFirst().orElse(null);
-            
-
-            if(papel != null && papel.getLotacaoGuid() != null) {
-                AcSectionInfoDto section = 
-                        this.cacheGuidSection.computeIfAbsent(
-                                papel.getLotacaoGuid(), 
-                                key -> Optional.ofNullable(this.acessoCidadaoService.findSectionInfoFromOrganogramaAPI(key)))
-                                            .orElse(null);
-                        
-                if(section != null && section.getGuidOrganizacao() != null){
-                    
-                    this.cacheGuidOrgPerson.computeIfAbsent(
-                        section.getGuidOrganizacao(),
-                        k -> new ArrayList<>()
-                    ).add(
-                        new PersonListItemsResponse(
-                            agente.getSub(),
-                            agente.getName(),
-                            papel.getNome(),
-                            section.getNome()
-                        )
-                    );
-                    
-                }
-            }
-
-
-        }
-        
-        log.info("Lista de agentes+papel carregado em {}", System.currentTimeMillis() - startTime);
-    }
     
     public List<PersonListItemsResponse> filterPersonsByOrganization(String guid){
         
@@ -163,10 +122,16 @@ public class PersonService {
                 
                 for(UnitRolesDto eval : evals) {
                     
+                    PublicAgentDto publicAgent = new PublicAgentDto();
+                    publicAgent.setSub(eval.getAgentePublicoSub());
+                    
+                    publicAgent = acessoCidadaoService.findThePersonEmailBySubInAcessoCidadaoAPI(publicAgent);
+                    
                     if(!response.stream().anyMatch(e -> e.getSub().equalsIgnoreCase(eval.getAgentePublicoSub())))
                         response.add(new  PersonListItemsResponse(
                                 eval.getAgentePublicoSub(), 
                                 eval.getAgentePublicoNome(), 
+                                Optional.ofNullable(publicAgent.getCorporativo()).orElse(publicAgent.getEmail()),
                                 eval.getNome(), 
                                 Optional.ofNullable(unit.getNome()).orElse(unit.getNomeCurto())
                         ));

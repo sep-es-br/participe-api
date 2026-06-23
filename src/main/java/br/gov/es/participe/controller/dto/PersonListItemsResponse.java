@@ -11,15 +11,17 @@ package br.gov.es.participe.controller.dto;
 public class PersonListItemsResponse {
     private String sub;
     private String name;
+    private String email;
     private String role;
     private String lotacao;
 
     public PersonListItemsResponse() {
     }
 
-    public PersonListItemsResponse(String sub, String name, String role, String lotacao) {
+    public PersonListItemsResponse(String sub, String name, String email, String role, String lotacao) {
         this.sub = sub;
         this.name = name;
+        this.email = email;
         this.role = role;
         this.lotacao = lotacao;
     }
@@ -56,6 +58,14 @@ public class PersonListItemsResponse {
 
     public void setLotacao(String lotacao) {
         this.lotacao = lotacao;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
     
     
