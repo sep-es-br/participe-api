@@ -235,7 +235,7 @@ Integer countParticipationAllOriginsByConference( @Param("idConference") Long id
   		  " WHERE id(co)=$idConference RETURN count(DISTINCT loc) ")
   Integer countLocalityAllOriginsByConference( @Param("idConference") Long idConference);
   
-  @Query(" MATCH (co:Conference)-[a:ABOUT]-(c:Comment)-[:ABOUT]->(loc:PlanItem)-[]-(planItem:PlanItem) " + 
+  @Query(" MATCH (co:Conference)-[a:ABOUT]-(c:Comment)-[:ABOUT]->(loc:PlanItem)-[:COMPOSES*0..]->(planItem:PlanItem)-[:COMPOSES]->(:Plan) " + 
   		"  WHERE id(co)=$idConference AND c.status IN ['pub', 'arq'] " + 
   		"  RETURN count(DISTINCT planItem) ")
   Integer countPlanItemAllOriginsByConference( @Param("idConference") Long idConference);
