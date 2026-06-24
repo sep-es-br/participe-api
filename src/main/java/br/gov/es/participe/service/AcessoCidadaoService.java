@@ -31,6 +31,7 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
@@ -780,7 +781,7 @@ public class AcessoCidadaoService {
         return publicAgentDto;
       } else {
         logger.error("Não foi possível buscar o cidadão atrelado ao CPF.");
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8));
         String inputLine;
         StringBuilder response = new StringBuilder();
         while ((inputLine = in.readLine()) != null) {
