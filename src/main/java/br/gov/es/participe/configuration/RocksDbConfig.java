@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +19,9 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class RocksDbConfig {
+    
+    @Value("${app.cachePath}")
+    private String cachePath;
 
     @Bean
     public RocksDB rocksDB() throws RocksDBException {
@@ -25,10 +29,9 @@ public class RocksDbConfig {
         RocksDB.loadLibrary();
 
         // 1. Pega o diretório atual de execução do sistema de forma segura
-        String jarPath = "C:\\participe\\api";
 
         // 2. Cria o caminho da pasta onde os dados serão salvos
-        Path dbPath = Path.of(jarPath, "rocksdb-store");
+        Path dbPath = Path.of(cachePath, "rocksdb-store");
 
         // 3. Tenta criar o diretório fisicamente se ele não existir
         try {
