@@ -25,7 +25,7 @@ public class RocksDbConfig {
         RocksDB.loadLibrary();
 
         // 1. Pega o diretório atual de execução do sistema de forma segura
-        String jarPath = "C:\\0articipe\\api";
+        String jarPath = "C:\\participe\\api";
 
         // 2. Cria o caminho da pasta onde os dados serão salvos
         Path dbPath = Path.of(jarPath, "rocksdb-store");
