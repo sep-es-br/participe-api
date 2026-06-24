@@ -6,7 +6,6 @@ package br.gov.es.participe.configuration;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -24,30 +23,24 @@ public class RocksDbConfig {
     public RocksDB rocksDB() throws RocksDBException {
         // Carrega as bibliotecas nativas do RocksDB
         RocksDB.loadLibrary();
-        
-        String jarPath;
-        try {
-            jarPath = System.getProperty("user.dir");
 
-// Diretório onde os dados serão armazenados
-Path dbPath = Path.of(jarPath, "rocksdb-store");
-;
-        } catch(Exception e) {
-            jarPath = Paths.get(".").toAbsolutePath().normalize().toString();
-        }
+        // 1. Pega o diretório atual de execução do sistema de forma segura
+        String jarPath = System.getProperty("user.dir");
 
-        // Diretório onde os dados serão armazenados (ex: no disco)
+        // 2. Cria o caminho da pasta onde os dados serão salvos
         Path dbPath = Path.of(jarPath, "rocksdb-store");
-        
+
+        // 3. Tenta criar o diretório fisicamente se ele não existir
         try {
             Files.createDirectories(dbPath);
         } catch (Exception e) {
             throw new RuntimeException("Não foi possível criar o diretório do RocksDB", e);
         }
 
-        // Configurações do banco (ex: criar DB se não existir)
+        // 4. Configurações do banco e inicialização
         try (Options options = new Options().setCreateIfMissing(true)) {
             return RocksDB.open(options, dbPath.toString());
         }
     }
+
 }
