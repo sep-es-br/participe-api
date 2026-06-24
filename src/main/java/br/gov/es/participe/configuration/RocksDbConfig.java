@@ -4,7 +4,6 @@
  */
 package br.gov.es.participe.configuration;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,11 +27,11 @@ public class RocksDbConfig {
         
         String jarPath;
         try {
-            jarPath = new File(RocksDbConfig.class.getProtectionDomain()
-                    .getCodeSource()
-                    .getLocation()
-                    .toURI()
-                ).getParent();
+            jarPath = System.getProperty("user.dir");
+
+// Diretório onde os dados serão armazenados
+Path dbPath = Path.of(jarPath, "rocksdb-store");
+;
         } catch(Exception e) {
             jarPath = Paths.get(".").toAbsolutePath().normalize().toString();
         }
