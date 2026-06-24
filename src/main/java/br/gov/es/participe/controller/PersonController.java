@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,10 +57,7 @@ public class PersonController {
   ){
       
       Assert.hasText(guid, "guid não informado");
-      
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Support" }))
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        
+           
     List<PersonListItemsResponse> response = personService.filterPersonsByOrganization(guid);
     
     return ResponseEntity.ok(response);
@@ -151,8 +147,19 @@ public class PersonController {
   ){
       HashMap<String, Object> acInfo = new HashMap<>();
       
+      
       PublicAgentDto publicAgentDto = acService.findSubFromPersonInAcessoCidadaoAPIByCpf(cpf);
-      String sub = publicAgentDto.getSub();
+      
+            
+      return getACInfoBySub(publicAgentDto.getSub(), conferenceId);
+  }
+  
+  @GetMapping("{sub}/ACInfoBySub/{conferenceId}")
+  public ResponseEntity<?> getACInfoBySub(
+          @PathVariable String sub,
+          @PathVariable Long conferenceId
+  ){
+      HashMap<String, Object> acInfo = new HashMap<>();
       
       acInfo.put("authoritySub", sub);
       

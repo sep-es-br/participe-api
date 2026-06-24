@@ -165,32 +165,19 @@ public class PersonService {
 
             for (OrganizationUnitsDto unit : subUnidades) {
                 List<UnitRolesDto> evals = acessoCidadaoService.findUnitRolesFromAcessoCidadaoAPI(unit.getGuid());
-                if (evals == null) continue;
 
-                for (UnitRolesDto eval : evals) {
-                    String sub = eval.getAgentePublicoSub();
-
-                    // Otimização O(1) para evitar duplicados
-                    if (subsAdicionados.contains(sub.toLowerCase())) {
-                        continue;
-                    }
-
-                    PublicAgentDto publicAgent = new PublicAgentDto();
-                    publicAgent.setSub(sub);
-                    publicAgent = acessoCidadaoService.findThePersonEmailBySubInAcessoCidadaoAPI(publicAgent);
-
-                    String email = Optional.ofNullable(publicAgent.getCorporativo()).orElse(publicAgent.getEmail());
-                    String nomeUnidade = Optional.ofNullable(unit.getNome()).orElse(unit.getNomeCurto());
-
-                    response.add(new PersonListItemsResponse(
-                            sub,
-                            eval.getAgentePublicoNome(),
-                            email,
-                            eval.getNome(),
-                            nomeUnidade
-                    ));
-
-                    subsAdicionados.add(sub.toLowerCase());
+                
+                for(UnitRolesDto eval : evals) {
+                                        
+                    if(!response.stream().anyMatch(e -> e.getSub().equalsIgnoreCase(eval.getAgentePublicoSub())))
+                        response.add(new  PersonListItemsResponse(
+                                eval.getAgentePublicoSub(), 
+                                eval.getAgentePublicoNome(), 
+                                null,
+                                eval.getNome(), 
+                                Optional.ofNullable(unit.getNome()).orElse(unit.getNomeCurto())
+                        ));
+                    
                 }
             }
 
