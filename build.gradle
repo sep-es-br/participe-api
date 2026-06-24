@@ -79,4 +79,5 @@ dependencies {
 	implementation group: 'com.google.zxing', name: 'core', version: '3.5.3'
 	implementation group: 'com.google.zxing', name: 'javase', version: '3.5.3'
 
+        implementation 'org.rocksdb:rocksdbjni:9.10.0'
 }

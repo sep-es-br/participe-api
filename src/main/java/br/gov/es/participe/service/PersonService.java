@@ -7,17 +7,22 @@ import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
 import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.rocksdb.RocksDBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,55 +103,111 @@ public class PersonService {
     @Autowired
     private CheckedInAtRepository checkedInAtRepository;
     
+    @Autowired
+    private CacheService cacheSrv;
     
-    public List<PersonListItemsResponse> filterPersonsByOrganization(String guid){
-        
+    
+    public List<PersonListItemsResponse> filterPersonsByOrganization(String guid) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            // 1. Tenta buscar do Cache
+            String jsonList = cacheSrv.buscar(guid);
+
+            if (jsonList != null) {
+                // SE EXISTE NO CACHE: 
+                // 1.1. Dispara a atualização em BACKGROUND (assíncrona) sem bloquear o retorno
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        log.info("Disparando atualização de cache em background para o guid: {}", guid);
+                        buscarEAtualizarCache(guid, mapper);
+                    } catch (Exception e) {
+                        log.error("Erro ao atualizar cache em background para o guid: " + guid, e);
+                    }
+                }, ForkJoinPool.commonPool()); // Recomenda-se injetar um Executor próprio do Spring aqui se preferir
+
+                // 1.2. Retorna o dado antigo imediatamente
+                return mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {});
+            }
+
+        } catch (RocksDBException | IOException ex) {
+            log.error("Erro ao ler do cache (procedendo com busca síncrona): ", ex);
+        }
+
+        // 2. SE NÃO EXISTE NO CACHE:
+        // Aguarda o primeiro carregamento de forma SÍNCRONA
+        log.info("Cache miss para o guid: {}. Buscando dados de forma síncrona...", guid);
+        return buscarEAtualizarCache(guid, mapper);
+    }
+
+    /**
+     * Método auxiliar isolado que faz o trabalho pesado de buscar na API e salvar no cache.
+     */
+    private List<PersonListItemsResponse> buscarEAtualizarCache(String guid, ObjectMapper mapper) {
         List<PersonListItemsResponse> response = new ArrayList<>();
-        
+        Set<String> subsAdicionados = new HashSet<>();
+
         try {
             List<OrganizationUnitsDto> sections = acessoCidadaoService.findOrgUnitsFromOrganogramaAPI(guid);
-            
-            final OrganizationUnitsDto unidadeBase = sections.stream().filter(s -> s.getUnidadePai() == null).findFirst().orElse(null);
-            
-            sections = sections.stream().filter(unt -> {
-                if(unt.getUnidadePai() == null) return false;
-                
-                return unt.getUnidadePai().guid.equalsIgnoreCase(unidadeBase.getGuid());
-            })
-            .collect(Collectors.toList());
-            
-            
-            for(OrganizationUnitsDto unit : sections) {
-                
+            if (sections == null || sections.isEmpty()) return response;
+
+            final OrganizationUnitsDto unidadeBase = sections.stream()
+                    .filter(s -> s.getUnidadePai() == null)
+                    .findFirst()
+                    .orElse(null);
+
+            if (unidadeBase == null) return response;
+
+            List<OrganizationUnitsDto> subUnidades = sections.stream()
+                    .filter(unt -> unt.getUnidadePai() != null && 
+                                   unt.getUnidadePai().guid.equalsIgnoreCase(unidadeBase.getGuid()))
+                    .collect(Collectors.toList());
+
+            for (OrganizationUnitsDto unit : subUnidades) {
                 List<UnitRolesDto> evals = acessoCidadaoService.findUnitRolesFromAcessoCidadaoAPI(unit.getGuid());
-                
-                for(UnitRolesDto eval : evals) {
-                    
+                if (evals == null) continue;
+
+                for (UnitRolesDto eval : evals) {
+                    String sub = eval.getAgentePublicoSub();
+
+                    // Otimização O(1) para evitar duplicados
+                    if (subsAdicionados.contains(sub.toLowerCase())) {
+                        continue;
+                    }
+
                     PublicAgentDto publicAgent = new PublicAgentDto();
-                    publicAgent.setSub(eval.getAgentePublicoSub());
-                    
+                    publicAgent.setSub(sub);
                     publicAgent = acessoCidadaoService.findThePersonEmailBySubInAcessoCidadaoAPI(publicAgent);
-                    
-                    if(!response.stream().anyMatch(e -> e.getSub().equalsIgnoreCase(eval.getAgentePublicoSub())))
-                        response.add(new  PersonListItemsResponse(
-                                eval.getAgentePublicoSub(), 
-                                eval.getAgentePublicoNome(), 
-                                Optional.ofNullable(publicAgent.getCorporativo()).orElse(publicAgent.getEmail()),
-                                eval.getNome(), 
-                                Optional.ofNullable(unit.getNome()).orElse(unit.getNomeCurto())
-                        ));
-                    
+
+                    String email = Optional.ofNullable(publicAgent.getCorporativo()).orElse(publicAgent.getEmail());
+                    String nomeUnidade = Optional.ofNullable(unit.getNome()).orElse(unit.getNomeCurto());
+
+                    response.add(new PersonListItemsResponse(
+                            sub,
+                            eval.getAgentePublicoNome(),
+                            email,
+                            eval.getNome(),
+                            nomeUnidade
+                    ));
+
+                    subsAdicionados.add(sub.toLowerCase());
                 }
             }
-                
+
+            // Salva o resultado atualizado no cache
+            try {
+                cacheSrv.salvar(guid, mapper.writeValueAsString(response));
+                log.info("Cache atualizado com sucesso para o guid: {}", guid);
+            } catch (RocksDBException | IOException ex) {
+                log.error("Erro ao salvar no cache: ", ex);
+            }
+
             return response;
-            
+
         } catch (IOException ex) {
             log.error("Erro ao buscar pessoas da organização: " + guid, ex);
             throw new RuntimeException(ex);
         }
-        
-        
     }
 
     public Boolean forgotPassword(String email, Long conferenceId, String server) {
