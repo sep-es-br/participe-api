@@ -584,7 +584,7 @@ public class AcessoCidadaoService {
       }
     } catch (IOException | InterruptedException e) {
         
-        logger.error(e.getMessage());
+        logger.error(e.getMessage(), e);
         throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
     }
   }
