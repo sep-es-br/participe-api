@@ -175,17 +175,12 @@ public class PersonService {
                         continue;
                     }
 
-                    PublicAgentDto publicAgent = new PublicAgentDto();
-                    publicAgent.setSub(sub);
-                    publicAgent = acessoCidadaoService.findThePersonEmailBySubInAcessoCidadaoAPI(publicAgent);
-
-                    String email = Optional.ofNullable(publicAgent.getCorporativo()).orElse(publicAgent.getEmail());
                     String nomeUnidade = Optional.ofNullable(unit.getNome()).orElse(unit.getNomeCurto());
 
                     response.add(new PersonListItemsResponse(
                             sub,
                             eval.getAgentePublicoNome(),
-                            email,
+                            null,
                             eval.getNome(),
                             nomeUnidade
                     ));
