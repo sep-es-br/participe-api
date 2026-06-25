@@ -161,13 +161,16 @@ public class PersonService {
             List<OrganizationUnitsDto> subUnidades = sections.stream()
                     .filter(unt -> unt.getUnidadePai() != null && 
                                    unt.getUnidadePai().guid.equalsIgnoreCase(unidadeBase.getGuid()))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toCollection(ArrayList::new));
+            
+            subUnidades.add(unidadeBase);
 
             for (OrganizationUnitsDto unit : subUnidades) {
                 List<UnitRolesDto> evals = acessoCidadaoService.findUnitRolesFromAcessoCidadaoAPI(unit.getGuid());
                 if (evals == null) continue;
 
                 for (UnitRolesDto eval : evals) {
+                    if(!eval.isPrioritario()) continue;
                     String sub = eval.getAgentePublicoSub();
 
                     // Otimização O(1) para evitar duplicados
