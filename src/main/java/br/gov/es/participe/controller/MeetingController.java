@@ -64,7 +64,7 @@ public class MeetingController {
   public Boolean getCanEditIsTeam(
       @RequestHeader(name = "Authorization") String token
   ){
-      return personService.hasOneOfTheRoles(token, new String[] { "Administrator" });
+      return personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Support" });
   }
 
   @GetMapping("/{idConference}/page-number")
