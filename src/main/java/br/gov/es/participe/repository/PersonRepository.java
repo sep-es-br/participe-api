@@ -60,7 +60,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     "    WHERE authBy.idByAuth=$sub OR authService.serverId=$sub\n" +
     "    OPTIONAL MATCH (l:Login)<-[:MADE]-(person)\n" +
     "    RETURN person\n" +
-    "    ORDER BY l.time IS NOT NULL ASC, l.time DESC\n" +
+    "    ORDER BY l.time IS NOT NULL DESC, l.time DESC\n" +
     "    LIMIT 1"
         )
     Optional<Person> findByLoginSub(@Param("sub")String sub);
@@ -333,7 +333,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "  coalesce(coalesce(cia, pr).isAuthority, false) AS isAuthority,\n" +
             "  coalesce(coalesce(cia, pr).isTeam, false) AS isTeam,\n" +
             "  coalesce(coalesce(cia, pr).role, '') AS role,\n" +
-            "  coalesce(coalesce(cia, pr).organization, '') + ' ' + coalesce(coalesce(cia, pr).organizationShort, '') AS organization,\n" +
+            "  coalesce(coalesce(cia, pr).organizationShort, '') + ' - ' + coalesce(coalesce(cia, pr).organization, '') AS organization,\n" +
             "  coalesce(coalesce(cia, pr).isAnnounced, false) AS isAnnounced,  \n" +
             "  coalesce(coalesce(cia, pr).toAnnounce, false) AS toAnnounce,\n" +
             "  pr.created AS preRegisteredDate,\n" +

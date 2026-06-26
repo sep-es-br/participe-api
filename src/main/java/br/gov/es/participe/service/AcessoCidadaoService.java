@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
@@ -583,7 +584,7 @@ public class AcessoCidadaoService {
       }
     } catch (IOException | InterruptedException e) {
         
-        logger.error(e.getMessage());
+        logger.error(e.getMessage(), e);
         throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
     }
   }
@@ -705,7 +706,9 @@ public class AcessoCidadaoService {
     try {
       token = getClientToken();
     } catch (RuntimeException e) {
-      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+        UUID uuid = UUID.randomUUID();
+      logger.error("erro UUID: " + uuid, e);
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token. (" + uuid + ")");
     }
 
     String url = acessocidadaoUriWebApi.concat("cidadao/" + personDto.getSub() + "/email");
