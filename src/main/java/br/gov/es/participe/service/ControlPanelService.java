@@ -8,12 +8,12 @@ import br.gov.es.participe.controller.dto.controlPanel.MicroregionChartQueryDto;
 import br.gov.es.participe.enumerator.ResultTypeControlPanelEnum;
 import br.gov.es.participe.repository.AttendRepository;
 import br.gov.es.participe.repository.ControlPanelRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -113,6 +113,7 @@ public class ControlPanelService {
 	    	 dto.setHighlights(highlightService.countHighlightAllOriginsByConference(idConference));
 	    	 dto.setProposals(attendRepository.countCommentAllOriginsByConference(idConference));
 	    	 dto.setCounties(attendRepository.countLocalityAllOriginsByConference(idConference));
+                 dto.setPlanItems(attendRepository.countPlanItemAllOriginsByConference(idConference));
 	   }
 	   else if (origin.equals("rem")) {
 		   dto.setParticipants(attendRepository.countParticipationRemoteOriginByConference(idConference));    
@@ -125,6 +126,7 @@ public class ControlPanelService {
 		   dto.setHighlights(highlightService.countHighlightPresentialOriginByConference(idConference, meetings));	
 		   dto.setProposals(attendRepository.countCommentPresentialOriginByConference(idConference, meetings)); 
 		   dto.setCounties(attendRepository.countLocalityPresentialOriginByConference(idConference, meetings));
+                   dto.setPlanItems(attendRepository.countPlanItemPresentialOriginByConference(idConference, meetings));
 	   }    	  
 
 	      	   

@@ -31,12 +31,14 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
@@ -93,6 +95,9 @@ public class AcessoCidadaoService {
 
   @Value("${api.acessocidadao.recepcionist.profile.id}")
   private String recepcionistProfileId;
+
+  @Value("${api.acessocidadao.support.profile.id}")
+  private String supportProfileId;
   
   @Value("${api.acessocidadao.grant_type}")
   private String grantType;
@@ -193,6 +198,7 @@ public class AcessoCidadaoService {
 //      roles.add("Administrator");
 //      roles.add("Presenter");
 //      roles.add("Recepcionist");
+//      roles.add("Support");
     
     return roles;
   }
@@ -354,6 +360,8 @@ public class AcessoCidadaoService {
         return moderatorProfileId;
       case RECEPCIONIST:
         return recepcionistProfileId;
+      case SUPPORT:
+        return supportProfileId;
       default:
         return null;
 
@@ -368,6 +376,8 @@ public class AcessoCidadaoService {
         return "Moderator";
       case RECEPCIONIST:
         return "Recepcionist";
+      case SUPPORT:
+        return "Support";
       default:
         return null;
 
@@ -405,6 +415,20 @@ public class AcessoCidadaoService {
   }
 
   public List<EvaluatorRoleDto> findRolesFromAcessoCidadaoAPI(String guid) throws IOException {
+    
+    List<UnitRolesDto> unitRolesDtos = this.findUnitRolesFromAcessoCidadaoAPI(guid);
+    
+    List<EvaluatorRoleDto> evaluatorServerDtos = new ArrayList<>();
+    unitRolesDtos.iterator().forEachRemaining((role) -> {
+        EvaluatorRoleDto newEvalServerDto = new EvaluatorRoleDto(role.getGuid(), (role.getAgentePublicoNome() + " - " + role.getNome()), guid);
+        evaluatorServerDtos.add(newEvalServerDto);
+      });
+    return evaluatorServerDtos;
+  }
+  
+  
+
+  public List<UnitRolesDto> findUnitRolesFromAcessoCidadaoAPI(String guid) throws IOException {
     String token = getClientToken();
     String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/papeis");
 
@@ -417,19 +441,11 @@ public class AcessoCidadaoService {
     try {
       HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() == 200) { 
-        List<EvaluatorRoleDto> evaluatorServerDtos = new ArrayList<>();
-        List<UnitRolesDto> unitRolesDtos = mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {
-        });
+        return mapper.readValue(response.body(), new TypeReference<List<UnitRolesDto>>() {});
 
-        unitRolesDtos.iterator().forEachRemaining((role) -> {
-          EvaluatorRoleDto newEvalServerDto = new EvaluatorRoleDto(role.getGuid(), (role.getAgentePublicoNome() + " - " + role.getNome()), guid);
-          evaluatorServerDtos.add(newEvalServerDto);
-        });
-
-        return evaluatorServerDtos;
       } else {
         logger.error("Não foi possível buscar a lista de papéis da unidade.");
-        throw new ApiAcessoCidadaoException(STATUS + response.statusCode());
+        throw new ApiAcessoCidadaoException(STATUS + response.statusCode() + "; body: " + response.body());
       }
     } catch (IOException | InterruptedException e) {
         
@@ -439,6 +455,19 @@ public class AcessoCidadaoService {
   }
 
   public List<EvaluatorSectionDto> findSectionsFromOrganogramaAPI(String guid) throws IOException {
+    
+    List<EvaluatorSectionDto> evaluatorSectionDtos = new ArrayList<>();
+    List<OrganizationUnitsDto> organizationUnitsDtos = this.findOrgUnitsFromOrganogramaAPI(guid);
+    organizationUnitsDtos.iterator().forEachRemaining((unit) -> {
+      EvaluatorSectionDto newEvalSectionDto = new EvaluatorSectionDto(unit.getGuid(), (unit.getNomeCurto() + " - " + unit.getNome()));
+      evaluatorSectionDtos.add(newEvalSectionDto);
+    });
+
+    return evaluatorSectionDtos;
+
+  }
+
+   public List<OrganizationUnitsDto> findOrgUnitsFromOrganogramaAPI(String guid) throws IOException {
     String token = getClientToken();
     String url = organogramaUriWebapi.concat("/unidades/organizacao/" + guid);
 
@@ -451,16 +480,7 @@ public class AcessoCidadaoService {
     try {
       HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() == 200) {
-        List<EvaluatorSectionDto> evaluatorSectionDtos = new ArrayList<>();
-        List<OrganizationUnitsDto> organizationUnitsDtos = mapper.readValue(response.body(), new TypeReference<List<OrganizationUnitsDto>>() {
-        });
-
-        organizationUnitsDtos.iterator().forEachRemaining((unit) -> {
-          EvaluatorSectionDto newEvalSectionDto = new EvaluatorSectionDto(unit.getGuid(), (unit.getNomeCurto() + " - " + unit.getNome()));
-          evaluatorSectionDtos.add(newEvalSectionDto);
-        });
-
-        return evaluatorSectionDtos;
+        return mapper.readValue(response.body(), new TypeReference<List<OrganizationUnitsDto>>() {});
 
       } else {
         logger.error("Não foi possível buscar a lista de unidades da organização.");
@@ -564,12 +584,12 @@ public class AcessoCidadaoService {
       }
     } catch (IOException | InterruptedException e) {
         
-        logger.error(e.getMessage());
+        logger.error(e.getMessage(), e);
         throw new ApiOrganogramaException("Erro ao buscar lista de organizações (Filhas do GOVES).");
     }
   }
 
-  public List<PublicAgentDto> findPublicAgentsFromAcessoCidadaoAPI() {
+  public List<PublicAgentDto> findPublicAgentsFromAcessoCidadaoAPI(String guid) {
     String token = null;
 
     try {
@@ -578,7 +598,7 @@ public class AcessoCidadaoService {
       throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
     }
 
-    String url = acessocidadaoUriWebApi.concat("conjunto/" + GUID_GOVES + "/agentesPublicos");
+    String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/agentesPublicos");
 
     HttpRequest request = HttpRequest.newBuilder(URI.create(url))
         .header(AUTHORIZATION, BEARER + token)
@@ -604,6 +624,10 @@ public class AcessoCidadaoService {
       logger.error(e.getMessage());
       throw new ApiAcessoCidadaoException("Não foi possível buscar os agentes publicos atrelado ao Guid GOVES.");
     }
+  }
+
+  public List<PublicAgentDto> findPublicAgentsFromAcessoCidadaoAPI() {
+    return this.findPublicAgentsFromAcessoCidadaoAPI(GUID_GOVES);
   }
 
   public PublicAgentDto findTheAgentPublicSubByCpfInAcessoCidadaoAPI(String cpf) {
@@ -682,7 +706,9 @@ public class AcessoCidadaoService {
     try {
       token = getClientToken();
     } catch (RuntimeException e) {
-      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token.");
+        UUID uuid = UUID.randomUUID();
+      logger.error("erro UUID: " + uuid, e);
+      throw new ApiAcessoCidadaoException("Não foi possível resgatar o token. (" + uuid + ")");
     }
 
     String url = acessocidadaoUriWebApi.concat("cidadao/" + personDto.getSub() + "/email");
@@ -758,7 +784,7 @@ public class AcessoCidadaoService {
         return publicAgentDto;
       } else {
         logger.error("Não foi possível buscar o cidadão atrelado ao CPF.");
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8));
         String inputLine;
         StringBuilder response = new StringBuilder();
         while ((inputLine = in.readLine()) != null) {

@@ -3,6 +3,7 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.AuthorityCredentialRequest;
 import br.gov.es.participe.controller.dto.CheckedInAtDto;
 import br.gov.es.participe.controller.dto.PreRegistrationAuthorityDto;
+import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.model.AuthService;
 import br.gov.es.participe.model.Locality;
 import br.gov.es.participe.model.Meeting;
@@ -76,14 +77,31 @@ public class AuthorityCredentialController {
 
         Person madeByPerson = personService.find(credentialRequest.getMadeBy());
         Meeting meeting = meetingService.find(credentialRequest.getMeetingId());
-        Locality locality = localityService.find(credentialRequest.getLocalityId());
+        final Locality locality;
+        if(credentialRequest.getLocalityId() != null) {
+            locality = localityService.find(credentialRequest.getLocalityId());
+            Assert.notNull(locality, "Localidade com id (" + credentialRequest.getLocalityId() + ") inexistente");
+        } else {
+            locality = null;
+        }
+        
         
         Assert.notNull(madeByPerson, "Pessoa com id (" + credentialRequest.getMadeBy() + ") inexistente");
         Assert.notNull(meeting, "Reunião com id (" + credentialRequest.getMeetingId() + ") inexistente");
-        Assert.notNull(locality, "Localidade com id (" + credentialRequest.getLocalityId() + ") inexistente");
 
-        madeByPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
-
+        
+        if (credentialRequest.getRepresentedByEmail() == null) {
+            PublicAgentDto dummy = new PublicAgentDto();
+            dummy.setSub(credentialRequest.getRepresentedBySub());
+            
+            dummy = acService.findThePersonEmailBySubInAcessoCidadaoAPI(dummy);
+            
+            if(dummy.getCorporativo() != null) {
+                credentialRequest.setRepresentedByEmail(dummy.getCorporativo());
+            } else {
+                credentialRequest.setRepresentedByEmail(dummy.getEmail());
+            }
+        }
 
         Person representedByPerson;
         if(credentialRequest.getRepresentedByCpf() == null) {
@@ -93,7 +111,7 @@ public class AuthorityCredentialController {
           Optional<Person> optReprPerson = personService.findByLoginSub(credentialRequest.getRepresentedBySub());
                   
           representedByPerson = optReprPerson.map((person) -> {
-              person.setContactEmail(credentialRequest.getRepresentedByEmail());
+              if(credentialRequest.getRepresentedByEmail() != null) person.setContactEmail(credentialRequest.getRepresentedByEmail());
               return person;
           }).orElseGet(() -> {
               
@@ -106,7 +124,7 @@ public class AuthorityCredentialController {
               as.setServerId(credentialRequest.getRepresentedBySub());
 
               reprPerson.addAuthService(as);
-              reprPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
+              if(credentialRequest.getRepresentedByEmail() != null) reprPerson.setContactEmail(credentialRequest.getRepresentedByEmail());
 
               return personService.save(reprPerson, true);
           });
@@ -115,29 +133,30 @@ public class AuthorityCredentialController {
         
 
         PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
-          
-        SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
+        
+        if(credentialRequest.getLocalityId() != null){
+            SelfDeclaration sfd = selfDeclarationService.findByPersonAndConference(representedByPerson.getId(), meeting.getConference().getId());
 
-          Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
-                // 1. Chame o seu updateLocality maroto (ele vai salvar no banco com @Transactional)
-                SelfDeclaration atualizada = selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
+            Optional.ofNullable(sfd).ifPresentOrElse(sf -> {
+                  // 1. Chame o seu updateLocality maroto (ele vai salvar no banco com @Transactional)
+                  SelfDeclaration atualizada = selfDeclarationService.updateLocality(sf, credentialRequest.getLocalityId());
 
-                // 2. ATUALIZE A MEMÓRIA: Remove a versão velha da lista da Person pelo ID da conferência
-                if (representedByPerson.getSelfDeclaretions() != null) {
-                    representedByPerson.getSelfDeclaretions().removeIf(sd -> 
-                        sd.getConference() != null && 
-                        sd.getConference().getId().equals(meeting.getConference().getId())
-                    );
-                    // 3. Injeta a instância 'atualizada' que o seu método devolveu
-                    representedByPerson.getSelfDeclaretions().add(atualizada);
-                }
-            },
-          () -> {
-              representedByPerson.addSelfDeclaration(
-                      selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
-              );
-          });
-
+                  // 2. ATUALIZE A MEMÓRIA: Remove a versão velha da lista da Person pelo ID da conferência
+                  if (representedByPerson.getSelfDeclaretions() != null) {
+                      representedByPerson.getSelfDeclaretions().removeIf(sd -> 
+                          sd.getConference() != null && 
+                          sd.getConference().getId().equals(meeting.getConference().getId())
+                      );
+                      // 3. Injeta a instância 'atualizada' que o seu método devolveu
+                      representedByPerson.getSelfDeclaretions().add(atualizada);
+                  }
+              },
+            () -> {
+                representedByPerson.addSelfDeclaration(
+                        selfDeclarationService.save(new SelfDeclaration(meeting.getConference(), locality, representedByPerson))
+                );
+            });
+        }
           preRegistration = Optional.ofNullable(preRegistration)
                                       .map(pr -> {
                                          

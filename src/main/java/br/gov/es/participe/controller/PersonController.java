@@ -3,6 +3,7 @@ package br.gov.es.participe.controller;
 import br.gov.es.participe.controller.dto.ForgotPasswordDto;
 import br.gov.es.participe.controller.dto.OptionOrganization;
 import br.gov.es.participe.controller.dto.PersonDto;
+import br.gov.es.participe.controller.dto.PersonListItemsResponse;
 import br.gov.es.participe.controller.dto.PersonParamDto;
 import br.gov.es.participe.controller.dto.PublicAgentDto;
 import br.gov.es.participe.controller.dto.SelfDeclarationDto;
@@ -24,9 +25,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,7 +38,7 @@ import org.springframework.web.bind.annotation.*;
 public class PersonController {
 
   private static final String SERVER = "Participe";
-
+  
   @Autowired
   private PersonService personService;
   
@@ -48,6 +51,23 @@ public class PersonController {
   @Autowired
   private SelfDeclarationService selfDeclarationService;
 
+  @GetMapping("/personsByOrganization/{guid}")
+  public ResponseEntity<?> findPersonsOrganization(
+          @PathVariable String guid,
+          @RequestHeader(name = "Authorization") String token
+  ){
+      
+      Assert.hasText(guid, "guid não informado");
+      
+    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Support" }))
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        
+    List<PersonListItemsResponse> response = personService.filterPersonsByOrganization(guid);
+    
+    return ResponseEntity.ok(response);
+    
+  }
+  
   @GetMapping
   @SuppressWarnings("rawtypes")
   public ResponseEntity index(

@@ -18,7 +18,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -222,6 +221,8 @@ public class ConferenceController {
     } else if (personService.hasOneOfTheRoles(token, new String[] { "Recepcionist"})) {
       conferences = conferenceService.findAllOpenWithPresentialMeetings4Receptionists(date, personService.getPerson(token).getId());
     } else if (personService.hasOneOfTheRoles(token, new String[] { "Presenter"})) {
+      conferences = conferenceService.findAllOpenWithPresentialMeetings(date);
+    } else if (personService.hasOneOfTheRoles(token, new String[] { "Support"})) {
       conferences = conferenceService.findAllOpenWithPresentialMeetings(date);
     }
         

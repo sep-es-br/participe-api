@@ -110,6 +110,9 @@ public class PersonDto {
       if(roles.contains("Recepcionist")) {
         return "Recepcionist";
       }
+      if(roles.contains("Support")) {
+        return "Support";
+      }
     }
     return null;
   }
