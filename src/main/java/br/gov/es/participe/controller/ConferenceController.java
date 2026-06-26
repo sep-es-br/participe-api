@@ -7,14 +7,6 @@ import br.gov.es.participe.model.PortalServer;
 import br.gov.es.participe.service.*;
 import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -22,6 +14,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @CrossOrigin
@@ -223,7 +221,7 @@ public class ConferenceController {
     } else if (personService.hasOneOfTheRoles(token, new String[] { "Presenter"})) {
       conferences = conferenceService.findAllOpenWithPresentialMeetings(date);
     } else if (personService.hasOneOfTheRoles(token, new String[] { "Support"})) {
-      conferences = conferenceService.findAllOpenWithPresentialMeetings(date);
+      conferences = conferenceService.findAllOpenWithPresentialMeetings4Admins();
     }
         
         
