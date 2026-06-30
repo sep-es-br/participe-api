@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -128,16 +130,25 @@ public class PersonService {
 
                 // 1.2. Retorna o dado antigo imediatamente
                 return mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {});
+            } else {
+                CompletableFuture<List<PersonListItemsResponse>> rotinaDeBusca = CompletableFuture.supplyAsync(() -> {
+                    return buscarEAtualizarCache(guid, mapper);
+                }, ForkJoinPool.commonPool());
+                
+                try {
+                    return rotinaDeBusca.get(55, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    return List.of();
+                } catch (Exception e) {
+                    log.error("Erro ao ler do cache (procedendo com busca síncrona): ", e);
+                }
             }
 
         } catch (RocksDBException | IOException ex) {
             log.error("Erro ao ler do cache (procedendo com busca síncrona): ", ex);
         }
-
-        // 2. SE NÃO EXISTE NO CACHE:
-        // Aguarda o primeiro carregamento de forma SÍNCRONA
-        log.info("Cache miss para o guid: {}. Buscando dados de forma síncrona...", guid);
-        return buscarEAtualizarCache(guid, mapper);
+        
+        return null;
     }
 
     /**
@@ -151,21 +162,7 @@ public class PersonService {
             List<OrganizationUnitsDto> sections = acessoCidadaoService.findOrgUnitsFromOrganogramaAPI(guid);
             if (sections == null || sections.isEmpty()) return response;
 
-            final OrganizationUnitsDto unidadeBase = sections.stream()
-                    .filter(s -> s.getUnidadePai() == null)
-                    .findFirst()
-                    .orElse(null);
-
-            if (unidadeBase == null) return response;
-
-            List<OrganizationUnitsDto> subUnidades = sections.stream()
-                    .filter(unt -> unt.getUnidadePai() != null && 
-                                   unt.getUnidadePai().guid.equalsIgnoreCase(unidadeBase.getGuid()))
-                    .collect(Collectors.toCollection(ArrayList::new));
-            
-            subUnidades.add(unidadeBase);
-
-            for (OrganizationUnitsDto unit : subUnidades) {
+            for (OrganizationUnitsDto unit : sections) {
                 List<UnitRolesDto> evals = acessoCidadaoService.findUnitRolesFromAcessoCidadaoAPI(unit.getGuid());
                 if (evals == null) continue;
 

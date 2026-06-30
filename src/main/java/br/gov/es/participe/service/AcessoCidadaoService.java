@@ -430,7 +430,7 @@ public class AcessoCidadaoService {
 
   public List<UnitRolesDto> findUnitRolesFromAcessoCidadaoAPI(String guid) throws IOException {
     String token = getClientToken();
-    String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/papeis");
+    String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/papeis?incluirFilhos=false&operacional=true");
 
     HttpRequest request = HttpRequest.newBuilder(URI.create(url))
         .header(AUTHORIZATION, BEARER + token)
