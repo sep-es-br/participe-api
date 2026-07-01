@@ -383,11 +383,12 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "        WHEN (preRegisteredDate IS NOT NULL) THEN \"1\" \n" +
             "        ELSE \"2\"\n" +
             "      END\n" +
-            "    WHEN $sort = 'organization' THEN " + 
-            "      CASE \n" +
-            "        WHEN organization IS NULL OR size(trim(apoc.text.clean(organization))) = 0 THEN 'zzzzzzzzzzzzzz' \n" +
-            "        ELSE apoc.text.clean(organization) \n" +
-            "      END\n" +
+            "    WHEN $sort = 'organization' THEN       \n" +
+            "       CASE \n" +
+            "         WHEN organization IS NULL OR size(trim(apoc.text.clean(organization))) = 0 THEN 'zzzzzzzzzzzzzz' \n" +
+            "         ELSE apoc.text.clean(organization) \n" +
+            "       END\n" +
+            "     ELSE 1\n" +
             "  END \n" +
             ") ASC, cia.time ASC\n",
         countQuery = 
