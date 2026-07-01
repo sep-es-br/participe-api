@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -119,17 +120,32 @@ public class PersonService {
             if (jsonList != null) {
                 // SE EXISTE NO CACHE: 
                 // 1.1. Dispara a atualização em BACKGROUND (assíncrona) sem bloquear o retorno
-                CompletableFuture.runAsync(() -> {
+                CompletableFuture<List<PersonListItemsResponse>> future = CompletableFuture.supplyAsync(() -> {
                     try {
                         log.info("Disparando atualização de cache em background para o guid: {}", guid);
-                        buscarEAtualizarCache(guid, mapper);
+                        return buscarEAtualizarCache(guid, mapper);
                     } catch (Exception e) {
                         log.error("Erro ao atualizar cache em background para o guid: " + guid, e);
                     }
-                }, ForkJoinPool.commonPool()); // Recomenda-se injetar um Executor próprio do Spring aqui se preferir
+                    return null;
+                }, ForkJoinPool.commonPool()).completeOnTimeout(
+                        mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {}), 
+                       55, 
+                       TimeUnit.SECONDS); // Recomenda-se injetar um Executor próprio do Spring aqui se preferir
 
                 // 1.2. Retorna o dado antigo imediatamente
-                return mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {});
+                try {
+                    return future.get();
+                } catch (ExecutionException ex) {
+                    log.error("Erro ao buscar lista de agentes", ex);
+                    return mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {});
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    log.error("Thread Interrompida", ex);
+                    return mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {});
+                }
+                
+                
             } else {
                 CompletableFuture<List<PersonListItemsResponse>> rotinaDeBusca = CompletableFuture.supplyAsync(() -> {
                     return buscarEAtualizarCache(guid, mapper);
