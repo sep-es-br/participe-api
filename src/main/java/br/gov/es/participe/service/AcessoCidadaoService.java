@@ -205,7 +205,9 @@ public class AcessoCidadaoService {
 
   private Person createPerson(JSONObject userInfo, Long conferenceId, boolean persistRelationship) throws IOException {
     Person person = new Person();
-    person.setName(userInfo.getString("apelido"));
+    
+    PublicAgentDto agente = this.findAgentPublicBySubInAcessoCidadaoAPI(userInfo.optString(FIELD_SUB_NOVO));
+    person.setName(agente.getName());
     person.setAccessToken(userInfo.get("accessToken").toString());
     if (!userInfo.isNull(FIELD_ROLE)) {
       if (userInfo.get(FIELD_ROLE).toString().contains("[")) {

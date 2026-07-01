@@ -112,6 +112,7 @@ public class AuthorityCredentialController {
                   
           representedByPerson = optReprPerson.map((person) -> {
               if(credentialRequest.getRepresentedByEmail() != null) person.setContactEmail(credentialRequest.getRepresentedByEmail());
+              person.setName(credentialRequest.getRepresentedByName());
               return person;
           }).orElseGet(() -> {
               
