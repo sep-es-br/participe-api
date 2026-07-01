@@ -180,7 +180,7 @@ public class PersonService {
 
             for (OrganizationUnitsDto unit : sections) {
                 List<UnitRolesDto> evals = acessoCidadaoService.findUnitRolesFromAcessoCidadaoAPI(unit.getGuid());
-                if (evals == null) continue;
+
 
                 for (UnitRolesDto eval : evals) {
                     if(!eval.isPrioritario()) continue;
