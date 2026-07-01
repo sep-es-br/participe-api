@@ -16,7 +16,10 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -117,27 +120,51 @@ public class PersonService {
             if (jsonList != null) {
                 // SE EXISTE NO CACHE: 
                 // 1.1. Dispara a atualização em BACKGROUND (assíncrona) sem bloquear o retorno
-                CompletableFuture.runAsync(() -> {
+                CompletableFuture<List<PersonListItemsResponse>> future = CompletableFuture.supplyAsync(() -> {
                     try {
                         log.info("Disparando atualização de cache em background para o guid: {}", guid);
-                        buscarEAtualizarCache(guid, mapper);
+                        return buscarEAtualizarCache(guid, mapper);
                     } catch (Exception e) {
                         log.error("Erro ao atualizar cache em background para o guid: " + guid, e);
                     }
-                }, ForkJoinPool.commonPool()); // Recomenda-se injetar um Executor próprio do Spring aqui se preferir
+                    return null;
+                }, ForkJoinPool.commonPool()).completeOnTimeout(
+                        mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {}), 
+                       55, 
+                       TimeUnit.SECONDS); // Recomenda-se injetar um Executor próprio do Spring aqui se preferir
 
                 // 1.2. Retorna o dado antigo imediatamente
-                return mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {});
+                try {
+                    return future.get();
+                } catch (ExecutionException ex) {
+                    log.error("Erro ao buscar lista de agentes", ex);
+                    return mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {});
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    log.error("Thread Interrompida", ex);
+                    return mapper.readValue(jsonList, new TypeReference<List<PersonListItemsResponse>>() {});
+                }
+                
+                
+            } else {
+                CompletableFuture<List<PersonListItemsResponse>> rotinaDeBusca = CompletableFuture.supplyAsync(() -> {
+                    return buscarEAtualizarCache(guid, mapper);
+                }, ForkJoinPool.commonPool());
+                
+                try {
+                    return rotinaDeBusca.get(55, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    return List.of();
+                } catch (Exception e) {
+                    log.error("Erro ao ler do cache (procedendo com busca síncrona): ", e);
+                }
             }
 
         } catch (RocksDBException | IOException ex) {
             log.error("Erro ao ler do cache (procedendo com busca síncrona): ", ex);
         }
-
-        // 2. SE NÃO EXISTE NO CACHE:
-        // Aguarda o primeiro carregamento de forma SÍNCRONA
-        log.info("Cache miss para o guid: {}. Buscando dados de forma síncrona...", guid);
-        return buscarEAtualizarCache(guid, mapper);
+        
+        return null;
     }
 
     /**
@@ -151,23 +178,9 @@ public class PersonService {
             List<OrganizationUnitsDto> sections = acessoCidadaoService.findOrgUnitsFromOrganogramaAPI(guid);
             if (sections == null || sections.isEmpty()) return response;
 
-            final OrganizationUnitsDto unidadeBase = sections.stream()
-                    .filter(s -> s.getUnidadePai() == null)
-                    .findFirst()
-                    .orElse(null);
-
-            if (unidadeBase == null) return response;
-
-            List<OrganizationUnitsDto> subUnidades = sections.stream()
-                    .filter(unt -> unt.getUnidadePai() != null && 
-                                   unt.getUnidadePai().guid.equalsIgnoreCase(unidadeBase.getGuid()))
-                    .collect(Collectors.toCollection(ArrayList::new));
-            
-            subUnidades.add(unidadeBase);
-
-            for (OrganizationUnitsDto unit : subUnidades) {
+            for (OrganizationUnitsDto unit : sections) {
                 List<UnitRolesDto> evals = acessoCidadaoService.findUnitRolesFromAcessoCidadaoAPI(unit.getGuid());
-                if (evals == null) continue;
+
 
                 for (UnitRolesDto eval : evals) {
                     if(!eval.isPrioritario()) continue;

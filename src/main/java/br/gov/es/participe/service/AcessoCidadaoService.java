@@ -205,7 +205,9 @@ public class AcessoCidadaoService {
 
   private Person createPerson(JSONObject userInfo, Long conferenceId, boolean persistRelationship) throws IOException {
     Person person = new Person();
-    person.setName(userInfo.getString("apelido"));
+    
+    PublicAgentDto agente = this.findAgentPublicBySubInAcessoCidadaoAPI(userInfo.optString(FIELD_SUB_NOVO));
+    person.setName(agente.getName());
     person.setAccessToken(userInfo.get("accessToken").toString());
     if (!userInfo.isNull(FIELD_ROLE)) {
       if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
@@ -430,7 +432,7 @@ public class AcessoCidadaoService {
 
   public List<UnitRolesDto> findUnitRolesFromAcessoCidadaoAPI(String guid) throws IOException {
     String token = getClientToken();
-    String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/papeis");
+    String url = acessocidadaoUriWebApi.concat("conjunto/" + guid + "/papeis?incluirFilhos=false&operacional=true");
 
     HttpRequest request = HttpRequest.newBuilder(URI.create(url))
         .header(AUTHORIZATION, BEARER + token)
