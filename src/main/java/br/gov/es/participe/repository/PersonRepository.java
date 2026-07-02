@@ -300,6 +300,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "    apoc.text.clean(COALESCE(cia, pr).role) CONTAINS apoc.text.clean($name)\r\n" + //
             "  ) AND\r\n" + //
             "  (CASE\r\n" + //
+            "    WHEN $filter = 'all' THEN coalesce(pr,cia.time) IS NOT NULL\r\n" + //
             "    WHEN $filter = 'pres' THEN cia.time IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg' THEN pr IS NOT NULL\r\n" + //
             "    WHEN $filter = 'prereg_pres' THEN cia.time IS NOT NULL AND pr IS NOT NULL\r\n" + //
