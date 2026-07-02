@@ -391,7 +391,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "       END\n" +
             "     ELSE 1\n" +
             "  END \n" +
-            ") ASC, cia.time ASC\n",
+            ") ASC, cia.time DESC\n",
         countQuery = 
             "CALL {\r\n" + //
             "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\r\n" + //
