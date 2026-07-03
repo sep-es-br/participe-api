@@ -11,20 +11,35 @@ import br.gov.es.participe.controller.dto.UnitRolesDto;
 import br.gov.es.participe.model.Person;
 import br.gov.es.participe.model.SelfDeclaration;
 import br.gov.es.participe.service.AcessoCidadaoService;
+import br.gov.es.participe.service.CacheService;
 import br.gov.es.participe.service.LocalityService;
 import br.gov.es.participe.service.PersonService;
 import br.gov.es.participe.service.SelfDeclarationService;
+import br.gov.es.participe.util.domain.report.JobManager;
 import br.gov.es.participe.util.dto.MessageDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcOrganizationInfoDto;
 import br.gov.es.participe.util.dto.acessoCidadao.AcSectionInfoDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import org.rocksdb.RocksDBException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +64,83 @@ public class PersonController {
   
   @Autowired
   private SelfDeclarationService selfDeclarationService;
+  
+  @Autowired
+  private JobManager jobManager;
+  
+  @Autowired
+  private CacheService cacheService;
+  
+  @Autowired
+  private ObjectMapper objectMapper;
+  
+  private final Logger logger = LoggerFactory.getLogger(PersonController.class);
 
+  
+    @GetMapping("/V2/personsByOrganization/{guid}")
+    public ResponseEntity<?> findPersonsOrg(
+            @PathVariable String guid,
+            @RequestHeader(name = "Authorization") String token
+    ) {
+        Assert.hasText(guid, "guid não informado");
+
+        // 1. Verifica se o job já está rodando ANTES de criá-lo
+        boolean jobJaExistia = jobManager.existsJob(guid);
+
+        // 2. Dispara o job em background (se não existir). 
+        // O próprio job se encarrega de salvar no cache quando terminar.
+        CompletableFuture<List<PersonListItemsResponse>> job = jobManager.getOrCreateJob(guid, () -> {
+            try {
+                List<PersonListItemsResponse> resultado = personService.filterPersonsByOrg(guid);
+                cacheService.salvar(guid, objectMapper.writeValueAsString(resultado));
+                return resultado;
+            } catch (Exception ex) {
+                logger.error("Erro ao processar ou salvar cache", ex);
+                throw new CompletionException(ex);
+            }
+        });
+
+        // 3. Se o job já terminou AGORA (ou acabou de ser pego do cache do jobManager)
+        if (jobJaExistia) {
+            try {
+                return ResponseEntity.ok(job.get(55, TimeUnit.SECONDS)); // Retorna 200 OK com o dado novinho
+            } catch (TimeoutException e) {
+            } catch (ExecutionException e) {
+                Throwable causaReal = e.getCause();
+                logger.error("", causaReal);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.error(null, e);
+            }
+            
+        }
+
+        // 4. Se o job AINDA está rodando (Cenário de Polling ou Requisição Nova)
+        List<PersonListItemsResponse> cacheAntigo = buscarDadoEmCache(guid);
+
+        // Se temos o cache antigo, mandamos ele com 202 (A UX que você planejou!)
+        if (cacheAntigo != null) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(cacheAntigo);
+        }
+
+        // Se não tem nem cache antigo e o job tá rodando, manda 202 vazio/mensagem pro front continuar o pooling
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .body(Collections.emptyList()); 
+    }
+  
+  private List<PersonListItemsResponse> buscarDadoEmCache(String guid) {
+        
+        try {
+            return objectMapper.readValue(cacheService.buscar(guid), new TypeReference<List<PersonListItemsResponse>>(){}) ;
+        } catch (JsonProcessingException e) {
+            logger.error("Erro ao converter dados em cache em lista", e);
+            return List.of();
+        } catch (RocksDBException e) {
+            logger.error("Erro ao recuperar dados do cache", e);
+            return List.of();
+        }
+  }
+  
   @GetMapping("/personsByOrganization/{guid}")
   public ResponseEntity<?> findPersonsOrganization(
           @PathVariable String guid,

@@ -109,6 +109,53 @@ public class PersonService {
     @Autowired
     private CacheService cacheSrv;
     
+    @Autowired
+    private ObjectMapper mapper;
+    
+    
+    public List<PersonListItemsResponse> filterPersonsByOrg(String guid) {
+        List<PersonListItemsResponse> response = new ArrayList<>();
+        Set<String> subsAdicionados = new HashSet<>();
+
+        try {
+            List<OrganizationUnitsDto> sections = acessoCidadaoService.findOrgUnitsFromOrganogramaAPI(guid);
+            if (sections == null || sections.isEmpty()) return response;
+
+            for (OrganizationUnitsDto unit : sections) {
+                List<UnitRolesDto> evals = acessoCidadaoService.findUnitRolesFromAcessoCidadaoAPI(unit.getGuid());
+
+
+                for (UnitRolesDto eval : evals) {
+                    if(!eval.isPrioritario()) continue;
+                    String sub = eval.getAgentePublicoSub();
+
+                    // Otimização O(1) para evitar duplicados
+                    if (subsAdicionados.contains(sub.toLowerCase())) {
+                        continue;
+                    }
+
+                    String nomeUnidade = Optional.ofNullable(unit.getNome()).orElse(unit.getNomeCurto());
+
+                    response.add(new PersonListItemsResponse(
+                            sub,
+                            eval.getAgentePublicoNome(),
+                            null,
+                            eval.getNome(),
+                            nomeUnidade
+                    ));
+
+                    subsAdicionados.add(sub.toLowerCase());
+                }
+            }
+
+            return response;
+
+        } catch (IOException ex) {
+            log.error("Erro ao buscar pessoas da organização: " + guid, ex);
+            throw new RuntimeException(ex);
+        }
+    }
+    
     
     public List<PersonListItemsResponse> filterPersonsByOrganization(String guid) {
         ObjectMapper mapper = new ObjectMapper();

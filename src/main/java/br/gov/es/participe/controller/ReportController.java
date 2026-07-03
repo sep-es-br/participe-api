@@ -1,7 +1,7 @@
 package br.gov.es.participe.controller;
 
 import br.gov.es.participe.service.ReportService;
-import br.gov.es.participe.util.domain.report.ReportJobManager;
+import br.gov.es.participe.util.domain.report.JobManager;
 import br.gov.es.participe.util.dto.MessageDto;
 import java.util.Map;
 import java.util.UUID;
@@ -33,7 +33,7 @@ public class ReportController {
     private ReportService reportService;
     
     @Autowired
-    private ReportJobManager jobManager;
+    private JobManager jobManager;
             
     private final Logger log = LoggerFactory.getLogger(ReportController.class);
             

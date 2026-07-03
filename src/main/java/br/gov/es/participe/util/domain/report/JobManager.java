@@ -21,11 +21,11 @@ import org.springframework.stereotype.Component;
  * @author gean.carneiro
  */
 @Component
-public class ReportJobManager {
+public class JobManager {
     
     private final Map<Object, CompletableFuture> futureJobMap = new ConcurrentHashMap<>();
     
-    private final Logger log = LoggerFactory.getLogger(ReportJobManager.class);
+    private final Logger log = LoggerFactory.getLogger(JobManager.class);
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     
     @PreDestroy
@@ -51,6 +51,12 @@ public class ReportJobManager {
             
         });
         
+        
+    }
+    
+    public boolean existsJob(Object key) {
+        
+        return futureJobMap.containsKey(key);
         
     }
     
