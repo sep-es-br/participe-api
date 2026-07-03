@@ -5,12 +5,15 @@
 package br.gov.es.participe.util.domain.report;
 
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.springframework.core.io.Resource;
-
+import java.util.function.Supplier;
+import javax.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,40 +23,40 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReportJobManager {
     
+    private final Map<Object, CompletableFuture> futureJobMap = new ConcurrentHashMap<>();
     
-    private final Map<UUID, JobStatus> jobStatusMap = new ConcurrentHashMap<>();
-    private final Map<UUID, Resource> reportContentMap = new ConcurrentHashMap<>();
-
-    public UUID createJob() {
-        UUID jobId = UUID.randomUUID();
-        jobStatusMap.put(jobId, JobStatus.PROCESSING);
-        return jobId;
+    private final Logger log = LoggerFactory.getLogger(ReportJobManager.class);
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    
+    @PreDestroy
+    public void shutdown() {
+        scheduler.shutdown();
+    }   
+       
+    public <T> CompletableFuture<T> getOrCreateJob(Object key, Supplier<T> supplier) {
+        
+        return futureJobMap.computeIfAbsent(key, id -> {
+            CompletableFuture<T> wrapper = CompletableFuture.supplyAsync(supplier);
+            
+            wrapper.whenComplete((result, exception) -> {
+                if(exception != null) {
+                    log.error("Erro no relatório: ", exception);
+                    futureJobMap.remove(id);
+                }
+            });
+            
+            scheduler.schedule(() -> futureJobMap.remove(id), 10, TimeUnit.MINUTES);
+            
+            return wrapper;
+            
+        });
+        
+        
     }
-
-    public void completeJob(UUID jobId, Resource reportData) {
-        jobStatusMap.put(jobId, JobStatus.DONE);
-        reportContentMap.put(jobId, reportData);
-        scheduleCleanup(jobId);
+    
+    public void removeJob(Object key) {
+        futureJobMap.remove(key);
     }
-
-    public void failJob(UUID jobId) {
-        jobStatusMap.put(jobId, JobStatus.ERROR);
-        scheduleCleanup(jobId);
-    }
-
-    public JobStatus getStatus(UUID jobId) {
-        return jobStatusMap.getOrDefault(jobId, null);
-    }
-
-    public Resource getReport(UUID jobId) {
-        return reportContentMap.get(jobId);
-    }
-
-    private void scheduleCleanup(UUID jobId) {
-        Executors.newSingleThreadScheduledExecutor().schedule(() -> {
-            jobStatusMap.remove(jobId);
-            reportContentMap.remove(jobId);
-        }, 10, TimeUnit.MINUTES); // expira em 10 minutos
-    }
+    
     
 }

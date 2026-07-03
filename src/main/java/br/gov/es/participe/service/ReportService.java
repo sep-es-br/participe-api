@@ -4,63 +4,29 @@
  */
 package br.gov.es.participe.service;
 
-import br.gov.es.participe.util.domain.report.ReportJobManager;
 import br.gov.es.participe.util.domain.report.RootFolderRepositoryService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.SimpleJasperReportsContext;
 import net.sf.jasperreports.engine.util.JRLoader;
-import net.sf.jasperreports.engine.util.JRSaver;
-import net.sf.jasperreports.repo.FileRepositoryService;
 import net.sf.jasperreports.repo.RepositoryService;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -88,30 +54,7 @@ public class ReportService {
     
     @Autowired
     private ResourcePatternResolver resourceResolver;
-    
-    @Autowired
-    private ReportJobManager jobManager;
-    
-    
-    public UUID startReportJob(int conferenceId) {
-        UUID jobId = jobManager.createJob();
-
-        // Processamento assíncrono
-        CompletableFuture.runAsync(() -> {
-            try {
-                // Aqui você geraria o PDF com Jasper, POI etc
-                Resource reportBytes = generateProposeReport(conferenceId);
-
-                jobManager.completeJob(jobId, reportBytes);
-            } catch (Exception e) {
-                jobManager.failJob(jobId);
-                Logger.getGlobal().log(Level.SEVERE, "report_error", e);
-            }
-        });
-
-        return jobId;
-    }
-
+        
     
     public Resource generateProposeReport(int idConference) {
         
@@ -138,35 +81,37 @@ public class ReportService {
             
             Class.forName("org.neo4j.jdbc.bolt.BoltDriver");
                                     
-            Connection connection = DriverManager.getConnection(
-            "jdbc:neo4j:" + this.urlConnection,
-            this.userName,
-            this.passwordNeo4j);
+            try(Connection connection = DriverManager.getConnection(
+                    "jdbc:neo4j:" + this.urlConnection,
+                    this.userName,
+                    this.passwordNeo4j)){
+                
+                
+                JasperReport report = (JasperReport) JRLoader.loadObject(tempDir.resolve("ProposeReport_main.jasper").toFile());
             
-            
-            JasperReport report = (JasperReport) JRLoader.loadObject(tempDir.resolve("ProposeReport_main.jasper").toFile());
-            
-           SimpleJasperReportsContext ctx = new SimpleJasperReportsContext();
-            
-            RootFolderRepositoryService fileRepositoryService = new RootFolderRepositoryService( ctx, tempDir);
-            ctx.setExtensions(RepositoryService.class, Collections.singletonList(fileRepositoryService));
-            report.setJasperReportsContext(ctx);
-            
-            
-            Map<String, Object> params = new HashMap<>();
-            params.put("ID_CONFERENCE", idConference);
-            params.put("REPORT_CONNECTION", connection);
-            params.put("IMG_PATH", imgPath);
-            
-            JasperPrint print = JasperFillManager.getInstance(ctx).fill(report, params, connection);
+                SimpleJasperReportsContext ctx = new SimpleJasperReportsContext();
 
-            
-            try (ByteArrayInputStream pdfIs = new ByteArrayInputStream(
+                RootFolderRepositoryService fileRepositoryService = new RootFolderRepositoryService( ctx, tempDir);
+                ctx.setExtensions(RepositoryService.class, Collections.singletonList(fileRepositoryService));
+                report.setJasperReportsContext(ctx);
+
+
+                Map<String, Object> params = new HashMap<>();
+                params.put("ID_CONFERENCE", idConference);
+                params.put("REPORT_CONNECTION", connection);
+                params.put("IMG_PATH", imgPath);
+
+                JasperPrint print = JasperFillManager.getInstance(ctx).fill(report, params, connection);
+                
+                
+                try (ByteArrayInputStream pdfIs = new ByteArrayInputStream(
                     JasperExportManager.exportReportToPdf(print)
-            )) {
-                return new InputStreamResource(pdfIs);
+                )) {
+                    return new InputStreamResource(pdfIs);
+                }
+
+                
             }
-            
 
         } catch (JRException | SQLException | IOException e) {
             
