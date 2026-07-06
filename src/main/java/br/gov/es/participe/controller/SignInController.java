@@ -88,9 +88,14 @@ public class SignInController {
       HttpServletRequest request,
       HttpServletResponse response) throws IOException {
       
-    Cookie cookie = cookieService.findCookie(request, FRONT_MODULE);
-    String module = cookie.getValue();
-    
+      String module;
+      if(cookieService.exists(request, FRONT_MODULE)){
+        Cookie cookie = cookieService.findCookie(request, FRONT_MODULE);
+        module = cookie.getValue();
+      } else {
+          module = "";
+      }
+      
     SigninDto signinDto = acessoCidadaoService.authenticate(token,
         getConferenceId(request, response), module);
     String valor = encode(signinDto);
