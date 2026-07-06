@@ -135,6 +135,9 @@ public class SignInController {
         
         return String.format("%s/#/%s/%s?signinDto=%s", url, module, meetingId, value);
     } else {
+        if(cookieService.exists(request, FRONT_MODULE)){
+            cookieService.deleteCookie(request, response, FRONT_MODULE, "/participe");
+        }
         return url.concat("/#/home?signinDto=".concat(value));
     }
     
