@@ -87,8 +87,12 @@ public class SignInController {
       @RequestParam(name = "access_token") String token,
       HttpServletRequest request,
       HttpServletResponse response) throws IOException {
+      
+    Cookie cookie = cookieService.findCookie(request, FRONT_MODULE);
+    String module = cookie.getValue();
+    
     SigninDto signinDto = acessoCidadaoService.authenticate(token,
-        getConferenceId(request, response));
+        getConferenceId(request, response), module);
     String valor = encode(signinDto);
     return new RedirectView(buildHomeCallbackUrl(request, response, valor));
   }

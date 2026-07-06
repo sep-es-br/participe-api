@@ -121,8 +121,8 @@ public class AcessoCidadaoService {
 
   ObjectMapper mapper = new ObjectMapper();
 
-  public SigninDto authenticate(String token, Long conferenceId) throws IOException {
-    Person person = findOrCreatePerson(token, conferenceId, true);
+  public SigninDto authenticate(String token, Long conferenceId, String module) throws IOException {
+    Person person = findOrCreatePerson(token, conferenceId, true, module);
     String authenticationToken = tokenService.generateToken(person, TokenType.AUTHENTICATION);
     String refreshToken = tokenService.generateToken(person, TokenType.REFRESH);
 
@@ -139,7 +139,7 @@ public class AcessoCidadaoService {
     return new SigninDto(person, SERVER, authenticationToken, newRefreshToken);
   }
 
-  private Person findOrCreatePerson(String token, Long conferenceId, boolean persistRelationship) throws IOException {
+  private Person findOrCreatePerson(String token, Long conferenceId, boolean persistRelationship, String module) throws IOException {
     JSONObject userInfo = getUserInfo(token);
     String email;
     if (userInfo.isNull(FIELD_EMAIL)) {
@@ -153,7 +153,7 @@ public class AcessoCidadaoService {
       Person person = findPerson.get();
       person.setAccessToken(token);
       person.setContactEmail(email);
-      person.setRoles(getRoles(userInfo));
+      if(module.equals("admin")) person.setRoles(getRoles(userInfo));
 
       return makeAuthServiceRelationship(conferenceId, persistRelationship, userInfo, person);
     }
@@ -404,7 +404,7 @@ public class AcessoCidadaoService {
           personAlreadyUsingSocialLogin.get().getId());
     }
 
-    Person person = findOrCreatePerson(token, conferenceId, false);
+    Person person = findOrCreatePerson(token, conferenceId, false, "");
 
     return new PersonProfileSignInDto(
         person,

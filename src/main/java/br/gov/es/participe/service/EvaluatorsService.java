@@ -6,7 +6,6 @@ import br.gov.es.participe.controller.dto.EvaluatorRoleDto;
 import br.gov.es.participe.controller.dto.EvaluatorSectionDto;
 import br.gov.es.participe.controller.dto.EvaluatorsNamesRequestDto;
 import br.gov.es.participe.controller.dto.EvaluatorsNamesResponseDto;
-import br.gov.es.participe.exception.EvaluatorForbiddenException;
 import br.gov.es.participe.exception.ParticipeServiceException;
 import br.gov.es.participe.model.Organization;
 import br.gov.es.participe.model.Role;
@@ -75,7 +74,7 @@ public class EvaluatorsService {
         if(!organizationGuids.isEmpty()){
             return String.join(",", organizationGuids);
         }else{
-            throw new EvaluatorForbiddenException();
+            return null;
         }
 
     }
