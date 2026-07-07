@@ -87,8 +87,17 @@ public class SignInController {
       @RequestParam(name = "access_token") String token,
       HttpServletRequest request,
       HttpServletResponse response) throws IOException {
+      
+      String module;
+      if(cookieService.exists(request, FRONT_MODULE)){
+        Cookie cookie = cookieService.findCookie(request, FRONT_MODULE);
+        module = cookie.getValue();
+      } else {
+          module = "";
+      }
+      
     SigninDto signinDto = acessoCidadaoService.authenticate(token,
-        getConferenceId(request, response));
+        getConferenceId(request, response), module);
     String valor = encode(signinDto);
     return new RedirectView(buildHomeCallbackUrl(request, response, valor));
   }
@@ -126,6 +135,9 @@ public class SignInController {
         
         return String.format("%s/#/%s/%s?signinDto=%s", url, module, meetingId, value);
     } else {
+        if(cookieService.exists(request, FRONT_MODULE)){
+            cookieService.deleteCookie(request, response, FRONT_MODULE, "/participe");
+        }
         return url.concat("/#/home?signinDto=".concat(value));
     }
     
