@@ -696,7 +696,7 @@ public class AcessoCidadaoService {
           RuntimeException ex = new RuntimeException("erro AC\ncode: " + response.statusCode() + "\nsub: " + sub +"\nbody: " + response.body());
           
           logger.error("Erro AC:", ex);
-          throw ex;
+          return null;
       }
     } catch (IOException | InterruptedException e) {
       
