@@ -1,9 +1,8 @@
 package br.gov.es.participe.controller.dto;
 
 import java.util.Date;
-import org.springframework.data.neo4j.annotation.QueryResult;
-
 import org.neo4j.ogm.annotation.typeconversion.DateString;
+import org.springframework.data.neo4j.annotation.QueryResult;
 
 @QueryResult
 public class AuthorityMeetingDto {
@@ -21,6 +20,7 @@ public class AuthorityMeetingDto {
     private String name;
     private String role;
     private String organization;
+    private Boolean isTeam;
 
     public String getLocalityName() {
         return localityName;
@@ -94,6 +94,14 @@ public class AuthorityMeetingDto {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public Boolean getIsTeam() {
+        return isTeam;
+    }
+
+    public void setIsTeam(Boolean isTeam) {
+        this.isTeam = isTeam;
     }
     
     

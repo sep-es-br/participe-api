@@ -246,7 +246,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     "    COALESCE(ci.isAnnounced, false) AS announced, \n" +
     "    p.name AS name, \n" +
     "    ci.role AS role,  \n" +
-    "    CASE WHEN ci.organizationShort IS NOT NULL THEN ci.organizationShort + ' - ' ELSE '' END + ci.organization as organization,\n" +
+    "    CASE WHEN ci.organizationShort IS NOT NULL THEN ci.organizationShort + ' - ' ELSE '' END + ci.organization as organization, \n" +
+    "    ci.isTeam as isTeam,\n" +
     "    ci\n" +
     "ORDER BY \n" +
     "    apoc.coll.max([\n" +
