@@ -83,7 +83,7 @@ public class PersonController {
             @RequestHeader(name = "Authorization") String token
     ) {
         Assert.hasText(guid, "guid não informado");
-
+        
         // 1. Verifica se o job já está rodando ANTES de criá-lo
         boolean jobJaExistia = jobManager.existsJob(guid);
 
@@ -131,7 +131,12 @@ public class PersonController {
   private List<PersonListItemsResponse> buscarDadoEmCache(String guid) {
         
         try {
-            return objectMapper.readValue(cacheService.buscar(guid), new TypeReference<List<PersonListItemsResponse>>(){}) ;
+            String dadoCache = cacheService.buscar(guid);
+            if(dadoCache == null) {
+                return null;
+            } else {
+                return objectMapper.readValue(dadoCache, new TypeReference<List<PersonListItemsResponse>>(){}) ;
+            }
         } catch (JsonProcessingException e) {
             logger.error("Erro ao converter dados em cache em lista", e);
             return List.of();
