@@ -49,10 +49,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -117,7 +117,7 @@ public class AcessoCidadaoService {
   @Autowired
   private ParticipeUtils participeUtils;
 
-  private final Logger logger = LogManager.getLogger(AcessoCidadaoService.class);
+  private final Logger logger = LoggerFactory.getLogger(AcessoCidadaoService.class);
 
   ObjectMapper mapper = new ObjectMapper();
 
@@ -693,7 +693,10 @@ public class AcessoCidadaoService {
 
         return publicAgentDtos;
       } else {
-        return null;
+          RuntimeException ex = new RuntimeException("erro AC\ncode: " + response.statusCode() + "\nsub: " + sub +"\nbody: " + response.body());
+          
+          logger.error("Erro AC:", ex);
+          throw ex;
       }
     } catch (IOException | InterruptedException e) {
       
