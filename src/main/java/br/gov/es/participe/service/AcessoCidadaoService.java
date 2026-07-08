@@ -207,7 +207,7 @@ public class AcessoCidadaoService {
     Person person = new Person();
     
     PublicAgentDto agente = this.findAgentPublicBySubInAcessoCidadaoAPI(userInfo.optString(FIELD_SUB_NOVO));
-    person.setName(agente.getName());
+    person.setName(Optional.ofNullable(agente).map(PublicAgentDto::getName).orElse(userInfo.getString("apelido")));
     person.setAccessToken(userInfo.get("accessToken").toString());
     if (!userInfo.isNull(FIELD_ROLE)) {
       if (userInfo.get(FIELD_ROLE).toString().contains("[")) {
