@@ -2,14 +2,13 @@ package br.gov.es.participe.repository;
 
 import br.gov.es.participe.model.Conference;
 import br.gov.es.participe.model.Person;
-import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.repository.Neo4jRepository;
-import org.springframework.data.repository.query.Param;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.neo4j.annotation.Query;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface ConferenceRepository extends Neo4jRepository<Conference, Long> {
 
@@ -24,7 +23,7 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
                         + "		[(n)-[fea:FEATURES_AUTHENTICATION_IMAGE]-(fa:File) | [fea, fa]], "
                         + "		[(p)-[r:REGIONALIZABLE]-(lt:LocalityType) | [r, lt]], "
                         + "		[(n)-[lo:LOCALIZES_CITIZEN_BY]-(l:LocalityType) | [lo, l]] "
-                        + " ] ORDER BY n.beginDate")
+                        + " ] ORDER BY n.beginDate DESC")
         Collection<Conference> findAllByQuery( @Param("name") String name, @Param("plan") Long plan, @Param("month") Integer month, @Param("year") Integer year);
 
         @Query("MATCH (n:Conference) "

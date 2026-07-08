@@ -2,16 +2,15 @@ package br.gov.es.participe.repository;
 
 import br.gov.es.participe.model.CheckedInAt;
 import br.gov.es.participe.model.Meeting;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 public interface MeetingRepository extends Neo4jRepository<Meeting, Long> {
 
@@ -41,7 +40,7 @@ MEETING_FILTER +
 "  [(meeting)<-[is_receptionist_of:IS_RECEPTIONIST_OF]-(receptionist:Person) | [is_receptionist_of, receptionist]], " +
 "  [(meeting)<-[is_channel_of:IS_CHANNEL_OF]-(channel:Channel) | [is_channel_of, channel]] " +
 "] " +
-"ORDER BY meeting.beginDate",
+"ORDER BY meeting.beginDate DESC",
 countQuery =
 "MATCH (meeting:Meeting)-[occurs_in:OCCURS_IN]->(conference:Conference), " +
 "(meeting:Meeting)-[takes_place:TAKES_PLACE_AT]->(locality:Locality) " +
