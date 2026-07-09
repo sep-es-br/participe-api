@@ -155,7 +155,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
         "MATCH (c:Conference)<-[:TO]-(s) " +
         "WHERE id(c) = $idConference " +
         "WITH {locality: loc.name, localityId: id(loc)} AS tuple " +
-        "RETURN tuple.locality AS localityName, tuple.localityId AS localityId")
+        "RETURN DISTINCT tuple.locality AS localityName, tuple.localityId AS localityId")
     LocalityInfoDto findLocalityByPersonAndConference(@Param("idConference")Long idConference, @Param("idPerson")Long idPerson);
 
     @Query("MATCH (p:Person)-[m:MADE]->(s:SelfDeclaration)-[a:AS_BEING_FROM]->(loc:Locality) , (s)-[:TO]->(c:Conference) " +
