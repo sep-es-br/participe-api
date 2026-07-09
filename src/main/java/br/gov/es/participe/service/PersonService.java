@@ -3,6 +3,7 @@ package br.gov.es.participe.service;
 import br.gov.es.participe.controller.dto.*;
 import br.gov.es.participe.model.*;
 import br.gov.es.participe.repository.*;
+import br.gov.es.participe.util.StringUtils;
 import br.gov.es.participe.util.domain.ProfileType;
 import br.gov.es.participe.util.domain.TokenType;
 import br.gov.es.participe.util.dto.MessageDto;
@@ -148,7 +149,10 @@ public class PersonService {
                 }
             }
 
-            return response;
+            return response.stream()
+                    .sorted((p1, p2) -> 
+                            StringUtils.apocClean(p1.getName()).compareToIgnoreCase(StringUtils.apocClean(p2.getName()))
+                    ).collect(Collectors.toList());
 
         } catch (IOException ex) {
             log.error("Erro ao buscar pessoas da organização: " + guid, ex);
