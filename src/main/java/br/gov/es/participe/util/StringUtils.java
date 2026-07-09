@@ -1,5 +1,7 @@
 package br.gov.es.participe.util;
 
+import java.text.Normalizer;
+
 public class StringUtils {
     public String replaceSpecialCharacters(String input) {
         String response = input;
@@ -16,5 +18,23 @@ public class StringUtils {
 
     public Boolean compareIfAContainsB(String a, String b) {
         return replaceSpecialCharacters(a).contains(replaceSpecialCharacters(b));
+    }
+    
+    public static String apocClean(String text){
+         if (text == null) {
+            return null;
+        }
+
+        // Remove acentos
+        String normalized = Normalizer.normalize(text, Normalizer.Form.NFD);
+        normalized = normalized.replaceAll("\\p{M}", "");
+
+        // Minúsculas
+        normalized = normalized.toLowerCase();
+
+        // Mantém apenas letras e números
+        normalized = normalized.replaceAll("[^\\p{Alnum}]", "");
+
+        return normalized;
     }
 }

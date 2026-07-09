@@ -385,14 +385,16 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
             "        WHEN (preRegisteredDate IS NOT NULL) THEN \"1\" \n" +
             "        ELSE \"2\"\n" +
             "      END\n" +
-            "    WHEN $sort = 'organization' THEN       \n" +
-            "       CASE \n" +
-            "         WHEN organization IS NULL OR size(trim(apoc.text.clean(organization))) = 0 THEN 'zzzzzzzzzzzzzz' \n" +
-            "         ELSE apoc.text.clean(organization) \n" +
-            "       END\n" +
-            "     ELSE 1\n" +
-            "  END \n" +
-            ") ASC, cia.time DESC\n",
+            "    WHEN $sort = 'organization' THEN\n" +
+            "      CASE\n" +
+            "        WHEN organization IS NULL OR size(trim(apoc.text.clean(organization))) = 0 THEN 'zzzzzzzzzzzzzz'\n" +
+            "        ELSE apoc.text.clean(organization)\n" +
+            "      END\n" +
+            "    ELSE 1\n" +
+            "   END) ASC,\n" +
+            "    (CASE \n" +
+            "      WHEN $sort = 'checkedInDate' THEN toString(checkedInDate)\n" +
+            "      ELSE cia.time END) DESC, preRegisteredDate DESC\n",
         countQuery = 
             "CALL {\r\n" + //
             "  MATCH (m:Meeting)-[:PRE_REGISTRATION|CHECKED_IN_AT*1..2]-(p:Person)\r\n" + //
