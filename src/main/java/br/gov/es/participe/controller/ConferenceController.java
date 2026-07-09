@@ -214,17 +214,13 @@ public class ConferenceController {
       @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date date) {
 
     List<Conference> conferences = new ArrayList<Conference>();
-    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator" })) {
+    if (personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Support" })) {
       conferences = conferenceService.findAllOpenWithPresentialMeetings4Admins();
     } else if (personService.hasOneOfTheRoles(token, new String[] { "Recepcionist"})) {
       conferences = conferenceService.findAllOpenWithPresentialMeetings4Receptionists(date, personService.getPerson(token).getId());
     } else if (personService.hasOneOfTheRoles(token, new String[] { "Presenter"})) {
       conferences = conferenceService.findAllOpenWithPresentialMeetings(date);
-    } else if (personService.hasOneOfTheRoles(token, new String[] { "Support"})) {
-      conferences = conferenceService.findAllOpenWithPresentialMeetings4Admins();
     }
-        
-        
 
     List<ConferenceDto> response = new ArrayList<>();
     conferences.forEach(conference -> {
