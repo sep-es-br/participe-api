@@ -1,28 +1,5 @@
 package br.gov.es.participe.controller;
 
-import static br.gov.es.participe.util.domain.CommentTypeType.PROPOSAL;
-import static br.gov.es.participe.util.domain.CommentFromType.REMOTE;
-import static br.gov.es.participe.util.domain.CommentStatusType.ALL;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import br.gov.es.participe.controller.dto.ConferenceDto;
 import br.gov.es.participe.controller.dto.LeanLocalityResultDto;
 import br.gov.es.participe.controller.dto.LeanPlanItemResultDto;
@@ -43,9 +20,29 @@ import br.gov.es.participe.service.PlanItemService;
 import br.gov.es.participe.service.PlanService;
 import br.gov.es.participe.service.TokenService;
 import br.gov.es.participe.util.domain.CommentFromType;
+import static br.gov.es.participe.util.domain.CommentFromType.REMOTE;
 import br.gov.es.participe.util.domain.CommentStatusType;
+import static br.gov.es.participe.util.domain.CommentStatusType.ALL;
 import br.gov.es.participe.util.domain.CommentTypeType;
+import static br.gov.es.participe.util.domain.CommentTypeType.PROPOSAL;
 import br.gov.es.participe.util.domain.TokenType;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin
@@ -89,9 +86,6 @@ public class ModerationController {
       @RequestParam(value = "rowsPerPage", required = true) Integer rowsPerPage) 
       {
 
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
-      return ResponseEntity.status(401).body(null);
-    }
 
     Long[] emptyList = {};
     CommentStatusType commStatus = ALL;
@@ -126,9 +120,6 @@ public class ModerationController {
       @PathVariable Long idComment,
       @RequestParam Long conferenceId) {
 
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
-      return ResponseEntity.status(401).body(null);
-    }
     ModerationResultDto response = commentService
         .findModerationResultById(idComment, conferenceId);
     if (response == null) {
@@ -142,9 +133,6 @@ public class ModerationController {
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long idComment) {
 
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
-      return ResponseEntity.status(401).body(null);
-    }
     PlanDto response = commentService
         .findTreeViewByCommentId(idComment);
     return ResponseEntity.status(200).body(response);
@@ -156,9 +144,7 @@ public class ModerationController {
       @RequestHeader(name = "Authorization") String token,
       @RequestBody ModerationParamDto moderationParamDto) {
 
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
-      return ResponseEntity.status(401).body(null);
-    }
+   
     if (moderationParamDto == null) {
       return ResponseEntity.status(400).body(null);
     }
@@ -176,9 +162,6 @@ public class ModerationController {
       @PathVariable Long id,
       @RequestHeader(name = "Authorization") String token) {
 
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
-      return ResponseEntity.status(401).body(null);
-    }
     Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
     ModerationResultDto moderation = commentService.begin(id, idPerson);
     return ResponseEntity.status(200).body(moderation);
@@ -190,9 +173,6 @@ public class ModerationController {
       @PathVariable Long id,
       @RequestHeader(name = "Authorization") String token) {
 
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
-      return ResponseEntity.status(401).body(null);
-    }
     Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
     Comment comment = commentService.find(id);
     commentService.end(comment, idPerson);
@@ -206,9 +186,7 @@ public class ModerationController {
       @RequestHeader(name = "Authorization") String token,
       @RequestParam(name = "activeConferences", required = false, defaultValue = "false") Boolean activeConferences) {
 
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
-      return ResponseEntity.status(401).body(null);
-    }
+   
     Long idPerson = tokenService.getPersonId(token.substring(7), TokenType.AUTHENTICATION);
     List<ConferenceDto> conferences = conferenceService.findAllActives(idPerson, activeConferences);
     return ResponseEntity.status(200).body(conferences);
@@ -219,9 +197,6 @@ public class ModerationController {
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long id) {
 
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
-      return ResponseEntity.status(401).body(null);
-    }
     
     LeanLocalityResultDto response = new LeanLocalityResultDto();
     
@@ -254,9 +229,7 @@ public class ModerationController {
       @RequestHeader(name = "Authorization") String token,
       @PathVariable Long id) {
 
-    if (!personService.hasOneOfTheRoles(token, new String[] { "Administrator", "Moderator" })) {
-      return ResponseEntity.status(401).body(null);
-    }
+   
     LeanPlanItemResultDto response = planItemService.findPlanItemsByConference(id);
     return ResponseEntity.status(200).body(response);
   }
