@@ -236,7 +236,11 @@ public class AuthorityCredentialController {
         
         PreRegistration preRegistration = preRegistrationService.findByMeetingAndPerson(meeting.getId(), representedByPerson.getId());
         
-        this.preRegistrationService.deletePreRegistration(preRegistration);
+        if(preRegistration != null) {
+            this.preRegistrationService.deletePreRegistration(preRegistration);
+        }
+        
+        
     }
             
 
