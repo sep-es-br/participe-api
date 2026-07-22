@@ -197,7 +197,7 @@ public class ConferenceService {
     Person person = this.personService.find(idPerson);
     final boolean adm = person.getRoles() != null && person.getRoles().contains("Administrator");
     List<ConferenceDto> conferences = new ArrayList<>();
-    this.conferenceRepository.findAllActives(new Date(), activeConferences || !adm).forEach(conference -> {
+    this.conferenceRepository.findAllActives(new Date(), !(activeConferences || !adm)).forEach(conference -> {
 
       if(adm || (conference.getModerators() != null
                  && conference.getModerators().stream().anyMatch(m -> idPerson.equals(m.getId())))) {

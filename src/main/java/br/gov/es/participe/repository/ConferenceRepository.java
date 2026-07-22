@@ -27,8 +27,8 @@ public interface ConferenceRepository extends Neo4jRepository<Conference, Long> 
         Collection<Conference> findAllByQuery( @Param("name") String name, @Param("plan") Long plan, @Param("month") Integer month, @Param("year") Integer year);
 
         @Query("MATCH (n:Conference) "
-                        + " WHERE NOT $active OR (datetime(n.beginDate) <= datetime($date) "
-                        + " AND datetime(n.endDate) >= datetime($date)) "
+                        + " WHERE NOT $active OR ((datetime(n.beginDate) <= datetime($date) "
+                        + " AND datetime(n.endDate) >= datetime($date))) "
                         + " RETURN n, [(n)-[md:MODERATORS]->(p:Person) |[n, md, p] ] "
                         + " ORDER BY n.beginDate desc")
         Collection<Conference> findAllActives( @Param("date") Date date,  @Param("active") Boolean active);
