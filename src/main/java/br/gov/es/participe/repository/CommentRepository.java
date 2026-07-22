@@ -5,14 +5,13 @@ import br.gov.es.participe.controller.dto.integration.SpoProposalsListResponseDt
 import br.gov.es.participe.model.Comment;
 import br.gov.es.participe.model.PlanItem;
 import br.gov.es.participe.model.StructureItem;
+import java.util.Collection;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Collection;
-import java.util.List;
 
 public interface CommentRepository extends Neo4jRepository<Comment, Long> {
 
@@ -66,8 +65,10 @@ public interface CommentRepository extends Neo4jRepository<Comment, Long> {
             + "WITH likedBy, personLikedBy, locality, aboutLocality, locOfCity, localityMicro, comment, madeBy, person, planItem, collect(pi3) AS listPi3, "
             + "aboutPlanItem, plan, obeys, structureItem, ofType, localityType, made, localitySD, asBeingFrom, selfDeclaration, to, conference "
             + WHERE_TEXT_FILTER
-            + "RETURN comment, aboutLocality, locality, person, madeBy, ofType, localityType, locOfCity, localityMicro, "
-            + "aboutPlanItem, planItem, obeys, structureItem, likedBy, personLikedBy, made,  localitySD, asBeingFrom, selfDeclaration, to, conference ", countQuery = "MATCH (comment:Comment)-[:ABOUT]->(conference:Conference), "
+            + "RETURN DISTINCT comment, COLLECT(aboutLocality), COLLECT(locality), COLLECT(person), COLLECT(madeBy), COLLECT(ofType), COLLECT(localityType), COLLECT(locOfCity), COLLECT(localityMicro), "
+            + "COLLECT(aboutPlanItem), COLLECT(planItem), COLLECT(obeys), COLLECT(structureItem), COLLECT(likedBy), COLLECT(personLikedBy), COLLECT(made),  COLLECT(localitySD), COLLECT(asBeingFrom), "
+            + "COLLECT(selfDeclaration), COLLECT(to), COLLECT(conference) ", 
+                    countQuery = "MATCH (p:Person)<-[:MADE_BY]-(comment:Comment)-[:ABOUT]->(conference:Conference), "
                     + "(conference)-[target:TARGETS]-(plan:Plan), "
                     + "(comment)-[ab1:ABOUT]->(child:PlanItem)-[composesChild:COMPOSES*]->(parent:PlanItem) "
                     + "OPTIONAL MATCH (comment)-[aboutLocality:ABOUT]->(locality:Locality)-[ofType:OF_TYPE]->(localityType) "
