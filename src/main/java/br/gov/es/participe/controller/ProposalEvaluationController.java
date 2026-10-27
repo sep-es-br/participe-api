@@ -112,9 +112,11 @@ public class ProposalEvaluationController {
 
     @GetMapping("/options/planItem")
     public ResponseEntity<List<PlanItemComboDto>> getPlanItemOptionsByConferenceId(
-        @RequestParam(value = "conferenceId") Long conferenceId
+        @RequestParam(value = "conferenceId") Long conferenceId,
+        @RequestParam(value = "planItemAreaId", required = false) Long planItemAreaId
     ) {
-        List<PlanItemComboDto> response = proposalEvaluationService.getPlanItemOptionsByConferenceId(conferenceId);
+        List<PlanItemComboDto> response = proposalEvaluationService
+            .getPlanItemOptionsByConferenceId(conferenceId, planItemAreaId);
         return ResponseEntity.ok().body(response);
     }
 

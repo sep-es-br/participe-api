@@ -249,11 +249,15 @@ public class ProposalEvaluationService {
 
     }
 
-    public List<PlanItemComboDto> getPlanItemOptionsByConferenceId(Long conferenceId) {
+    public List<PlanItemComboDto> getPlanItemOptionsByConferenceId(
+        Long conferenceId,
+        Long planItemAreaId
+    ) {
 
         List<PlanItemComboDto> planItemComboDtoList = new ArrayList<PlanItemComboDto>();
         
-        List<PlanItem> planItemsList = proposalEvaluationRepository.getPlanItemOptionsByConferenceId(conferenceId);
+        List<PlanItem> planItemsList = proposalEvaluationRepository
+            .getPlanItemOptionsByConferenceId(conferenceId, planItemAreaId);
 
         planItemsList.iterator().forEachRemaining((planItem) -> {
             planItemComboDtoList.add(new PlanItemComboDto(planItem.getId(), planItem.getName()));
